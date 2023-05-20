@@ -1,0 +1,31 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+      - uses: EasyDesk/action-dotnet-build@v1
+        with:
+          # (Optional) Additional arguments for dotnet build.
+          # build-args: -v normal
+
+          # (Optional) Build configuration, defaults to 'Release'.
+          # If the version starts with the 'v' prefix, it will be removed to conform to the requirements of dotnet pack.
+          build-configuration: Release
+
+          # (Optional) The path of the project to build; if omitted, the whole solution is built.
+          # path: ./WitchyBND/
+          
+          # (Optional) True if warnings should be treated as errors, defaults to false.
+          # warnings-as-errors: true
