@@ -40,11 +40,11 @@ namespace SoulsFormats
                 BufferOffset = br.ReadInt32();
             }
 
-            internal void ReadBuffer(BinaryReaderEx br, List<BufferLayout> layouts, FLVER.Vertex[] vertices, int count, int dataOffset, FLVER2Header header)
+            internal void ReadBuffer(BinaryReaderEx br, List<BufferLayout> layouts, List<FLVER.Vertex> vertices, int dataOffset, FLVERHeader header)
             {
                 BufferLayout layout = layouts[LayoutIndex];
                 if (VertexSize != layout.Size)
-                    throw new InvalidDataException($"Mismatched vertex buffer ({VertexSize}) and buffer layout ({layout.Size}) sizes.");
+                    throw new InvalidDataException($"Mismatched vertex buffer and buffer layout sizes.");
 
                 br.StepIn(dataOffset + BufferOffset);
                 {
@@ -52,7 +52,7 @@ namespace SoulsFormats
                     if (header.Version >= 0x2000F)
                         uvFactor = 2048;
 
-                    for (int i = 0; i < count; i++)
+                    for (int i = 0; i < vertices.Count; i++)
                         vertices[i].Read(br, layout, uvFactor);
                 }
                 br.StepOut();
@@ -63,7 +63,7 @@ namespace SoulsFormats
                 BufferOffset = -1;
             }
 
-            internal void Write(BinaryWriterEx bw, FLVER2Header header, int index, int bufferIndex, List<BufferLayout> layouts, int vertexCount)
+            internal void Write(BinaryWriterEx bw, FLVERHeader header, int index, int bufferIndex, List<BufferLayout> layouts, int vertexCount)
             {
                 BufferLayout layout = layouts[LayoutIndex];
 
@@ -77,7 +77,7 @@ namespace SoulsFormats
                 bw.ReserveInt32($"VertexBufferOffset{index}");
             }
 
-            internal void WriteBuffer(BinaryWriterEx bw, int index, List<BufferLayout> layouts, FLVER.Vertex[] Vertices, int dataStart, FLVER2Header header)
+            internal void WriteBuffer(BinaryWriterEx bw, int index, List<BufferLayout> layouts, List<FLVER.Vertex> Vertices, int dataStart, FLVERHeader header)
             {
                 BufferLayout layout = layouts[LayoutIndex];
                 bw.FillInt32($"VertexBufferOffset{index}", (int)bw.Position - dataStart);

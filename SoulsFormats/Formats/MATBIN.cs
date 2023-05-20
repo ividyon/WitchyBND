@@ -267,34 +267,6 @@ namespace SoulsFormats
                         throw new NotImplementedException($"Unimplemented value type: {Type}");
                 }
             }
-
-            public override string ToString()
-            {
-                string s = $"{Name}: ";
-                switch (Type)
-                {
-                    default:
-                    case ParamType.Bool:
-                    case ParamType.Int:
-                    case ParamType.Float:
-                        return s+$"{Value}";
-                    case ParamType.Int2:
-                        for (int i = 0; i < ((int[])Value).Length; i++)
-                        {
-                            s += $"{((int[])Value)[i]},";
-                        }
-                        return s;
-                    case ParamType.Float2:
-                    case ParamType.Float3:
-                    case ParamType.Float4:
-                    case ParamType.Float5:
-                        for (int i = 0; i < ((float[])Value).Length; i++)
-                        {
-                            s += $"{((float[])Value)[i]},";
-                        }
-                        return s;
-                }
-            }
         }
 
         /// <summary>

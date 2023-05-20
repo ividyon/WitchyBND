@@ -28,7 +28,7 @@ namespace SoulsFormats
                 TerminatorID = int.MaxValue;
             }
 
-            internal GXList(BinaryReaderEx br, FLVER2Header header) : base()
+            internal GXList(BinaryReaderEx br, FLVERHeader header) : base()
             {
                 if (header.Version < 0x20010)
                 {
@@ -43,11 +43,11 @@ namespace SoulsFormats
                     TerminatorID = br.AssertInt32(id);
                     br.AssertInt32(100);
                     TerminatorLength = br.ReadInt32() - 0xC;
-                    br.ReadBytes(header.Unk6B);
+                    br.AssertPattern(TerminatorLength, 0x00);
                 }
             }
 
-            internal void Write(BinaryWriterEx bw, FLVER2Header header)
+            internal void Write(BinaryWriterEx bw, FLVERHeader header)
             {
                 if (header.Version < 0x20010)
                 {
@@ -106,7 +106,7 @@ namespace SoulsFormats
                 Data = data;
             }
 
-            internal GXItem(BinaryReaderEx br, FLVER2Header header)
+            internal GXItem(BinaryReaderEx br, FLVERHeader header)
             {
                 if (header.Version <= 0x20010)
                 {
@@ -121,7 +121,7 @@ namespace SoulsFormats
                 Data = br.ReadBytes(length - 0xC);
             }
 
-            internal void Write(BinaryWriterEx bw, FLVER2Header header)
+            internal void Write(BinaryWriterEx bw, FLVERHeader header)
             {
                 if (header.Version <= 0x20010)
                 {

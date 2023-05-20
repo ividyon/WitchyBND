@@ -243,14 +243,12 @@ namespace SoulsFormats
             /// <summary>
             /// Unknown.
             /// </summary>
-            [MSBReference(ReferenceType = typeof(Part))]
             public string PartName { get; set; }
             private int PartIndex;
 
             /// <summary>
             /// Unknown.
             /// </summary>
-            [MSBReference(ReferenceType = typeof(Region))]
             public string RegionName { get; set; }
             private int RegionIndex;
 
@@ -382,7 +380,6 @@ namespace SoulsFormats
                 /// <summary>
                 /// The part that the treasure is attached to.
                 /// </summary>
-                [MSBReference(ReferenceType = typeof(Region))]
                 public string TreasurePartName { get; set; }
                 private int TreasurePartIndex;
 
@@ -533,15 +530,12 @@ namespace SoulsFormats
                 /// <summary>
                 /// Regions where parts will spawn from.
                 /// </summary>
-
-                [MSBReference(ReferenceType = typeof(Region))]
                 public string[] SpawnRegionNames { get; private set; }
                 private int[] SpawnRegionIndices;
 
                 /// <summary>
                 /// Parts that will be respawned.
                 /// </summary>
-                [MSBReference(ReferenceType = typeof(Part))]
                 public string[] SpawnPartNames { get; private set; }
                 private int[] SpawnPartIndices;
 
@@ -638,7 +632,6 @@ namespace SoulsFormats
                 /// <summary>
                 /// The part to be interacted with.
                 /// </summary>
-                [MSBReference(ReferenceType = typeof(Part))]
                 public string ObjActPartName { get; set; }
                 private int ObjActPartIndex;
 
@@ -726,7 +719,7 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown, but looks like rotation.
                 /// </summary>
-                public float RotationY { get; set; }
+                public float Degree { get; set; }
 
                 /// <summary>
                 /// Creates a MapOffset with default values.
@@ -738,13 +731,13 @@ namespace SoulsFormats
                 private protected override void ReadTypeData(BinaryReaderEx br)
                 {
                     Position = br.ReadVector3();
-                    RotationY = br.ReadSingle();
+                    Degree = br.ReadSingle();
                 }
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
                     bw.WriteVector3(Position);
-                    bw.WriteSingle(RotationY);
+                    bw.WriteSingle(Degree);
                 }
             }
 
@@ -757,14 +750,13 @@ namespace SoulsFormats
                 private protected override bool HasTypeData => true;
 
                 /// <summary>
-                /// Determines patrol behavior. 0 = return to first region on loop, 1 = go through list backwards on loop, etc.
+                /// Unknown.
                 /// </summary>
-                public int PatrolType { get; set; }
+                public int UnkT00 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                [MSBReference(ReferenceType = typeof(Region))]
                 public string[] WalkRegionNames { get; private set; }
                 private short[] WalkRegionIndices;
 
@@ -797,7 +789,7 @@ namespace SoulsFormats
 
                 private protected override void ReadTypeData(BinaryReaderEx br)
                 {
-                    PatrolType = br.ReadInt32();
+                    UnkT00 = br.ReadInt32();
                     br.AssertInt32(0);
                     br.AssertInt32(0);
                     br.AssertInt32(0);
@@ -810,7 +802,7 @@ namespace SoulsFormats
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
-                    bw.WriteInt32(PatrolType);
+                    bw.WriteInt32(UnkT00);
                     bw.WriteInt32(0);
                     bw.WriteInt32(0);
                     bw.WriteInt32(0);
@@ -850,7 +842,6 @@ namespace SoulsFormats
                     /// <summary>
                     /// Unknown.
                     /// </summary>
-                    [MSBReference(ReferenceType = typeof(Region))]
                     public string RegionName { get; set; }
                     private short RegionIndex;
 
@@ -926,7 +917,6 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                [MSBReference(ReferenceType = typeof(Part))]
                 public string[] GroupPartNames { get; private set; }
                 private int[] GroupPartIndices;
 
@@ -1189,7 +1179,6 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                [MSBReference(ReferenceType = typeof(Part.EnemyBase))]
                 public string[] EnemyNames { get; private set; }
                 private int[] EnemyIndices;
 
@@ -1277,14 +1266,12 @@ namespace SoulsFormats
                 /// <summary>
                 /// Name of the filming point for the autodrawgroup capture, probably.
                 /// </summary>
-                [MSBReference(ReferenceType = typeof(Region))]
                 public string AutoDrawGroupPointName { get; set; }
                 private int AutoDrawGroupPointIndex;
 
                 /// <summary>
                 /// The collision that the filming point belongs to, presumably.
                 /// </summary>
-                [MSBReference(ReferenceType = typeof(Part.Collision))]
                 public string OwningCollisionName { get; set; }
                 private int OwningCollisionIndex;
 

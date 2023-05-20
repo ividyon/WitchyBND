@@ -5,7 +5,7 @@ namespace WitchyFormats
 {
     /// <summary>
     /// A graphics config file used since DS2. Extensions: .fltparam, .gparam
-    /// By TKGP, minor edits by Avocado and Pear
+    /// Source: GParamStudio
     /// </summary>
     public class GPARAM : SoulsFile<GPARAM>
     {

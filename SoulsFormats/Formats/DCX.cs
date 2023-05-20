@@ -14,10 +14,8 @@ namespace SoulsFormats
             if (br.Stream.Length < 4)
                 return false;
 
-            byte b0 = br.GetByte(0);
-            byte b1 = br.GetByte(1);
             string magic = br.GetASCII(0, 4);
-            return magic == "DCP\0" || magic == "DCX\0" || b0 == 0x78 && (b1 == 0x01 || b1 == 0x5E || b1 == 0x9C || b1 == 0xDA);
+            return magic == "DCP\0" || magic == "DCX\0";
         }
 
         /// <summary>
@@ -115,11 +113,11 @@ namespace SoulsFormats
                     if (unk04 == 0x10000 && unk10 == 0x24 && unk30 == 9 && unk38 == 0)
                         type = Type.DCX_DFLT_10000_24_9;
                     else if (unk04 == 0x10000 && unk10 == 0x44 && unk30 == 9 && unk38 == 0)
-                            type = Type.DCX_DFLT_10000_44_9;
+                        type = Type.DCX_DFLT_10000_44_9;
                     else if (unk04 == 0x11000 && unk10 == 0x44 && unk30 == 8 && unk38 == 0)
-                                type = Type.DCX_DFLT_11000_44_8;
+                        type = Type.DCX_DFLT_11000_44_8;
                     else if (unk04 == 0x11000 && unk10 == 0x44 && unk30 == 9 && unk38 == 0)
-                                type = Type.DCX_DFLT_11000_44_9;
+                        type = Type.DCX_DFLT_11000_44_9;
                     else if (unk04 == 0x11000 && unk10 == 0x44 && unk30 == 9 && unk38 == 15)
                         type = Type.DCX_DFLT_11000_44_9_15;
                 }

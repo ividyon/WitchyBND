@@ -92,7 +92,7 @@ static class WBUtil
     /// which for most end users should not be a big deal.
     /// This function excludes the SF dataversion check.
     /// </summary>
-    public static bool ApplyParamdefLessCarefully(this PARAM param, PARAMDEF paramdef)
+    public static bool ApplyParamdefLessCarefully(this WitchyFormats.PARAM param, PARAMDEF paramdef)
     {
         if (param.ParamType == paramdef.ParamType &&
             (param.DetectedSize == -1 || param.DetectedSize == paramdef.GetRowSize()))

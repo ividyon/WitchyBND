@@ -618,9 +618,9 @@ namespace SoulsFormats
                 public sbyte[] EventIDs { get; private set; }
 
                 /// <summary>
-                /// Amount of time it takes for GParam to transition (in seconds). -1 = Some default time.
+                /// Unknown.
                 /// </summary>
-                public float TransitionTime { get; set; }
+                public float Unk40 { get; set; }
 
                 /// <summary>
                 /// Creates a SceneGparamConfig with default values.
@@ -644,7 +644,7 @@ namespace SoulsFormats
                 {
                     br.AssertPattern(0x3C, 0x00);
                     EventIDs = br.ReadSBytes(4);
-                    TransitionTime = br.ReadSingle();
+                    Unk40 = br.ReadSingle();
                     br.AssertInt32(0);
                     br.AssertInt32(0);
                     br.AssertInt32(0);
@@ -654,7 +654,7 @@ namespace SoulsFormats
                 {
                     bw.WritePattern(0x3C, 0x00);
                     bw.WriteSBytes(EventIDs);
-                    bw.WriteSingle(TransitionTime);
+                    bw.WriteSingle(Unk40);
                     bw.WriteInt32(0);
                     bw.WriteInt32(0);
                     bw.WriteInt32(0);
@@ -724,7 +724,6 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                [MSBReference(ReferenceType = typeof(Collision))]
                 public string CollisionName { get; set; }
                 private int CollisionPartIndex;
 
@@ -849,20 +848,17 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                [MSBReference(ReferenceType = typeof(Collision))]
                 public string CollisionName { get; set; }
                 private int CollisionPartIndex;
 
                 /// <summary>
                 /// Controls enemy AI.
                 /// </summary>
-                [MSBParamReference(ParamName = "NpcThinkParam")]
                 public int ThinkParamID { get; set; }
 
                 /// <summary>
                 /// Controls enemy stats.
                 /// </summary>
-                [MSBParamReference(ParamName = "NpcParam")]
                 public int NPCParamID { get; set; }
 
                 /// <summary>
@@ -873,7 +869,6 @@ namespace SoulsFormats
                 /// <summary>
                 /// Controls enemy equipment.
                 /// </summary>
-                [MSBParamReference(ParamName = "CharaInitParam")]
                 public int CharaInitID { get; set; }
 
                 /// <summary>
@@ -889,7 +884,6 @@ namespace SoulsFormats
                 /// <summary>
                 /// Walk route followed by this enemy.
                 /// </summary>
-                [MSBReference(ReferenceType = typeof(Event.PatrolInfo))]
                 public string WalkRouteName { get; set; }
                 private short WalkRouteIndex;
 
@@ -1192,14 +1186,12 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown. Always refers to another collision part.
                 /// </summary>
-                [MSBReference(ReferenceType = typeof(Collision))]
                 public string UnkHitName { get; set; }
                 private int UnkHitIndex;
 
                 /// <summary>
                 /// ID in MapMimicryEstablishmentParam.
                 /// </summary>
-                [MSBParamReference(ParamName = "MapMimicryEstablishmentParam")]
                 public int ChameleonParamID { get; set; }
 
                 /// <summary>
@@ -1371,7 +1363,6 @@ namespace SoulsFormats
                 /// <summary>
                 /// The name of the associated collision part.
                 /// </summary>
-                [MSBReference(ReferenceType = typeof(Collision))]
                 public string CollisionName { get; set; }
                 private int CollisionIndex;
 

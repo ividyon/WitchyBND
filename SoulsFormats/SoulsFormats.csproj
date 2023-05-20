@@ -7,9 +7,9 @@
     <Company>JKAnderson</Company>
     <Authors>Joseph Anderson</Authors>
     <PackageProjectUrl>https://github.com/JKAnderson/SoulsFormats</PackageProjectUrl>
-	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-	<PlatformTarget>x64</PlatformTarget>
-	<Platforms>x64</Platforms>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>x64</PlatformTarget>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard'))">

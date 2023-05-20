@@ -245,14 +245,6 @@ namespace SoulsFormats
         {
             bw.Write(bytes);
         }
-        
-        /// <summary>
-        /// Writes an array of one-byte unsigned integers.
-        /// </summary>
-        public void WriteBytes(ReadOnlySpan<byte> bytes)
-        {
-            bw.Write(bytes);
-        }
 
         /// <summary>
         /// Writes an array of one-byte unsigned integers.

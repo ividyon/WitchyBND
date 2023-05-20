@@ -6,7 +6,7 @@ namespace WitchyFormats
 {
     /// <summary>
     /// A material config format introduced in Elden Ring. Extension: .matbin
-    /// By TKGP, minor edits by Avocado
+    /// Source: YabberAvocado
     /// </summary>
     public class MATBIN : SoulsFile<MATBIN>
     {

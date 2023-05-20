@@ -408,20 +408,6 @@ namespace SoulsFormats
             /// </summary>
             public class Collision : Part
             {
-                /// <summary>
-                /// Amount of reverb to apply to sounds.
-                /// </summary>
-                public enum SoundSpace : byte
-                {
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-                    NoReverb = 0,
-                    SmallReverb = 1,
-                    MiddleReverb = 2,
-                    LargeReverb = 3,
-                    ExtraLargeReverb = 4
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
-                }
-
                 private protected override PartType Type => PartType.Collision;
 
                 /// <summary>
@@ -445,9 +431,9 @@ namespace SoulsFormats
                 public int UnkT0C { get; set; }
 
                 /// <summary>
-                /// Modifies sounds while the player is touching this collision.
+                /// Unknown.
                 /// </summary>
-                public SoundSpace SoundSpaceType { get; set; }
+                public byte UnkT10 { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -460,9 +446,9 @@ namespace SoulsFormats
                 public byte UnkT12 { get; set; }
 
                 /// <summary>
-                /// Refers to ID of fltparam to determine visual effects.
+                /// Unknown.
                 /// </summary>
-                public byte FilterParamID { get; set; }
+                public byte UnkT13 { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -562,10 +548,10 @@ namespace SoulsFormats
                     UnkT04 = br.ReadInt32();
                     UnkT08 = br.ReadInt32();
                     UnkT0C = br.ReadInt32();
-                    SoundSpaceType = br.ReadEnum8<SoundSpace>();
+                    UnkT10 = br.ReadByte();
                     UnkT11 = br.ReadByte();
                     UnkT12 = br.ReadByte();
-                    FilterParamID = br.ReadByte();
+                    UnkT13 = br.ReadByte();
                     UnkT14 = br.ReadByte();
                     UnkT15 = br.ReadByte();
                     br.AssertByte(0);
@@ -600,10 +586,10 @@ namespace SoulsFormats
                     bw.WriteInt32(UnkT04);
                     bw.WriteInt32(UnkT08);
                     bw.WriteInt32(UnkT0C);
-                    bw.WriteByte((byte)SoundSpaceType);
+                    bw.WriteByte(UnkT10);
                     bw.WriteByte(UnkT11);
                     bw.WriteByte(UnkT12);
-                    bw.WriteByte(FilterParamID);
+                    bw.WriteByte(UnkT13);
                     bw.WriteByte(UnkT14);
                     bw.WriteByte(UnkT15);
                     bw.WriteByte(0);
@@ -696,7 +682,6 @@ namespace SoulsFormats
                 /// <summary>
                 /// Name of the referenced collision part.
                 /// </summary>
-                [MSBReference(ReferenceType = typeof(Collision))]
                 public string CollisionName { get; set; }
                 private int CollisionIndex;
 

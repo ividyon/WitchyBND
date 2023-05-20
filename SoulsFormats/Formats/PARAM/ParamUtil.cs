@@ -5,7 +5,7 @@ using EditFlags = SoulsFormats.PARAMDEF.EditFlags;
 
 namespace SoulsFormats
 {
-    public static class ParamUtil
+    internal static class ParamUtil
     {
         public static string GetDefaultFormat(DefType type)
         {

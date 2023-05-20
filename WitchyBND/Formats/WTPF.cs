@@ -1,22 +1,23 @@
 ﻿using SoulsFormats;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+using WitchyFormats.Utils;
+using TPF = WitchyFormats.TPF;
 
 namespace WitchyBND
 {
     static class WTPF
     {
-        public static void Unpack(this TPF tpf, string sourceName, string targetDir, IProgress<float> progress)
+        static List<TPF.TPFPlatform> supportedPlatforms = new() { TPF.TPFPlatform.PC, TPF.TPFPlatform.PS3, TPF.TPFPlatform.PS4 };
+        public static bool Unpack(this TPF tpf, string sourceName, string targetDir, IProgress<float> progress)
         {
-//#if !DEBUG
-            // if (tpf.Platform != TPF.TPFPlatform.PC)
-            //     throw new NotSupportedException("WitchyBND does not support console TPFs at the moment.");
-//#endif
-            if (tpf.Platform != TPF.TPFPlatform.PC)
-                Console.WriteLine("WitchyBND only officially supports PC TPFs, at the moment. Unpacking other TPFs, such as console TPFs" +
-                                  "may cause issues. Results may not be perfect. Repacking is not supported, yet.  ");
-                
+            if (!supportedPlatforms.Contains(tpf.Platform))
+            {
+                Console.WriteLine(@"WitchyBND currently only supports unpacking PC, PS3 and PS4 TPFs. There may be issues with other console TPFs.");
+            }
+
             Directory.CreateDirectory(targetDir);
             var xws = new XmlWriterSettings();
             xws.Indent = true;
@@ -27,6 +28,7 @@ namespace WitchyBND
             xw.WriteElementString("compression", tpf.Compression.ToString());
             xw.WriteElementString("encoding", $"0x{tpf.Encoding:X2}");
             xw.WriteElementString("flag2", $"0x{tpf.Flag2:X2}");
+            xw.WriteElementString("platform", tpf.Platform.ToString());
 
             xw.WriteStartElement("textures");
             for (int i = 0; i < tpf.Textures.Count; i++)
@@ -45,17 +47,39 @@ namespace WitchyBND
                     {
                         xw.WriteElementString("Value", value.ToString());
                     }
+
                     xw.WriteEndElement();
                 }
+
                 xw.WriteEndElement();
 
-                File.WriteAllBytes($"{targetDir}\\{texture.Name}.dds", texture.Headerize());
+                try
+                {
+                    File.WriteAllBytes($"{targetDir}\\{texture.Name}.dds", texture.Headerize());
+                }
+                catch (EndOfStreamException)
+                {
+                    try
+                    {
+                        File.WriteAllBytes($"{targetDir}\\{texture.Name}.dds",
+                            SecretHeaderizer.SecretHeaderize(texture));
+                    }
+                    catch(Exception e)
+                    {
+                        Console.WriteLine(@"There was an error unpacking the TPF:");
+                        Console.WriteLine(e);
+                        return true;
+                    }
+                }
                 progress.Report((float)i / tpf.Textures.Count);
             }
+
             xw.WriteEndElement();
 
             xw.WriteEndElement();
             xw.Close();
+
+            return false;
         }
 
         public static void Repack(string sourceDir, string targetDir)
@@ -63,8 +87,15 @@ namespace WitchyBND
             TPF tpf = new TPF();
             XmlDocument xml = new XmlDocument();
 
-
             xml.Load(WBUtil.GetXmlPath("tpf4", sourceDir));
+
+            Enum.TryParse(xml.SelectSingleNode("tpf/platform")?.InnerText ?? "None", out TPF.TPFPlatform platform);
+            tpf.Platform = platform;
+            if (tpf.Platform != TPF.TPFPlatform.PC)
+            {
+                Console.WriteLine(
+                    @"WitchyBND only officially supports repacking PC TPFs at the moment. Repacking console TPFs is not supported.");
+            }
 
             string filename = xml.SelectSingleNode("tpf/filename").InnerText;
             Enum.TryParse(xml.SelectSingleNode("tpf/compression")?.InnerText ?? "None", out DCX.Type compression);

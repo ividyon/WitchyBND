@@ -9,13 +9,17 @@ WitchyBND continues where Yabber+ by Nordgaren left off.
 This fork is focused on **ELDEN RING** development and is untested with other games in the series. TKGP's original Yabber is likely the best for those.
 
 New additions include:
-* Avoids excessive folder nesting by breaking down BND folder structure
+* Breaks down BND folder structure to avoid excessive nesting in unpacked folders
+* File globbing pattern support in the commandline
+* regulation.bin support (Decrypt->unpack and repack->encrypt)
 * Slightly improved Oodle DLL detection
-* Support for PARAMs (XML serialization/deserialization using Paramdex and DefPatch, with tweaks for compact and readable output)
-* Support for FXR (XML serialization/deserialization)
-* Support for MATBIN (XML serialization/deserialization, by Avocado)
-* Support for ELDEN RING GPARAM (XML serialization/deserialization, by Avocado and Pear)
-* Support for ELDEN RING envmap TPF unpacking
+* PARAM support (using Paramdex and DefPatch. Compact, readable output)
+* FXR support
+* MATBIN support (by Avocado)
+* MTD support (by Avocado)
+* ELDEN RING GPARAM support (by Avocado and Pear)
+* Console TPF unpacking (but not repacking)
+* Minor fixes like ELDEN RING envmap TPF unpack
 
 Planned (but TBD):
 * Small UI for quality-of-life actions outside of unpacking/repacking (like duplicating AEGs, CHRs, PARTSBND...)

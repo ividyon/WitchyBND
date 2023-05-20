@@ -1,8 +1,8 @@
 ﻿using System.Text;
 
-namespace FSParam
+namespace WitchyFormats
 {
-    internal static class SFEncoding
+    internal static class WFEncoding
     {
         public static readonly Encoding ASCII;
 
@@ -12,11 +12,11 @@ namespace FSParam
 
         public static readonly Encoding UTF16BE;
 
-        static SFEncoding()
+        static WFEncoding()
         {
-//#if NETSTANDARD
+#if NETSTANDARD
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-//#endif
+#endif
             ASCII = Encoding.ASCII;
             ShiftJIS = Encoding.GetEncoding("shift-jis");
             UTF16 = Encoding.Unicode;

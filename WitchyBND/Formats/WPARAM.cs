@@ -4,12 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using SoulsFormats;
+using PARAM = WitchyFormats.PARAM;
 
 namespace WitchyBND
 {
     static class WPARAM
     {
-        private class YPARAMRow
+        private class WPARAMRow
         {
             public int ID { get; set; }
             public string Name { get; set; }
@@ -104,7 +105,7 @@ namespace WitchyBND
 
             // Prepare rows
             var allValues = new Dictionary<string, List<string>>();
-            var rows = new List<YPARAMRow>();
+            var rows = new List<WPARAMRow>();
             var fieldNames = paramdef.Fields.Select(field => {
                 allValues[field.InternalName] = new List<string>();
                 return field.InternalName;
@@ -124,7 +125,7 @@ namespace WitchyBND
                         paramdexName = NameStorage[game][paramName][id];
                 }
 
-                var prepRow = new YPARAMRow()
+                var prepRow = new WPARAMRow()
                 {
                     ID = id,
                     Name = name,
@@ -208,7 +209,7 @@ namespace WitchyBND
             xw.WriteEndElement();
             // Rows
             xw.WriteStartElement("rows");
-            foreach (YPARAMRow row in rows)
+            foreach (WPARAMRow row in rows)
             {
                 xw.WriteStartElement("row");
                 xw.WriteAttributeString("id", row.ID.ToString());
@@ -497,10 +498,26 @@ namespace WitchyBND
                 return;
             }
 
+            var nameDict = new Dictionary<int, string>();
             var names = File.ReadAllLines(namePath);
-            // var dupes = names.GroupBy(name => name.Split(' ')[0]).Where(x => x.Count() > 1).OrderByDescending(x => x.Count()).ToDictionary(x => x.Key, x => x.Count());
-            NameStorage[game][paramName] = names.ToDictionary(name => { return int.Parse(name.Split(' ')[0]); },
-                name => string.Join(" ", name.Split(' ').Skip(1)));
+            foreach (string name in names)
+            {
+                var splitted = name.Split(' ', 2);
+                try
+                {
+                    var result = nameDict.TryAdd(int.Parse(splitted[0]), splitted[1]);
+                    if (result == false)
+                    {
+                        Console.WriteLine($"Paramdex: Duplicate name for ID {splitted[0]}");
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw new InvalidDataException($"There was something wrong with the Paramdex names at \"{name}\"",
+                        e);
+                }
+            }
+            NameStorage[game][paramName] = nameDict;
         }
 
         public static string CellValueToString(PARAM.Cell cell)

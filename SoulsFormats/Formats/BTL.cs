@@ -186,7 +186,6 @@ namespace SoulsFormats
             /// <summary>
             /// Rotation of a spot light.
             /// </summary>
-            [RotationRadians]
             public Vector3 Rotation { get; set; }
 
             /// <summary>
@@ -306,9 +305,9 @@ namespace SoulsFormats
             public byte[] UnkC0 { get; set; }
 
             /// <summary>
-            /// Distance required for a light to transition into view. 0 = always enabled.
+            /// Unknown.
             /// </summary>
-            public float EnableDist { get; set; }
+            public float UnkC4 { get; set; }
 
             /// <summary>
             /// Unknown; not present before Sekiro.
@@ -435,7 +434,7 @@ namespace SoulsFormats
                 Width = br.ReadSingle();
                 UnkBC = br.ReadSingle();
                 UnkC0 = br.ReadBytes(4);
-                EnableDist = br.ReadSingle();
+                UnkC4 = br.ReadSingle();
 
                 if (version >= 16)
                 {
@@ -494,7 +493,7 @@ namespace SoulsFormats
                 bw.WriteSingle(Width);
                 bw.WriteSingle(UnkBC);
                 bw.WriteBytes(UnkC0);
-                bw.WriteSingle(EnableDist);
+                bw.WriteSingle(UnkC4);
 
                 if (version >= 16)
                 {

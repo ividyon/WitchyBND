@@ -460,7 +460,6 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                [SupportsAlpha(true)]
                 public Color ColorT04 { get; set; }
 
                 /// <summary>

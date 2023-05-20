@@ -14,6 +14,9 @@ using Microsoft.Extensions.FileSystemGlobbing;
 using WitchyFormats;
 using GPARAM = WitchyFormats.GPARAM;
 using MATBIN = WitchyFormats.MATBIN;
+using MTD = WitchyFormats.MTD;
+using TPF = WitchyFormats.TPF;
+using PARAM = WitchyFormats.PARAM;
 
 namespace WitchyBND
 {
@@ -352,7 +355,7 @@ namespace WitchyBND
                 {
                     Console.WriteLine($"Unpacking TPF: {fileName}...");
                     TPF tpf = TPF.Read(sourceFile);
-                    tpf.Unpack(fileName, targetDir, progress);
+                    return tpf.Unpack(fileName, targetDir, progress);
                 }
                 else if (Zero3.Is(sourceFile))
                 {
@@ -381,6 +384,17 @@ namespace WitchyBND
                 {
                     Console.WriteLine($"Repacking MATBIN: {fileName}...");
                     return WMATBIN.Repack(sourceFile);
+                }
+                else if (MTD.Is(sourceFile))
+                {
+                    Console.WriteLine($"Unpacking MTD: {fileName}...");
+                    MTD mtd = MTD.Read(sourceFile);
+                    mtd.Unpack(fileName);
+                }
+                else if (sourceFile.EndsWith(".mtd.xml"))
+                {
+                    Console.WriteLine($"Repacking MTD: {fileName}...");
+                    return WMTD.Repack(sourceFile);
                 }
                 else if (sourceFile.EndsWith(".param"))
                 {
