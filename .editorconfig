@@ -1,0 +1,13 @@
+
+[*]
+
+# Microsoft .NET properties
+csharp_indent_braces = false
+csharp_new_line_before_open_brace = accessors,anonymous_types,control_blocks,events,indexers,local_functions,methods,object_collection_array_initalizers,properties,types
+csharp_preferred_modifier_order = public, private, protected, internal, new, static, abstract, virtual, sealed, readonly, override, extern, unsafe, volatile, async, required:suggestion
+csharp_style_var_elsewhere = false:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+
+# ReSharper properties
+resharper_csharp_case_block_braces = end_of_line
+resharper_remove_blank_lines_near_braces_in_declarations = false

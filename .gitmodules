@@ -1,0 +1,4 @@
+[submodule "Paramdex"]
+	path = Paramdex
+	url = https://github.com/ividyon/Paramdex
+	branch = dsms
