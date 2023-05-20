@@ -8,6 +8,9 @@ on:
     tags:
       - '*'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
@@ -37,7 +40,7 @@ jobs:
         uses: thedoctor0/zip-release@main
         with:
           type: 'zip'
-          filename: 'WitchyBND-${{ github.ref_name }}.zip'
+          filename: '../../../WitchyBND-${{ github.ref_name }}.zip'
           directory: './bin/Release/net7.0-windows'
           path: '.'
 
