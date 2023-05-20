@@ -435,14 +435,14 @@ namespace WitchyBND
                 return;
 
             var gameName = WBUtil.GameNames[game];
-            var paramdefPath = $@"{WBUtil.GetExeLocation()}\Paramdex\{gameName}\Defs";
+            var paramdefPath = $@"{WBUtil.GetExeLocation()}\Assets\Paramdex\{gameName}\Defs";
 
             if (!Directory.Exists(paramdefPath))
             {
                 throw new Exception($"Paramdef path not found for {gameName}.");
             }
 
-            var patchParamdefPaths = Directory.GetDirectories($@"{WBUtil.GetExeLocation()}\Paramdex\{gameName}\DefsPatch").OrderByDescending(path => path);
+            var patchParamdefPaths = Directory.GetDirectories($@"{WBUtil.GetExeLocation()}\Assets\Paramdex\{gameName}\DefsPatch").OrderByDescending(path => path);
 
             // Reading XML paramdefs
             foreach (string path in Directory.GetFiles(paramdefPath, "*.xml"))
@@ -483,7 +483,7 @@ namespace WitchyBND
                 return;
 
             var gameName = WBUtil.GameNames[game];
-            var namePath = $@"{WBUtil.GetExeLocation()}\Paramdex\{gameName}\Names\{paramName}.txt";
+            var namePath = $@"{WBUtil.GetExeLocation()}\Assets\Paramdex\{gameName}\Names\{paramName}.txt";
 
             if (!File.Exists(namePath))
             {

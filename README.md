@@ -11,10 +11,11 @@ This fork is focused on **ELDEN RING** development and is untested with other ga
 New additions include:
 * Avoids excessive folder nesting by breaking down BND folder structure
 * Slightly improved Oodle DLL detection
-* Support for PARAMs (XML serialization/deserialization using Paramdex, with tweaks for compact and readable output)
+* Support for PARAMs (XML serialization/deserialization using Paramdex and DefPatch, with tweaks for compact and readable output)
 * Support for FXR (XML serialization/deserialization)
-* Support for MATBIN (XML serialization/deserialization)
-* Support for ELDEN RING envmap TPFs
+* Support for MATBIN (XML serialization/deserialization, by Avocado)
+* Support for ELDEN RING GPARAM (XML serialization/deserialization, by Avocado and Pear)
+* Support for ELDEN RING envmap TPF unpacking
 
 Planned (but TBD):
 * Small UI for quality-of-life actions outside of unpacking/repacking (like duplicating AEGs, CHRs, PARTSBND...)
@@ -29,14 +30,14 @@ Requires [.NET Desktop Runtime 7.0](https://dotnet.microsoft.com/en-us/download/
 Please see the included readme for detailed instructions.  
 
 # Contributors
-*TKGP* - Basically everything
-*katalash* - GPARAM support
-*Nordgaren* - Yabber+ additions
-*DSMapStudio team* - FSParam, Paramdex
-*NamelessHoodie* - FXR serialization
-*Avocado* - YabberAvocado additions
-*Pear* - Tweaks to GPARAM
-*ivi* - WitchyBND maintainer
+* *TKGP* - Basically everything
+* *katalash* - GPARAM support
+* *Nordgaren* - Yabber+ additions
+* *DSMapStudio team* - FSParam, Paramdex
+* *NamelessHoodie* - FXR serialization
+* *Avocado* - YabberAvocado additions
+* *Pear* - Tweaks to GPARAM
+* *ivi* - WitchyBND maintainer
 
 # Changelog
 ## WitchyBND

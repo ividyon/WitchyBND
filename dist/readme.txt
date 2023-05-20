@@ -1,36 +1,25 @@
+--| WitchyBND
+--| Maintained by ivi, Yabber created by TKGP
+--| https://github.com/ividyon/WitchyBND
 
---| Yabber 1.3.1
---| By TKGP
---| https://www.nexusmods.com/sekiro/mods/42
---| https://github.com/JKAnderson/Yabber
+An unpacker/repacker for common Demon's Souls, Dark Souls 1-3, Bloodborne, Sekiro, Elden Ring file formats. Supports .bnd, .bhd/.bdt, .dcx, .fltparam, .fmg, .gparam, .luagnl, .luainfo, and .tpf.
+Does not support dvdbnds (the very large bhd/bdt pairs in the main game directory); use UDSFM or UXM unpack those first.
+Requires .NET Desktop Runtime 7.0.
 
-An unpacker/repacker for common Demon's Souls, Dark Souls 1-3, Bloodborne, and Sekiro file formats. Supports .bnd, .bhd/.bdt, .dcx, .fltparam, .fmg, .gparam, .luagnl, .luainfo, and .tpf.
-In order to decompress Sekiro files you must copy oo2core_6_win64.dll from Sekiro into Yabber's lib folder.
-Does not support dvdbnds (the very large bhd/bdt pairs in the main game directory); use UDSFM or UXM to unpack those first.
-https://www.nexusmods.com/darksouls/mods/1304
-https://www.nexusmods.com/sekiro/mods/26
-Also does not support encrypted files (enc_regulation.bnd.dcx in DS2, Data0.bdt in DS3); you can edit these with Yapped or unpack them with BinderTool.
-https://www.nexusmods.com/darksouls3/mods/306
-https://github.com/Atvaark/BinderTool
-Requires .NET 4.7.2 - Windows 10 users should already have this.
-https://www.microsoft.com/net/download/thank-you/net472
+--| WitchyBND.exe
 
-
---| Yabber.exe
-
-This program is for unpacking and repacking supported formats. Drag and drop a file (bnd, bhd, fmg, gparam, luagnl, luainfo, or tpf) onto the exe to unpack it; drag and drop an unpacked folder to repack it. Multiple files or folders can be selected and dropped at a time.
-DCX versions of supported formats can be dropped directly onto Yabber.exe without decompressing them separately; they will automatically be recompressed when repacking.
+This program is for unpacking and repacking supported formats. Drag and drop a file (bnd, bhd, fmg, gparam, luagnl, luainfo, tpf, fxr and more...) onto the exe to unpack it; drag and drop an unpacked folder to repack it. Multiple files or folders can be selected and dropped at a time.
+DCX versions of supported formats can be dropped directly onto WitchyBND.exe without decompressing them separately; they will automatically be recompressed when repacking.
 Edit the .xml file in the unpacked folder to add, remove or rename files before repacking.
-Non-container files such as FMG or GPARAM are simply extracted to an xml file with the same name. Drop the .xml back onto Yabber to repack it.
+Non-container files such as FMG or GPARAM are simply extracted to an xml file with the same name. Drop the .xml back onto WitchyBND to repack it.
 
-
---| Yabber.DCX.exe
+--| WitchyBND.DCX.exe
 
 This program is for decompressing and recompressing any DCX file. Drag and drop a DCX file onto the exe to decompress it; drag and drop the decompressed file to recompress it. Multiple files can be selected and dropped at a time.
-You don't need to use this to decompress container formats before dropping them on Yabber.exe; this is only for compressed formats that aren't otherwise supported by Yabber.
+You don't need to use this to decompress container formats before dropping them on WitchyBND.exe; this is only for compressed formats that aren't otherwise supported by WitchyBND.
 
 
---| Yabber.Context.exe
+--| WitchyBND.Context.exe
 
 This program registers the other two so that they can be run by right-clicking on a file or folder. Run it to choose whether to register or unregister them.
 The other two programs are assumed to be in the same folder. If you move them, just run it again from the new location.
@@ -77,44 +66,16 @@ A DDS texture container, used in all games. Console versions are not supported.
 
 --| Contributors
 
+TKGP - Basically everything
 katalash - GPARAM support
-TKGP - Everything else
-
+Nordgaren - Yabber+ additions
+DSMapStudio team - FSParam, Paramdex
+NamelessHoodie - FXR serialization
+Avocado - YabberAvocado additions
+Pear - Tweaks to GPARAM
+ivi - WitchyBND maintainer
 
 --| Changelog
 
-1.3.1
-	DS2 .fltparams are now supported
-	BXF4 repacking fixed
-	Prompt for administrator access if necessary
-	Breaking change: GPARAM format changed again; please repack any in-progress GPARAMs with the previous version, then unpack them again with this one
-
-1.3
-	Sekiro support
-	Breaking change: GPARAM format has changed in a few ways; please repack any in-progress GPARAMs with the previous version, then unpack them again with this one
-
-1.2.2
-	Fix not being able to repack bnds with roots
-
-1.2.1
-	Fix LUAINFO not working on files with 2 or fewer goals
-	Fix LUAGNL not working on some files
-	Fix GPARAM not repacking files with Byte4 params
-	Better support for weird BND/BXF formats without IDs or names
-
-1.2
-	GPARAM, LUAGNL, and LUAINFO are now supported
-	Breaking change: compressed FMG is now supported; please repack any in-progress FMGs with the previous version, then unpack them again with this one
-
-1.1.1
-	Fix repacked FMGs getting double-spaced
-	Fix decompressing DCXs that aren't named .dcx
-
-1.1
-	Add FMG support
-
-1.0.2
-	Fix repacking DX10 textures
-
-1.0.1
-	Fix bad BXF4 repacking
+1.0.0
+    Initial release.
