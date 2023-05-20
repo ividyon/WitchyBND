@@ -45,5 +45,5 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           artifacts: 'WitchyBND-${{ github.ref_name }}.zip'
-          bodyFile: "RELEASENOTES.md"
+          bodyFile: "./NOTES.md"
           token: ${{ secrets.GITHUB_TOKEN }}
