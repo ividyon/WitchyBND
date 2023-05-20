@@ -25,7 +25,7 @@ jobs:
           build-configuration: Release
 
           # (Optional) The path of the project to build; if omitted, the whole solution is built.
-          # path: ./WitchyBND/
+          path: ./WitchyBND.sln
           
           # (Optional) True if warnings should be treated as errors, defaults to false.
           # warnings-as-errors: true
