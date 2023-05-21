@@ -536,7 +536,7 @@ namespace WitchyBND
             else if (File.Exists($"{sourceDir}\\_witchy-tpf.xml") || File.Exists($"{sourceDir}\\_yabber-tpf.xml"))
             {
                 Console.WriteLine($"Repacking TPF: {sourceName}...");
-                WTPF.Repack(sourceDir, targetDir);
+                return WTPF.Repack(sourceDir, targetDir);
             }
             else
             {

@@ -118,7 +118,7 @@ static class WBUtil
             return $"{dir}_yabber-{type}.xml";
         }
 
-        throw new Exception($"Could not find WitchyBND or Yabber BND4 XML");
+        throw new Exception($"Could not find WitchyBND or Yabber {type.ToUpper()} XML");
     }
 
     private static readonly Regex DriveRx = new Regex(@"^(\w\:\\)(.+)$");

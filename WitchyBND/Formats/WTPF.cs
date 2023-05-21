@@ -82,20 +82,15 @@ namespace WitchyBND
             return false;
         }
 
-        public static void Repack(string sourceDir, string targetDir)
+        public static bool Repack(string sourceDir, string targetDir)
         {
             TPF tpf = new TPF();
             XmlDocument xml = new XmlDocument();
 
-            xml.Load(WBUtil.GetXmlPath("tpf4", sourceDir));
+            xml.Load(WBUtil.GetXmlPath("tpf", sourceDir));
 
             Enum.TryParse(xml.SelectSingleNode("tpf/platform")?.InnerText ?? "None", out TPF.TPFPlatform platform);
             tpf.Platform = platform;
-            if (tpf.Platform != TPF.TPFPlatform.PC)
-            {
-                Console.WriteLine(
-                    @"WitchyBND only officially supports repacking PC TPFs at the moment. Repacking console TPFs is not supported.");
-            }
 
             string filename = xml.SelectSingleNode("tpf/filename").InnerText;
             Enum.TryParse(xml.SelectSingleNode("tpf/compression")?.InnerText ?? "None", out DCX.Type compression);
@@ -128,7 +123,24 @@ namespace WitchyBND
 
             string outPath = $"{targetDir}\\{filename}";
             WBUtil.Backup(outPath);
-            tpf.Write(outPath);
+            try
+            {
+                tpf.Write(outPath);
+            }
+            catch (Exception e)
+            {
+                if (platform != TPF.TPFPlatform.PC)
+                {
+                    Console.WriteLine("Writing TPF failed.");
+                    Console.WriteLine(
+                        @"WitchyBND only officially supports repacking PC TPFs at the moment. Repacking console TPFs is not supported.");
+                    return true;
+                }
+
+                throw new Exception($"Error while writing TPF", e);
+            }
+
+            return false;
         }
     }
 }

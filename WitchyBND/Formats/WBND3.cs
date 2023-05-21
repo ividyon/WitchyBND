@@ -33,7 +33,7 @@ namespace WitchyBND
             var bnd = new BND3();
             var xml = new XmlDocument();
 
-            xml.Load(WBUtil.GetXmlPath("bnd4", sourceDir));
+            xml.Load(WBUtil.GetXmlPath("bnd3", sourceDir));
 
             if (xml.SelectSingleNode("bnd3/filename") == null)
                 throw new FriendlyException("Missing filename tag.");
