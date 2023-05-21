@@ -454,7 +454,7 @@ namespace WitchyBND
                 {
                     var patchParamdefPath = $@"{patchPath}\{Path.GetFileName(path)}";
                     if (!File.Exists(patchParamdefPath)) continue;
-                    PARAMDEF? patchParamdef = PARAMDEF.XmlDeserialize(patchParamdefPath);
+                    var patchParamdef = PARAMDEF.XmlDeserialize(patchParamdefPath);
                     if (patchParamdef == null) continue;
                     paramdef = patchParamdef;
                     break;
