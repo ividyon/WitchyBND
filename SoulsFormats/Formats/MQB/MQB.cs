@@ -81,7 +81,7 @@ namespace SoulsFormats
             Framerate = br.ReadSingle();
             int resourceCount = br.ReadInt32();
             int cutCount = br.ReadInt32();
-            br.AssertInt32(0);
+            int unkX50 = br.ReadInt32();
             br.AssertInt32(0);
             br.AssertInt32(0);
             br.AssertInt32(0);

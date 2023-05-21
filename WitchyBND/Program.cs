@@ -12,6 +12,7 @@ using System.Threading;
 using System.Xml;
 using Microsoft.Extensions.FileSystemGlobbing;
 using WitchyFormats;
+using Yabber;
 using GPARAM = WitchyFormats.GPARAM;
 using MATBIN = WitchyFormats.MATBIN;
 using MTD = WitchyFormats.MTD;
@@ -75,11 +76,15 @@ namespace WitchyBND
                     paths.Add(arg);
                 }
             }
+            
+            bool pause = false;
+            
             foreach (string halfPath in paths)
             {
                 try
                 {
                     string path = Path.GetFullPath(halfPath);
+                 
                     // int maxProgress = Console.WindowWidth - 1;
                     // int lastProgress = 0;
                     //
@@ -110,6 +115,13 @@ namespace WitchyBND
                         error |= RepackDir(path, progress);
 
                     }
+
+                    if (Directory.Exists(path))
+                    {
+                        pause |= ManageDir(path, progress);
+
+                    }
+
                     else if (File.Exists(path))
                     {
                         error |= UnpackFile(path, progress);
@@ -177,6 +189,8 @@ namespace WitchyBND
             string targetDir = $"{sourceDir}\\{fileName.Replace('.', '-')}";
             if (File.Exists(targetDir))
                 targetDir += "-ybr";
+            
+            DCX.Type compression = DCX.Type.Unknown;
 
             if (fileName.Contains("regulation.bnd.dcx") || fileName.Contains("Data0") || fileName.Contains("regulation.bin") || fileName.Contains("regulation.bnd"))
                 return UnpackRegulationFile(fileName, sourceDir, targetDir, progress);
@@ -184,7 +198,8 @@ namespace WitchyBND
             if (DCX.Is(sourceFile))
             {
                 Console.WriteLine($"Decompressing DCX: {fileName}...");
-                byte[] bytes = TryDecompressBytes(sourceFile, out DCX.Type compression);
+                byte[] bytes = TryDecompressBytes(sourceFile, out DCX.Type compr);
+                compression = compr;
 
                 if (BND3.Is(bytes))
                 {
@@ -232,11 +247,24 @@ namespace WitchyBND
                     tpf.Compression = compression;
                     tpf.Unpack(fileName, targetDir, progress);
                 }
+                else if (sourceFile.EndsWith(".btl") || sourceFile.EndsWith(".btl.dcx"))
+                {
+                    Console.WriteLine($"Unpacking BTL: {fileName}...");
+                    BTL btl = BTL.Read(sourceFile);
+                    btl.Compression = compression;
+                    btl.Unpack(sourceFile);
+                }
+                else if (sourceFile.EndsWith(".btl.json") || sourceFile.EndsWith(".btl.dcx.json"))
+                {
+                    Console.WriteLine($"Repacking BTL: {fileName}...");
+                    YBTL.Repack(sourceFile);
+                }
                 else
                 {
                     Console.WriteLine($"File format not recognized: {fileName}");
                     return true;
                 }
+                
             }
             else
             {
@@ -413,14 +441,31 @@ namespace WitchyBND
                     Console.WriteLine($"Repacking PARAM: {fileName}...");
                     return WPARAM.Repack(sourceFile, sourceDir);
                 }
+                else if (MQB.Is(sourceFile))
+                {
+                    Console.WriteLine($"Converting MQB: {fileName}...");
+                    MQB mqb = MQB.Read(sourceFile);
+                    mqb.Unpack(fileName, sourceDir, progress);
+                }
+                else if (sourceFile.EndsWith(".mqb.xml"))
+                {
+                    Console.WriteLine($"Converting XML to MQB: {fileName}...");
+                    YMQB.Repack(sourceFile);
+                }
+                
                 else
                 {
                     Console.WriteLine($"File format not recognized: {fileName}");
                     return true;
                 }
+
+
             }
 
-            return false;
+            return false; 
+            
+           
+            
         }
         private static byte[] TryDecompressBytes(string sourceFile, out DCX.Type compression)
         {
@@ -591,6 +636,56 @@ namespace WitchyBND
 
             throw new InvalidOperationException("This state is unreachable. If your regulation bin is named correctly, please contact Nordgaren about this regulation.bin. Otherwise" +
                 "make sure your bnd contains the original bnd name.");
+        }
+        private static bool ManageDir(string sourceDir, IProgress<float> progress)
+        {
+            string sourceDirName = new DirectoryInfo(sourceDir).Name;
+            string targetDir = new DirectoryInfo(sourceDir).Parent.FullName;
+
+            if (File.Exists($"{sourceDir}\\_witchy-bnd3.xml"))
+            {
+                Console.WriteLine($"Repacking BND3: {sourceDirName}...");
+                WBND3.Repack(sourceDir, targetDir);
+            }
+            else if (File.Exists($"{sourceDir}\\_witchy-bnd4.xml"))
+            {
+                Console.WriteLine($"Repacking BND4: {sourceDirName}...");
+                WBND4.Repack(sourceDir, targetDir);
+            }
+            else if (File.Exists($"{sourceDir}\\_witchy-bxf3.xml"))
+            {
+                Console.WriteLine($"Repacking BXF3: {sourceDirName}...");
+                WBXF3.Repack(sourceDir, targetDir);
+            }
+            else if (File.Exists($"{sourceDir}\\_witchy-bxf4.xml"))
+            {
+                Console.WriteLine($"Repacking BXF4: {sourceDirName}...");
+                WBXF4.Repack(sourceDir, targetDir);
+            }
+            else if (File.Exists($"{sourceDir}\\_witchy-tpf.xml"))
+            {
+                Console.WriteLine($"Repacking TPF: {sourceDirName}...");
+                WTPF.Repack(sourceDir, targetDir);
+            }
+            else
+            {
+                foreach (string sourceFile in Directory.EnumerateFiles(sourceDir))
+                {
+                    UnpackFile(sourceFile, progress);
+                }
+
+                foreach (string dir in Directory.EnumerateDirectories(sourceDir))
+                {
+                    string dirName = new DirectoryInfo(dir).Name;
+
+                    if (!dirName.EndsWith("bak"))
+                    {
+                        ManageDir(dir, progress);
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }

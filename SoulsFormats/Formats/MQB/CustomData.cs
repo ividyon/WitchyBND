@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Numerics;
 
 namespace SoulsFormats
 {
@@ -22,6 +23,7 @@ namespace SoulsFormats
                 String = 10,
                 Custom = 11,
                 Color = 13,
+                Vector3 = 18
             }
 
             public string Name { get; set; }
@@ -46,7 +48,7 @@ namespace SoulsFormats
             {
                 Name = br.ReadFixStrW(0x40);
                 Type = br.ReadEnum32<DataType>();
-                br.AssertInt32(Type == DataType.Color ? 3 : 0);
+                br.AssertInt32(Type == DataType.Color || Type == DataType.Vector3 ? 3 : 0);
 
                 long valueOffset = br.Position;
                 switch (Type)
@@ -61,6 +63,7 @@ namespace SoulsFormats
                     case DataType.String:
                     case DataType.Custom:
                     case DataType.Color: Value = br.ReadInt32(); break;
+                    case DataType.Vector3: Value = br.ReadInt32(); break;
                     default: throw new NotImplementedException($"Unimplemented custom data type: {Type}");
                 }
 
@@ -80,7 +83,7 @@ namespace SoulsFormats
                 br.AssertInt32(0);
                 br.AssertInt32(0);
 
-                if (Type == DataType.String || Type == DataType.Color || Type == DataType.Custom)
+                if (Type == DataType.String || Type == DataType.Color || Type == DataType.Custom || Type == DataType.Vector3)
                 {
                     int length = (int)Value;
                     if (Type == DataType.String)
@@ -103,6 +106,13 @@ namespace SoulsFormats
                         Value = Color.FromArgb(br.ReadByte(), br.ReadByte(), br.ReadByte());
                         br.AssertByte(0);
                     }
+                    else if (Type == DataType.Vector3)
+                    {
+                        if (length != 16)
+                            throw new InvalidDataException($"Unexpected custom data vector3 length: {length}");
+                        Value = br.ReadVector3();
+                        br.AssertInt32(0);
+                    }
                 }
 
                 Sequences = new List<Sequence>(sequenceCount);
@@ -121,7 +131,7 @@ namespace SoulsFormats
             {
                 bw.WriteFixStrW(Name, 0x40, 0x00);
                 bw.WriteUInt32((uint)Type);
-                bw.WriteInt32(Type == DataType.Color ? 3 : 0);
+                bw.WriteInt32(Type == DataType.Color || Type == DataType.Vector3 ? 3 : 0);
 
                 int length = -1;
                 if (Type == DataType.String)
@@ -140,6 +150,10 @@ namespace SoulsFormats
                 {
                     length = 4;
                 }
+                else if (Type == DataType.Vector3)
+                {
+                    length = 16;
+                }
 
                 long valueOffset = bw.Position;
                 switch (Type)
@@ -153,7 +167,8 @@ namespace SoulsFormats
                     case DataType.Float: bw.WriteSingle((float)Value); break;
                     case DataType.String:
                     case DataType.Custom:
-                    case DataType.Color: bw.WriteInt32(length); break;
+                    case DataType.Color:
+                    case DataType.Vector3:bw.WriteInt32(length); break;
                     default: throw new NotImplementedException($"Unimplemented custom data type: {Type}");
                 }
 
@@ -190,6 +205,13 @@ namespace SoulsFormats
                     bw.WriteByte(color.G);
                     bw.WriteByte(color.B);
                     bw.WriteByte(0);
+                }
+                else if (Type == DataType.Vector3)
+                {
+                    var vector = (Vector3)Value;
+                    valueOffset = bw.Position;
+                    bw.WriteVector3(vector);
+                    bw.WriteInt32(0);
                 }
 
                 allCustomData.Add(this);
