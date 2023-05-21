@@ -4,7 +4,7 @@
 name: Development artifact
 
 concurrency:
-  group: build-${{ github.ref }}
+  group: build
   cancel-in-progress: false
 
 on:
