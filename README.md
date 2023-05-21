@@ -40,11 +40,33 @@ Please see the included readme for detailed instructions.
 * *DSMapStudio team* - FSParam, Paramdex
 * *NamelessHoodie* - FXR serialization
 * *Avocado* - YabberAvocado additions
-* *Pear* - Tweaks to GPARAM
 * *ivi* - WitchyBND maintainer
 
 # Changelog
 ## WitchyBND
+
+### 1.0.4.1
+* Updated READMEs.
+
+### 1.0.4.0
+* New attempt at GPARAM support, using decompiled code from a random YabberAvocado zip. Appears to do a byte-perfect roundtrip unlike all other versions. Testing needed.
+* Project cleanup for less warnings.
+* Moved to NuGet versioning format (1.0.4.0 instead of 1.0.4).
+* Properly display assembly info data.
+
+### 1.0.3
+* Fixed regulation.bin repacking as regulation.bin.dcx.
+
+### 1.0.2
+* Fixed embarassing bug preventing binders from being repacked.
+* Added more graceful handling of failed TPF repacking for console TPFs.
+
+### 1.0.1
+* Moved to clean latest version of TKGP's SoulsFormats (ER branch)
+* Improved handling of Paramdex name files
+* Added support for console TPFs (by TK/DSMS team)
+* Added support for MTD (by Avocado)
+* Fixed small issue with AssetGeometryParam def being version 4 instead of 6
 
 ### 1.0.0
 * Initial release.
