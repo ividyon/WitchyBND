@@ -116,12 +116,6 @@ namespace WitchyBND
 
                     }
 
-                    if (Directory.Exists(path))
-                    {
-                        pause |= ManageDir(path, progress);
-
-                    }
-
                     else if (File.Exists(path))
                     {
                         error |= UnpackFile(path, progress);
@@ -187,7 +181,7 @@ namespace WitchyBND
             string sourceDir = new FileInfo(sourceFile).Directory.FullName;
             string fileName = Path.GetFileName(sourceFile);
             string targetDir = $"{sourceDir}\\{fileName.Replace('.', '-')}";
-            if (File.Exists(targetDir))
+            if (Directory.Exists(targetDir))
                 targetDir += "-ybr";
             
             DCX.Type compression = DCX.Type.Unknown;
@@ -621,6 +615,7 @@ BBBBBBBBBBBBBBBBBBBBBGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
         }
 
         private static bool RepackDir(string sourceDir, IProgress<float> progress)
+        
         {
             string sourceName = new DirectoryInfo(sourceDir).Name;
             string targetDir = new DirectoryInfo(sourceDir).Parent.FullName;
@@ -705,7 +700,7 @@ BBBBBBBBBBBBBBBBBBBBBGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
             throw new InvalidOperationException("This state is unreachable. If your regulation bin is named correctly, please contact Nordgaren about this regulation.bin. Otherwise" +
                 "make sure your bnd contains the original bnd name.");
         }
-        private static bool ManageDir(string sourceDir, IProgress<float> progress)
+       /* private static bool ManageDir(string sourceDir, IProgress<float> progress)
         {
             string sourceDirName = new DirectoryInfo(sourceDir).Name;
             string targetDir = new DirectoryInfo(sourceDir).Parent.FullName;
@@ -733,6 +728,7 @@ BBBBBBBBBBBBBBBBBBBBBGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
             else if (File.Exists($"{sourceDir}\\_witchy-tpf.xml"))
             {
                 Console.WriteLine($"Repacking TPF: {sourceDirName}...");
+                System.Threading.Thread.Sleep(5000);
                 WTPF.Repack(sourceDir, targetDir);
             }
             else
@@ -755,5 +751,6 @@ BBBBBBBBBBBBBBBBBBBBBGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 
             return false;
         }
+        */
     }
 }

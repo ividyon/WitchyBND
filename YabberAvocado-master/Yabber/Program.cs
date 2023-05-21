@@ -462,6 +462,7 @@ namespace Yabber
             {
                 Console.WriteLine($"Repacking BND3: {sourceDirName}...");
                 YBND3.Repack(sourceDir, targetDir);
+                Path.Combine(Directory.GetCurrentDirectory(), filename)
             }
             else if (File.Exists($"{sourceDir}\\_witchy-bnd4.xml"))
             {
@@ -482,6 +483,7 @@ namespace Yabber
             {
                 Console.WriteLine($"Repacking TPF: {sourceDirName}...");
                 YTPF.Repack(sourceDir, targetDir);
+                Path.Combine(Directory.GetCurrentDirectory(), filename)
             }
             else
             {
