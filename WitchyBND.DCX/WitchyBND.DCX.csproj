@@ -2,9 +2,13 @@
   <PropertyGroup>
     <TargetFramework>net7.0-windows</TargetFramework>
     <OutputType>Exe</OutputType>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <RootNamespace>WitchyBND.DCX</RootNamespace>
-    <Company>ividyon</Company>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <RootNamespace>WitchyBND</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <Title>WitchyBND.DCX</Title>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Assets/icon.ico</ApplicationIcon>

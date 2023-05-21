@@ -1,4 +1,5 @@
-﻿using SoulsFormats;
+﻿using System;
+using SoulsFormats;
 
 namespace WitchyFormats
 {

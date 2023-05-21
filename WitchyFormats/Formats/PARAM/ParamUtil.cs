@@ -1,5 +1,6 @@
-﻿using SoulsFormats;
-using DefType = SoulsFormats.PARAMDEF.DefType;
+﻿using System;
+using System.Collections.Generic;
+using SoulsFormats;
 
 namespace WitchyFormats
 {
@@ -24,7 +25,7 @@ namespace WitchyFormats
                 case PARAMDEF.DefType.fixstrW: return "%d";
 
                 default:
-                    throw new NotImplementedException($"No default format specified for {nameof(DefType)}.{type}");
+                    throw new NotImplementedException($"No default format specified for {nameof(PARAMDEF.DefType)}.{type}");
             }
         }
 
@@ -66,8 +67,7 @@ namespace WitchyFormats
         {
             if (def?.VariableEditorValueTypes ?? false)
                 return variableDefaults[type];
-            else
-                return fixedDefaults[type];
+            return fixedDefaults[type];
         }
 
         private static readonly Dictionary<PARAMDEF.DefType, float> fixedMinimums = new Dictionary<PARAMDEF.DefType, float>
@@ -108,8 +108,7 @@ namespace WitchyFormats
         {
             if (def?.VariableEditorValueTypes ?? false)
                 return variableMinimums[type];
-            else
-                return fixedMinimums[type];
+            return fixedMinimums[type];
         }
 
         private static readonly Dictionary<PARAMDEF.DefType, float> fixedMaximums = new Dictionary<PARAMDEF.DefType, float>
@@ -150,8 +149,7 @@ namespace WitchyFormats
         {
             if (def?.VariableEditorValueTypes ?? false)
                 return variableMaximums[type];
-            else
-                return fixedMaximums[type];
+            return fixedMaximums[type];
         }
 
         private static readonly Dictionary<PARAMDEF.DefType, float> fixedIncrements = new Dictionary<PARAMDEF.DefType, float>
@@ -192,8 +190,7 @@ namespace WitchyFormats
         {
             if (def?.VariableEditorValueTypes ?? false)
                 return variableIncrements[type];
-            else
-                return fixedIncrements[type];
+            return fixedIncrements[type];
         }
 
         public static PARAMDEF.EditFlags GetDefaultEditFlags(PARAMDEF.DefType type)
@@ -215,7 +212,7 @@ namespace WitchyFormats
                 case PARAMDEF.DefType.fixstrW: return PARAMDEF.EditFlags.Wrap;
 
                 default:
-                    throw new NotImplementedException($"No default edit flags specified for {nameof(DefType)}.{type}");
+                    throw new NotImplementedException($"No default edit flags specified for {nameof(PARAMDEF.DefType)}.{type}");
             }
         }
 
@@ -267,7 +264,7 @@ namespace WitchyFormats
                 case PARAMDEF.DefType.fixstrW: return 2;
 
                 default:
-                    throw new NotImplementedException($"No value size specified for {nameof(DefType)}.{type}");
+                    throw new NotImplementedException($"No value size specified for {nameof(PARAMDEF.DefType)}.{type}");
             }
         }
 
@@ -290,8 +287,7 @@ namespace WitchyFormats
                 case PARAMDEF.DefType.dummy8:
                     if (field.BitSize == -1)
                         return new byte[field.ArrayLength];
-                    else
-                        return (byte)0;
+                    return (byte)0;
 
                 default:
                     throw new NotImplementedException($"Default not implemented for type {field.DisplayType}");
@@ -302,12 +298,11 @@ namespace WitchyFormats
         {
             if (type == PARAMDEF.DefType.u8)
                 return 8;
-            else if (type == PARAMDEF.DefType.u16)
+            if (type == PARAMDEF.DefType.u16)
                 return 16;
-            else if (type == PARAMDEF.DefType.u32)
+            if (type == PARAMDEF.DefType.u32)
                 return 32;
-            else
-                throw new InvalidOperationException($"Bit type may only be u8, u16, or u32.");
+            throw new InvalidOperationException("Bit type may only be u8, u16, or u32.");
         }
     }
 }
