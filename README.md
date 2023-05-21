@@ -17,7 +17,7 @@ New additions include:
 * FXR support
 * MATBIN support (by Avocado)
 * MTD support (by Avocado)
-* ELDEN RING GPARAM support (by Avocado and Pear)
+* ELDEN RING GPARAM support (by Avocado)
 * Console TPF unpacking (but not repacking)
 * Minor fixes like ELDEN RING envmap TPF unpack
 

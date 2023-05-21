@@ -40,7 +40,6 @@ namespace WitchyBND
                 if (arg.Contains('*'))
                 {
                     var matcher = new Matcher();
-                    int? idx = null;
                     var rootParts = arg.Split(Path.DirectorySeparatorChar).TakeWhile(part => !part.Contains('*')).ToList();
                     var root = string.Join(Path.DirectorySeparatorChar, rootParts);
                     var rest = arg.Substring(root.Length + 1);

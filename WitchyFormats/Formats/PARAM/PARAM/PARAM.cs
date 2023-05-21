@@ -1,4 +1,6 @@
-﻿using SoulsFormats;
+﻿using System;
+using System.Collections.Generic;
+using SoulsFormats;
 
 namespace WitchyFormats
 {
