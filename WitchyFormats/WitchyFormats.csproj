@@ -9,12 +9,19 @@
     <AssemblyTitle>WitchyFormats</AssemblyTitle>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
   <PropertyGroup>
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SoulsFormats\SoulsFormats.csproj" />
+    <ProjectReference Include="..\StudioUtils\StudioUtils.csproj" />
   </ItemGroup>
 
 </Project>

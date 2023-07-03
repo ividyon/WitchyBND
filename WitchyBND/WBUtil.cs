@@ -15,7 +15,7 @@ static class WBUtil
 {
     public static string GetExeLocation()
     {
-        return Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
+        return Path.GetDirectoryName(AppContext.BaseDirectory);
     }
 
     public enum GameType
@@ -96,6 +96,17 @@ static class WBUtil
     {
         if (param.ParamType == paramdef.ParamType &&
             (param.DetectedSize == -1 || param.DetectedSize == paramdef.GetRowSize()))
+        {
+            param.ApplyParamdef(paramdef);
+            return true;
+        }
+
+        return false;
+    }
+    public static bool ApplyParamdefLessCarefully(this WitchyFormats.FsParam param, PARAMDEF paramdef)
+    {
+        if (param.ParamType == paramdef.ParamType &&
+            (param.DetectedSize == 0 || param.DetectedSize == paramdef.GetRowSize()))
         {
             param.ApplyParamdef(paramdef);
             return true;

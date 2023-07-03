@@ -4,7 +4,7 @@ using SoulsFormats;
 
 namespace WitchyFormats
 {
-    internal static class ParamUtil
+    public static class ParamUtil
     {
         public static string GetDefaultFormat(PARAMDEF.DefType type)
         {

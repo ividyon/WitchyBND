@@ -4,6 +4,9 @@
     <OutputType>Exe</OutputType>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <RootNamespace>WitchyBND</RootNamespace>
+    <PublishSingleFile>True</PublishSingleFile>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+    <UseWindowsForms>True</UseWindowsForms>
     <IsPackable>false</IsPackable>
     <Title>WitchyBND.DCX</Title>
   </PropertyGroup>

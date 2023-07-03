@@ -4,6 +4,9 @@
     <OutputType>Exe</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <RootNamespace>WitchyBND</RootNamespace>
+    <PublishSingleFile>True</PublishSingleFile>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+    <UseWindowsForms>True</UseWindowsForms>
     <Company>ividyon</Company>
   </PropertyGroup>
   <PropertyGroup>

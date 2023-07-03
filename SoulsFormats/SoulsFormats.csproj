@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net7.0-windows</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Copyright>Copyright © Joseph Anderson 2019</Copyright>
     <Description>A .NET library for reading and writing FromSoftware file formats.</Description>
@@ -8,20 +8,20 @@
     <Authors>Joseph Anderson</Authors>
     <PackageProjectUrl>https://github.com/JKAnderson/SoulsFormats</PackageProjectUrl>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PlatformTarget>x64</PlatformTarget>
-    <Platforms>x64</Platforms>
   </PropertyGroup>
-
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
   <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard'))">
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.7.0" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.2.0" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
-
   <ItemGroup>
     <None Update="oo2core_6_win64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

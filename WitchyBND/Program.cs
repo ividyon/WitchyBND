@@ -16,7 +16,7 @@ using GPARAM = WitchyFormats.GPARAM;
 using MATBIN = WitchyFormats.MATBIN;
 using MTD = WitchyFormats.MTD;
 using TPF = WitchyFormats.TPF;
-using PARAM = WitchyFormats.PARAM;
+using PARAM = WitchyFormats.FsParam;
 
 namespace WitchyBND
 {
@@ -149,13 +149,13 @@ namespace WitchyBND
                     error = true;
                 }
                 #if (!DEBUG)
-                catch (Exception ex)
-                {
-                    Console.WriteLine();
-                    Console.Error.WriteLine($"ERROR: Unhandled exception: {ex}");
-                    errorcode = 1;
-                    error = true;
-                }
+                // catch (Exception ex)
+                // {
+                //     Console.WriteLine();
+                //     Console.Error.WriteLine($"ERROR: Unhandled exception: {ex}");
+                //     errorcode = 1;
+                //     error = true;
+                // }
                 #endif
 
                 Console.WriteLine();

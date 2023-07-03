@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using SoulsFormats;
-using PARAM = WitchyFormats.PARAM;
+using PARAM = WitchyFormats.FsParam;
 
 namespace WitchyBND
 {
@@ -104,15 +104,12 @@ namespace WitchyBND
             }
 
             // Prepare rows
-            var allValues = new Dictionary<string, List<string>>();
             var rows = new List<WPARAMRow>();
-            var fieldNames = paramdef.Fields.Select(field => {
-                allValues[field.InternalName] = new List<string>();
-                return field.InternalName;
-            });
+            var fieldNames = paramdef.Fields.Select(field => field.InternalName);
 
-            // No row re-sorting to preserve byte perfection
-            // param.Rows.Sort((e1, e2) => e1.ID.CompareTo(e2.ID));
+            var fieldCounts = new Dictionary<string, Dictionary<string, int>>();
+            var fieldMaxes = new Dictionary<string, (string, int)>();
+
             foreach (PARAM.Row row in param.Rows)
             {
                 int id = row.ID;
@@ -134,41 +131,31 @@ namespace WitchyBND
 
                 foreach (string fieldName in fieldNames)
                 {
-                    PARAM.Cell cell = row[fieldName];
+                    PARAM.Cell? cell = row[fieldName];
                     if (cell == null)
                     {
                         throw new Exception($"Row {id} is missing cell {fieldName}.");
                     }
 
-                    var value = CellValueToString(cell);
-                    allValues[fieldName].Add(value);
+                    if (!fieldCounts.ContainsKey(fieldName))
+                        fieldCounts[fieldName] = new Dictionary<string, int>();
+
+                    var value = CellValueToString(cell.Value);
+
+                    if (!fieldCounts[fieldName].ContainsKey(value))
+                        fieldCounts[fieldName][value] = 0;
+                    fieldCounts[fieldName][value]++;
+
+                    if (!fieldMaxes.ContainsKey(fieldName) || fieldCounts[fieldName][value] > fieldMaxes[fieldName].Item2)
+                        fieldMaxes[fieldName] = (value, fieldCounts[fieldName][value]);
+
                     prepRow.Fields[fieldName] = value;
                 }
-
                 rows.Add(prepRow);
             }
-
-            // Count cell values and create defaults
-            var defaultValues = new Dictionary<string, string>();
-            foreach (KeyValuePair<string, List<string>> pair in allValues)
-            {
-                var fieldName = pair.Key;
-                var values = pair.Value;
-
-                var maxValue = values.GroupBy(x => x).Select(x => new { x.Key, Count = x.Count() })
-                    .OrderByDescending(x => x.Count).First();
-                if (maxValue.Count >= pair.Value.Count() * 0.8)
-                {
-                    defaultValues[fieldName] = maxValue.Key;
-                }
-            }
-            // var fieldValues = allValues.
-            // var maxValue = fieldValues.OrderByDescending(pair => pair.Value).First();
-            // if (maxValue.Value >= (fieldValues.Count * 0.8))
-            // {
-            // xw.WriteAttributeString("defaultValue", maxValue.Key);
-            // commonFieldValues[field.InternalName] = maxValue.Key;
-            // }
+            int threshold = (int)(rows.Count * 0.6);
+            string GetMajorityValue(KeyValuePair<string, int> c) => c.Value > threshold ? c.Key : null;
+            var defaultValues = fieldCounts.ToDictionary(e => e.Key, e => GetMajorityValue(e.Value.MaxBy(c => c.Value)));
 
             // Field info (def & default values)
             xw.WriteStartElement("fields");
@@ -190,17 +177,9 @@ namespace WitchyBND
                 xw.WriteAttributeString("unkc0", field.UnkC0);
 
                 // Store common "default" values
-                // var fieldValues = param.Rows.Select(row => row[field.InternalName]).GroupBy(CellValueToString)
-                // .ToDictionary(x => x.Key, x => x.Count());
-                // var maxValue = fieldValues.OrderByDescending(pair => pair.Value).First();
-                // if (maxValue.Value >= (fieldValues.Count * 0.8))
-                // {
-                // xw.WriteAttributeString("defaultValue", maxValue.Key);
-                // commonFieldValues[field.InternalName] = maxValue.Key;
-                // }
-                if (defaultValues.ContainsKey(fieldName))
+                if (defaultValues.TryGetValue(fieldName, out string value) && value != null)
                 {
-                    xw.WriteAttributeString("defaultValue", defaultValues[fieldName]);
+                    xw.WriteAttributeString("defaultValue", value);
                 }
 
                 xw.WriteEndElement();
@@ -290,23 +269,6 @@ namespace WitchyBND
 
             param.Unk06 = Convert.ToInt16(xml.SelectSingleNode("param/unk06").InnerText);
 
-            // PopulateParamdef(game);
-            //
-            // XmlNode paramTypeNode = xml.SelectSingleNode("param/type");
-            // if (paramTypeNode == null)
-            // {
-            //     throw new Exception("Param XML does not contain type.");
-            // }
-            //
-            // string paramType = paramTypeNode.InnerText;
-            //
-            // if (!ParamdefStorage[game].ContainsKey(paramType))
-            // {
-            //     throw new Exception($"Paramdef does not contain param type {paramType}.");
-            // }
-
-            // PARAMDEF paramdef = ParamdefStorage[game][paramType];
-
             var paramdef = new PARAMDEF();
 
             var paramType = xml.SelectSingleNode("param/paramdef/type").InnerText;
@@ -355,19 +317,21 @@ namespace WitchyBND
                 paramdef.Fields.Add(field);
             }
 
+            param.ApplyParamdef(paramdef);
+
             foreach (XmlNode xmlRow in xml.SelectNodes("param/rows/row"))
             {
                 var id = int.Parse(xmlRow.Attributes["id"].InnerText);
                 var name = xmlRow.Attributes["name"]?.InnerText ?? "";
 
-                var row = new PARAM.Row(id, name, paramdef);
+                var row = new PARAM.Row(id, name, param);
 
                 var csv = cellStyle == CellStyle.CSV ? WBUtil.DelimitedString.Split(xmlRow.InnerText) : null;
 
-                foreach (PARAMDEF.Field field in paramdef.Fields)
+                foreach (PARAM.Column column in param.Cells)
                 {
-                    string fieldName = field.InternalName;
-                    string defaultValue = defaultValues[field.InternalName];
+                    string fieldName = column.Def.InternalName;
+                    string defaultValue = defaultValues[column.Def.InternalName];
                     string value = defaultValue;
                     switch (cellStyle)
                     {
@@ -388,7 +352,7 @@ namespace WitchyBND
 
                             break;
                         case CellStyle.CSV:
-                            var fieldIdx = paramdef.Fields.IndexOf(field);
+                            var fieldIdx = param.Cells.ToList().IndexOf(column);
                             if (csv != null && csv.Length > fieldIdx)
                             {
                                 value = csv[fieldIdx];
@@ -402,26 +366,25 @@ namespace WitchyBND
                         throw new Exception($"Row {id} is missing value for cell {fieldName}.");
                     }
 
-                    row[fieldName].Value = StringToCellValue(value, field);
+                    column.SetValue(row, ConvertValueFromString(column.Def, StringToCellValue(value, column.Def)));
                 }
 
-                param.Rows.Add(row);
+                param.AddRow(row);
             }
 
-            try
-            {
-                // We're creating a new param, so applying carefully is not an option due to
-                // missing values auto-generated during Write.
-                // param.ApplyParamdef(paramdef);
-                if (!param.ApplyParamdefLessCarefully(paramdef))
-                {
-                    throw new Exception($"Paramdef did not apply carefully");
-                }
-            }
-            catch (Exception e)
-            {
-                throw new Exception($"Could not parse param {sourceFile} with paramdef {paramType}.", e);
-            }
+            // try
+            // {
+            //     // We're creating a new param, so applying carefully is not an option due to
+            //     // missing values auto-generated during Write.
+            //     if (!param.ApplyParamdefLessCarefully(paramdef))
+            //     {
+            //         throw new Exception($"Paramdef did not apply carefully");
+            //     }
+            // }
+            // catch (Exception e)
+            // {
+            //     throw new Exception($"Could not parse param {sourceFile} with paramdef {paramType}.", e);
+            // }
 
             string outPath = Path.Combine(sourceDir, sourceFile.Replace(".param.xml", ".param"));
             WBUtil.Backup(outPath);
@@ -443,7 +406,13 @@ namespace WitchyBND
                 throw new Exception($"Paramdef path not found for {gameName}.");
             }
 
-            var patchParamdefPaths = Directory.GetDirectories($@"{WBUtil.GetExeLocation()}\Assets\Paramdex\{gameName}\DefsPatch").OrderByDescending(path => path);
+            List<string> patchParamdefPaths = new();
+
+            var defsPatchPath = $@"{WBUtil.GetExeLocation()}\Assets\Paramdex\{gameName}\DefsPatch";
+            if (Directory.Exists(defsPatchPath))
+            {
+                patchParamdefPaths = Directory.GetDirectories(defsPatchPath).OrderByDescending(path => path).ToList();
+            }
 
             // Reading XML paramdefs
             foreach (string path in Directory.GetFiles(paramdefPath, "*.xml"))
@@ -519,6 +488,23 @@ namespace WitchyBND
             }
             NameStorage[game][paramName] = nameDict;
         }
+        public static Byte[] Dummy8Read(string dummy8, int expectedLength)
+        {
+            Byte[] nval = new Byte[expectedLength];
+            if (!(dummy8.StartsWith('[') && dummy8.EndsWith(']')))
+                return null;
+            string[] spl = dummy8.Substring(1, dummy8.Length-2).Split('|');
+            if (nval.Length != spl.Length)
+            {
+                return null;
+            }
+            for (int i=0; i<nval.Length; i++)
+            {
+                if (!byte.TryParse(spl[i], out nval[i]))
+                    return null;
+            }
+            return nval;
+        }
 
         public static string CellValueToString(PARAM.Cell cell)
         {
@@ -552,6 +538,8 @@ namespace WitchyBND
                 if (pdefField.BitSize == -1)
                 {
                     value = bytes.ToArray();
+                    if (bytes.Count() == 1)
+                        value = bytes.First();
                 }
                 else
                 {
@@ -564,6 +552,35 @@ namespace WitchyBND
             }
 
             return value;
+        }
+
+        public static object ConvertValueFromString(PARAMDEF.Field def, object value)
+        {
+            if (value == null)
+                throw new NullReferenceException($"Cell value may not be null.");
+
+            switch (def.DisplayType)
+            {
+                case PARAMDEF.DefType.s8: return Convert.ToSByte(value);
+                case PARAMDEF.DefType.u8: return Convert.ToByte(value);
+                case PARAMDEF.DefType.s16: return Convert.ToInt16(value);
+                case PARAMDEF.DefType.u16: return Convert.ToUInt16(value);
+                case PARAMDEF.DefType.s32: return Convert.ToInt32(value);
+                case PARAMDEF.DefType.u32: return Convert.ToUInt32(value);
+                case PARAMDEF.DefType.b32: return Convert.ToInt32(value);
+                case PARAMDEF.DefType.f32: return Convert.ToSingle(value);
+                case PARAMDEF.DefType.angle32: return Convert.ToSingle(value);
+                case PARAMDEF.DefType.f64: return Convert.ToDouble(value);
+                case PARAMDEF.DefType.fixstr: return Convert.ToString(value);
+                case PARAMDEF.DefType.fixstrW: return Convert.ToString(value);
+                case PARAMDEF.DefType.dummy8:
+                    if (def.ArrayLength > 1)
+                        return (byte[])value;
+                    return Convert.ToByte(value);
+
+                default:
+                    throw new NotImplementedException($"Conversion not specified for type {def.DisplayType}");
+            }
         }
 
         static WPARAM()

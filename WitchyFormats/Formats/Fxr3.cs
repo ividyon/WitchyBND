@@ -379,7 +379,7 @@ namespace WitchyFormats
 
             public int FieldData1 { get; set; }
 
-            public int FieldData2 { get; set; }
+            public float FieldData2 { get; set; }
 
             public FFXTransition()
             {
@@ -413,8 +413,15 @@ namespace WitchyFormats
                 br.AssertInt32(0);
                 br.AssertInt32(0);
                 br.AssertInt32(0);
-                FieldData1 = br.GetInt32(fieldOffset1);
-                FieldData2 = br.GetInt32(fieldOffset2);
+                if (Unk40 == 0)
+                {
+                    FieldData2 = br.GetSingle(fieldOffset1);
+                }
+                else
+                {
+                    FieldData1 = br.GetInt32(fieldOffset1);
+                    FieldData2 = br.GetSingle(fieldOffset2);
+                }
             }
 
             internal FFXTransition(FFXTransition transition)
@@ -462,11 +469,21 @@ namespace WitchyFormats
 
             internal void WriteFields(BinaryWriterEx bw, int index, ref int fieldCount)
             {
-                bw.FillInt32(string.Format("TransitionFieldOffset1[{0}]", index), (int)bw.Position);
-                bw.WriteInt32(FieldData1);
-                bw.FillInt32(string.Format("TransitionFieldOffset2[{0}]", index), (int)bw.Position);
-                bw.WriteInt32(FieldData2);
-                fieldCount += 2;
+                if (Unk40 == 0)
+                {
+                    bw.FillInt32(string.Format("TransitionFieldOffset1[{0}]", index), (int)bw.Position);
+                    bw.WriteSingle(FieldData2);
+                    bw.FillInt32(string.Format("TransitionFieldOffset2[{0}]", index), 0);
+                    fieldCount += 1;
+                }
+                else
+                {
+                    bw.FillInt32(string.Format("TransitionFieldOffset1[{0}]", index), (int)bw.Position);
+                    bw.WriteInt32(FieldData1);
+                    bw.FillInt32(string.Format("TransitionFieldOffset2[{0}]", index), (int)bw.Position);
+                    bw.WriteSingle(FieldData2);
+                    fieldCount += 2;
+                }
             }
         }
 
