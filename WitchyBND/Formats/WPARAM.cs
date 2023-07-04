@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using SoulsFormats;
-using PARAM = WitchyFormats.FsParam;
+using WitchyFormats;
 
 namespace WitchyBND
 {
@@ -39,7 +39,7 @@ namespace WitchyBND
         private static Dictionary<WBUtil.GameType, Dictionary<string, Dictionary<int, string>>>
             NameStorage { get; set; } = new Dictionary<WBUtil.GameType, Dictionary<string, Dictionary<int, string>>>();
 
-        public static bool Unpack(this PARAM param, string sourceFile, string sourceDir, WBUtil.GameType game)
+        public static bool Unpack(this FsParam param, string sourceFile, string sourceDir, WBUtil.GameType game)
         {
             string paramType = param.ParamType;
 
@@ -59,18 +59,13 @@ namespace WitchyBND
 
             try
             {
-                if (!param.ApplyParamdefLessCarefully(paramdef))
-                {
-                    Console.WriteLine($"Could not carefully apply paramdef {paramType} to {Path.GetFileName(sourceFile)}.");
-                    // Nothing happened yet, so can just proceed to the next file.
-                    return true;
-                }
-
+                param.ApplyParamdef(paramdef);
             }
             catch (Exception e)
             {
-                throw new Exception($"Param type {paramType} could not be applied to {Path.GetFileName(sourceFile)}.",
-                    e);
+                Console.WriteLine($"Could not carefully apply paramdef {paramType} to {Path.GetFileName(sourceFile)}.");
+                // Nothing happened yet, so can just proceed to the next file.
+                return true;
             }
 
             string paramName = Path.GetFileNameWithoutExtension(sourceFile);
@@ -110,7 +105,7 @@ namespace WitchyBND
             var fieldCounts = new Dictionary<string, Dictionary<string, int>>();
             var fieldMaxes = new Dictionary<string, (string, int)>();
 
-            foreach (PARAM.Row row in param.Rows)
+            foreach (FsParam.Row row in param.Rows)
             {
                 int id = row.ID;
                 string name = row.Name;
@@ -131,7 +126,7 @@ namespace WitchyBND
 
                 foreach (string fieldName in fieldNames)
                 {
-                    PARAM.Cell? cell = row[fieldName];
+                    FsParam.Cell? cell = row[fieldName];
                     if (cell == null)
                     {
                         throw new Exception($"Row {id} is missing cell {fieldName}.");
@@ -248,7 +243,7 @@ namespace WitchyBND
 
         public static bool Repack(string sourceFile, string sourceDir)
         {
-            var param = new PARAM();
+            var param = new FsParam();
 
             XmlDocument xml = new XmlDocument();
             xml.Load(sourceFile);
@@ -260,11 +255,11 @@ namespace WitchyBND
             param.Compression = compression;
 
             Enum.TryParse(xml.SelectSingleNode("param/format2D")?.InnerText ?? "0",
-                out PARAM.FormatFlags1 formatFlags1);
+                out FsParam.FormatFlags1 formatFlags1);
             param.Format2D = formatFlags1;
 
             Enum.TryParse(xml.SelectSingleNode("param/format2E")?.InnerText ?? "0",
-                out PARAM.FormatFlags2 formatFlags2);
+                out FsParam.FormatFlags2 formatFlags2);
             param.Format2E = formatFlags2;
 
             param.Unk06 = Convert.ToInt16(xml.SelectSingleNode("param/unk06").InnerText);
@@ -324,11 +319,11 @@ namespace WitchyBND
                 var id = int.Parse(xmlRow.Attributes["id"].InnerText);
                 var name = xmlRow.Attributes["name"]?.InnerText ?? "";
 
-                var row = new PARAM.Row(id, name, param);
+                var row = new FsParam.Row(id, name, param);
 
                 var csv = cellStyle == CellStyle.CSV ? WBUtil.DelimitedString.Split(xmlRow.InnerText) : null;
 
-                foreach (PARAM.Column column in param.Cells)
+                foreach (FsParam.Column column in param.Columns)
                 {
                     string fieldName = column.Def.InternalName;
                     string defaultValue = defaultValues[column.Def.InternalName];
@@ -352,7 +347,7 @@ namespace WitchyBND
 
                             break;
                         case CellStyle.CSV:
-                            var fieldIdx = param.Cells.ToList().IndexOf(column);
+                            var fieldIdx = param.Columns.ToList().IndexOf(column);
                             if (csv != null && csv.Length > fieldIdx)
                             {
                                 value = csv[fieldIdx];
@@ -506,7 +501,7 @@ namespace WitchyBND
             return nval;
         }
 
-        public static string CellValueToString(PARAM.Cell cell)
+        public static string CellValueToString(FsParam.Cell cell)
         {
             var value = cell.Value.ToString();
             if (cell.Def.DisplayType == PARAMDEF.DefType.dummy8)

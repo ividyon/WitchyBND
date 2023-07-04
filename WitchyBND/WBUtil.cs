@@ -103,17 +103,17 @@ static class WBUtil
 
         return false;
     }
-    public static bool ApplyParamdefLessCarefully(this WitchyFormats.FsParam param, PARAMDEF paramdef)
-    {
-        if (param.ParamType == paramdef.ParamType &&
-            (param.DetectedSize == 0 || param.DetectedSize == paramdef.GetRowSize()))
-        {
-            param.ApplyParamdef(paramdef);
-            return true;
-        }
-
-        return false;
-    }
+    // public static bool ApplyParamdefLessCarefully(this WitchyFormats.FsParam param, PARAMDEF paramdef)
+    // {
+    //     if (param.ParamType == paramdef.ParamType &&
+    //         (param.DetectedSize == 0 || param.DetectedSize == paramdef.GetRowSize()))
+    //     {
+    //         param.ApplyParamdef(paramdef);
+    //         return true;
+    //     }
+    //
+    //     return false;
+    // }
 
     public static string GetXmlPath(string type, string dir = "")
     {
