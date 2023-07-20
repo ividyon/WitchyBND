@@ -12,6 +12,7 @@ using System.Threading;
 using System.Xml;
 using Microsoft.Extensions.FileSystemGlobbing;
 using WitchyFormats;
+using WitchyLib;
 using GPARAM = WitchyFormats.GPARAM;
 using MATBIN = WitchyFormats.MATBIN;
 using MTD = WitchyFormats.MTD;

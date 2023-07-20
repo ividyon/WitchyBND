@@ -41,6 +41,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SoulsFormats\SoulsFormats.csproj" />
     <ProjectReference Include="..\WitchyFormats\WitchyFormats.csproj" />
+    <ProjectReference Include="..\WitchyLib\WitchyLib.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Assets\Paramdex\**" />

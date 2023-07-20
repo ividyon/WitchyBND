@@ -1,17 +1,17 @@
-﻿using Microsoft.Win32;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text.RegularExpressions;
-using SoulsFormats;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Serialization;
+using Microsoft.Win32;
 using Newtonsoft.Json;
+using SoulsFormats;
 
-namespace WitchyBND;
+namespace WitchyLib;
 
-static class WBUtil
+public static class WBUtil
 {
     public static string GetExeLocation()
     {
@@ -322,6 +322,18 @@ static class WBUtil
 
             xmlSer.Serialize(xw, obj);
         }
+    }
+    public static byte[] XmlSerialize<T>(object obj)
+    {
+        var stream = new MemoryStream();
+        using (var xw = XmlWriter.Create(stream, new XmlWriterSettings() { Indent = true }))
+        {
+            var xmlSer = new XmlSerializer(typeof(T));
+
+            xmlSer.Serialize(xw, obj);
+        }
+
+        return stream.ToArray();
     }
 
     public static T XmlDeserialize<T>(string sourceFile)

@@ -1,5 +1,6 @@
 ﻿using SoulsFormats;
 using System.IO;
+using WitchyLib;
 
 namespace WitchyBND
 {

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Xml;
 using SoulsFormats;
 using WitchyFormats;
+using WitchyLib;
 
 namespace WitchyBND
 {

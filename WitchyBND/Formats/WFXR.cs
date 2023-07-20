@@ -2,6 +2,7 @@
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using WitchyFormats;
+using WitchyLib;
 
 namespace WitchyBND;
 

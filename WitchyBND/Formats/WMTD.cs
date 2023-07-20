@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using WitchyFormats;
+using WitchyLib;
 
 namespace WitchyBND;
 

@@ -31,7 +31,7 @@ using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Security;
 
-namespace WitchyBND
+namespace WitchyLib
 {
     public static class CryptographyUtil
     {

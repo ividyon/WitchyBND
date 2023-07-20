@@ -7,6 +7,7 @@ using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Xml;
+using WitchyLib;
 using GPARAM = WitchyFormats.GPARAM;
 
 namespace WitchyBND

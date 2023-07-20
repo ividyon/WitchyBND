@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFramework>net7.0-windows</TargetFramework>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-    <RootNamespace>WitchyBND</RootNamespace>
     <IsPackable>false</IsPackable>
     <Title>WitchyFormats</Title>
     <AssemblyTitle>WitchyFormats</AssemblyTitle>
@@ -23,5 +22,4 @@
     <ProjectReference Include="..\SoulsFormats\SoulsFormats.csproj" />
     <ProjectReference Include="..\StudioUtils\StudioUtils.csproj" />
   </ItemGroup>
-
 </Project>

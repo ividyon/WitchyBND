@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using WitchyFormats.Utils;
+using WitchyLib;
 using TPF = WitchyFormats.TPF;
 
 namespace WitchyBND
