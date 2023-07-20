@@ -195,6 +195,15 @@ namespace WitchyBND
                         bnd.Unpack(fileName, targetDir, progress);
                     }
                 }
+                else if (WFFXBND.Is(bytes, fileName))
+                {
+                    Console.WriteLine($"Unpacking FFXBND: {fileName}...");
+                    using (var bnd = new BND4Reader(bytes))
+                    {
+                        bnd.Compression = compression;
+                        bnd.UnpackFFXBND(fileName, targetDir, progress);
+                    }
+                }
                 else if (BND4.Is(bytes))
                 {
                     Console.WriteLine($"Unpacking BND4: {fileName}...");
@@ -246,6 +255,14 @@ namespace WitchyBND
                     using (var bnd = new BND3Reader(sourceFile))
                     {
                         bnd.Unpack(fileName, targetDir, progress);
+                    }
+                }
+                else if (WFFXBND.Is(sourceFile))
+                {
+                    Console.WriteLine($"Unpacking FFXBND: {fileName}...");
+                    using (var bnd = new BND4Reader(sourceFile))
+                    {
+                        bnd.UnpackFFXBND(fileName, targetDir, progress);
                     }
                 }
                 else if (BND4.Is(sourceFile))
@@ -517,6 +534,11 @@ namespace WitchyBND
             {
                 Console.WriteLine($"Repacking BND3: {sourceName}...");
                 WBND3.Repack(sourceDir, targetDir);
+            }
+            else if (File.Exists($"{sourceDir}\\_witchy-ffxbnd.xml"))
+            {
+                Console.WriteLine($"Repacking FFXBND: {sourceName}...");
+                WFFXBND.Repack(sourceDir, targetDir);
             }
             else if (File.Exists($"{sourceDir}\\_witchy-bnd4.xml") || File.Exists($"{sourceDir}\\_yabber-bnd4.xml"))
             {
