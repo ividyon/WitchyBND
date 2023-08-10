@@ -241,6 +241,12 @@ namespace WitchyBND
                     tpf.Compression = compression;
                     tpf.Unpack(fileName, targetDir, progress);
                 }
+                else if (MSBE.Is(bytes))
+                {
+                    Console.WriteLine($"Unpacking MSB: {fileName}...");
+                    MSBE msb = MSBE.Read(bytes);
+                    msb.Unpack(fileName, targetDir, progress);
+                }
                 else
                 {
                     Console.WriteLine($"File format not recognized: {fileName}");
