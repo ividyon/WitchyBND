@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using SoulsFormats;
 
-namespace SoulsFormats
+namespace WitchyFormats
 {
     /// <summary>
-    /// A cutscene definition format used since DS2, short for MovieSequencer Binary. Extension: .mqb
+    /// A cutscene definition format which dates back to at least Armored Core V, short for MovieSequencer Binary. Extension: .mqb
     /// </summary>
     public partial class MQB : SoulsFile<MQB>
     {
@@ -81,7 +82,7 @@ namespace SoulsFormats
             Framerate = br.ReadSingle();
             int resourceCount = br.ReadInt32();
             int cutCount = br.ReadInt32();
-            br.AssertInt32(0);
+            int unkX50 = br.ReadInt32();
             br.AssertInt32(0);
             br.AssertInt32(0);
             br.AssertInt32(0);

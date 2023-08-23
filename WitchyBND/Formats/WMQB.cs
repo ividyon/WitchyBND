@@ -7,9 +7,9 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Xml;
-using WitchyBND;
+using MQB = WitchyFormats.MQB;
 
-namespace YabberExtended
+namespace WitchyBND
 {
     static class WMQB
     {
