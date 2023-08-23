@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using WitchyLib;
-using MATBIN = WitchyFormats.MATBIN;
+using WitchyFormats;
 
 namespace WitchyBND
 {

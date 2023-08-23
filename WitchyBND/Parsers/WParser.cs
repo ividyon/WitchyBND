@@ -1,0 +1,69 @@
+﻿using System;
+using System.IO;
+using System.Xml;
+using System.Xml.Linq;
+using System.Xml.Serialization;
+using WitchyFormats;
+using WitchyLib;
+
+namespace WitchyBND.Parsers;
+
+public abstract class WFileParser
+{
+    public abstract bool Is(string path);
+    public abstract void Unpack(string path);
+    public abstract void Repack(string path);
+    public abstract string GetUnpackDestPath(string srcPath);
+    public abstract string GetRepackDestPath(string srcPath);
+}
+
+public abstract class WXMLParser : WFileParser
+{
+    public override string GetUnpackDestPath(string srcPath)
+    {
+        return $"{srcPath}.xml";
+    }
+
+    public override string GetRepackDestPath(string srcPath)
+    {
+        var ext = Path.GetExtension(srcPath);
+        return srcPath.Replace(ext, $"{ext}");
+    }
+}
+
+public class WFXR : WXMLParser
+{
+    public override bool Is(string path)
+    {
+        return Fxr3.Is(path);
+    }
+    public override void Unpack(string path)
+    {
+        var fxr = Fxr3.Read(path);
+
+        XDocument xDoc = new XDocument();
+
+        using (var xmlWriter = xDoc.CreateWriter())
+        {
+            var thing = new XmlSerializer(typeof(Fxr3));
+            thing.Serialize(xmlWriter, fxr);
+        }
+
+        xDoc.Save(GetUnpackDestPath(path));
+    }
+
+    public override void Repack(string path)
+    {
+        XDocument XML = XDocument.Load(path);
+        XmlSerializer serializer = new XmlSerializer(typeof(Fxr3));
+        XmlReader xmlReader = XML.CreateReader();
+
+        var fxr = (Fxr3)serializer.Deserialize(xmlReader);
+        if (fxr == null)
+            throw new Exception();
+
+        string outPath = GetRepackDestPath(path);
+        WBUtil.Backup(outPath);
+        fxr.Write(outPath);
+    }
+}
