@@ -17,6 +17,7 @@ using MATBIN = WitchyFormats.MATBIN;
 using MTD = WitchyFormats.MTD;
 using TPF = WitchyFormats.TPF;
 using PARAM = WitchyFormats.FsParam;
+using YabberExtended;
 
 namespace WitchyBND
 {
@@ -411,6 +412,17 @@ namespace WitchyBND
                 {
                     Console.WriteLine($"Repacking PARAM: {fileName}...");
                     return WPARAM.Repack(sourceFile, sourceDir);
+                }
+                else if (MQB.Is(sourceFile))
+                {
+                    Console.WriteLine($"Converting MQB: {fileName}...");
+                    MQB mqb = MQB.Read(sourceFile);
+                    mqb.Unpack(fileName, sourceDir, progress);
+                }
+                else if (sourceFile.EndsWith(".mqb.xml"))
+                {
+                    Console.WriteLine($"Converting XML to MQB: {fileName}...");
+                    WMQB.Repack(sourceFile);
                 }
                 else
                 {
