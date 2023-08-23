@@ -17,7 +17,6 @@ using MATBIN = WitchyFormats.MATBIN;
 using MTD = WitchyFormats.MTD;
 using TPF = WitchyFormats.TPF;
 using PARAM = WitchyFormats.FsParam;
-using YabberExtended;
 
 namespace WitchyBND
 {
