@@ -7,6 +7,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Xml;
+using WitchyLib;
 using MQB = WitchyFormats.MQB;
 
 namespace WitchyBND
