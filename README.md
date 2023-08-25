@@ -36,14 +36,21 @@ Please see the included readme for detailed instructions.
 # Contributors
 * *TKGP* - Basically everything
 * *katalash* - GPARAM support
-* *Nordgaren* - Yabber+ additions
+* *Nordgaren* - Yabber+ additions, misc. help
 * *DSMapStudio team* - FSParam, Paramdex
 * *NamelessHoodie* - FXR serialization
 * *Avocado* - YabberAvocado additions
+* *NatsuDragneelTheFireDragon* - MQB support
 * *ivi* - WitchyBND maintainer
 
 # Changelog
 ## WitchyBND
+
+### 1.0.5.0
+* Added MQB support (by NatsuDragneelTheFireDragon)
+* Added preliminary support for Armored Core VI DCX.
+* Improved performance when serializing PARAM files.
+* Updated Paramdex.
 
 ### 1.0.4.1
 * Updated READMEs.

@@ -196,15 +196,15 @@ namespace WitchyBND
                         bnd.Unpack(fileName, targetDir, progress);
                     }
                 }
-                else if (WFFXBND.Is(bytes, fileName))
-                {
-                    Console.WriteLine($"Unpacking FFXBND: {fileName}...");
-                    using (var bnd = new BND4Reader(bytes))
-                    {
-                        bnd.Compression = compression;
-                        bnd.UnpackFFXBND(fileName, targetDir, progress);
-                    }
-                }
+                // else if (WFFXBND.Is(bytes, fileName))
+                // {
+                //     Console.WriteLine($"Unpacking FFXBND: {fileName}...");
+                //     using (var bnd = new BND4Reader(bytes))
+                //     {
+                //         bnd.Compression = compression;
+                //         bnd.UnpackFFXBND(fileName, targetDir, progress);
+                //     }
+                // }
                 else if (BND4.Is(bytes))
                 {
                     Console.WriteLine($"Unpacking BND4: {fileName}...");
@@ -264,14 +264,14 @@ namespace WitchyBND
                         bnd.Unpack(fileName, targetDir, progress);
                     }
                 }
-                else if (WFFXBND.Is(sourceFile))
-                {
-                    Console.WriteLine($"Unpacking FFXBND: {fileName}...");
-                    using (var bnd = new BND4Reader(sourceFile))
-                    {
-                        bnd.UnpackFFXBND(fileName, targetDir, progress);
-                    }
-                }
+                // else if (WFFXBND.Is(sourceFile))
+                // {
+                //     Console.WriteLine($"Unpacking FFXBND: {fileName}...");
+                //     using (var bnd = new BND4Reader(sourceFile))
+                //     {
+                //         bnd.UnpackFFXBND(fileName, targetDir, progress);
+                //     }
+                // }
                 else if (BND4.Is(sourceFile))
                 {
                     Console.WriteLine($"Unpacking BND4: {fileName}...");
