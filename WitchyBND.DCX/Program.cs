@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Runtime.Versioning;
 using System.Xml;
 using Microsoft.Extensions.FileSystemGlobbing;
+using WitchyLib;
 
 namespace WitchyBND
 {
@@ -129,9 +130,7 @@ namespace WitchyBND
             XmlWriter xw = XmlWriter.Create($"{outPath}-wbinder-dcx.xml", xws);
 
             xw.WriteStartElement("dcx");
-            xw.WriteElementString("compression", compression.ToString());
-            if (compressionLevel != 0)
-                xw.WriteElementString("compression_level", $"0x{compressionLevel:X}");
+            WBUtil.XmlWriteCompression(xw, compression, compressionLevel);
             xw.WriteEndElement();
             xw.Close();
 
