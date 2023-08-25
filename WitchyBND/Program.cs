@@ -12,6 +12,7 @@ using System.Threading;
 using System.Xml;
 using Microsoft.Extensions.FileSystemGlobbing;
 using WitchyFormats;
+using DCX = WitchyFormats.DCX;
 using GPARAM = WitchyFormats.GPARAM;
 using MATBIN = WitchyFormats.MATBIN;
 using MTD = WitchyFormats.MTD;
@@ -184,7 +185,7 @@ namespace WitchyBND
             if (DCX.Is(sourceFile))
             {
                 Console.WriteLine($"Decompressing DCX: {fileName}...");
-                byte[] bytes = TryDecompressBytes(sourceFile, out DCX.Type compression);
+                byte[] bytes = TryDecompressBytes(sourceFile, out SoulsFormats.DCX.Type compression);
 
                 if (BND3.Is(bytes))
                 {
@@ -433,7 +434,7 @@ namespace WitchyBND
 
             return false;
         }
-        private static byte[] TryDecompressBytes(string sourceFile, out DCX.Type compression)
+        private static byte[] TryDecompressBytes(string sourceFile, out SoulsFormats.DCX.Type compression)
         {
             try
             {

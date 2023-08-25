@@ -251,7 +251,7 @@ namespace WitchyBND
             Enum.TryParse(xml.SelectSingleNode("param/cellStyle")?.InnerText ?? "None", out CellStyle cellStyle);
 
             // Enum.TryParse(xml.SelectSingleNode("param/game")?.InnerText ?? "", out WBUtil.GameType game);
-            Enum.TryParse(xml.SelectSingleNode("param/compression")?.InnerText ?? "None", out DCX.Type compression);
+            Enum.TryParse(xml.SelectSingleNode("param/compression")?.InnerText ?? "None", out SoulsFormats.DCX.Type compression);
             param.Compression = compression;
 
             Enum.TryParse(xml.SelectSingleNode("param/format2D")?.InnerText ?? "0",
@@ -279,7 +279,7 @@ namespace WitchyBND
                 Convert.ToBoolean(Convert.ToInt32(xml.SelectSingleNode("param/paramdef/unicode").InnerText));
 
             Enum.TryParse(xml.SelectSingleNode("param/paramdef/compression")?.InnerText ?? "None",
-                out DCX.Type defCompression);
+                out SoulsFormats.DCX.Type defCompression);
             paramdef.Compression = defCompression;
 
             paramdef.DataVersion = Convert.ToInt16(xml.SelectSingleNode("param/paramdef/dataVersion").InnerText);

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using SoulsFormats;
+using Type = SoulsFormats.DCX.Type;
 
 namespace WitchyFormats;
 
@@ -235,8 +236,8 @@ public partial class TPF : SoulsFile<TPF>, IEnumerable<TPF.Texture>
             Bytes = br.GetBytes(fileOffset, fileSize);
             if (Flags1 == 2 || Flags1 == 3)
             {
-                Bytes = DCX.Decompress(Bytes, out DCX.Type type);
-                if (type != DCX.Type.DCP_EDGE)
+                Bytes = DCX.Decompress(Bytes, out Type type);
+                if (type != SoulsFormats.DCX.Type.DCP_EDGE)
                     throw new NotImplementedException($"TPF compression is expected to be DCP_EDGE, but it was {type}");
             }
 
@@ -315,7 +316,7 @@ public partial class TPF : SoulsFile<TPF>, IEnumerable<TPF.Texture>
 
             byte[] bytes = Bytes;
             if (Flags1 == 2 || Flags1 == 3)
-                bytes = DCX.Compress(bytes, DCX.Type.DCP_EDGE);
+                bytes = DCX.Compress(bytes, SoulsFormats.DCX.Type.DCP_EDGE);
 
             bw.FillInt32($"FileSize{index}", bytes.Length);
             bw.WriteBytes(bytes);
