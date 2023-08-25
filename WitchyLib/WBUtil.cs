@@ -164,6 +164,9 @@ public static class WBUtil
     /// </summary>
     public static string UnrootBNDPath(string path, string root)
     {
+        if (string.IsNullOrEmpty(root))
+            return path;
+
         path = path.Substring(root.Length);
 
         Match drive = DriveRx.Match(path);

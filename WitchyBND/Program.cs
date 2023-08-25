@@ -12,6 +12,7 @@ using System.Threading;
 using System.Xml;
 using CommandLine;
 using Microsoft.Extensions.FileSystemGlobbing;
+using PPlus;
 using WitchyBND.Parsers;
 using WitchyFormats;
 using WitchyLib;
@@ -24,111 +25,122 @@ using PARAM = WitchyFormats.FsParam;
 namespace WitchyBND;
 
 [SupportedOSPlatform("windows")]
+internal class Configuration
+{
+    public bool Dry { get; set; }
+    public bool Verbose { get; set; }
+    public bool Quiet { get; set; }
+}
+
+public enum CliMode
+{
+    Parse,
+    Context
+}
+
+public class CliOptions
+{
+    [Option('v', "verbose", Group = "verbosity", Default = false, HelpText = "Set output to verbose messages.")]
+    public bool Verbose { get; set; }
+
+    [Option('q', "quiet", Group = "verbosity", Default = false,
+        HelpText = "Set output to quiet, reporting only errors.")]
+    public bool Quiet { get; set; }
+
+    [Option('b', "bnd", HelpText = "Unpack BND traditionally instead of using Witchy helpers")]
+    public bool UnpackBnd { get; set; }
+
+    [Option('n', "noninteractive", HelpText = "Will not prompt the user or halt the process during execution.")]
+    public bool NonInteractive { get; set; }
+
+    [Option('m', "mode", Required = false, Default = CliMode.Parse)]
+    public CliMode Mode { get; set; }
+
+    [Value(0, Min = 1, HelpText = "The paths that should be parsed by Witchy.")]
+    public IEnumerable<string> Paths { get; set; }
+}
+
 static class Program
 {
+    public static Configuration Configuration;
     private static List<WFileParser> Parsers;
     static WBUtil.GameType? game;
-
-    public enum Mode
-    {
-        Parse,
-        Context
-    }
-
-    public class Options
-    {
-        [Option('v', "verbose", Group = "verbosity", Default = false, HelpText = "Set output to verbose messages.")]
-        public bool Verbose { get; set; }
-
-        [Option('q', "quiet", Group = "verbosity", Default = false,
-            HelpText = "Set output to quiet, reporting only errors.")]
-        public bool Quiet { get; set; }
-
-        [Option('b', "bnd", HelpText = "Unpack BND traditionally instead of using Witchy helpers")]
-        public bool UnpackBnd { get; set; }
-
-        [Option('n', "noninteractive", HelpText = "Will not prompt the user or halt the process during execution.")]
-        public bool NonInteractive { get; set; }
-
-        [Option('m', "mode", Required = false, Default = Mode.Parse)]
-        public Mode Mode { get; set; }
-
-        [Value(0, Min = 1, HelpText = "The paths that should be parsed by Witchy.")]
-        public IEnumerable<string> Paths { get; set; }
-    }
 
     static void Main(string[] args)
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
         Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
-        var parser = new Parser(with => { });
-        parser.ParseArguments<Options>(args)
-            .WithParsed(ParsedArgs)
-            .WithNotParsed(UnparsedArgs);
+        var parser = new Parser(_ => { });
+        parser.ParseArguments<CliOptions>(args)
+            .WithParsed(opt => {
+                switch (opt.Mode)
+                {
+                    case CliMode.Parse:
+                        ParsePaths(opt);
+                        break;
+                    case CliMode.Context:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            })
+            .WithNotParsed(errors => { });
     }
 
-    private static void UnparsedArgs(IEnumerable<Error> obj)
+    private static void ParseFiles(List<string> paths)
     {
-        throw new NotImplementedException();
-    }
-
-    private static void ParsedArgs(Options opt)
-    {
-        switch (opt.Mode)
+        foreach (string path in paths)
         {
-            case Mode.Parse:
-                ParseFiles(opt);
-                break;
-            case Mode.Context:
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-    }
-
-    private static void ParseFilesNew(Options opt)
-    {
-        foreach (string file in opt.Paths)
-        {
+            string fileName = Path.GetFileName(path);
             var parsed = false;
 
-            foreach (WFileParser parser in Parsers.Where(parser => parser.Is(file)))
+            foreach (WFileParser parser in Parsers)
             {
-                parser.Unpack(file);
-                parsed = true;
-                break;
+                if (parser.Is(path))
+                {
+                    switch (parser.Verb)
+                    {
+                        case WFileParserVerb.Unpack:
+                            PromptPlus.WriteLine($"Unpacking {parser.Name}: {fileName}...");
+                            break;
+                        case WFileParserVerb.Serialize:
+                            PromptPlus.WriteLine($"Serializing {parser.Name}: {fileName}...");
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                    parser.Unpack(path);
+                    parsed = true;
+                    break;
+                }
+
+                if (parser.IsUnpacked(path))
+                {
+                    switch (parser.Verb)
+                    {
+                        case WFileParserVerb.Unpack:
+                            PromptPlus.WriteLine($"Repacking {parser.Name}: {fileName}...");
+                            break;
+                        case WFileParserVerb.Serialize:
+                            PromptPlus.WriteLine($"Deserializing {parser.Name}: {fileName}...");
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                    parser.Repack(path);
+                    parsed = true;
+                    break;
+                }
             }
 
             if (!parsed)
-                throw new FileFormatException();
+                Console.WriteLine($"Could not find valid parser for \"{path}\"");
         }
     }
 
-    private static void ParseFiles(Options opt)
+    private static List<string> ProcessPathGlobs(List<string> paths)
     {
-        var paths = opt.Paths.ToList();
-
-        if (paths.Count == 0)
-        {
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            Console.WriteLine(
-                $"{assembly.GetName().Name} {assembly.GetName().Version}\n\n" +
-                "WitchyBND has no GUI.\n" +
-                "Drag and drop a file onto the exe to unpack it,\n" +
-                "or an unpacked folder to repack it.\n\n" +
-                "DCX files will be transparently decompressed and recompressed;\n" +
-                "If you need to decompress or recompress an unsupported format,\n" +
-                "use WitchyBND.DCX instead.\n\n" +
-                "Press any key to exit."
-            );
-            Console.ReadKey();
-            return;
-        }
-
-        bool error = false;
-        int errorcode = 0;
-
         var processedPaths = new List<string>();
         foreach (string path in paths)
         {
@@ -154,90 +166,66 @@ static class Program
             }
         }
 
-        foreach (string processedPath in processedPaths)
+        return processedPaths.Select(path => Path.GetFullPath(path)).ToList();
+    }
+
+    private static void ParsePaths(CliOptions opt)
+    {
+        var paths = opt.Paths.ToList();
+
+        if (paths.Count == 0)
         {
-            try
-            {
-                string path = Path.GetFullPath(processedPath);
-                // int maxProgress = Console.WindowWidth - 1;
-                // int lastProgress = 0;
-                //
-                // void report(float value)
-                // {
-                //     int nextProgress = (int)Math.Ceiling(value * maxProgress);
-                //     if (nextProgress > lastProgress)
-                //     {
-                //         for (int i = lastProgress; i < nextProgress; i++)
-                //         {
-                //             if (i == 0)
-                //                 Console.Write('[');
-                //             else if (i == maxProgress - 1)
-                //                 Console.Write(']');
-                //             else
-                //                 Console.Write('=');
-                //         }
-                //
-                //         lastProgress = nextProgress;
-                //     }
-                // }
-                //
-                // IProgress<float> progress = new Progress<float>(report);
-                IProgress<float> progress = new Progress<float>();
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            Console.WriteLine(
+                $"{assembly.GetName().Name} {assembly.GetName().Version}\n\n" +
+                "WitchyBND has no GUI.\n" +
+                "Drag and drop a file onto the exe to unpack it,\n" +
+                "or an unpacked folder to repack it.\n\n" +
+                "DCX files will be transparently decompressed and recompressed;\n" +
+                "If you need to decompress or recompress an unsupported format,\n" +
+                "use WitchyBND.DCX instead.\n\n" +
+                "Press any key to exit."
+            );
+            Console.ReadKey();
+            return;
+        }
 
-                if (Directory.Exists(path))
-                {
-                    error |= RepackDir(path, progress);
-                }
-                else if (File.Exists(path))
-                {
-                    error |= UnpackFile(path, progress);
-                }
-                else
-                {
-                    Console.Error.WriteLine($"ERROR: File or directory not found: {path}");
-                    errorcode = 2;
-                    error = true;
-                }
-            }
-            catch (DllNotFoundException ex) when (ex.Message.Contains("oo2core_6_win64.dll"))
-            {
-                Console.Error.WriteLine(
-                    "ERROR: oo2core_6_win64.dll not found. Please copy this library from the game directory to WitchyBND's directory.");
-                errorcode = 3;
-                error = true;
-            }
-            catch (UnauthorizedAccessException)
-            {
-                using (Process current = Process.GetCurrentProcess())
-                {
-                    var admin = new Process();
-                    admin.StartInfo = current.StartInfo;
-                    admin.StartInfo.FileName = current.MainModule.FileName;
-                    admin.StartInfo.Arguments =
-                        Environment.CommandLine.Replace($"\"{Environment.GetCommandLineArgs()[0]}\"", "");
-                    admin.StartInfo.Verb = "runas";
-                    admin.Start();
-                    return;
-                }
-            }
-            catch (FriendlyException ex)
-            {
-                Console.WriteLine();
-                Console.Error.WriteLine($"ERROR: {ex.Message}");
-                errorcode = 4;
-                error = true;
-            }
-#if (!DEBUG)
-            // catch (Exception ex)
-            // {
-            //     Console.WriteLine();
-            //     Console.Error.WriteLine($"ERROR: Unhandled exception: {ex}");
-            //     errorcode = 1;
-            //     error = true;
-            // }
-#endif
+        bool error = false;
+        int errorcode = 0;
 
+        paths = ProcessPathGlobs(paths);
+
+        try
+        {
+            ParseFiles(paths);
+        }
+        catch (DllNotFoundException ex) when (ex.Message.Contains("oo2core_6_win64.dll"))
+        {
+            Console.Error.WriteLine(
+                "ERROR: oo2core_6_win64.dll not found. Please copy this library from the game directory to WitchyBND's directory.");
+            errorcode = 3;
+            error = true;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            using (Process current = Process.GetCurrentProcess())
+            {
+                var admin = new Process();
+                admin.StartInfo = current.StartInfo;
+                admin.StartInfo.FileName = current.MainModule.FileName;
+                admin.StartInfo.Arguments =
+                    Environment.CommandLine.Replace($"\"{Environment.GetCommandLineArgs()[0]}\"", "");
+                admin.StartInfo.Verb = "runas";
+                admin.Start();
+                return;
+            }
+        }
+        catch (FriendlyException ex)
+        {
             Console.WriteLine();
+            Console.Error.WriteLine($"ERROR: {ex.Message}");
+            errorcode = 4;
+            error = true;
         }
 
         if (!error) return;
@@ -249,7 +237,7 @@ static class Program
 
     private static bool UnpackFile(string sourceFile, IProgress<float> progress)
     {
-        string sourceDir = new FileInfo(sourceFile).Directory.FullName;
+        string sourceDir = new FileInfo(sourceFile).Directory?.FullName;
         string fileName = Path.GetFileName(sourceFile);
         string targetDir = $"{sourceDir}\\{fileName.Replace('.', '-')}";
         if (File.Exists(targetDir))
@@ -709,7 +697,15 @@ static class Program
     {
         Parsers = new List<WFileParser>
         {
-            new Parsers.WFXR()
+            new Parsers.WFXR(),
+            new Parsers.WBND4(),
+        };
+
+        Configuration = new Configuration
+        {
+            Dry = false,
+            Quiet = false,
+            Verbose = false,
         };
     }
 }
