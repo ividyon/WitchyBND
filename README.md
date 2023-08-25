@@ -20,6 +20,8 @@ New additions include:
 * ELDEN RING GPARAM support (by Avocado)
 * Console TPF unpacking (but not repacking)
 * Minor fixes like ELDEN RING envmap TPF unpack
+* MQB support (by NatsuDragneelTheFireDragon)
+* Support for Armored Core VI DCX archives
 
 Planned (but TBD):
 * Small UI for quality-of-life actions outside of unpacking/repacking (like duplicating AEGs, CHRs, PARTSBND...)
