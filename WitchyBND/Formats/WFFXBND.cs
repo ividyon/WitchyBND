@@ -28,7 +28,7 @@ static class WFFXBND
         var xw = XmlWriter.Create($"{targetDir}\\_witchy-ffxbnd.xml", xws);
         xw.WriteStartElement("ffxbnd");
         xw.WriteElementString("filename", sourceName);
-        xw.WriteElementString("compression", bnd.Compression.ToString());
+        WBUtil.XmlWriteCompression(xw, bnd.Compression, bnd.CompressionLevel);
         xw.WriteElementString("version", bnd.Version);
         xw.WriteElementString("format", bnd.Format.ToString());
         xw.WriteElementString("bigendian", bnd.BigEndian.ToString());
@@ -96,8 +96,9 @@ static class WFFXBND
 
         string filename = xml.SelectSingleNode("ffxbnd/filename").InnerText;
 
-        Enum.TryParse(xml.SelectSingleNode("ffxbnd/compression")?.InnerText ?? "None", out DCX.Type compression);
+        WBUtil.XmlReadCompression(xml, "ffxbnd", out DCX.Type compression, out int compressionLevel);
         bnd.Compression = compression;
+        bnd.CompressionLevel = compressionLevel;
 
         bnd.Version = xml.SelectSingleNode("ffxbnd/version").InnerText;
         bnd.Format = (Binder.Format)Enum.Parse(typeof(Binder.Format), xml.SelectSingleNode("ffxbnd/format").InnerText);

@@ -203,16 +203,17 @@ namespace SoulsFormats
         /// <summary>
         /// Decompresses data and returns a new BinaryReaderEx if necessary.
         /// </summary>
-        public static BinaryReaderEx GetDecompressedBR(BinaryReaderEx br, out DCX.Type compression)
+        public static BinaryReaderEx GetDecompressedBR(BinaryReaderEx br, out DCX.Type compression, out int compressionLevel)
         {
             if (DCX.Is(br))
             {
-                byte[] bytes = DCX.Decompress(br, out compression);
+                byte[] bytes = DCX.Decompress(br, out compression, out compressionLevel);
                 return new BinaryReaderEx(false, bytes);
             }
             else
             {
                 compression = DCX.Type.None;
+                compressionLevel = 0;
                 return br;
             }
         }

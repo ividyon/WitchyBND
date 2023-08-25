@@ -13,6 +13,8 @@ namespace SoulsFormats
         /// </summary>
         public DCX.Type Compression { get; set; } = DCX.Type.None;
 
+        public int CompressionLevel { get; set; }
+
         /// <summary>
         /// Returns true if the data appears to be a file of this type.
         /// </summary>
@@ -32,7 +34,7 @@ namespace SoulsFormats
 
             BinaryReaderEx br = new BinaryReaderEx(false, bytes);
             var dummy = new TFormat();
-            return dummy.Is(SFUtil.GetDecompressedBR(br, out _));
+            return dummy.Is(SFUtil.GetDecompressedBR(br, out _, out _));
         }
 
         /// <summary>
@@ -47,7 +49,7 @@ namespace SoulsFormats
 
                 BinaryReaderEx br = new BinaryReaderEx(false, stream);
                 var dummy = new TFormat();
-                return dummy.Is(SFUtil.GetDecompressedBR(br, out _));
+                return dummy.Is(SFUtil.GetDecompressedBR(br, out _, out _));
             }
         }
 
@@ -66,8 +68,9 @@ namespace SoulsFormats
         {
             BinaryReaderEx br = new BinaryReaderEx(false, bytes);
             TFormat file = new TFormat();
-            br = SFUtil.GetDecompressedBR(br, out DCX.Type compression);
+            br = SFUtil.GetDecompressedBR(br, out DCX.Type compression, out int compressionLevel);
             file.Compression = compression;
+            file.CompressionLevel = compressionLevel;
             file.Read(br);
             return file;
         }
@@ -81,8 +84,9 @@ namespace SoulsFormats
             {
                 BinaryReaderEx br = new BinaryReaderEx(false, stream);
                 TFormat file = new TFormat();
-                br = SFUtil.GetDecompressedBR(br, out DCX.Type compression);
+                br = SFUtil.GetDecompressedBR(br, out DCX.Type compression, out int compressionLevel);
                 file.Compression = compression;
+                file.CompressionLevel = compressionLevel;
                 file.Read(br);
                 return file;
             }
@@ -91,11 +95,12 @@ namespace SoulsFormats
         private static bool IsRead(BinaryReaderEx br, out TFormat file)
         {
             var test = new TFormat();
-            br = SFUtil.GetDecompressedBR(br, out DCX.Type compression);
+            br = SFUtil.GetDecompressedBR(br, out DCX.Type compression, out int compressionLevel);
             if (test.Is(br))
             {
                 br.Position = 0;
                 test.Compression = compression;
+                test.CompressionLevel = compressionLevel;
                 test.Read(br);
                 file = test;
                 return true;
@@ -182,7 +187,7 @@ namespace SoulsFormats
         /// <summary>
         /// Writes file data to a BinaryWriterEx, compressing it afterwards if specified.
         /// </summary>
-        private void Write(BinaryWriterEx bw, DCX.Type compression)
+        private void Write(BinaryWriterEx bw, DCX.Type compression, int compressionLevel = 0)
         {
             if (compression == DCX.Type.None)
             {
@@ -193,7 +198,7 @@ namespace SoulsFormats
                 BinaryWriterEx bwUncompressed = new BinaryWriterEx(false);
                 Write(bwUncompressed);
                 byte[] uncompressed = bwUncompressed.FinishBytes();
-                DCX.Compress(uncompressed, bw, compression);
+                DCX.Compress(uncompressed, bw, compression, compressionLevel);
             }
         }
 
@@ -202,19 +207,19 @@ namespace SoulsFormats
         /// </summary>
         public byte[] Write()
         {
-            return Write(Compression);
+            return Write(Compression, CompressionLevel);
         }
 
         /// <summary>
         /// Writes the file to an array of bytes, compressing it as specified.
         /// </summary>
-        public byte[] Write(DCX.Type compression)
+        public byte[] Write(DCX.Type compression, int compressionLevel = 0)
         {
             if (!Validate(out Exception ex))
                 throw ex;
 
             BinaryWriterEx bw = new BinaryWriterEx(false);
-            Write(bw, compression);
+            Write(bw, compression, compressionLevel);
             return bw.FinishBytes();
         }
 
@@ -223,13 +228,13 @@ namespace SoulsFormats
         /// </summary>
         public void Write(string path)
         {
-            Write(path, Compression);
+            Write(path, Compression, CompressionLevel);
         }
 
         /// <summary>
         /// Writes the file to the specified path, compressing it as specified.
         /// </summary>
-        public void Write(string path, DCX.Type compression)
+        public void Write(string path, DCX.Type compression, int compressionLevel = 0)
         {
             if (!Validate(out Exception ex))
                 throw ex;
@@ -238,7 +243,7 @@ namespace SoulsFormats
             using (FileStream stream = File.Create(path))
             {
                 BinaryWriterEx bw = new BinaryWriterEx(false, stream);
-                Write(bw, compression);
+                Write(bw, compression, compressionLevel);
                 bw.Finish();
             }
         }

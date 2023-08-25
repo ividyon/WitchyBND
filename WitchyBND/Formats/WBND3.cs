@@ -17,7 +17,7 @@ namespace WitchyBND
             xw.WriteStartElement("bnd3");
 
             xw.WriteElementString("filename", sourceName);
-            xw.WriteElementString("compression", bnd.Compression.ToString());
+            WBUtil.XmlWriteCompression(xw, bnd.Compression, bnd.CompressionLevel);
             xw.WriteElementString("version", bnd.Version);
             xw.WriteElementString("format", bnd.Format.ToString());
             xw.WriteElementString("bigendian", bnd.BigEndian.ToString());
@@ -42,16 +42,15 @@ namespace WitchyBND
             string filename = xml.SelectSingleNode("bnd3/filename").InnerText;
             string root = xml.SelectSingleNode("bnd3/root")?.InnerText ?? "";
 
-            string strCompression = xml.SelectSingleNode("bnd3/compression")?.InnerText ?? "None";
             bnd.Version = xml.SelectSingleNode("bnd3/version")?.InnerText ?? "07D7R6";
             string strFormat = xml.SelectSingleNode("bnd3/format")?.InnerText ?? "IDs, Names1, Names2, Compression";
             string strBigEndian = xml.SelectSingleNode("bnd3/bigendian")?.InnerText ?? "False";
             string strBitBigEndian = xml.SelectSingleNode("bnd3/bitbigendian")?.InnerText ?? "False";
             string strUnk18 = xml.SelectSingleNode("bnd3/unk18")?.InnerText ?? "0x0";
 
-            if (!Enum.TryParse(strCompression, out DCX.Type compression))
-                throw new FriendlyException($"Could not parse compression type: {strCompression}");
+            WBUtil.XmlReadCompression(xml, "bnd3", out DCX.Type compression, out int compressionLevel);
             bnd.Compression = compression;
+            bnd.CompressionLevel = compressionLevel;
 
             try
             {

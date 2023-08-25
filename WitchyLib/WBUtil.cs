@@ -30,6 +30,38 @@ public static class WBUtil
         ER,
         SDT
     }
+    public static void XmlWriteCompression(XmlWriter xw, DCX.Type compression, int compressionLevel)
+    {
+        xw.WriteElementString("compression", compression.ToString());
+        switch (compression)
+        {
+            case DCX.Type.DCX_KRAK:
+                if (compressionLevel != 0x6000000)
+                    xw.WriteElementString("compression_level", $"0x{compressionLevel:X}");
+                break;
+            default:
+                if (compressionLevel != 0x0)
+                    xw.WriteElementString("compression_level", $"0x{compressionLevel:X}");
+                break;
+        }
+    }
+
+    public static void XmlReadCompression(XmlDocument xml, string xmlName, out DCX.Type compressionVal, out int compressionLevelVal, string compressionName = "compression", string compressionLevelName = "compression_level")
+    {
+        Enum.TryParse(xml.SelectSingleNode($"{xmlName}/{compressionName}")?.InnerText ?? "None", out DCX.Type compression);
+        compressionVal = compression;
+
+        XmlNode compressionLevelNode = xml.SelectSingleNode($"{xmlName}/{compressionLevelName}");
+        switch (compression)
+        {
+            case DCX.Type.DCX_KRAK:
+                compressionLevelVal = compressionLevelNode != null ? Convert.ToInt32(compressionLevelNode.InnerText, 16) : 0x6000000;
+                break;
+            default:
+                compressionLevelVal = compressionLevelNode != null ? Convert.ToInt32(compressionLevelNode.InnerText, 16) : 0;
+                break;
+        }
+    }
 
     public static Dictionary<GameType, string> GameNames = new Dictionary<GameType, string>()
     {

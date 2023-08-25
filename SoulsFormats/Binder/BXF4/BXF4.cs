@@ -16,7 +16,7 @@ namespace SoulsFormats
         public static bool IsBHD(byte[] bytes)
         {
             BinaryReaderEx br = new BinaryReaderEx(false, bytes);
-            return IsBHD(SFUtil.GetDecompressedBR(br, out _));
+            return IsBHD(SFUtil.GetDecompressedBR(br, out _, out _));
         }
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace SoulsFormats
             using (FileStream fs = System.IO.File.OpenRead(path))
             {
                 BinaryReaderEx br = new BinaryReaderEx(false, fs);
-                return IsBHD(SFUtil.GetDecompressedBR(br, out _));
+                return IsBHD(SFUtil.GetDecompressedBR(br, out _, out _));
             }
         }
 
@@ -37,7 +37,7 @@ namespace SoulsFormats
         public static bool IsBDT(byte[] bytes)
         {
             BinaryReaderEx br = new BinaryReaderEx(false, bytes);
-            return IsBDT(SFUtil.GetDecompressedBR(br, out _));
+            return IsBDT(SFUtil.GetDecompressedBR(br, out _, out _));
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace SoulsFormats
             using (FileStream fs = System.IO.File.OpenRead(path))
             {
                 BinaryReaderEx br = new BinaryReaderEx(false, fs);
-                return IsBDT(SFUtil.GetDecompressedBR(br, out _));
+                return IsBDT(SFUtil.GetDecompressedBR(br, out _, out _));
             }
         }
         #endregion

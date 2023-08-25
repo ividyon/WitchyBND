@@ -7,6 +7,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Xml;
+using WitchyLib;
 using MQB = WitchyFormats.MQB;
 
 namespace WitchyBND
@@ -19,13 +20,13 @@ namespace WitchyBND
             var xws = new XmlWriterSettings();
             xws.Indent = true;
             var xw = XmlWriter.Create($"{targetDir}\\{Path.GetFileNameWithoutExtension(filename)}.mqb.xml", xws);
-            xw.WriteStartElement("MQB");
-            xw.WriteElementString("Name", mqb.Name);
-            xw.WriteElementString("Version", mqb.Version.ToString());
-            xw.WriteElementString("Filename", filename);
-            xw.WriteElementString("Framerate", mqb.Framerate.ToString());
-            xw.WriteElementString("BigEndian", mqb.BigEndian.ToString());
-            xw.WriteElementString("Compression", mqb.Compression.ToString());
+            xw.WriteStartElement("mqb");
+            xw.WriteElementString("name", mqb.Name);
+            xw.WriteElementString("version", mqb.Version.ToString());
+            xw.WriteElementString("filename", filename);
+            xw.WriteElementString("framerate", mqb.Framerate.ToString());
+            xw.WriteElementString("bigendian", mqb.BigEndian.ToString());
+            WBUtil.XmlWriteCompression(xw, mqb.Compression, mqb.CompressionLevel);
             xw.WriteElementString("ResourceDirectory", mqb.ResourceDirectory);
             xw.WriteStartElement("Resources");
             foreach (var resource in mqb.Resources)
@@ -44,7 +45,7 @@ namespace WitchyBND
         public static void UnpackResource(XmlWriter xw, MQB.Resource resource)
         {
             xw.WriteStartElement($"Resource");
-            xw.WriteElementString("Name", $"{resource.Name}");
+            xw.WriteElementString("name", $"{resource.Name}");
             xw.WriteElementString("Path", $"{resource.Path}");
             xw.WriteElementString("ParentIndex", $"{resource.ParentIndex}");
             xw.WriteElementString("Unk48", $"{resource.Unk48}");
@@ -58,7 +59,7 @@ namespace WitchyBND
         public static void UnpackCustomData(XmlWriter xw, MQB.CustomData customdata)
         {
             xw.WriteStartElement($"CustomData");
-            xw.WriteElementString("Name", $"{customdata.Name}");
+            xw.WriteElementString("name", $"{customdata.Name}");
             xw.WriteElementString("Type", $"{customdata.Type}");
 
             switch (customdata.Type)
@@ -108,7 +109,7 @@ namespace WitchyBND
         public static void UnpackCut(XmlWriter xw, MQB.Cut cut)
         {
             xw.WriteStartElement($"Cut");
-            xw.WriteElementString("Name", $"{cut.Name}");
+            xw.WriteElementString("name", $"{cut.Name}");
             xw.WriteElementString("Duration", $"{cut.Duration}");
             xw.WriteElementString("Unk44", $"{cut.Unk44}");
             xw.WriteStartElement($"Timelines");
@@ -181,22 +182,20 @@ namespace WitchyBND
             XmlDocument xml = new XmlDocument();
             xml.Load(sourceFile);
 
-            string name = xml.SelectSingleNode("MQB/Name").InnerText;
-            var version = FriendlyParseEnum<MQB.MQBVersion>(nameof(MQB), nameof(MQB.Version), xml.SelectSingleNode("MQB/Version").InnerText);
-            float framerate = FriendlyParseFloat32(nameof(MQB), nameof(MQB.Framerate), xml.SelectSingleNode("MQB/Framerate").InnerText);
-            bool bigendian = FriendlyParseBool(nameof(MQB), nameof(MQB.BigEndian), xml.SelectSingleNode("MQB/BigEndian").InnerText);
-            if (!Enum.TryParse(xml.SelectSingleNode("MQB/Compression")?.InnerText ?? "None", out DCX.Type compression))
-                throw new FriendlyException($"{nameof(MQB)} {nameof(MQB.Compression)} could not be parsed.");
+            string name = xml.SelectSingleNode("mqb/name").InnerText;
+            var version = FriendlyParseEnum<MQB.MQBVersion>(nameof(MQB), nameof(MQB.Version), xml.SelectSingleNode("mqb/version").InnerText);
+            float framerate = FriendlyParseFloat32(nameof(MQB), nameof(MQB.Framerate), xml.SelectSingleNode("mqb/framerate").InnerText);
+            bool bigendian = FriendlyParseBool(nameof(MQB), nameof(MQB.BigEndian), xml.SelectSingleNode("mqb/bigendian").InnerText);
 
-            string resDir = xml.SelectSingleNode("MQB/ResourceDirectory").InnerText;
+            string resDir = xml.SelectSingleNode("mqb/ResourceDirectory").InnerText;
             List<MQB.Resource> resources = new List<MQB.Resource>();
             List<MQB.Cut> cuts = new List<MQB.Cut>();
 
-            var resourcesNode = xml.SelectSingleNode("MQB/Resources");
+            var resourcesNode = xml.SelectSingleNode("mqb/Resources");
             foreach (XmlNode resNode in resourcesNode.SelectNodes("Resource"))
                 resources.Add(RepackResource(resNode));
 
-            var cutsNode = xml.SelectSingleNode("MQB/Cuts");
+            var cutsNode = xml.SelectSingleNode("mqb/Cuts");
             foreach (XmlNode cutNode in cutsNode.SelectNodes("Cut"))
                 cuts.Add(RepackCut(cutNode));
 
@@ -204,7 +203,11 @@ namespace WitchyBND
             mqb.Version = version;
             mqb.Framerate = framerate;
             mqb.BigEndian = bigendian;
+
+            WBUtil.XmlReadCompression(xml, "mqb", out DCX.Type compression, out int compressionLevel);
             mqb.Compression = compression;
+            mqb.CompressionLevel = compressionLevel;
+
             mqb.ResourceDirectory = resDir;
             mqb.Resources = resources;
             mqb.Cuts = cuts;
@@ -220,7 +223,7 @@ namespace WitchyBND
         {
             MQB.Resource resource = new MQB.Resource();
 
-            string name = resNode.SelectSingleNode("Name").InnerText;
+            string name = resNode.SelectSingleNode("name").InnerText;
             string path = resNode.SelectSingleNode("Path").InnerText;
             int parentIndex = FriendlyParseInt32(nameof(MQB.Resource), nameof(MQB.Resource.ParentIndex), resNode.SelectSingleNode("ParentIndex").InnerText);
             int unk48 = FriendlyParseInt32(nameof(MQB.Resource), nameof(MQB.Resource.Unk48), resNode.SelectSingleNode("Unk48").InnerText);
@@ -242,7 +245,7 @@ namespace WitchyBND
         {
             MQB.CustomData customdata = new MQB.CustomData();
 
-            string name = customdataNode.SelectSingleNode("Name").InnerText;
+            string name = customdataNode.SelectSingleNode("name").InnerText;
             var type = FriendlyParseEnum<MQB.CustomData.DataType>(nameof(MQB.CustomData), nameof(MQB.CustomData.Type), customdataNode.SelectSingleNode("Type").InnerText);
             object value = ConvertValueToDataType(customdataNode.SelectSingleNode("Value").InnerText, type);
             int unk44 = FriendlyParseInt32(nameof(MQB.CustomData), nameof(MQB.CustomData.Unk44), customdataNode.SelectSingleNode("Unk44").InnerText);
@@ -309,7 +312,7 @@ namespace WitchyBND
         {
             MQB.Cut cut = new MQB.Cut();
 
-            string name = cutNode.SelectSingleNode("Name").InnerText;
+            string name = cutNode.SelectSingleNode("name").InnerText;
             int duration = FriendlyParseInt32("Cut", nameof(cut.Duration), cutNode.SelectSingleNode("Duration").InnerText);
             int unk44 = FriendlyParseInt32("Cut", nameof(cut.Unk44), cutNode.SelectSingleNode("Unk44").InnerText);
             List<MQB.Timeline> timelines = new List<MQB.Timeline>();

@@ -233,7 +233,7 @@ namespace SoulsFormats
                 Bytes = br.GetBytes(fileOffset, fileSize);
                 if (Flags1 == 2 || Flags1 == 3)
                 {
-                    Bytes = DCX.Decompress(Bytes, out DCX.Type type);
+                    Bytes = DCX.Decompress(Bytes, out DCX.Type type, out _);
                     if (type != DCX.Type.DCP_EDGE)
                         throw new NotImplementedException($"TPF compression is expected to be DCP_EDGE, but it was {type}");
                 }

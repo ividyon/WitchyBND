@@ -26,7 +26,7 @@ namespace WitchyBND
             xw.WriteStartElement("tpf");
 
             xw.WriteElementString("filename", sourceName);
-            xw.WriteElementString("compression", tpf.Compression.ToString());
+            WBUtil.XmlWriteCompression(xw, tpf.Compression, tpf.CompressionLevel);
             xw.WriteElementString("encoding", $"0x{tpf.Encoding:X2}");
             xw.WriteElementString("flag2", $"0x{tpf.Flag2:X2}");
             xw.WriteElementString("platform", tpf.Platform.ToString());
@@ -94,8 +94,10 @@ namespace WitchyBND
             tpf.Platform = platform;
 
             string filename = xml.SelectSingleNode("tpf/filename").InnerText;
-            Enum.TryParse(xml.SelectSingleNode("tpf/compression")?.InnerText ?? "None", out DCX.Type compression);
+
+            WBUtil.XmlReadCompression(xml, "tpf", out DCX.Type compression, out int compressionLevel);
             tpf.Compression = compression;
+            tpf.CompressionLevel = compressionLevel;
 
             tpf.Encoding = Convert.ToByte(xml.SelectSingleNode("tpf/encoding").InnerText, 16);
             tpf.Flag2 = Convert.ToByte(xml.SelectSingleNode("tpf/flag2").InnerText, 16);

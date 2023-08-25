@@ -121,7 +121,7 @@ namespace WitchyBND
             else
                 outPath = $"{sourceFile}.undcx";
 
-            byte[] bytes = DCX.Decompress(sourceFile, out DCX.Type compression);
+            byte[] bytes = DCX.Decompress(sourceFile, out DCX.Type compression, out int compressionLevel);
             File.WriteAllBytes(outPath, bytes);
 
             XmlWriterSettings xws = new XmlWriterSettings();
@@ -130,6 +130,8 @@ namespace WitchyBND
 
             xw.WriteStartElement("dcx");
             xw.WriteElementString("compression", compression.ToString());
+            if (compressionLevel != 0)
+                xw.WriteElementString("compression_level", $"0x{compressionLevel:X}");
             xw.WriteEndElement();
             xw.Close();
 

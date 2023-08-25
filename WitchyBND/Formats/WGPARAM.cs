@@ -26,49 +26,49 @@ namespace WitchyBND
       string str = sourceFile + ".xml";
       if (File.Exists(str))
         WBUtil.Backup(str);
-      using (XmlWriter xmlWriter1 = XmlWriter.Create(str, new XmlWriterSettings()
+      using (XmlWriter xw = XmlWriter.Create(str, new XmlWriterSettings()
       {
         Indent = true
       }))
       {
-        xmlWriter1.WriteStartElement(nameof (gparam));
-        xmlWriter1.WriteElementString("compression", gparam.Compression.ToString());
-        xmlWriter1.WriteElementString("game", gparam.Game.ToString());
-        xmlWriter1.WriteElementString("unk0D", gparam.Unk0D.ToString());
-        xmlWriter1.WriteElementString("unk14", gparam.Unk14.ToString());
-        xmlWriter1.WriteElementString("unk40", gparam.Unk40.ToString());
+        xw.WriteStartElement(nameof (gparam));
+        WBUtil.XmlWriteCompression(xw, gparam.Compression, gparam.CompressionLevel);
+        xw.WriteElementString("game", gparam.Game.ToString());
+        xw.WriteElementString("unk0D", gparam.Unk0D.ToString());
+        xw.WriteElementString("unk14", gparam.Unk14.ToString());
+        xw.WriteElementString("unk40", gparam.Unk40.ToString());
         if (gparam.Game == GPARAM.GPGame.Sekiro)
-          xmlWriter1.WriteElementString("unk50", gparam.Unk50.ToString());
-        xmlWriter1.WriteStartElement("groups");
+          xw.WriteElementString("unk50", gparam.Unk50.ToString());
+        xw.WriteStartElement("groups");
         foreach (GPARAM.Group group in gparam.Groups)
         {
-          xmlWriter1.WriteStartElement("group");
-          xmlWriter1.WriteAttributeString("name1", group.Name1);
+          xw.WriteStartElement("group");
+          xw.WriteAttributeString("name1", group.Name1);
           if (gparam.Game == GPARAM.GPGame.DarkSouls3 || gparam.Game == GPARAM.GPGame.Sekiro)
           {
-            xmlWriter1.WriteAttributeString("name2", group.Name2);
-            xmlWriter1.WriteStartElement("comments");
+            xw.WriteAttributeString("name2", group.Name2);
+            xw.WriteStartElement("comments");
             foreach (string comment in group.Comments)
-              xmlWriter1.WriteElementString("comment", comment);
-            xmlWriter1.WriteEndElement();
+              xw.WriteElementString("comment", comment);
+            xw.WriteEndElement();
           }
           foreach (GPARAM.Param obj in group.Params)
           {
-            xmlWriter1.WriteStartElement("param");
-            xmlWriter1.WriteAttributeString("name1", obj.Name1);
+            xw.WriteStartElement("param");
+            xw.WriteAttributeString("name1", obj.Name1);
             if (gparam.Game == GPARAM.GPGame.DarkSouls3 || gparam.Game == GPARAM.GPGame.Sekiro)
-              xmlWriter1.WriteAttributeString("name2", obj.Name2);
-            xmlWriter1.WriteAttributeString("type", obj.Type.ToString());
+              xw.WriteAttributeString("name2", obj.Name2);
+            xw.WriteAttributeString("type", obj.Type.ToString());
             for (int index = 0; index < obj.Values.Count; ++index)
             {
-              xmlWriter1.WriteStartElement("value");
-              xmlWriter1.WriteAttributeString("id", obj.ValueIDs[index].ToString());
+              xw.WriteStartElement("value");
+              xw.WriteAttributeString("id", obj.ValueIDs[index].ToString());
               if (gparam.Game == GPARAM.GPGame.Sekiro)
-                xmlWriter1.WriteAttributeString("timeOfDay", obj.TimeOfDay[index].ToString());
+                xw.WriteAttributeString("timeOfDay", obj.TimeOfDay[index].ToString());
               if (obj.Type == GPARAM.ParamType.Float2)
               {
                 Vector2 vector2 = (Vector2) obj.Values[index];
-                XmlWriter xmlWriter2 = xmlWriter1;
+                XmlWriter xmlWriter2 = xw;
                 DefaultInterpolatedStringHandler interpolatedStringHandler = new DefaultInterpolatedStringHandler(1, 2);
                 interpolatedStringHandler.AppendFormatted<float>(vector2.X);
                 interpolatedStringHandler.AppendLiteral(" ");
@@ -79,7 +79,7 @@ namespace WitchyBND
               else if (obj.Type == GPARAM.ParamType.Float3)
               {
                 Vector3 vector3 = (Vector3) obj.Values[index];
-                XmlWriter xmlWriter3 = xmlWriter1;
+                XmlWriter xmlWriter3 = xw;
                 DefaultInterpolatedStringHandler interpolatedStringHandler = new DefaultInterpolatedStringHandler(2, 3);
                 interpolatedStringHandler.AppendFormatted<float>(vector3.X);
                 interpolatedStringHandler.AppendLiteral(" ");
@@ -92,7 +92,7 @@ namespace WitchyBND
               else if (obj.Type == GPARAM.ParamType.Float4)
               {
                 Vector4 vector4 = (Vector4) obj.Values[index];
-                XmlWriter xmlWriter4 = xmlWriter1;
+                XmlWriter xmlWriter4 = xw;
                 DefaultInterpolatedStringHandler interpolatedStringHandler = new DefaultInterpolatedStringHandler(3, 4);
                 interpolatedStringHandler.AppendFormatted<float>(vector4.X);
                 interpolatedStringHandler.AppendLiteral(" ");
@@ -107,7 +107,7 @@ namespace WitchyBND
               else if (obj.Type == GPARAM.ParamType.Byte4)
               {
                 byte[] numArray = (byte[]) obj.Values[index];
-                XmlWriter xmlWriter5 = xmlWriter1;
+                XmlWriter xmlWriter5 = xw;
                 DefaultInterpolatedStringHandler interpolatedStringHandler = new DefaultInterpolatedStringHandler(3, 4);
                 interpolatedStringHandler.AppendFormatted<byte>(numArray[0], "X2");
                 interpolatedStringHandler.AppendLiteral(" ");
@@ -120,47 +120,50 @@ namespace WitchyBND
                 xmlWriter5.WriteString(stringAndClear);
               }
               else
-                xmlWriter1.WriteString(obj.Values[index].ToString());
-              xmlWriter1.WriteEndElement();
+                xw.WriteString(obj.Values[index].ToString());
+              xw.WriteEndElement();
             }
-            xmlWriter1.WriteEndElement();
+            xw.WriteEndElement();
           }
-          xmlWriter1.WriteEndElement();
+          xw.WriteEndElement();
         }
-        xmlWriter1.WriteEndElement();
-        xmlWriter1.WriteStartElement("unk3s");
+        xw.WriteEndElement();
+        xw.WriteStartElement("unk3s");
         foreach (GPARAM.Unk3 unk3 in gparam.Unk3s)
         {
-          xmlWriter1.WriteStartElement("unk3");
-          xmlWriter1.WriteAttributeString("group_index", unk3.GroupIndex.ToString());
+          xw.WriteStartElement("unk3");
+          xw.WriteAttributeString("group_index", unk3.GroupIndex.ToString());
           if (gparam.Game == GPARAM.GPGame.Sekiro)
-            xmlWriter1.WriteAttributeString("unk0C", unk3.Unk0C.ToString());
+            xw.WriteAttributeString("unk0C", unk3.Unk0C.ToString());
           foreach (int valueId in unk3.ValueIDs)
-            xmlWriter1.WriteElementString("value_id", valueId.ToString());
-          xmlWriter1.WriteEndElement();
+            xw.WriteElementString("value_id", valueId.ToString());
+          xw.WriteEndElement();
         }
-        xmlWriter1.WriteEndElement();
-        xmlWriter1.WriteElementString("unk_block_2", string.Join(" ", ((IEnumerable<byte>) gparam.UnkBlock2).Select<byte, string>((Func<byte, string>) (b => b.ToString("X2")))));
-        xmlWriter1.WriteEndElement();
-        xmlWriter1.Close();
+        xw.WriteEndElement();
+        xw.WriteElementString("unk_block_2", string.Join(" ", ((IEnumerable<byte>) gparam.UnkBlock2).Select<byte, string>((Func<byte, string>) (b => b.ToString("X2")))));
+        xw.WriteEndElement();
+        xw.Close();
       }
     }
 
     public static void Repack(string sourceFile)
     {
       GPARAM gparam = new GPARAM();
-      XmlDocument xmlDocument = new XmlDocument();
-      xmlDocument.Load(sourceFile);
+      XmlDocument xml = new XmlDocument();
+      xml.Load(sourceFile);
       DCX.Type result;
-      Enum.TryParse(xmlDocument.SelectSingleNode("gparam/compression")?.InnerText ?? "None", out result);
-      gparam.Compression = result;
-      Enum.TryParse(xmlDocument.SelectSingleNode("gparam/game").InnerText, out gparam.Game);
-      gparam.Unk0D = bool.Parse(xmlDocument.SelectSingleNode("gparam/unk0D").InnerText);
-      gparam.Unk14 = int.Parse(xmlDocument.SelectSingleNode("gparam/unk14").InnerText);
-      gparam.Unk40 = float.Parse(xmlDocument.SelectSingleNode("gparam/unk40").InnerText);
+
+      WBUtil.XmlReadCompression(xml, "gparam", out DCX.Type compression, out int compressionLevel);
+      gparam.Compression = compression;
+      gparam.CompressionLevel = compressionLevel;
+
+      Enum.TryParse(xml.SelectSingleNode("gparam/game").InnerText, out gparam.Game);
+      gparam.Unk0D = bool.Parse(xml.SelectSingleNode("gparam/unk0D").InnerText);
+      gparam.Unk14 = int.Parse(xml.SelectSingleNode("gparam/unk14").InnerText);
+      gparam.Unk40 = float.Parse(xml.SelectSingleNode("gparam/unk40").InnerText);
       if (gparam.Game == GPARAM.GPGame.Sekiro)
-        gparam.Unk50 = float.Parse(xmlDocument.SelectSingleNode("gparam/unk50").InnerText);
-      foreach (XmlNode selectNode1 in xmlDocument.SelectNodes("gparam/groups/group"))
+        gparam.Unk50 = float.Parse(xml.SelectSingleNode("gparam/unk50").InnerText);
+      foreach (XmlNode selectNode1 in xml.SelectNodes("gparam/groups/group"))
       {
         string innerText1 = selectNode1.Attributes["name1"].InnerText;
         GPARAM.Group group;
@@ -243,7 +246,7 @@ namespace WitchyBND
         }
         gparam.Groups.Add(group);
       }
-      foreach (XmlNode selectNode5 in xmlDocument.SelectNodes("gparam/unk3s/unk3"))
+      foreach (XmlNode selectNode5 in xml.SelectNodes("gparam/unk3s/unk3"))
       {
         GPARAM.Unk3 unk3 = new GPARAM.Unk3(int.Parse(selectNode5.Attributes["group_index"].InnerText));
         if (gparam.Game == GPARAM.GPGame.Sekiro)
@@ -252,7 +255,7 @@ namespace WitchyBND
           unk3.ValueIDs.Add(int.Parse(selectNode6.InnerText));
         gparam.Unk3s.Add(unk3);
       }
-      gparam.UnkBlock2 = xmlDocument.SelectSingleNode("gparam/unk_block_2").InnerText.Split(new char[1]
+      gparam.UnkBlock2 = xml.SelectSingleNode("gparam/unk_block_2").InnerText.Split(new char[1]
       {
         ' '
       }, StringSplitOptions.RemoveEmptyEntries).Select((Func<string, byte>) (s => Convert.ToByte(s, 16))).ToArray();

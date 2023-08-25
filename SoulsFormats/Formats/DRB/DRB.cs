@@ -787,7 +787,7 @@ namespace SoulsFormats
                 return false;
 
             BinaryReaderEx br = new BinaryReaderEx(false, bytes);
-            return Is(SFUtil.GetDecompressedBR(br, out _));
+            return Is(SFUtil.GetDecompressedBR(br, out _, out _));
         }
 
         /// <summary>
@@ -801,7 +801,7 @@ namespace SoulsFormats
                     return false;
 
                 BinaryReaderEx br = new BinaryReaderEx(false, stream);
-                return Is(SFUtil.GetDecompressedBR(br, out _));
+                return Is(SFUtil.GetDecompressedBR(br, out _, out _));
             }
         }
 
@@ -812,7 +812,7 @@ namespace SoulsFormats
         {
             BinaryReaderEx br = new BinaryReaderEx(false, bytes);
             DRB drb = new DRB();
-            br = SFUtil.GetDecompressedBR(br, out drb.Compression);
+            br = SFUtil.GetDecompressedBR(br, out drb.Compression, out _);
             drb.Read(br, version);
             return drb;
         }
@@ -826,7 +826,7 @@ namespace SoulsFormats
             {
                 BinaryReaderEx br = new BinaryReaderEx(false, stream);
                 DRB drb = new DRB();
-                br = SFUtil.GetDecompressedBR(br, out drb.Compression);
+                br = SFUtil.GetDecompressedBR(br, out drb.Compression, out _);
                 drb.Read(br, version);
                 return drb;
             }

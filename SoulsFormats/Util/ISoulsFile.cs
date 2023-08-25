@@ -10,6 +10,8 @@
         /// </summary>
         DCX.Type Compression { get; set; }
 
+        int CompressionLevel { get; set; }
+
         /// <summary>
         /// Writes the file to an array of bytes using the stored compression type.
         /// </summary>
@@ -18,7 +20,7 @@
         /// <summary>
         /// Writes the file to an array of bytes using the given compression type.
         /// </summary>
-        byte[] Write(DCX.Type compression);
+        byte[] Write(DCX.Type compression, int compressionLevel);
 
         /// <summary>
         /// Writes the file to disk using the stored compression type.
@@ -28,6 +30,6 @@
         /// <summary>
         /// Writes the file to disk using the given compression type.
         /// </summary>
-        void Write(string path, DCX.Type compression);
+        void Write(string path, DCX.Type compression, int compressionLevel);
     }
 }

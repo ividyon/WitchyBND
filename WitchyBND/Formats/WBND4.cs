@@ -17,7 +17,7 @@ namespace WitchyBND
             xw.WriteStartElement("bnd4");
 
             xw.WriteElementString("filename", sourceName);
-            xw.WriteElementString("compression", bnd.Compression.ToString());
+            WBUtil.XmlWriteCompression(xw, bnd.Compression, bnd.CompressionLevel);
             xw.WriteElementString("version", bnd.Version);
             xw.WriteElementString("format", bnd.Format.ToString());
             xw.WriteElementString("bigendian", bnd.BigEndian.ToString());
@@ -41,8 +41,10 @@ namespace WitchyBND
             string filename = xml.SelectSingleNode("bnd4/filename").InnerText;
             var root = xml.SelectSingleNode("bnd4/root")?.InnerText ?? "";
 
-            Enum.TryParse(xml.SelectSingleNode("bnd4/compression")?.InnerText ?? "None", out DCX.Type compression);
+            WBUtil.XmlReadCompression(xml, "bnd4", out DCX.Type compression, out int compressionLevel);
             bnd.Compression = compression;
+            bnd.CompressionLevel = compressionLevel;
+
 
             bnd.Version = xml.SelectSingleNode("bnd4/version").InnerText;
             bnd.Format = (Binder.Format)Enum.Parse(typeof(Binder.Format), xml.SelectSingleNode("bnd4/format").InnerText);

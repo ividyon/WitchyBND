@@ -81,7 +81,7 @@ namespace WitchyBND
             xw.WriteElementString("fileName", Path.GetFileName(sourceFile));
             xw.WriteElementString("game", WBUtil.GameNames[game]);
             xw.WriteElementString("cellStyle", ((int)cellStyle).ToString());
-            xw.WriteElementString("compression", param.Compression.ToString());
+            WBUtil.XmlWriteCompression(xw, param.Compression, param.CompressionLevel);
             xw.WriteElementString("format2D", ((byte)param.Format2D).ToString());
             xw.WriteElementString("format2E", ((byte)param.Format2E).ToString());
             xw.WriteElementString("unk06", param.Unk06.ToString());
@@ -92,6 +92,8 @@ namespace WitchyBND
                 xw.WriteElementString("type", paramdef.ParamType);
                 xw.WriteElementString("bigEndian", Convert.ToInt32(paramdef.BigEndian).ToString());
                 xw.WriteElementString("compression", paramdef.Compression.ToString());
+                if (paramdef.CompressionLevel != 0x6000000)
+                    xw.WriteElementString("compression_level", $"0x{paramdef.CompressionLevel:X}");
                 xw.WriteElementString("unicode", Convert.ToInt32(paramdef.Unicode).ToString());
                 xw.WriteElementString("dataVersion", paramdef.DataVersion.ToString());
                 xw.WriteElementString("formatVersion", paramdef.FormatVersion.ToString());
@@ -252,8 +254,10 @@ namespace WitchyBND
             Enum.TryParse(xml.SelectSingleNode("param/cellStyle")?.InnerText ?? "None", out CellStyle cellStyle);
 
             // Enum.TryParse(xml.SelectSingleNode("param/game")?.InnerText ?? "", out WBUtil.GameType game);
-            Enum.TryParse(xml.SelectSingleNode("param/compression")?.InnerText ?? "None", out DCX.Type compression);
+
+            WBUtil.XmlReadCompression(xml, "param", out DCX.Type compression, out int compressionLevel);
             param.Compression = compression;
+            param.CompressionLevel = compressionLevel;
 
             Enum.TryParse(xml.SelectSingleNode("param/format2D")?.InnerText ?? "0",
                 out FsParam.FormatFlags1 formatFlags1);
@@ -282,6 +286,10 @@ namespace WitchyBND
             Enum.TryParse(xml.SelectSingleNode("param/paramdef/compression")?.InnerText ?? "None",
                 out DCX.Type defCompression);
             paramdef.Compression = defCompression;
+
+            XmlNode paramDefCompressionLevelNode = xml.SelectSingleNode("param/paramdef/compression_level");
+            paramdef.CompressionLevel = paramDefCompressionLevelNode != null ? Convert.ToByte(paramDefCompressionLevelNode.InnerText, 16) : 0;
+
 
             paramdef.DataVersion = Convert.ToInt16(xml.SelectSingleNode("param/paramdef/dataVersion").InnerText);
             param.ParamdefDataVersion = paramdef.DataVersion;

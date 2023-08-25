@@ -185,7 +185,7 @@ namespace WitchyBND
             if (DCX.Is(sourceFile))
             {
                 Console.WriteLine($"Decompressing DCX: {fileName}...");
-                byte[] bytes = TryDecompressBytes(sourceFile, out DCX.Type compression);
+                byte[] bytes = TryDecompressBytes(sourceFile, out DCX.Type compression, out int compressionLevel);
 
                 if (BND3.Is(bytes))
                 {
@@ -193,6 +193,7 @@ namespace WitchyBND
                     using (var bnd = new BND3Reader(bytes))
                     {
                         bnd.Compression = compression;
+                        bnd.CompressionLevel = compressionLevel;
                         bnd.Unpack(fileName, targetDir, progress);
                     }
                 }
@@ -202,6 +203,7 @@ namespace WitchyBND
                     using (var bnd = new BND4Reader(bytes))
                     {
                         bnd.Compression = compression;
+                        bnd.CompressionLevel = compressionLevel;
                         bnd.UnpackFFXBND(fileName, targetDir, progress);
                     }
                 }
@@ -211,6 +213,7 @@ namespace WitchyBND
                     using (var bnd = new BND4Reader(bytes))
                     {
                         bnd.Compression = compression;
+                        bnd.CompressionLevel = compressionLevel;
                         bnd.Unpack(fileName, targetDir, progress);
                     }
                 }
@@ -219,6 +222,7 @@ namespace WitchyBND
                     Console.WriteLine($"Unpacking FFX: {fileName}...");
                     var ffx = FFXDLSE.Read(bytes);
                     ffx.Compression = compression;
+                    ffx.CompressionLevel = compressionLevel;
                     ffx.Unpack(sourceFile);
                 }
                 else if (sourceFile.EndsWith(".fmg.dcx"))
@@ -226,6 +230,7 @@ namespace WitchyBND
                     Console.WriteLine($"Unpacking FMG: {fileName}...");
                     FMG fmg = FMG.Read(bytes);
                     fmg.Compression = compression;
+                    fmg.CompressionLevel = compressionLevel;
                     fmg.Unpack(sourceFile);
                 }
                 else if (GPARAM.Is(bytes))
@@ -233,6 +238,7 @@ namespace WitchyBND
                     Console.WriteLine($"Unpacking GPARAM: {fileName}...");
                     GPARAM gparam = GPARAM.Read(bytes);
                     gparam.Compression = compression;
+                    gparam.CompressionLevel = compressionLevel;
                     gparam.Unpack(sourceFile);
                 }
                 else if (TPF.Is(bytes))
@@ -240,14 +246,15 @@ namespace WitchyBND
                     Console.WriteLine($"Unpacking TPF: {fileName}...");
                     TPF tpf = TPF.Read(bytes);
                     tpf.Compression = compression;
+                    tpf.CompressionLevel = compressionLevel;
                     tpf.Unpack(fileName, targetDir, progress);
                 }
-                else if (MSBE.Is(bytes))
-                {
-                    Console.WriteLine($"Unpacking MSB: {fileName}...");
-                    MSBE msb = MSBE.Read(bytes);
-                    msb.Unpack(fileName, targetDir, progress);
-                }
+                // else if (MSBE.Is(bytes))
+                // {
+                //     Console.WriteLine($"Unpacking MSB: {fileName}...");
+                //     MSBE msb = MSBE.Read(bytes);
+                //     msb.Unpack(fileName, targetDir, progress);
+                // }
                 else
                 {
                     Console.WriteLine($"File format not recognized: {fileName}");
@@ -457,11 +464,11 @@ namespace WitchyBND
 
             return false;
         }
-        private static byte[] TryDecompressBytes(string sourceFile, out DCX.Type compression)
+        private static byte[] TryDecompressBytes(string sourceFile, out DCX.Type compression, out int compressionLevel)
         {
             try
             {
-                return DCX.Decompress(sourceFile, out compression);
+                return DCX.Decompress(sourceFile, out compression, out compressionLevel);
             }
             catch (DllNotFoundException ex) when (ex.Message.Contains("oo2core_6_win64.dll"))
             {
@@ -470,7 +477,7 @@ namespace WitchyBND
                     throw;
 
                 IntPtr handle = Kernel32.LoadLibrary(oo2corePath);
-                byte[] bytes = DCX.Decompress(sourceFile, out compression);
+                byte[] bytes = DCX.Decompress(sourceFile, out compression, out compressionLevel);
                 Kernel32.FreeLibrary(handle);
                 return bytes;
             }

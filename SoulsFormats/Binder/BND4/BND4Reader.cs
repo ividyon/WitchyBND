@@ -32,6 +32,8 @@ namespace SoulsFormats
         /// </summary>
         public DCX.Type Compression { get; set; }
 
+        public int CompressionLevel { get; set; }
+
         /// <summary>
         /// Reads a BND4 from the given path, decompressing if necessary.
         /// </summary>
@@ -54,8 +56,9 @@ namespace SoulsFormats
 
         private void Read(BinaryReaderEx br)
         {
-            br = SFUtil.GetDecompressedBR(br, out DCX.Type compression);
+            br = SFUtil.GetDecompressedBR(br, out DCX.Type compression, out int compressionLevel);
             Compression = compression;
+            CompressionLevel = compressionLevel;
             Files = BND4.ReadHeader(this, br);
             DataBR = br;
         }

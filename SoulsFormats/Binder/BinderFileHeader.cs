@@ -159,10 +159,11 @@ namespace SoulsFormats
         {
             byte[] bytes;
             DCX.Type compressionType = DCX.Type.Zlib;
+            int compressionLevel = 0;
             if (IsCompressed(Flags))
             {
                 bytes = br.GetBytes(DataOffset, (int)CompressedSize);
-                bytes = DCX.Decompress(bytes, out compressionType);
+                bytes = DCX.Decompress(bytes, out compressionType, out _);
             }
             else
             {

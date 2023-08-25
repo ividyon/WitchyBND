@@ -16,7 +16,7 @@ namespace WitchyBND
             xws.IndentChars = "";
             XmlWriter xw = XmlWriter.Create($"{sourceFile}.xml", xws);
             xw.WriteStartElement("fmg");
-            xw.WriteElementString("compression", fmg.Compression.ToString());
+            WBUtil.XmlWriteCompression(xw, fmg.Compression, fmg.CompressionLevel);
             xw.WriteElementString("version", fmg.Version.ToString());
             xw.WriteElementString("bigendian", fmg.BigEndian.ToString());
             xw.WriteStartElement("entries");
@@ -40,8 +40,10 @@ namespace WitchyBND
             FMG fmg = new FMG();
             XmlDocument xml = new XmlDocument();
             xml.Load(sourceFile);
-            Enum.TryParse(xml.SelectSingleNode("fmg/compression")?.InnerText ?? "None", out DCX.Type compression);
+
+            WBUtil.XmlReadCompression(xml, "fmg", out DCX.Type compression, out int compressionLevel);
             fmg.Compression = compression;
+            fmg.CompressionLevel = compressionLevel;
 
             fmg.Version = (FMG.FMGVersion)Enum.Parse(typeof(FMG.FMGVersion), xml.SelectSingleNode("fmg/version").InnerText);
             fmg.BigEndian = bool.Parse(xml.SelectSingleNode("fmg/bigendian").InnerText);
