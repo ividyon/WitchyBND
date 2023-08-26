@@ -151,13 +151,13 @@ namespace WitchyBND
                     error = true;
                 }
                 #if (!DEBUG)
-                // catch (Exception ex)
-                // {
-                //     Console.WriteLine();
-                //     Console.Error.WriteLine($"ERROR: Unhandled exception: {ex}");
-                //     errorcode = 1;
-                //     error = true;
-                // }
+                catch (Exception ex)
+                {
+                    Console.WriteLine();
+                    Console.Error.WriteLine($"ERROR: Unhandled exception: {ex}");
+                    errorcode = 1;
+                    error = true;
+                }
                 #endif
 
                 Console.WriteLine();
