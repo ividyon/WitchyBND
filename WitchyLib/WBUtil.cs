@@ -280,17 +280,30 @@ public static class WBUtil
         return installPath;
     }
 
-    private static string[] OodleGames =
+    private static string[] Oodle6Games =
     {
         "Sekiro",
         "ELDEN RING",
     };
 
+    private static string[] Oodle8Games =
+    {
+        "ARMORED CORE VI FIRES OF RUBICON",
+    };
+
+    
     public static string GetOodlePath()
     {
-        foreach (string game in OodleGames)
+        foreach (string game in Oodle6Games)
         {
             string path = TryGetGameInstallLocation($"\\steamapps\\common\\{game}\\Game\\oo2core_6_win64.dll");
+            if (path != null)
+                return path;
+        }
+        
+        foreach (string game in Oodle8Games)
+        {
+            string path = TryGetGameInstallLocation($"\\steamapps\\common\\{game}\\Game\\oo2core_8_win64.dll");
             if (path != null)
                 return path;
         }

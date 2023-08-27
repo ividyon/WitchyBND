@@ -109,7 +109,6 @@ namespace WitchyBND
                     if (Directory.Exists(path))
                     {
                         error |= RepackDir(path, progress);
-
                     }
                     else if (File.Exists(path))
                     {
@@ -122,10 +121,17 @@ namespace WitchyBND
                         error = true;
                     }
                 }
-                catch (DllNotFoundException ex) when (ex.Message.Contains("oo2core_6_win64.dll"))
+                catch (DllNotFoundException ex) 
                 {
                     Console.Error.WriteLine(
-                        "ERROR: oo2core_6_win64.dll not found. Please copy this library from the game directory to WitchyBND's directory.");
+                        $"ERROR: {ex.Message}");
+                    errorcode = 3;
+                    error = true;
+                }
+                catch (NoOodleFoundException ex)
+                {
+                    Console.Error.WriteLine(
+                        $"ERROR: {ex.Message}");
                     errorcode = 3;
                     error = true;
                 }
@@ -463,7 +469,7 @@ namespace WitchyBND
             {
                 return DCX.Decompress(sourceFile, out compression);
             }
-            catch (DllNotFoundException ex) when (ex.Message.Contains("oo2core_6_win64.dll"))
+            catch (NoOodleFoundException ex)
             {
                 string oo2corePath = WBUtil.GetOodlePath();
                 if (oo2corePath == null)
