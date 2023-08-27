@@ -463,24 +463,6 @@ namespace WitchyBND
 
             return false;
         }
-        private static byte[] TryDecompressBytes(string sourceFile, out DCX.Type compression)
-        {
-            try
-            {
-                return DCX.Decompress(sourceFile, out compression);
-            }
-            catch (NoOodleFoundException ex)
-            {
-                string oo2corePath = WBUtil.GetOodlePath();
-                if (oo2corePath == null)
-                    throw;
-
-                IntPtr handle = Kernel32.LoadLibrary(oo2corePath);
-                byte[] bytes = DCX.Decompress(sourceFile, out compression);
-                Kernel32.FreeLibrary(handle);
-                return bytes;
-            }
-        }
 
         private static bool UnpackRegulationFile(string fileName, string sourceDir, string targetDir, IProgress<float> progress)
         {
