@@ -58,7 +58,7 @@ namespace WitchyBND
             WBUtil.Backup(bhdPath);
             string bdtPath = $"{targetDir}\\{bdtFilename}";
             WBUtil.Backup(bdtPath);
-            bxf.Write(bhdPath, bdtPath);
+            bxf.TryWriteBXF(bhdPath, bdtPath);
         }
     }
 }

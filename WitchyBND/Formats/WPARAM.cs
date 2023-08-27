@@ -384,7 +384,7 @@ namespace WitchyBND
 
             string outPath = Path.Combine(sourceDir, sourceFile.Replace(".param.xml", ".param"));
             WBUtil.Backup(outPath);
-            param.Write(outPath);
+            param.TryWriteSoulsFile(outPath);
 
             return false;
         }

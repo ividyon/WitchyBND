@@ -46,6 +46,20 @@ public class Oodle
         );
     }
 
+    public IntPtr GetOodlePtr()
+    {
+        if (Oodle6Ptr != IntPtr.Zero)
+        {
+            return Oodle6Ptr;
+        }
+        if (Oodle8Ptr != IntPtr.Zero)
+        {
+            return Oodle8Ptr;
+        }
+
+        return IntPtr.Zero;
+    }
+
     private static int _oodleVersion = -1;
     public static IOodleCompressor GetOodleCompressor2()
     {

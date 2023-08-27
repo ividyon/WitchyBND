@@ -36,7 +36,7 @@ static class WFXR
 
         string outPath = sourceFile.Replace(".fxr.xml", ".fxr");
         WBUtil.Backup(outPath);
-        fxr.Write(outPath);
+        fxr.TryWriteSoulsFile(outPath);
 
         return false;
     }

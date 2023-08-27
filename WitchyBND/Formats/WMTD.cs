@@ -28,7 +28,7 @@ static class WMTD
 
         if (File.Exists(outPath)) WBUtil.Backup(outPath);
 
-        WBUtil.XmlDeserialize<MTD>(sourceFile).Write(outPath);
+        WBUtil.XmlDeserialize<MTD>(sourceFile).TryWriteSoulsFile(outPath);
 
         return false;
     }

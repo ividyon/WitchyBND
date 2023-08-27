@@ -180,7 +180,7 @@ public static class WBUtil
 
         if (path.Contains("..\\") || path.Contains("../"))
             throw new InvalidDataException(
-                $"the path {path} contains invalid data, attempting to extract to a different folder. Please report this bnd to Nordgaren.");
+                $"the path {path} contains invalid data, attempting to extract to a different folder. Please report this file to Nordgaren.");
         return RemoveLeadingBackslashes(path);
     }
 
@@ -437,4 +437,59 @@ public static class WBUtil
                 .Replace(EscapeString + EscapeString, EscapeString);
         }
     }
+
+    public static void TryWriteSoulsFile(this ISoulsFile file, string path)
+    {
+        try
+        {
+            file.Write(path);
+        }
+        catch (NoOodleFoundException ex)
+        {
+            string oo2corePath = GetOodlePath();
+            if (oo2corePath == null)
+                throw;
+
+            IntPtr handle = Kernel32.LoadLibrary(oo2corePath);
+            file.Write(path);
+            Kernel32.FreeLibrary(handle);
+        }
+    }
+    
+    public static void TryWriteBXF(this BXF4 file, string bhdPath, string bdtPath)
+    {
+        try
+        {
+            file.Write(bhdPath, bdtPath);
+        }
+        catch (NoOodleFoundException ex)
+        {
+            string oo2corePath = GetOodlePath();
+            if (oo2corePath == null)
+                throw;
+
+            IntPtr handle = Kernel32.LoadLibrary(oo2corePath);
+            file.Write(bhdPath, bdtPath);
+            Kernel32.FreeLibrary(handle);
+        }
+    }
+    
+    public static void TryWriteBXF(this BXF3 file, string bhdPath, string bdtPath)
+    {
+        try
+        {
+            file.Write(bhdPath, bdtPath);
+        }
+        catch (NoOodleFoundException ex)
+        {
+            string oo2corePath = GetOodlePath();
+            if (oo2corePath == null)
+                throw;
+
+            IntPtr handle = Kernel32.LoadLibrary(oo2corePath);
+            file.Write(bhdPath, bdtPath);
+            Kernel32.FreeLibrary(handle);
+        }
+    }
+
 }
