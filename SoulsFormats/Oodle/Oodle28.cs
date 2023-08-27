@@ -70,8 +70,6 @@ namespace SoulsFormats
                 IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, 0);
 
 
-        /// <param name="compressor">= OodleLZ_Compressor_Invalid</param>
-        /// <param name="lzLevel">= OodleLZ_CompressionLevel_Normal</param>
         [DllImport("oo2core_8_win64.dll", CallingConvention = CallingConvention.StdCall)]
         public static extern IntPtr OodleLZ_CompressOptions_GetDefault();
 
@@ -113,21 +111,38 @@ namespace SoulsFormats
                 Oodle.OodleLZ_FuzzSafe.OodleLZ_FuzzSafe_Yes, Oodle.OodleLZ_CheckCRC.OodleLZ_CheckCRC_No, Oodle.OodleLZ_Verbosity.OodleLZ_Verbosity_None,
                 IntPtr.Zero, 0, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, 0, Oodle.OodleLZ_Decode_ThreadPhase.OodleLZ_Decode_Unthreaded);
 
-
+        /// <summary>
+        /// Relevant Info: http://cbloomrants.blogspot.com/2019/04/oodle-280-release.html?m=1
+        /// </summary>
+        /// <param name="unkCompressorArg"> An unknown parameter related to the compressor that determines buffer size. 
+        /// This is zero for our purposes. "Compressor argument to return smaller padding for the new codec"</param>
+        /// <param name="rawSize"></param>
+        /// <returns></returns>
         [DllImport("oo2core_8_win64.dll", CallingConvention = CallingConvention.StdCall)]
         private static extern long OodleLZ_GetCompressedBufferSizeNeeded(
-                byte unk,
-                long rawSize);
+            // It is possible that this arg just takes OodleLZ_Compressor enum as an argument and
+            // gets truncated by the function by only using what is in `al`
+            byte unkCompressorArg,
+            long rawSize);
 
 
+        /// <summary>
+        /// Relevant Info: http://cbloomrants.blogspot.com/2019/04/oodle-280-release.html?m=1
+        /// </summary>
+        /// <param name="unkCompressorArg"> An unknown parameter related to the compressor that determines buffer size. 
+        /// This is zero for our purposes. "Compressor argument to return smaller padding for the new codec" </param>
+        /// <param name="rawSize"></param>
+        /// <param name="corruptionPossible"></param>
+        /// <returns></returns>
         [DllImport("oo2core_8_win64.dll", CallingConvention = CallingConvention.StdCall)]
         private static extern long OodleLZ_GetDecodeBufferSize(
-            byte unk,
+            // It is possible that this arg just takes OodleLZ_Compressor enum as an argument and
+            // gets truncated by the function by only using what is in `al`
+            byte unkCompressorArg,
             long rawSize,
             [MarshalAs(UnmanagedType.Bool)]
             bool corruptionPossible);
 
 
-       
     }
 }

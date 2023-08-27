@@ -39,7 +39,7 @@ public class Oodle
         string oodle6ErrorMessage = new Win32Exception(oodle6Error).Message;
         string oodle8ErrorMessage = new Win32Exception(oodle8Error).Message;
         
-        throw new NoOodleFoundException($"Could not find a supported version of oo2core. "
+        throw new NoOodleFoundException($"Could not find a supported version of oo2core.\n"
             + $"Please copy oo2core_6_win64.dll or oo2core_8_win64.dll into the program directory\n"
             + $"Last Error Oodle 6: {oodle6ErrorMessage}\n"
             + $"Last Error Oodle 8: {oodle8ErrorMessage}\n"
@@ -88,7 +88,7 @@ public class Oodle
             catch (EntryPointNotFoundException innerEx)
             {
                 throw new NoOodleFoundException(
-                    $"Could not find a supported version of oo2core. "
+                    $"Could not find a supported version of oo2core.\n"
                     + $"Please copy oo2core_6_win64.dll or oo2core_8_win64.dll into the program directory\n"
                     + $"{ex.Message}\n"
                     + $"{innerEx.Message}"
