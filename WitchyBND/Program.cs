@@ -191,7 +191,7 @@ namespace WitchyBND
             if (DCX.Is(sourceFile))
             {
                 Console.WriteLine($"Decompressing DCX: {fileName}...");
-                byte[] bytes = TryDecompressBytes(sourceFile, out DCX.Type compression);
+                byte[] bytes = WBUtil.TryDecompressBytes(sourceFile, out DCX.Type compression);
 
                 if (BND3.Is(bytes))
                 {

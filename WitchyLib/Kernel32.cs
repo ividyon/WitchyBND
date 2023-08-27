@@ -2,7 +2,7 @@
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace WitchyBND {
+namespace WitchyLib {
     public static class Kernel32 {
         [DllImport("kernel32", SetLastError = true)]
         static extern IntPtr LoadLibraryW([MarshalAs(UnmanagedType.LPWStr)]string lpFileName);

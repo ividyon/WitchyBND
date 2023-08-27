@@ -110,25 +110,6 @@ namespace WitchyBND
                 Environment.Exit(errorcode);
             }
         }
-        
-        private static byte[] TryDecompressBytes(string sourceFile, out DCX.Type compression)
-        {
-            try
-            {
-                return DCX.Decompress(sourceFile, out compression);
-            }
-            catch (NoOodleFoundException ex)
-            {
-                string oo2corePath = WBUtil.GetOodlePath();
-                if (oo2corePath == null)
-                    throw;
-
-                IntPtr handle = Kernel32.LoadLibrary(oo2corePath);
-                byte[] bytes = DCX.Decompress(sourceFile, out compression);
-                Kernel32.FreeLibrary(handle);
-                return bytes;
-            }
-        }
 
         private static bool Decompress(string sourceFile)
         {
@@ -141,7 +122,7 @@ namespace WitchyBND
             else
                 outPath = $"{sourceFile}.undcx";
 
-            byte[] bytes = TryDecompressBytes(sourceFile, out DCX.Type compression);
+            byte[] bytes = WBUtil.TryDecompressBytes(sourceFile, out DCX.Type compression);
             File.WriteAllBytes(outPath, bytes);
 
             XmlWriterSettings xws = new XmlWriterSettings();
@@ -154,24 +135,6 @@ namespace WitchyBND
             xw.Close();
 
             return false;
-        }
-        
-        private static void TryCompressBytes(byte[] data, DCX.Type type, string path)
-        {
-            try
-            {
-                DCX.Compress(data, type, path);
-            }
-            catch (NoOodleFoundException ex)
-            {
-                string oo2corePath = WBUtil.GetOodlePath();
-                if (oo2corePath == null)
-                    throw;
-
-                IntPtr handle = Kernel32.LoadLibrary(oo2corePath);
-                DCX.Compress(data, type, path);
-                Kernel32.FreeLibrary(handle);
-            }
         }
 
         private static bool Compress(string path)
@@ -197,7 +160,7 @@ namespace WitchyBND
             if (File.Exists(outPath) && !File.Exists(outPath + ".bak"))
                 File.Move(outPath, outPath + ".bak");
 
-            TryCompressBytes(File.ReadAllBytes(path), compression, outPath);
+            WBUtil.TryCompressBytes(File.ReadAllBytes(path), compression, outPath);
 
             return false;
         }

@@ -437,7 +437,43 @@ public static class WBUtil
                 .Replace(EscapeString + EscapeString, EscapeString);
         }
     }
+    public static byte[] TryDecompressBytes(string sourceFile, out DCX.Type compression)
+    {
+        try
+        {
+            return DCX.Decompress(sourceFile, out compression);
+        }
+        catch (NoOodleFoundException ex)
+        {
+            string oo2corePath = WBUtil.GetOodlePath();
+            if (oo2corePath == null)
+                throw;
 
+            IntPtr handle = Kernel32.LoadLibrary(oo2corePath);
+            byte[] bytes = DCX.Decompress(sourceFile, out compression);
+            Kernel32.FreeLibrary(handle);
+            return bytes;
+        }
+    }
+
+    public static void TryCompressBytes(byte[] data, DCX.Type type, string path)
+    {
+        try
+        {
+            DCX.Compress(data, type, path);
+        }
+        catch (NoOodleFoundException ex)
+        {
+            string oo2corePath = WBUtil.GetOodlePath();
+            if (oo2corePath == null)
+                throw;
+
+            IntPtr handle = Kernel32.LoadLibrary(oo2corePath);
+            DCX.Compress(data, type, path);
+            Kernel32.FreeLibrary(handle);
+        }
+    }
+    
     public static void TryWriteSoulsFile(this ISoulsFile file, string path)
     {
         try
