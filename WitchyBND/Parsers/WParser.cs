@@ -35,7 +35,14 @@ public abstract class WSingleFileParser : WFileParser
 public abstract class WFolderParser : WFileParser
 {
     public override WFileParserVerb Verb => WFileParserVerb.Unpack;
-    public abstract string GetUnpackDestPath(string srcPath);
+
+    public virtual string GetUnpackDestPath(string srcPath)
+    {
+        string sourceDir = new FileInfo(srcPath).Directory?.FullName;
+        string fileName = Path.GetFileName(srcPath);
+        return $"{sourceDir}\\{fileName.Replace('.', '-')}";
+    }
+
     public abstract string GetRepackDestPath(string srcDirPath, string destFileName);
 }
 
@@ -93,7 +100,7 @@ public abstract class WBinderParser : WFolderParser
             Directory.CreateDirectory(Path.GetDirectoryName(outPath));
             File.WriteAllBytes(outPath, bytes);
 
-            files.Add(file);
+            files.Add(fileElement);
         }
 
         return files;

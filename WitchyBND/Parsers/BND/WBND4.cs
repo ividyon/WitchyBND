@@ -21,37 +21,35 @@ public class WBND4 : WBinderParser
     {
         if (!Directory.Exists(path)) return false;
 
-        var xmlPaths = Directory.GetFiles(path, "_witchy-bnd4.xml");
-        if (xmlPaths.Length == 0) return false;
+        string xmlPath = Path.Combine(path, "_witchy-bnd4.xml");
+        if (!File.Exists(xmlPath)) return false;
 
-        XmlDocument xDoc = new XmlDocument();
-
-        throw new NotImplementedException();
+        var doc = XDocument.Load(xmlPath);
+        return doc.Root != null && doc.Root.Name == "bnd4";
     }
 
     public override void Unpack(string srcPath)
         {
             var bnd = new BND4Reader(srcPath);
-            var srcName = Path.GetFileName(srcPath);
-            var destDir = GetUnpackDestPath(srcPath);
+            string srcName = Path.GetFileName(srcPath);
+            string destDir = GetUnpackDestPath(srcPath);
             Directory.CreateDirectory(destDir);
 
-            string root = "";
+            var root = "";
             if (Binder.HasNames(bnd.Format))
             {
                 root = WBUtil.FindCommonRootPath(bnd.Files.Select(bndFile => bndFile.Name));
             }
 
-            XElement files = new XElement("files", WriteBinderFiles(bnd, destDir, root));
+            XElement files = WriteBinderFiles(bnd, destDir, root);
 
-            XElement xml =
+            var xml =
                 new XElement("bnd4",
                     new XElement("filename", srcName),
                     new XElement("compression", bnd.Compression.ToString()),
                     new XElement("version", bnd.Version),
                     new XElement("format", bnd.Format.ToString()),
-                    new XElement("format", bnd.Format.ToString()),
-                    new XElement("bigendian", bnd.BigEndian, ToString()),
+                    new XElement("bigendian", bnd.BigEndian.ToString()),
                     new XElement("bitbigendian", bnd.BitBigEndian.ToString()),
                     new XElement("unicode", bnd.Unicode.ToString()),
                     new XElement("extended", $"0x{bnd.Extended:X2}"),
@@ -73,24 +71,29 @@ public class WBND4 : WBinderParser
         public override void Repack(string srcPath)
         {
             var bnd = new BND4();
-            var xml = new XmlDocument();
 
+            var xml = new XmlDocument();
             xml.Load(WBUtil.GetXmlPath("bnd4", srcPath));
 
-            string filename = xml.SelectSingleNode("bnd4/filename").InnerText;
-            var root = xml.SelectSingleNode("bnd4/root")?.InnerText ?? "";
+            var doc = XDocument.Load(WBUtil.GetXmlPath("bnd4", srcPath));
+            if (doc.Root == null) throw new XmlException("XML has no root");
+            var myXml = doc.Root;
+            string filename = doc.Root.Elements("filename").First().Value;
 
-            Enum.TryParse(xml.SelectSingleNode("bnd4/compression")?.InnerText ?? "None", out DCX.Type compression);
+            string root = myXml.Elements("root").Any() ? myXml.Elements("root").First().Value : "";
+
+            string compString = myXml.Elements("compression").Any() ? myXml.Elements("compression").First().Value : "None";
+            Enum.TryParse(compString, out DCX.Type compression);
             bnd.Compression = compression;
 
-            bnd.Version = xml.SelectSingleNode("bnd4/version").InnerText;
-            bnd.Format = (Binder.Format)Enum.Parse(typeof(Binder.Format), xml.SelectSingleNode("bnd4/format").InnerText);
-            bnd.BigEndian = bool.Parse(xml.SelectSingleNode("bnd4/bigendian").InnerText);
-            bnd.BitBigEndian = bool.Parse(xml.SelectSingleNode("bnd4/bitbigendian").InnerText);
-            bnd.Unicode = bool.Parse(xml.SelectSingleNode("bnd4/unicode").InnerText);
-            bnd.Extended = Convert.ToByte(xml.SelectSingleNode("bnd4/extended").InnerText, 16);
-            bnd.Unk04 = bool.Parse(xml.SelectSingleNode("bnd4/unk04").InnerText);
-            bnd.Unk05 = bool.Parse(xml.SelectSingleNode("bnd4/unk05").InnerText);
+            bnd.Version = myXml.Elements("version").First().Value;
+            bnd.Format = (Binder.Format)Enum.Parse(typeof(Binder.Format), myXml.Elements("format").First().Value);
+            bnd.BigEndian = bool.Parse(myXml.Elements("bigendian").First().Value);
+            bnd.BitBigEndian = bool.Parse(myXml.Elements("bitbigendian").First().Value);
+            bnd.Unicode = bool.Parse(myXml.Elements("unicode").First().Value);
+            bnd.Extended = Convert.ToByte(myXml.Elements("extended").First().Value, 16);
+            bnd.Unk04 = bool.Parse(myXml.Elements("unk04").First().Value);
+            bnd.Unk05 = bool.Parse(myXml.Elements("unk05").First().Value);
 
             WBinder.ReadBinderFiles(bnd, xml.SelectSingleNode("bnd4/files"), srcPath, root);
 
@@ -100,11 +103,6 @@ public class WBND4 : WBinderParser
             string outPath = $"{destPath}\\{filename}";
             WBUtil.Backup(outPath);
             bnd.Write(outPath);
-        }
-
-        public override string GetUnpackDestPath(string srcPath)
-        {
-            throw new NotImplementedException();
         }
 
         public override string GetRepackDestPath(string srcDirPath, string destFileName)

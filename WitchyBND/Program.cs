@@ -2,7 +2,6 @@
 using SoulsFormats.AC4;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -11,8 +10,8 @@ using System.Runtime.Versioning;
 using System.Threading;
 using System.Xml;
 using CommandLine;
-using Microsoft.Extensions.FileSystemGlobbing;
 using PPlus;
+using WitchyBND.CliModes;
 using WitchyBND.Parsers;
 using WitchyFormats;
 using WitchyLib;
@@ -25,45 +24,45 @@ using PARAM = WitchyFormats.FsParam;
 namespace WitchyBND;
 
 [SupportedOSPlatform("windows")]
-internal class Configuration
-{
-    public bool Dry { get; set; }
-    public bool Verbose { get; set; }
-    public bool Quiet { get; set; }
-}
 
 public enum CliMode
 {
     Parse,
-    Context
+    Config
 }
 
+internal class Configuration
+{
+    public bool Dry { get; set; }
+    public bool Bnd { get; set; }
+    public bool Dcx { get; set; }
+}
 public class CliOptions
 {
-    [Option('v', "verbose", Group = "verbosity", Default = false, HelpText = "Set output to verbose messages.")]
-    public bool Verbose { get; set; }
+    // [Option('v', "verbose", Group = "verbosity", Default = false, HelpText = "Set output to verbose messages.")]
+    // public bool Verbose { get; set; }
+    //
+    // [Option('q', "quiet", Group = "verbosity", Default = false,
+    //     HelpText = "Set output to quiet, reporting only errors.")]
+    // public bool Quiet { get; set; }
 
-    [Option('q', "quiet", Group = "verbosity", Default = false,
-        HelpText = "Set output to quiet, reporting only errors.")]
-    public bool Quiet { get; set; }
+    [Option('b', "default-bnd", HelpText = "Perform basic unpacking of BND instead of using special Witchy methods, where present")]
+    public bool Bnd { get; set; }
 
-    [Option('b', "bnd", HelpText = "Unpack BND traditionally instead of using Witchy helpers")]
-    public bool UnpackBnd { get; set; }
+    [Option('n', "dry-run", HelpText = "Perform the actions as a \"dry run\", meaning that files will not actually be written or modified.")]
+    public bool Dry { get; set; }
 
-    [Option('n', "noninteractive", HelpText = "Will not prompt the user or halt the process during execution.")]
-    public bool NonInteractive { get; set; }
+    [Option('d', "dcx", HelpText = "Simply decompress DCX files instead of unpacking their content.")]
+    public bool Dcx { get; set; }
 
-    [Option('m', "mode", Required = false, Default = CliMode.Parse)]
-    public CliMode Mode { get; set; }
-
-    [Value(0, Min = 1, HelpText = "The paths that should be parsed by Witchy.")]
+    [Value(0, HelpText = "The paths that should be parsed by Witchy.")]
     public IEnumerable<string> Paths { get; set; }
 }
 
 static class Program
 {
     public static Configuration Configuration;
-    private static List<WFileParser> Parsers;
+    private static List<string> AccruedErrors;
     static WBUtil.GameType? game;
 
     static void Main(string[] args)
@@ -71,168 +70,39 @@ static class Program
         Console.OutputEncoding = System.Text.Encoding.UTF8;
         Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
-        var parser = new Parser(_ => { });
+        Assembly assembly = Assembly.GetExecutingAssembly();
+        PromptPlus.DoubleDash($"{assembly.GetName().Name} {assembly.GetName().Version}");
+
+        var parser = new Parser(config => {
+            config.AutoHelp = true;
+        });
         parser.ParseArguments<CliOptions>(args)
             .WithParsed(opt => {
-                switch (opt.Mode)
+                // Override configuration
+                if (opt.Dcx)
+                    Configuration.Dcx = true;
+                if (opt.Bnd)
+                    Configuration.Bnd = true;
+
+                // Set CLI mode
+                CliMode mode = CliMode.Parse;
+                if (!opt.Paths.Any())
+                    mode = CliMode.Config;
+
+                // Execute
+                switch (mode)
                 {
                     case CliMode.Parse:
-                        ParsePaths(opt);
+                        Parse.CliParseMode(opt);
                         break;
-                    case CliMode.Context:
+                    case CliMode.Config:
+                        Config.CliConfigMode(opt);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
             })
             .WithNotParsed(errors => { });
-    }
-
-    private static void ParseFiles(List<string> paths)
-    {
-        foreach (string path in paths)
-        {
-            string fileName = Path.GetFileName(path);
-            var parsed = false;
-
-            foreach (WFileParser parser in Parsers)
-            {
-                if (parser.Is(path))
-                {
-                    switch (parser.Verb)
-                    {
-                        case WFileParserVerb.Unpack:
-                            PromptPlus.WriteLine($"Unpacking {parser.Name}: {fileName}...");
-                            break;
-                        case WFileParserVerb.Serialize:
-                            PromptPlus.WriteLine($"Serializing {parser.Name}: {fileName}...");
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-                    parser.Unpack(path);
-                    parsed = true;
-                    break;
-                }
-
-                if (parser.IsUnpacked(path))
-                {
-                    switch (parser.Verb)
-                    {
-                        case WFileParserVerb.Unpack:
-                            PromptPlus.WriteLine($"Repacking {parser.Name}: {fileName}...");
-                            break;
-                        case WFileParserVerb.Serialize:
-                            PromptPlus.WriteLine($"Deserializing {parser.Name}: {fileName}...");
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-                    parser.Repack(path);
-                    parsed = true;
-                    break;
-                }
-            }
-
-            if (!parsed)
-                Console.WriteLine($"Could not find valid parser for \"{path}\"");
-        }
-    }
-
-    private static List<string> ProcessPathGlobs(List<string> paths)
-    {
-        var processedPaths = new List<string>();
-        foreach (string path in paths)
-        {
-            if (path.Contains('*'))
-            {
-                var matcher = new Matcher();
-                var rootParts = path.Split(Path.DirectorySeparatorChar).TakeWhile(part => !part.Contains('*')).ToList();
-                var root = string.Join(Path.DirectorySeparatorChar, rootParts);
-                var rest = path.Substring(root.Length + 1);
-
-                matcher = matcher.AddInclude(rest.Replace(Path.DirectorySeparatorChar.ToString(), "/"));
-                var files = Directory.GetFiles(Path.Combine(Environment.CurrentDirectory, root), "*",
-                    SearchOption.AllDirectories);
-                var match = matcher.Match(Path.Combine(Environment.CurrentDirectory, root), files);
-                if (match.HasMatches)
-                {
-                    processedPaths.AddRange(match.Files.Select(m => Path.Combine(root, m.Path)).ToList());
-                }
-            }
-            else
-            {
-                processedPaths.Add(path);
-            }
-        }
-
-        return processedPaths.Select(path => Path.GetFullPath(path)).ToList();
-    }
-
-    private static void ParsePaths(CliOptions opt)
-    {
-        var paths = opt.Paths.ToList();
-
-        if (paths.Count == 0)
-        {
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            Console.WriteLine(
-                $"{assembly.GetName().Name} {assembly.GetName().Version}\n\n" +
-                "WitchyBND has no GUI.\n" +
-                "Drag and drop a file onto the exe to unpack it,\n" +
-                "or an unpacked folder to repack it.\n\n" +
-                "DCX files will be transparently decompressed and recompressed;\n" +
-                "If you need to decompress or recompress an unsupported format,\n" +
-                "use WitchyBND.DCX instead.\n\n" +
-                "Press any key to exit."
-            );
-            Console.ReadKey();
-            return;
-        }
-
-        bool error = false;
-        int errorcode = 0;
-
-        paths = ProcessPathGlobs(paths);
-
-        try
-        {
-            ParseFiles(paths);
-        }
-        catch (DllNotFoundException ex) when (ex.Message.Contains("oo2core_6_win64.dll"))
-        {
-            Console.Error.WriteLine(
-                "ERROR: oo2core_6_win64.dll not found. Please copy this library from the game directory to WitchyBND's directory.");
-            errorcode = 3;
-            error = true;
-        }
-        catch (UnauthorizedAccessException)
-        {
-            using (Process current = Process.GetCurrentProcess())
-            {
-                var admin = new Process();
-                admin.StartInfo = current.StartInfo;
-                admin.StartInfo.FileName = current.MainModule.FileName;
-                admin.StartInfo.Arguments =
-                    Environment.CommandLine.Replace($"\"{Environment.GetCommandLineArgs()[0]}\"", "");
-                admin.StartInfo.Verb = "runas";
-                admin.Start();
-                return;
-            }
-        }
-        catch (FriendlyException ex)
-        {
-            Console.WriteLine();
-            Console.Error.WriteLine($"ERROR: {ex.Message}");
-            errorcode = 4;
-            error = true;
-        }
-
-        if (!error) return;
-
-        Console.WriteLine("One or more errors were encountered and displayed above.\nPress any key to exit.");
-        Console.ReadKey();
-        Environment.Exit(errorcode);
     }
 
     private static bool UnpackFile(string sourceFile, IProgress<float> progress)
@@ -693,19 +563,20 @@ static class Program
             "make sure your bnd contains the original bnd name.");
     }
 
+    public static void WriteError(string message)
+    {
+        PromptPlus.Error.WriteLine(message);
+        AccruedErrors.Add(message);
+    }
+
     static Program()
     {
-        Parsers = new List<WFileParser>
-        {
-            new Parsers.WFXR(),
-            new Parsers.WBND4(),
-        };
-
         Configuration = new Configuration
         {
             Dry = false,
-            Quiet = false,
-            Verbose = false,
+            Bnd = false,
+            Dcx = false
         };
+        AccruedErrors = new List<string>();
     }
 }

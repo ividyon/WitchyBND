@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Serialization;
+using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using SoulsFormats;
@@ -13,6 +14,38 @@ namespace WitchyLib;
 
 public static class WBUtil
 {
+
+
+    public static List<string> ProcessPathGlobs(List<string> paths)
+    {
+        var processedPaths = new List<string>();
+        foreach (string path in paths)
+        {
+            if (path.Contains('*'))
+            {
+                var matcher = new Matcher();
+                var rootParts = path.Split(Path.DirectorySeparatorChar).TakeWhile(part => !part.Contains('*')).ToList();
+                var root = string.Join(Path.DirectorySeparatorChar, rootParts);
+                var rest = path.Substring(root.Length + 1);
+
+                matcher = matcher.AddInclude(rest.Replace(Path.DirectorySeparatorChar.ToString(), "/"));
+                var files = Directory.GetFiles(Path.Combine(Environment.CurrentDirectory, root), "*",
+                    SearchOption.AllDirectories);
+                var match = matcher.Match(Path.Combine(Environment.CurrentDirectory, root), files);
+                if (match.HasMatches)
+                {
+                    processedPaths.AddRange(match.Files.Select(m => Path.Combine(root, m.Path)).ToList());
+                }
+            }
+            else
+            {
+                processedPaths.Add(path);
+            }
+        }
+
+        return processedPaths.Select(path => Path.GetFullPath(path)).ToList();
+    }
+
     public static string GetExeLocation()
     {
         return Path.GetDirectoryName(AppContext.BaseDirectory);
