@@ -40,13 +40,20 @@ Please see the included readme for detailed instructions.
 * *katalash* - GPARAM support
 * *Nordgaren* - Yabber+ additions, Armored Core VI additions
 * *DSMapStudio team* - FSParam, Paramdex
-* *NamelessHoodie* - FXR serialization
+* *Meowmaritus, NamelessHoodie* - initial FXR serialization
 * *Avocado* - YabberAvocado additions
 * *NatsuDragneelTheFireDragon* - MQB support
+* *Vawser* - preliminary Armored Core VI paramdefs
 * *ivi* - WitchyBND maintainer
 
 # Changelog
 ## WitchyBND
+
+### 1.0.7.0
+
+* Added support for decrypting/encrypting Armored Core VI regulation.bin. Thanks to Nordgaren for the encryption key.
+* Added preliminary Paramdex support for Armored Core VI PARAM serialization. Thanks to Vawser for the preliminary paramdefs.
+    * Please note that this will mostly be a bunch of Unknown fields; this is more of a tool for reverse engineering than anything else.
 
 ### 1.0.6.2
 

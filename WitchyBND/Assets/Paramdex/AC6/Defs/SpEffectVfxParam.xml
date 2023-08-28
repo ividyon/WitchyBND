@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<PARAMDEF XmlVersion="0">
+  <ParamType>SP_EFFECT_VFX_PARAM_ST</ParamType>
+  <DataVersion>4</DataVersion>
+  <BigEndian>False</BigEndian>
+  <Unicode>True</Unicode>
+  <FormatVersion>203</FormatVersion>
+  <Fields>
+    <!-- <Field Def="dummy8 paramSize[196]" /> -->
+    <Field Def="s32 midstSfxId"></Field>
+    <Field Def="s32 midstSeId"></Field>
+    <Field Def="s32 initSfxId"></Field>
+    <Field Def="s32 initSeId"></Field>
+    <Field Def="s32 finishSfxId"></Field>
+    <Field Def="s32 finishSeId"></Field>
+    <Field Def="s32 Unk0x18"></Field>
+    <Field Def="f32 Unk0x1C"></Field>
+    <Field Def="f32 Unk0x20"></Field>
+    <Field Def="s16 midstDmyId"></Field>
+    <Field Def="s16 initDmyId"></Field>
+    <Field Def="s16 finishDmyId"></Field>
+    <Field Def="u8 effectType"></Field>
+    <Field Def="u8 soulParamIdForWepEnchant"></Field>
+    <Field Def="u8 playCategory"></Field>
+    <Field Def="u8 playPriority"></Field>
+    <Field Def="u8 existEffectForLarge:1"></Field>
+    <Field Def="u8 existEffectForSoul:1"></Field>
+    <Field Def="u8 effectInvisibleAtCamouflage:1"></Field>
+    <Field Def="u8 useCamouflage:1"></Field>
+    <Field Def="u8 invisibleAtFriendCamouflage:1"></Field>
+    <Field Def="u8 isHideFootEffect_forCamouflage:1"></Field>
+    <Field Def="u8 halfCamouflage:1"></Field>
+    <Field Def="u8 isFullBodyTransformProtectorId:1"></Field>
+    <Field Def="u8 isInvisibleWeapon:1"></Field>
+    <Field Def="u8 isSilence:1"></Field>
+    <Field Def="u8 isMidstFullbody:1"></Field>
+    <Field Def="u8 isInitFullbody:1"></Field>
+    <Field Def="u8 isFinishFullbody:1"></Field>
+    <Field Def="u8 isVisibleDeadChr:1"></Field>
+    <Field Def="u8 isUseOffsetEnchantSfxSize:1"></Field>
+    <Field Def="dummy8 pad_1:1"></Field>
+    <Field Def="s32 Unk0x30"></Field>
+    <Field Def="s32 Unk0x34"></Field>
+    <Field Def="s32 Unk0x38"></Field>
+    <Field Def="s32 Unk0x3C"></Field>
+    <Field Def="s32 Unk0x40"></Field>
+    <Field Def="s32 Unk0x44"></Field>
+    <Field Def="s32 Unk0x48"></Field>
+    <Field Def="s32 Unk0x4C"></Field>
+    <Field Def="s32 Unk0x50"></Field>
+    <Field Def="s32 Unk0x54"></Field>
+    <Field Def="s32 Unk0x58"></Field>
+    <Field Def="s32 Unk0x5C"></Field>
+    <Field Def="s32 Unk0x60"></Field>
+    <Field Def="s32 Unk0x64"></Field>
+    <Field Def="s32 Unk0x68"></Field>
+    <Field Def="s32 Unk0x6C"></Field>
+    <Field Def="s32 Unk0x70"></Field>
+    <Field Def="s32 Unk0x74"></Field>
+    <Field Def="s32 Unk0x78"></Field>
+    <Field Def="s32 Unk0x7C"></Field>
+    <Field Def="s32 Unk0x80"></Field>
+    <Field Def="s32 Unk0x84"></Field>
+    <Field Def="s32 Unk0x88"></Field>
+    <Field Def="s32 Unk0x8C"></Field>
+    <Field Def="s32 Unk0x90"></Field>
+    <Field Def="s32 Unk0x94"></Field>
+    <Field Def="s32 Unk0x98"></Field>
+    <Field Def="s32 Unk0x9C"></Field>
+    <Field Def="s32 Unk0xA0"></Field>
+    <Field Def="s32 Unk0xA4"></Field>
+    <Field Def="f32 Unk0xA8"></Field>
+    <Field Def="f32 Unk0xAC"></Field>
+    <Field Def="f32 Unk0xB0"></Field>
+    <Field Def="s32 Unk0xB4"></Field>
+    <Field Def="s32 Unk0xB8"></Field>
+    <Field Def="s32 Unk0xBC"></Field>
+    <Field Def="s32 Unk0xC0"></Field>
+  </Fields>
+</PARAMDEF>

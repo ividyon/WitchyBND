@@ -61,7 +61,8 @@ public static class WBUtil
         DS2S,
         DS3,
         ER,
-        SDT
+        SDT,
+        AC6
     }
 
     public static Dictionary<GameType, string> GameNames = new Dictionary<GameType, string>()
@@ -74,7 +75,8 @@ public static class WBUtil
         { GameType.DS2S, "DS2S" },
         { GameType.DS3, "DS3" },
         { GameType.ER, "ER" },
-        { GameType.SDT, "SDT" }
+        { GameType.SDT, "SDT" },
+        { GameType.AC6, "AC6" },
     };
 
     public static GameType DetermineParamdexGame(string path)
@@ -91,8 +93,8 @@ public static class WBUtil
             string filename = xml.SelectSingleNode("bnd4/filename").InnerText;
             if (filename == "regulation.bin")
             {
-                // We are loading ELDEN RING param
-                gameNullable = GameType.ER;
+                Enum.TryParse(xml.SelectSingleNode("bnd4/game").InnerText, out GameType regGame);
+                gameNullable = regGame;
             }
         }
 
@@ -107,7 +109,7 @@ public static class WBUtil
             Console.WriteLine(String.Join(", ", GameNames.Values));
             Console.Write($"Game: ");
             string input = Console.ReadLine().ToUpper();
-            var flippedDict = WBUtil.GameNames.ToDictionary(pair => pair.Value, pair => pair.Key);
+            var flippedDict = GameNames.ToDictionary(pair => pair.Value, pair => pair.Key);
             if (string.IsNullOrEmpty(input) || !flippedDict.ContainsKey(input))
             {
                 throw new Exception("Could not determine PARAM type.");
@@ -117,6 +119,62 @@ public static class WBUtil
         }
 
         return gameNullable.Value;
+    }
+
+    /// <summary>
+    /// Decrypts and unpacks a regulation BND4 from the specified path, and also outputs the game it's from.
+    /// </summary>
+    public static BND4 DecryptRegulationBin(string path, out GameType game)
+    {
+        try
+        {
+            game = GameType.ER;
+            return SFUtil.DecryptERRegulation(path);
+        }
+        catch (Exception e1)
+        {
+            try
+            {
+                game = GameType.AC6;
+                return SFUtil.DecryptAC6Regulation(path);
+            }
+            catch (Exception e2)
+            {
+                throw new InvalidDataException($"File is not a regulation.bin BND for Elden Ring or Armored Core VI.", e2);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Repacks and encrypts an regulation BND4 for a specified game to the specified path.
+    /// </summary>
+    public static void EncryptRegulationBin(string path, GameType game, BND4 bnd)
+    {
+        switch (game)
+        {
+            case GameType.ER:
+                SFUtil.EncryptERRegulation(path, bnd);
+                break;
+            case GameType.AC6:
+                SFUtil.EncryptAC6Regulation(path, bnd);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(game), game, null);
+        }
+    }
+
+    /// <summary>
+    /// Determines whether the output of a decrypted regulation.bin file actually
+    /// gives a proper BND4 or not.
+    /// </summary>
+    public static BND4 IsRegulationBin(string path, GameType game)
+    {
+        return game switch
+        {
+            GameType.ER => SFUtil.DecryptERRegulation(path),
+            GameType.AC6 => SFUtil.DecryptAC6Regulation(path),
+            _ => throw new InvalidOperationException("Only Elden Ring and Armored Core VI have a regulation.bin")
+        };
     }
 
     /// <summary>
@@ -136,17 +194,6 @@ public static class WBUtil
 
         return false;
     }
-    // public static bool ApplyParamdefLessCarefully(this WitchyFormats.FsParam param, PARAMDEF paramdef)
-    // {
-    //     if (param.ParamType == paramdef.ParamType &&
-    //         (param.DetectedSize == 0 || param.DetectedSize == paramdef.GetRowSize()))
-    //     {
-    //         param.ApplyParamdef(paramdef);
-    //         return true;
-    //     }
-    //
-    //     return false;
-    // }
 
     public static string GetXmlPath(string type, string dir = "")
     {
@@ -281,8 +328,7 @@ public static class WBUtil
         string[] libraryFolders = File.ReadAllLines($@"{steamPath}\SteamApps\libraryfolders.vdf");
 
         var pathStrings = libraryFolders.Where(str => str.Contains("\"path\""));
-        var paths = pathStrings.Select(str =>
-        {
+        var paths = pathStrings.Select(str => {
             var split = str.Split('"').Where((s, i) => i % 2 == 1).ToList();
             if (split.Count == 2)
                 return split[1];
@@ -327,7 +373,7 @@ public static class WBUtil
         "ARMORED CORE VI FIRES OF RUBICON",
     };
 
-    
+
     public static string GetOodlePath()
     {
         foreach (string game in Oodle6Games)
@@ -336,7 +382,7 @@ public static class WBUtil
             if (path != null)
                 return path;
         }
-        
+
         foreach (string game in Oodle8Games)
         {
             string path = TryGetGameInstallLocation($"\\steamapps\\common\\{game}\\Game\\oo2core_8_win64.dll");
@@ -372,6 +418,7 @@ public static class WBUtil
             xmlSer.Serialize(xw, obj);
         }
     }
+
     public static byte[] XmlSerialize<T>(object obj)
     {
         var stream = new MemoryStream();
@@ -473,6 +520,7 @@ public static class WBUtil
                 .Replace(EscapeString + EscapeString, EscapeString);
         }
     }
+
     public static byte[] TryDecompressBytes(string sourceFile, out DCX.Type compression)
     {
         try
@@ -509,7 +557,7 @@ public static class WBUtil
             Kernel32.FreeLibrary(handle);
         }
     }
-    
+
     public static void TryWriteSoulsFile(this ISoulsFile file, string path)
     {
         try
@@ -527,7 +575,7 @@ public static class WBUtil
             Kernel32.FreeLibrary(handle);
         }
     }
-    
+
     public static void TryWriteBXF(this BXF4 file, string bhdPath, string bdtPath)
     {
         try
@@ -545,7 +593,7 @@ public static class WBUtil
             Kernel32.FreeLibrary(handle);
         }
     }
-    
+
     public static void TryWriteBXF(this BXF3 file, string bhdPath, string bdtPath)
     {
         try

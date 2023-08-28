@@ -395,18 +395,18 @@ static class Program
             return false;
         }
 
-    private static bool UnpackRegulationFile(string fileName, string sourceDir, string targetDir,
-        IProgress<float> progress)
-    {
-        if (fileName.Contains("regulation.bin"))
+        private static bool UnpackRegulationFile(string fileName, string sourceDir, string targetDir, IProgress<float> progress)
         {
-            string destPath = Path.Combine(sourceDir, fileName);
-            BND4 bnd = SFUtil.DecryptERRegulation(destPath);
-            Console.WriteLine($"ER Regulation Bin: {fileName}...");
-            using (var bndReader = new BND4Reader(bnd.Write()))
+
+            if (fileName.Contains("regulation.bin"))
             {
-                bndReader.Unpack(fileName, targetDir, progress);
-            }
+                string destPath = Path.Combine(sourceDir, fileName);
+                Console.WriteLine($"Regulation Bin: {fileName}...");
+                BND4 bnd = WBUtil.DecryptRegulationBin(destPath, out WBUtil.GameType game);
+                using (var bndReader = new BND4Reader(bnd.Write()))
+                {
+                    bndReader.Unpack(fileName, targetDir, progress, game);
+                }
 
             return false;
         }
@@ -504,29 +504,28 @@ static class Program
             return true;
         }
 
-        if (sourceName.Contains("regulation-bnd-dcx") || sourceName.Contains("Data0") ||
-            sourceName.Contains("regulation-bin"))
-            return ReEncryptRegulationFile(sourceName, sourceDir, targetDir, progress);
+            if (sourceName.Contains("regulation-bnd-dcx") || sourceName.Contains("Data0") || sourceName.Contains("regulation-bin"))
+                return ReEncryptRegulationFile( sourceName, sourceDir, targetDir);
 
         return false;
     }
 
-    private static bool ReEncryptRegulationFile(string sourceName, string sourceDir, string targetDir,
-        IProgress<float> progress)
-    {
-        XmlDocument xml = new XmlDocument();
+        private static bool ReEncryptRegulationFile(string sourceName, string sourceDir, string targetDir)
+        {
+            XmlDocument xml = new XmlDocument();
 
         xml.Load(WBUtil.GetXmlPath("bnd4", sourceDir));
 
         string filename = xml.SelectSingleNode("bnd4/filename").InnerText;
         string regFile = $"{targetDir}\\{filename}";
 
-        if (filename.Contains("regulation.bin"))
-        {
-            BND4 bnd = BND4.Read(regFile);
-            SFUtil.EncryptERRegulation(regFile, bnd);
-            return false;
-        }
+            if (filename.Contains("regulation.bin"))
+            {
+                Enum.TryParse(xml.SelectSingleNode("bnd4/game")?.InnerText ?? "ER", out WBUtil.GameType game);
+                BND4 bnd = BND4.Read(regFile);
+                WBUtil.EncryptRegulationBin(regFile, game, bnd);
+                return false;
+            }
 
         if (filename.Contains("Data0"))
         {
