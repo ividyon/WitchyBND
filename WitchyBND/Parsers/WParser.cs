@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Xml;
 using System.Xml.Linq;
-using System.Xml.Serialization;
 using SoulsFormats;
-using WitchyFormats;
 using WitchyLib;
 
 namespace WitchyBND.Parsers;
@@ -16,6 +12,7 @@ public enum WFileParserVerb
     Unpack = 0,
     Serialize = 1,
 }
+
 public abstract class WFileParser
 {
     public virtual WFileParserVerb Verb => WFileParserVerb.Unpack;
@@ -36,21 +33,58 @@ public abstract class WFolderParser : WFileParser
 {
     public override WFileParserVerb Verb => WFileParserVerb.Unpack;
 
-    public virtual string GetUnpackDestPath(string srcPath)
+    protected virtual string GetUnpackDestDir(string srcPath)
     {
         string sourceDir = new FileInfo(srcPath).Directory?.FullName;
         string fileName = Path.GetFileName(srcPath);
         return $"{sourceDir}\\{fileName.Replace('.', '-')}";
     }
 
-    public abstract string GetRepackDestPath(string srcDirPath, string destFileName);
+    protected virtual string GetRepackDestPath(string srcDirPath, string destFileName)
+    {
+        string targetDir = new DirectoryInfo(srcDirPath).Parent?.FullName;
+        return $"{targetDir}\\{destFileName}";
+    }
+
+    public override bool IsUnpacked(string path)
+    {
+        if (!Directory.Exists(path)) return false;
+
+        string xmlPath = Path.Combine(path, GetXmlFilename());
+        if (!File.Exists(xmlPath)) return false;
+
+        var doc = XDocument.Load(xmlPath);
+        return doc.Root != null && doc.Root.Name == Name.ToLower();
+    }
+
+    protected virtual string GetXmlFilename()
+    {
+        return $"_witchy-{Name.ToLower()}.xml";
+    }
+
+    protected virtual string GetXmlPath(string dir)
+    {
+        dir = string.IsNullOrEmpty(dir) ? dir : $"{dir}\\";
+
+        if (File.Exists($"{dir}{GetXmlFilename()}"))
+        {
+            return $"{dir}_witchy-{Name.ToLower()}.xml";
+        }
+
+        if (File.Exists($"{dir}_yabber-{Name.ToLower()}.xml"))
+        {
+            return $"{dir}_yabber-{Name.ToLower()}.xml";
+        }
+
+        return $"{dir}{GetXmlFilename()}";
+    }
 }
 
 public abstract class WBinderParser : WFolderParser
 {
-    public static XElement WriteBinderFiles(BinderReader bnd, string destDirPath, string root)
+    protected static XElement WriteBinderFiles(BinderReader bnd, string destDirPath, string root)
     {
-        XElement files = new XElement("files");
+        var files = new XElement("files");
         var pathCounts = new Dictionary<string, int>();
 
         for (int i = 0; i < bnd.Files.Count; i++)
@@ -72,7 +106,7 @@ public abstract class WBinderParser : WFolderParser
             }
 
             var fileElement = new XElement("file",
-            new XElement("flags", file.Flags.ToString()));
+                new XElement("flags", file.Flags.ToString()));
 
             if (Binder.HasIDs(bnd.Format))
                 fileElement.Add(new XElement("id", file.ID.ToString()));
@@ -95,10 +129,10 @@ public abstract class WBinderParser : WFolderParser
                 fileElement.Add("compression_type", file.CompressionType.ToString());
 
             byte[] bytes = bnd.ReadFile(file);
-            string outPath =
+            string destPath =
                 $@"{destDirPath}\{Path.GetDirectoryName(path)}\{Path.GetFileNameWithoutExtension(path)}{suffix}{Path.GetExtension(path)}";
-            Directory.CreateDirectory(Path.GetDirectoryName(outPath));
-            File.WriteAllBytes(outPath, bytes);
+            Directory.CreateDirectory(Path.GetDirectoryName(destPath));
+            File.WriteAllBytes(destPath, bytes);
 
             files.Add(fileElement);
         }
@@ -106,34 +140,33 @@ public abstract class WBinderParser : WFolderParser
         return files;
     }
 
-    public static void ReadBinderFiles(IBinder bnd, XmlNode filesNode, string destPath, string root)
+    protected static void ReadBinderFiles(IBinder bnd, XElement filesElement, string srcDirPath, string root)
     {
-        foreach (XmlNode fileNode in filesNode.SelectNodes("file"))
+        foreach (XElement file in filesElement.Elements("file"))
         {
-            if (fileNode.SelectSingleNode("path") == null)
+            if (file.Element("path") == null)
                 throw new FriendlyException("File node missing path tag.");
 
-            string strFlags = fileNode.SelectSingleNode("flags")?.InnerText ?? "Flag1";
-            string strID = fileNode.SelectSingleNode("id")?.InnerText ?? "-1";
-            string path = fileNode.SelectSingleNode("path").InnerText;
-            string suffix = fileNode.SelectSingleNode("suffix")?.InnerText ?? "";
-            string strCompression =
-                fileNode.SelectSingleNode("compression_type")?.InnerText ?? DCX.Type.Zlib.ToString();
+            string strFlags = file.Element("flags")?.Value ?? "Flag1";
+            string strId = file.Element("id")?.Value ?? "-1";
+            string path = file.Element("path")!.Value;
+            string suffix = file.Element("suffix")?.Value ?? "";
+            string strCompression = file.Element("compression_type")?.Value ?? DCX.Type.Zlib.ToString();
             string name = root + path;
 
             if (!Enum.TryParse(strFlags, out Binder.FileFlags flags))
                 throw new FriendlyException(
                     $"Could not parse file flags: {strFlags}\nFlags must be comma-separated list of flags.");
 
-            if (!int.TryParse(strID, out int id))
-                throw new FriendlyException($"Could not parse file ID: {strID}\nID must be a 32-bit signed integer.");
+            if (!int.TryParse(strId, out int id))
+                throw new FriendlyException($"Could not parse file ID: {strId}\nID must be a 32-bit signed integer.");
 
             if (!Enum.TryParse(strCompression, out DCX.Type compressionType))
                 throw new FriendlyException(
                     $"Could not parse compression type: {strCompression}\nCompression type must be a valid DCX Type.");
 
             string inPath =
-                $@"{destPath}\{Path.GetDirectoryName(path)}\{Path.GetFileNameWithoutExtension(path)}{suffix}{Path.GetExtension(path)}";
+                $@"{srcDirPath}\{Path.GetDirectoryName(path)}\{Path.GetFileNameWithoutExtension(path)}{suffix}{Path.GetExtension(path)}";
             if (!File.Exists(inPath))
                 throw new FriendlyException($"File not found: {inPath}");
 
@@ -149,6 +182,7 @@ public abstract class WBinderParser : WFolderParser
 public abstract class WXMLParser : WSingleFileParser
 {
     public override WFileParserVerb Verb => WFileParserVerb.Serialize;
+
     public override string GetUnpackDestPath(string srcPath)
     {
         return $"{srcPath}.xml";

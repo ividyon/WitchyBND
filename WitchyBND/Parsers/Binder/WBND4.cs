@@ -14,25 +14,14 @@ public class WBND4 : WBinderParser
 
     public override bool Is(string path)
     {
-        return BND4.Is(path);
-    }
-
-    public override bool IsUnpacked(string path)
-    {
-        if (!Directory.Exists(path)) return false;
-
-        string xmlPath = Path.Combine(path, "_witchy-bnd4.xml");
-        if (!File.Exists(xmlPath)) return false;
-
-        var doc = XDocument.Load(xmlPath);
-        return doc.Root != null && doc.Root.Name == "bnd4";
+        return File.Exists(path) && BND4.Is(path);
     }
 
     public override void Unpack(string srcPath)
         {
             var bnd = new BND4Reader(srcPath);
             string srcName = Path.GetFileName(srcPath);
-            string destDir = GetUnpackDestPath(srcPath);
+            string destDir = GetUnpackDestDir(srcPath);
             Directory.CreateDirectory(destDir);
 
             var root = "";
@@ -44,7 +33,7 @@ public class WBND4 : WBinderParser
             XElement files = WriteBinderFiles(bnd, destDir, root);
 
             var xml =
-                new XElement("bnd4",
+                new XElement(Name.ToLower(),
                     new XElement("filename", srcName),
                     new XElement("compression", bnd.Compression.ToString()),
                     new XElement("version", bnd.Version),
@@ -60,7 +49,7 @@ public class WBND4 : WBinderParser
             if (!string.IsNullOrEmpty(root))
                 files.AddBeforeSelf(new XElement("root", root));
 
-            var xw = XmlWriter.Create($"{destDir}\\_witchy-bnd4.xml", new XmlWriterSettings
+            var xw = XmlWriter.Create($"{destDir}\\${GetXmlFilename()}", new XmlWriterSettings
             {
                 Indent = true
             });
@@ -72,40 +61,31 @@ public class WBND4 : WBinderParser
         {
             var bnd = new BND4();
 
-            var xml = new XmlDocument();
-            xml.Load(WBUtil.GetXmlPath("bnd4", srcPath));
-
-            var doc = XDocument.Load(WBUtil.GetXmlPath("bnd4", srcPath));
+            var doc = XDocument.Load(GetXmlPath(srcPath));
             if (doc.Root == null) throw new XmlException("XML has no root");
-            var myXml = doc.Root;
+            XElement xml = doc.Root;
             string filename = doc.Root.Element("filename")!.Value;
 
-            string root = myXml.Element("root")?.Value ?? "";
+            string root = xml.Element("root")?.Value ?? "";
 
-            Enum.TryParse(myXml.Element("compression")?.Value ?? "None", out DCX.Type compression);
+            Enum.TryParse(xml.Element("compression")?.Value ?? "None", out DCX.Type compression);
             bnd.Compression = compression;
 
-            bnd.Version = myXml.Element("version")!.Value;
-            bnd.Format = (Binder.Format)Enum.Parse(typeof(Binder.Format), myXml.Element("format")!.Value);
-            bnd.BigEndian = bool.Parse(myXml.Element("bigendian")!.Value);
-            bnd.BitBigEndian = bool.Parse(myXml.Element("bitbigendian")!.Value);
-            bnd.Unicode = bool.Parse(myXml.Element("unicode")!.Value);
-            bnd.Extended = Convert.ToByte(myXml.Element("extended")!.Value, 16);
-            bnd.Unk04 = bool.Parse(myXml.Element("unk04")!.Value);
-            bnd.Unk05 = bool.Parse(myXml.Element("unk05")!.Value);
+            bnd.Version = xml.Element("version")!.Value;
+            bnd.Format = (Binder.Format)Enum.Parse(typeof(Binder.Format), xml.Element("format")!.Value);
+            bnd.BigEndian = bool.Parse(xml.Element("bigendian")!.Value);
+            bnd.BitBigEndian = bool.Parse(xml.Element("bitbigendian")!.Value);
+            bnd.Unicode = bool.Parse(xml.Element("unicode")!.Value);
+            bnd.Extended = Convert.ToByte(xml.Element("extended")!.Value, 16);
+            bnd.Unk04 = bool.Parse(xml.Element("unk04")!.Value);
+            bnd.Unk05 = bool.Parse(xml.Element("unk05")!.Value);
 
-            WBinder.ReadBinderFiles(bnd, xml.SelectSingleNode("bnd4/files"), srcPath, root);
-
+            if (xml.Element("files") != null)
+                ReadBinderFiles(bnd, xml.Element("files")!, srcPath, root);
 
             var destPath = GetRepackDestPath(srcPath, filename);
 
-            string outPath = $"{destPath}\\{filename}";
-            WBUtil.Backup(outPath);
-            bnd.Write(outPath);
-        }
-
-        public override string GetRepackDestPath(string srcDirPath, string destFileName)
-        {
-            throw new NotImplementedException();
+            WBUtil.Backup(destPath);
+            bnd.Write(destPath);
         }
 }

@@ -33,7 +33,7 @@ public static class Parse
             errorcode = 3;
             error = true;
         }
-        catch (UnauthorizedAccessException)
+        catch (UnauthorizedAccessException e)
         {
             using (Process current = Process.GetCurrentProcess())
             {
@@ -68,9 +68,6 @@ public static class Parse
         {
             string fileName = Path.GetFileName(path);
             var parsed = false;
-
-            if (Program.Configuration.Dcx)
-                Parsers.Insert(0, new Parsers.WBND4());
 
             foreach (WFileParser parser in Parsers)
             {
@@ -121,11 +118,11 @@ public static class Parse
         {
             new Parsers.WDCX(),
             //Regulation file
-            //FFXBND
-            //BND3
+            new Parsers.WFFXBND(),
+            new Parsers.WBND3(),
             new Parsers.WBND4(),
-            //BXF3
-            //BXF4
+            new Parsers.WBXF3(),
+            new Parsers.WBXF4(),
             //FFXDLSE
             //FFX
             //FMG
