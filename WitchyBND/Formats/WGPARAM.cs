@@ -267,7 +267,7 @@ namespace WitchyBND
         path = sourceFile.EndsWith(".fltparam.dcx.xml") ? sourceFile.Replace(".fltparam.dcx.xml", ".fltparam.dcx") : throw new InvalidOperationException("Invalid GPARAM xml filename.");
       if (File.Exists(path))
         WBUtil.Backup(path);
-      gparam.Write(path);
+      gparam.TryWriteSoulsFile(path);
     }
   }
 }

@@ -180,7 +180,7 @@ public static class WBUtil
 
         if (path.Contains("..\\") || path.Contains("../"))
             throw new InvalidDataException(
-                $"the path {path} contains invalid data, attempting to extract to a different folder. Please report this bnd to Nordgaren.");
+                $"the path {path} contains invalid data, attempting to extract to a different folder. Please report this file to Nordgaren.");
         return RemoveLeadingBackslashes(path);
     }
 
@@ -280,17 +280,30 @@ public static class WBUtil
         return installPath;
     }
 
-    private static string[] OodleGames =
+    private static string[] Oodle6Games =
     {
         "Sekiro",
         "ELDEN RING",
     };
 
+    private static string[] Oodle8Games =
+    {
+        "ARMORED CORE VI FIRES OF RUBICON",
+    };
+
+    
     public static string GetOodlePath()
     {
-        foreach (string game in OodleGames)
+        foreach (string game in Oodle6Games)
         {
             string path = TryGetGameInstallLocation($"\\steamapps\\common\\{game}\\Game\\oo2core_6_win64.dll");
+            if (path != null)
+                return path;
+        }
+        
+        foreach (string game in Oodle8Games)
+        {
+            string path = TryGetGameInstallLocation($"\\steamapps\\common\\{game}\\Game\\oo2core_8_win64.dll");
             if (path != null)
                 return path;
         }
@@ -424,4 +437,95 @@ public static class WBUtil
                 .Replace(EscapeString + EscapeString, EscapeString);
         }
     }
+    public static byte[] TryDecompressBytes(string sourceFile, out DCX.Type compression)
+    {
+        try
+        {
+            return DCX.Decompress(sourceFile, out compression);
+        }
+        catch (NoOodleFoundException ex)
+        {
+            string oo2corePath = WBUtil.GetOodlePath();
+            if (oo2corePath == null)
+                throw;
+
+            IntPtr handle = Kernel32.LoadLibrary(oo2corePath);
+            byte[] bytes = DCX.Decompress(sourceFile, out compression);
+            Kernel32.FreeLibrary(handle);
+            return bytes;
+        }
+    }
+
+    public static void TryCompressBytes(byte[] data, DCX.Type type, string path)
+    {
+        try
+        {
+            DCX.Compress(data, type, path);
+        }
+        catch (NoOodleFoundException ex)
+        {
+            string oo2corePath = WBUtil.GetOodlePath();
+            if (oo2corePath == null)
+                throw;
+
+            IntPtr handle = Kernel32.LoadLibrary(oo2corePath);
+            DCX.Compress(data, type, path);
+            Kernel32.FreeLibrary(handle);
+        }
+    }
+    
+    public static void TryWriteSoulsFile(this ISoulsFile file, string path)
+    {
+        try
+        {
+            file.Write(path);
+        }
+        catch (NoOodleFoundException ex)
+        {
+            string oo2corePath = GetOodlePath();
+            if (oo2corePath == null)
+                throw;
+
+            IntPtr handle = Kernel32.LoadLibrary(oo2corePath);
+            file.Write(path);
+            Kernel32.FreeLibrary(handle);
+        }
+    }
+    
+    public static void TryWriteBXF(this BXF4 file, string bhdPath, string bdtPath)
+    {
+        try
+        {
+            file.Write(bhdPath, bdtPath);
+        }
+        catch (NoOodleFoundException ex)
+        {
+            string oo2corePath = GetOodlePath();
+            if (oo2corePath == null)
+                throw;
+
+            IntPtr handle = Kernel32.LoadLibrary(oo2corePath);
+            file.Write(bhdPath, bdtPath);
+            Kernel32.FreeLibrary(handle);
+        }
+    }
+    
+    public static void TryWriteBXF(this BXF3 file, string bhdPath, string bdtPath)
+    {
+        try
+        {
+            file.Write(bhdPath, bdtPath);
+        }
+        catch (NoOodleFoundException ex)
+        {
+            string oo2corePath = GetOodlePath();
+            if (oo2corePath == null)
+                throw;
+
+            IntPtr handle = Kernel32.LoadLibrary(oo2corePath);
+            file.Write(bhdPath, bdtPath);
+            Kernel32.FreeLibrary(handle);
+        }
+    }
+
 }

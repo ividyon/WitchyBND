@@ -20,7 +20,7 @@ namespace WitchyBND
 
             string outPath = sourceFile.Replace(".ffx.xml", ".ffx").Replace(".ffx.dcx.xml", ".ffx.dcx");
             WBUtil.Backup(outPath);
-            ffx.Write(outPath);
+            ffx.TryWriteSoulsFile(outPath);
         }
     }
 }

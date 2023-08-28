@@ -58,7 +58,7 @@ namespace WitchyBND
 
             string outPath = sourceFile.Replace(".fmg.xml", ".fmg");
             WBUtil.Backup(outPath);
-            fmg.Write(outPath);
+            fmg.TryWriteSoulsFile(outPath);
         }
     }
 }

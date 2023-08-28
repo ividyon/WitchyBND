@@ -212,7 +212,7 @@ namespace WitchyBND
 
             string outPath = sourceFile.Replace(".mqb.xml", ".mqb");
             WBUtil.Backup(outPath);
-            mqb.Write(outPath);
+            mqb.TryWriteSoulsFile(outPath);
         }
 
         #region RepackHelpers

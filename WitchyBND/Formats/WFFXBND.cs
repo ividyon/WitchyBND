@@ -223,6 +223,6 @@ static class WFFXBND
 
         string outPath = $"{targetDir}\\{filename}";
         WBUtil.Backup(outPath);
-        bnd.Write(outPath);
+        bnd.TryWriteSoulsFile(outPath);
     }
 }

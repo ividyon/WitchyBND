@@ -109,7 +109,6 @@ namespace WitchyBND
                     if (Directory.Exists(path))
                     {
                         error |= RepackDir(path, progress);
-
                     }
                     else if (File.Exists(path))
                     {
@@ -122,10 +121,17 @@ namespace WitchyBND
                         error = true;
                     }
                 }
-                catch (DllNotFoundException ex) when (ex.Message.Contains("oo2core_6_win64.dll"))
+                catch (DllNotFoundException ex) 
                 {
                     Console.Error.WriteLine(
-                        "ERROR: oo2core_6_win64.dll not found. Please copy this library from the game directory to WitchyBND's directory.");
+                        $"ERROR: {ex.Message}");
+                    errorcode = 3;
+                    error = true;
+                }
+                catch (NoOodleFoundException ex)
+                {
+                    Console.Error.WriteLine(
+                        $"ERROR: {ex.Message}");
                     errorcode = 3;
                     error = true;
                 }
@@ -185,7 +191,7 @@ namespace WitchyBND
             if (DCX.Is(sourceFile))
             {
                 Console.WriteLine($"Decompressing DCX: {fileName}...");
-                byte[] bytes = TryDecompressBytes(sourceFile, out DCX.Type compression);
+                byte[] bytes = WBUtil.TryDecompressBytes(sourceFile, out DCX.Type compression);
 
                 if (BND3.Is(bytes))
                 {
@@ -456,24 +462,6 @@ namespace WitchyBND
             }
 
             return false;
-        }
-        private static byte[] TryDecompressBytes(string sourceFile, out DCX.Type compression)
-        {
-            try
-            {
-                return DCX.Decompress(sourceFile, out compression);
-            }
-            catch (DllNotFoundException ex) when (ex.Message.Contains("oo2core_6_win64.dll"))
-            {
-                string oo2corePath = WBUtil.GetOodlePath();
-                if (oo2corePath == null)
-                    throw;
-
-                IntPtr handle = Kernel32.LoadLibrary(oo2corePath);
-                byte[] bytes = DCX.Decompress(sourceFile, out compression);
-                Kernel32.FreeLibrary(handle);
-                return bytes;
-            }
         }
 
         private static bool UnpackRegulationFile(string fileName, string sourceDir, string targetDir, IProgress<float> progress)

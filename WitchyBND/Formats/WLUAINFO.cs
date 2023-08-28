@@ -53,7 +53,7 @@ namespace WitchyBND
 
             string outPath = sourceFile.Replace(".luainfo.xml", ".luainfo");
             WBUtil.Backup(outPath);
-            info.Write(outPath);
+            info.TryWriteSoulsFile(outPath);
         }
     }
 }

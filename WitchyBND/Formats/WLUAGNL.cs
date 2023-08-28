@@ -41,7 +41,7 @@ namespace WitchyBND
 
             string outPath = sourceFile.Replace(".luagnl.xml", ".luagnl");
             WBUtil.Backup(outPath);
-            gnl.Write(outPath);
+            gnl.TryWriteSoulsFile(outPath);
         }
     }
 }

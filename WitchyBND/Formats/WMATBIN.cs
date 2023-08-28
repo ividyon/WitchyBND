@@ -29,8 +29,8 @@ namespace WitchyBND
                 throw new InvalidOperationException("Invalid MATBIN xml filename.");
 
             if (File.Exists(outPath)) WBUtil.Backup(outPath);
-
-            WBUtil.XmlDeserialize<MATBIN>(sourceFile).Write(outPath);
+            
+            WBUtil.XmlDeserialize<MATBIN>(sourceFile).TryWriteSoulsFile(outPath);
 
             return false;
         }

@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Runtime.Versioning;
 using System.Xml;
 using Microsoft.Extensions.FileSystemGlobbing;
+using WitchyLib;
 
 namespace WitchyBND
 {
@@ -121,7 +122,7 @@ namespace WitchyBND
             else
                 outPath = $"{sourceFile}.undcx";
 
-            byte[] bytes = DCX.Decompress(sourceFile, out DCX.Type compression);
+            byte[] bytes = WBUtil.TryDecompressBytes(sourceFile, out DCX.Type compression);
             File.WriteAllBytes(outPath, bytes);
 
             XmlWriterSettings xws = new XmlWriterSettings();
@@ -159,7 +160,7 @@ namespace WitchyBND
             if (File.Exists(outPath) && !File.Exists(outPath + ".bak"))
                 File.Move(outPath, outPath + ".bak");
 
-            DCX.Compress(File.ReadAllBytes(path), compression, outPath);
+            WBUtil.TryCompressBytes(File.ReadAllBytes(path), compression, outPath);
 
             return false;
         }

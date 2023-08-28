@@ -126,9 +126,9 @@ namespace WitchyBND
             WBUtil.Backup(outPath);
             try
             {
-                tpf.Write(outPath);
+                tpf.TryWriteSoulsFile(outPath);
             }
-            catch (Exception e)
+            catch (Exception e) when (e is not NoOodleFoundException)
             {
                 if (platform != TPF.TPFPlatform.PC)
                 {
@@ -138,7 +138,7 @@ namespace WitchyBND
                     return true;
                 }
 
-                throw new Exception($"Error while writing TPF", e);
+                throw;
             }
 
             return false;
