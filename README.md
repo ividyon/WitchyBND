@@ -29,7 +29,7 @@ Planned (but TBD):
 * Other formats from other Yabber forks (Let me know which are flying around the community)
 
 ## Yabber
-An unpacker/repacker for common Demon's Souls, Dark Souls 1-3, Bloodborne, Sekiro, Elden Ring file formats. Supports .bnd, .bhd/.bdt, .dcx, .fltparam, .fmg, .gparam, .luagnl, .luainfo, and .tpf.
+An unpacker/repacker for common Demon's Souls, Dark Souls 1-3, Bloodborne, Sekiro, Elden Ring, Armored Core VI file formats. Supports .bnd, .bhd/.bdt, .dcx, .fltparam, .fmg, .gparam, .luagnl, .luainfo, and .tpf.
 Does not support dvdbnds (the very large bhd/bdt pairs in the main game directory); use [UDSFM](https://www.nexusmods.com/darksouls/mods/1304) or [UXM](https://www.nexusmods.com/sekiro/mods/26) to unpack those first.  
 Requires [.NET Desktop Runtime 7.0](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-7.0.5-windows-x64-installer).  
 
@@ -38,7 +38,7 @@ Please see the included readme for detailed instructions.
 # Contributors
 * *TKGP* - Basically everything
 * *katalash* - GPARAM support
-* *Nordgaren* - Yabber+ additions, misc. help
+* *Nordgaren* - Yabber+ additions, Armored Core VI additions
 * *DSMapStudio team* - FSParam, Paramdex
 * *NamelessHoodie* - FXR serialization
 * *Avocado* - YabberAvocado additions
@@ -47,6 +47,10 @@ Please see the included readme for detailed instructions.
 
 # Changelog
 ## WitchyBND
+
+### 1.0.6.1
+
+* Fixed incorrect versions in README and other texts
 
 ### 1.0.6.0
 
