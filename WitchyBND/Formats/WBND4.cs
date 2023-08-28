@@ -8,7 +8,7 @@ namespace WitchyBND
 {
     static class WBND4
     {
-        public static void Unpack(this BND4Reader bnd, string sourceName, string targetDir, IProgress<float> progress)
+        public static void Unpack(this BND4Reader bnd, string sourceName, string targetDir, IProgress<float> progress, SFUtil.RegulationGame? game = null)
         {
             Directory.CreateDirectory(targetDir);
             var xws = new XmlWriterSettings();
@@ -17,6 +17,8 @@ namespace WitchyBND
             xw.WriteStartElement("bnd4");
 
             xw.WriteElementString("filename", sourceName);
+            if (game != null)
+                xw.WriteElementString("game", game.ToString());
             xw.WriteElementString("compression", bnd.Compression.ToString());
             xw.WriteElementString("version", bnd.Version);
             xw.WriteElementString("format", bnd.Format.ToString());
