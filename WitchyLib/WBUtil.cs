@@ -28,7 +28,8 @@ public static class WBUtil
         DS2S,
         DS3,
         ER,
-        SDT
+        SDT,
+        AC6
     }
 
     public static Dictionary<GameType, string> GameNames = new Dictionary<GameType, string>()
@@ -41,7 +42,8 @@ public static class WBUtil
         { GameType.DS2S, "DS2S" },
         { GameType.DS3, "DS3" },
         { GameType.ER, "ER" },
-        { GameType.SDT, "SDT" }
+        { GameType.SDT, "SDT" },
+        { GameType.AC6, "AC6" },
     };
 
     public static GameType DetermineParamdexGame(string path)
@@ -58,8 +60,18 @@ public static class WBUtil
             string filename = xml.SelectSingleNode("bnd4/filename").InnerText;
             if (filename == "regulation.bin")
             {
-                // We are loading ELDEN RING param
-                gameNullable = GameType.ER;
+                Enum.TryParse(xml.SelectSingleNode("bnd4/game").InnerText, out SFUtil.RegulationGame regGame);
+                switch (regGame)
+                {
+                    case SFUtil.RegulationGame.ER:
+                        gameNullable = GameType.ER;
+                        break;
+                    case SFUtil.RegulationGame.AC6:
+                        gameNullable = GameType.AC6;
+                        break;
+                    default:
+                        throw new InvalidDataException("Invalid regulation.bin game specified in XML");
+                }
             }
         }
 

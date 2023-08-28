@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<PARAMDEF XmlVersion="0">
+  <ParamType>OS_REINFORCE_PARAM_ST</ParamType>
+  <DataVersion>6</DataVersion>
+  <BigEndian>False</BigEndian>
+  <Unicode>True</Unicode>
+  <FormatVersion>203</FormatVersion>
+  <Fields>
+    <!-- <Field Def="dummy8 paramSize[172]" /> -->
+    <Field Def="s32 Unk0x00"></Field>
+    <Field Def="u8 os_install_category"></Field>
+    <Field Def="u8 os_install_index"></Field>
+    <Field Def="dummy8 padding_1[14]" />
+    <Field Def="s32 install_increase_value"></Field>
+    <Field Def="s32 install_ost_chip_cost"></Field>
+    <Field Def="s32 install_unlock_text_id"></Field>
+    <Field Def="dummy8 padding_2[12]" />
+    <Field Def="s32 update_2_increase_value"></Field>
+    <Field Def="s32 update_2_ost_chip_cost"></Field>
+    <Field Def="s32 update_2_unlock_text_id"></Field>
+    <Field Def="dummy8 padding_3[12]" />
+    <Field Def="s32 update_3_increase_value"></Field>
+    <Field Def="s32 update_3_ost_chip_cost"></Field>
+    <Field Def="s32 update_3_unlock_text_id"></Field>
+    <Field Def="dummy8 padding_4[12]" />
+    <Field Def="s32 update_4_increase_value"></Field>
+    <Field Def="s32 update_4_ost_chip_cost"></Field>
+    <Field Def="s32 update_4_unlock_text_id"></Field>
+    <Field Def="dummy8 padding_5[12]" />
+    <Field Def="s32 update_5_increase_value"></Field>
+    <Field Def="s32 update_5_ost_chip_cost"></Field>
+    <Field Def="s32 update_5_unlock_text_id"></Field>
+    <Field Def="dummy8 padding_6[44]" />
+  </Fields>
+</PARAMDEF>

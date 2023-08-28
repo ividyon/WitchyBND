@@ -527,6 +527,10 @@ namespace SoulsFormats
             return DecryptBndWithKey(path, ac6RegulationKey);
         }
 
+
+        /// <summary>
+        /// Decrypts and unpacks a regulation BND4 from the specified path, and also outputs the game it's from.
+        /// </summary>
         public static BND4 DecryptRegulationBin(string path, out RegulationGame game)
         {
             RegulationGame? regGame = GetRegulationBinGame(path);
@@ -536,13 +540,11 @@ namespace SoulsFormats
                 case RegulationGame.ER:
                     game = regGame!.Value;
                     return DecryptERRegulation(path);
-                    break;
                 case RegulationGame.AC6:
                     game = regGame!.Value;
                     return DecryptAC6Regulation(path);
-                    break;
                 default:
-                    throw new ArgumentOutOfRangeException($"File is not a regulation.bin BND for Elden Ring or Armored Core VI");
+                    throw new InvalidDataException($"File is not a regulation.bin BND for Elden Ring or Armored Core VI.");
             }
         }
 
@@ -591,6 +593,10 @@ namespace SoulsFormats
             return IsRegulationBin(File.ReadAllBytes(path), regulationKey);
         }
 
+        /// <summary>
+        /// Determines whether the output of a decrypted regulation.bin file actually
+        /// gives a proper BND4 or not.
+        /// </summary>
         public static bool IsRegulationBin(byte[] bytes, byte[] regulationKey)
         {
             try
@@ -620,6 +626,10 @@ namespace SoulsFormats
             EncryptRegulationWithKey(path, bnd, ac6RegulationKey);
         }
 
+
+        /// <summary>
+        /// Repacks and encrypts an regulation BND4 for a specified game to the specified path.
+        /// </summary>
         public static void EncryptRegulationBin(string path, RegulationGame game, BND4 bnd)
         {
             switch (game)
