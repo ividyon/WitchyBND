@@ -470,11 +470,11 @@ namespace WitchyBND
             if (fileName.Contains("regulation.bin"))
             {
                 string destPath = Path.Combine(sourceDir, fileName);
-                BND4 bnd = SFUtil.DecryptERRegulation(destPath);
-                Console.WriteLine($"ER Regulation Bin: {fileName}...");
+                Console.WriteLine($"Regulation Bin: {fileName}...");
+                BND4 bnd = SFUtil.DecryptRegulationBin(destPath, out SFUtil.RegulationGame game);
                 using (var bndReader = new BND4Reader(bnd.Write()))
                 {
-                    bndReader.Unpack(fileName, targetDir, progress);
+                    bndReader.Unpack(fileName, targetDir, progress, game);
                 }
 
                 return false;
@@ -573,12 +573,12 @@ namespace WitchyBND
             }
 
             if (sourceName.Contains("regulation-bnd-dcx") || sourceName.Contains("Data0") || sourceName.Contains("regulation-bin"))
-                return ReEncryptRegulationFile( sourceName, sourceDir, targetDir, progress);
+                return ReEncryptRegulationFile( sourceName, sourceDir, targetDir);
 
             return false;
         }
 
-        private static bool ReEncryptRegulationFile(string sourceName, string sourceDir, string targetDir, IProgress<float> progress)
+        private static bool ReEncryptRegulationFile(string sourceName, string sourceDir, string targetDir)
         {
             XmlDocument xml = new XmlDocument();
 
@@ -589,8 +589,9 @@ namespace WitchyBND
 
             if (filename.Contains("regulation.bin"))
             {
+                Enum.TryParse(xml.SelectSingleNode("bnd4/game")?.InnerText ?? "ER", out SFUtil.RegulationGame game);
                 BND4 bnd = BND4.Read(regFile);
-                SFUtil.EncryptERRegulation(regFile, bnd);
+                SFUtil.EncryptRegulationBin(regFile, game, bnd);
                 return false;
             }
 
