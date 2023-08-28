@@ -7,7 +7,6 @@
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <IsPackable>false</IsPackable>
     <RootNamespace>WitchyBND</RootNamespace>
-    <PublishSingleFile>True</PublishSingleFile>
     <Title>WitchyBND</Title>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
@@ -17,9 +16,10 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <OutputPath>bin\Release\</OutputPath>
-    <DebugType>none</DebugType>
+    <DebugType>embedded</DebugType>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <PlatformTarget>x64</PlatformTarget>
+    <PublishSingleFile>True</PublishSingleFile>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Assets/icon.ico</ApplicationIcon>
