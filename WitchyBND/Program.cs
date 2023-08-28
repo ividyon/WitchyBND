@@ -471,7 +471,7 @@ namespace WitchyBND
             {
                 string destPath = Path.Combine(sourceDir, fileName);
                 Console.WriteLine($"Regulation Bin: {fileName}...");
-                BND4 bnd = SFUtil.DecryptRegulationBin(destPath, out SFUtil.RegulationGame game);
+                BND4 bnd = WBUtil.DecryptRegulationBin(destPath, out WBUtil.GameType game);
                 using (var bndReader = new BND4Reader(bnd.Write()))
                 {
                     bndReader.Unpack(fileName, targetDir, progress, game);
@@ -589,9 +589,9 @@ namespace WitchyBND
 
             if (filename.Contains("regulation.bin"))
             {
-                Enum.TryParse(xml.SelectSingleNode("bnd4/game")?.InnerText ?? "ER", out SFUtil.RegulationGame game);
+                Enum.TryParse(xml.SelectSingleNode("bnd4/game")?.InnerText ?? "ER", out WBUtil.GameType game);
                 BND4 bnd = BND4.Read(regFile);
-                SFUtil.EncryptRegulationBin(regFile, game, bnd);
+                WBUtil.EncryptRegulationBin(regFile, game, bnd);
                 return false;
             }
 
