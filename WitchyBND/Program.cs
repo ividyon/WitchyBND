@@ -70,6 +70,7 @@ static class Program
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
         Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+        PromptPlus.Config.DefaultCulture = new CultureInfo("en-us");
 
         Assembly assembly = Assembly.GetExecutingAssembly();
         PromptPlus.DoubleDash($"{assembly.GetName().Name} {assembly.GetName().Version}");
