@@ -48,6 +48,11 @@ Please see the included readme for detailed instructions.
 # Changelog
 ## WitchyBND
 
+### 1.0.6.2
+
+* ACTUALLY enabled use of Oodle 28 as promised in previous updates notes, just forgot to actually merge Nordgaren's change...
+* See previous notes.
+
 ### 1.0.6.1
 
 * Fixed incorrect versions in README and other texts

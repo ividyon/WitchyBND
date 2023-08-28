@@ -1,1 +1,2 @@
-* Fixed incorrect versions in README and other texts
+* ACTUALLY enabled use of Oodle 28 as promised in previous updates notes, just forgot to actually merge Nordgaren's change...
+* See previous notes.
