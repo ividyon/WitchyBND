@@ -78,22 +78,21 @@ public class WBND4 : WBinderParser
             var doc = XDocument.Load(WBUtil.GetXmlPath("bnd4", srcPath));
             if (doc.Root == null) throw new XmlException("XML has no root");
             var myXml = doc.Root;
-            string filename = doc.Root.Elements("filename").First().Value;
+            string filename = doc.Root.Element("filename")!.Value;
 
-            string root = myXml.Elements("root").Any() ? myXml.Elements("root").First().Value : "";
+            string root = myXml.Element("root")?.Value ?? "";
 
-            string compString = myXml.Elements("compression").Any() ? myXml.Elements("compression").First().Value : "None";
-            Enum.TryParse(compString, out DCX.Type compression);
+            Enum.TryParse(myXml.Element("compression")?.Value ?? "None", out DCX.Type compression);
             bnd.Compression = compression;
 
-            bnd.Version = myXml.Elements("version").First().Value;
-            bnd.Format = (Binder.Format)Enum.Parse(typeof(Binder.Format), myXml.Elements("format").First().Value);
-            bnd.BigEndian = bool.Parse(myXml.Elements("bigendian").First().Value);
-            bnd.BitBigEndian = bool.Parse(myXml.Elements("bitbigendian").First().Value);
-            bnd.Unicode = bool.Parse(myXml.Elements("unicode").First().Value);
-            bnd.Extended = Convert.ToByte(myXml.Elements("extended").First().Value, 16);
-            bnd.Unk04 = bool.Parse(myXml.Elements("unk04").First().Value);
-            bnd.Unk05 = bool.Parse(myXml.Elements("unk05").First().Value);
+            bnd.Version = myXml.Element("version")!.Value;
+            bnd.Format = (Binder.Format)Enum.Parse(typeof(Binder.Format), myXml.Element("format")!.Value);
+            bnd.BigEndian = bool.Parse(myXml.Element("bigendian")!.Value);
+            bnd.BitBigEndian = bool.Parse(myXml.Element("bitbigendian")!.Value);
+            bnd.Unicode = bool.Parse(myXml.Element("unicode")!.Value);
+            bnd.Extended = Convert.ToByte(myXml.Element("extended")!.Value, 16);
+            bnd.Unk04 = bool.Parse(myXml.Element("unk04")!.Value);
+            bnd.Unk05 = bool.Parse(myXml.Element("unk05")!.Value);
 
             WBinder.ReadBinderFiles(bnd, xml.SelectSingleNode("bnd4/files"), srcPath, root);
 
