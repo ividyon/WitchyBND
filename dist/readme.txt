@@ -1,9 +1,9 @@
 --| WitchyBND
---| 1.0.4.1
+--| 1.0.6.2
 --| Maintained by ivi, Yabber created by TKGP
 --| https://github.com/ividyon/WitchyBND
 
-An unpacker/repacker for common Demon's Souls, Dark Souls 1-3, Bloodborne, Sekiro, Elden Ring file formats. Supports .bnd, .bhd/.bdt, .dcx, .fltparam, .fmg, .gparam, .luagnl, .luainfo, and .tpf.
+An unpacker/repacker for common Demon's Souls, Dark Souls 1-3, Bloodborne, Sekiro, Elden Ring, Armored Core VI file formats. Supports .bnd, .bhd/.bdt, .dcx, .fltparam, .fmg, .gparam, .luagnl, .luainfo, and .tpf.
 Does not support dvdbnds (the very large bhd/bdt pairs in the main game directory); use UDSFM or UXM unpack those first.
 Requires .NET Desktop Runtime 7.0.
 
@@ -69,13 +69,33 @@ A DDS texture container, used in all games. Console versions are not supported.
 
 TKGP - Basically everything
 katalash - GPARAM support
-Nordgaren - Yabber+ additions
+Nordgaren - Yabber+ additions, Armored Core VI additions
 DSMapStudio team - FSParam, Paramdex
 NamelessHoodie - FXR serialization
 Avocado - YabberAvocado additions
+NatsuDragneelTheFireDragon - MQB support
 ivi - WitchyBND maintainer
 
 --| Changelog
+
+1.0.6.2
+    ACTUALLY enabled use of Oodle 28 as promised in previous updates notes, just forgot to actually merge Nordgaren's change...
+    See previous notes.
+
+1.0.6.1
+    Fixed incorrect versions in README and other texts
+
+1.0.6.0
+    Added detection and usage of Oodle 28 (from Armored Core VI) to SoulsFormats and Witchy. (By Nordgaren)
+    Updated Fxr3 class to the newest findings from Rainbow Stone development. (This is **breaking** for the serialization, so convert all the XMLs you need to FXR before updating.)
+    Fixed an oversight that could cause issues with error printing to the console.
+    Small fixes behind the scenes to make working with the project easier for contributors.
+
+1.0.5.0
+    Added MQB support (by NatsuDragneelTheFireDragon)
+    Added preliminary support for Armored Core VI DCX.
+    Improved performance when serializing PARAM files.
+    Updated Paramdex.
 
 1.0.4.1
     Updated READMEs.

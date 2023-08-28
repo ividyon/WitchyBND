@@ -20,6 +20,8 @@ New additions include:
 * ELDEN RING GPARAM support (by Avocado)
 * Console TPF unpacking (but not repacking)
 * Minor fixes like ELDEN RING envmap TPF unpack
+* MQB support (by NatsuDragneelTheFireDragon)
+* Support for Armored Core VI DCX archives
 
 Planned (but TBD):
 * Small UI for quality-of-life actions outside of unpacking/repacking (like duplicating AEGs, CHRs, PARTSBND...)
@@ -27,7 +29,7 @@ Planned (but TBD):
 * Other formats from other Yabber forks (Let me know which are flying around the community)
 
 ## Yabber
-An unpacker/repacker for common Demon's Souls, Dark Souls 1-3, Bloodborne, Sekiro, Elden Ring file formats. Supports .bnd, .bhd/.bdt, .dcx, .fltparam, .fmg, .gparam, .luagnl, .luainfo, and .tpf.
+An unpacker/repacker for common Demon's Souls, Dark Souls 1-3, Bloodborne, Sekiro, Elden Ring, Armored Core VI file formats. Supports .bnd, .bhd/.bdt, .dcx, .fltparam, .fmg, .gparam, .luagnl, .luainfo, and .tpf.
 Does not support dvdbnds (the very large bhd/bdt pairs in the main game directory); use [UDSFM](https://www.nexusmods.com/darksouls/mods/1304) or [UXM](https://www.nexusmods.com/sekiro/mods/26) to unpack those first.  
 Requires [.NET Desktop Runtime 7.0](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-7.0.5-windows-x64-installer).  
 
@@ -36,14 +38,37 @@ Please see the included readme for detailed instructions.
 # Contributors
 * *TKGP* - Basically everything
 * *katalash* - GPARAM support
-* *Nordgaren* - Yabber+ additions
+* *Nordgaren* - Yabber+ additions, Armored Core VI additions
 * *DSMapStudio team* - FSParam, Paramdex
 * *NamelessHoodie* - FXR serialization
 * *Avocado* - YabberAvocado additions
+* *NatsuDragneelTheFireDragon* - MQB support
 * *ivi* - WitchyBND maintainer
 
 # Changelog
 ## WitchyBND
+
+### 1.0.6.2
+
+* ACTUALLY enabled use of Oodle 28 as promised in previous updates notes, just forgot to actually merge Nordgaren's change...
+* See previous notes.
+
+### 1.0.6.1
+
+* Fixed incorrect versions in README and other texts
+
+### 1.0.6.0
+
+* Added detection and usage of Oodle 28 (from Armored Core VI) to SoulsFormats and Witchy. (By Nordgaren)
+* Updated Fxr3 class to the newest findings from Rainbow Stone development. (This is **breaking** for the serialization, so convert all the XMLs you need to FXR before updating.)
+* Fixed an oversight that could cause issues with error printing to the console.
+* Small fixes behind the scenes to make working with the project easier for contributors.
+
+### 1.0.5.0
+* Added MQB support (by NatsuDragneelTheFireDragon)
+* Added preliminary support for Armored Core VI DCX.
+* Improved performance when serializing PARAM files.
+* Updated Paramdex.
 
 ### 1.0.4.1
 * Updated READMEs.

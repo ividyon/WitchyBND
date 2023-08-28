@@ -1,2 +1,2 @@
-* Fixed an issue which prevented PARAMs for non-ER games from serializing due to a missing DefsPatch folder in Paramdex.
-* Adjustments to FXR3 reading and writing.
+* ACTUALLY enabled use of Oodle 28 as promised in previous updates notes, just forgot to actually merge Nordgaren's change...
+* See previous notes.
