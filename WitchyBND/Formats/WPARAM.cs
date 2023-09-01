@@ -33,27 +33,65 @@ namespace WitchyBND
         }
 
         // Dictionary housing paramdefs for batched usage.
-        private static Dictionary<WBUtil.GameType, Dictionary<string, PARAMDEF>> ParamdefStorage { get; set; } =
-            new Dictionary<WBUtil.GameType, Dictionary<string, PARAMDEF>>();
+        private static Dictionary<WBUtil.GameType, Dictionary<string, PARAMDEF>> ParamdefStorage { get; } = new();
 
         // Dictionary housing param row names for batched usage.
         private static Dictionary<WBUtil.GameType, Dictionary<string, Dictionary<int, string>>>
-            NameStorage { get; set; } = new Dictionary<WBUtil.GameType, Dictionary<string, Dictionary<int, string>>>();
+            NameStorage { get; } = new();
+
+        // Temporary mapping of param file names to AC6 param types.
+        private static readonly Dictionary<string, string> ac6ParamMappings = new()
+        {
+            {"EquipParamWeapon", "EQUIP_PARAM_WEAPON_ST"},
+            {"EquipParamProtector", "EQUIP_PARAM_PROTECTOR_ST"},
+            {"EquipParamAccessory", "EQUIP_PARAM_ACCESSORY_ST"},
+            {"ReinforceParamProtector", "REINFORCE_PARAM_PROTECTOR_ST"},
+            {"NpcParam", "NPC_PARAM_ST"},
+            {"NpcTransformParam", "NpcTransformParam"}, //
+            {"AtkParam_Npc", "ATK_PARAM_ST"},
+            {"WepAbsorpPosParam", "WEP_ABSORP_POS_PARAM_ST"},
+            {"DirectionCameraParam", "DIRECTION_CAMERA_PARAM_ST"},
+            {"MovementAcTypeParam", "MovementAcTypeParam"}, //
+            {"MovementRideObjParam", "MovementRideObjParam"}, //
+            {"MovementFlyEnemyParam", "MovementFlyEnemyParam"}, //
+            {"ChrModelParam", "CHR_MODEL_PARAM_ST"},
+            {"MissionParam", "MissionParam"}, //
+            {"MailParam", "MAIL_PARAM_ST"},
+            {"EquipParamBooster", "EquipParamBooster"}, //
+            {"EquipParamGenerator", "EquipParamGenerator"}, //
+            {"EquipParamFcs", "EquipParamFcs"}, //
+            {"RuntimeSoundParam_Npc", "RuntimeSoundParam"}, //
+            {"RuntimeSoundParam_Pc", "RuntimeSoundParam"}, //
+            {"CutsceneGparamTimeParam", "CUTSCENE_GPARAM_TIME_PARAM_ST"},
+            {"CutsceneTimezoneConvertParam", "CUTSCENE_TIMEZONE_CONVERT_PARAM_ST"},
+            {"CutsceneMapIdParam", "CUTSCENE_MAP_ID_PARAM_ST"},
+            {"MapAreaParam", "MapAreaParam"}, //
+            {"RuntimeSoundGlobalParam", "RuntimeSoundGlobalParam"}, //
+        };
 
         public static bool Unpack(this FsParam param, string sourceFile, string sourceDir, WBUtil.GameType game)
         {
             string paramType = param.ParamType;
+            string paramName = Path.GetFileNameWithoutExtension(sourceFile);
 
             // Fixed cell style for now.
             CellStyle cellStyle = CellStyle.Attribute;
 
             PopulateParamdef(game);
 
-            if (!ParamdefStorage[game].ContainsKey(paramType))
+            if (paramType == null || !ParamdefStorage[game].ContainsKey(paramType) || string.IsNullOrWhiteSpace(paramType))
             {
-                Console.WriteLine($"Param type {paramType} not found in {WBUtil.GameNames[game]} paramdefs.");
-                // Don't hard-fail this because it can happen, just proceed to the next file.
-                return true;
+                // Temporary solution to handle AC6 paramdefs without paramtype.
+                if (paramType == null)
+                {
+                    paramType = ac6ParamMappings[paramName];
+                }
+                else
+                {
+                    Console.WriteLine($"Param type {paramType} not found in {WBUtil.GameNames[game]} paramdefs.");
+                    // Don't hard-fail this because it can happen, just proceed to the next file.
+                    return true;
+                }
             }
 
             PARAMDEF paramdef = ParamdefStorage[game][paramType];
@@ -68,8 +106,6 @@ namespace WitchyBND
                 // Nothing happened yet, so can just proceed to the next file.
                 return true;
             }
-
-            string paramName = Path.GetFileNameWithoutExtension(sourceFile);
 
             // Begin writing the XML
             var xws = new XmlWriterSettings();
@@ -142,16 +178,20 @@ namespace WitchyBND
                         fieldCounts[fieldName][value] = 0;
                     fieldCounts[fieldName][value]++;
 
-                    if (!fieldMaxes.ContainsKey(fieldName) || fieldCounts[fieldName][value] > fieldMaxes[fieldName].Item2)
+                    if (!fieldMaxes.ContainsKey(fieldName) ||
+                        fieldCounts[fieldName][value] > fieldMaxes[fieldName].Item2)
                         fieldMaxes[fieldName] = (value, fieldCounts[fieldName][value]);
 
                     prepRow.Fields[fieldName] = value;
                 }
+
                 rows.Add(prepRow);
             }
+
             int threshold = (int)(rows.Count * 0.6);
             string GetMajorityValue(KeyValuePair<string, int> c) => c.Value > threshold ? c.Key : null;
-            var defaultValues = fieldCounts.ToDictionary(e => e.Key, e => GetMajorityValue(e.Value.MaxBy(c => c.Value)));
+            var defaultValues =
+                fieldCounts.ToDictionary(e => e.Key, e => GetMajorityValue(e.Value.MaxBy(c => c.Value)));
 
             // Field info (def & default values)
             xw.WriteStartElement("fields");
@@ -188,11 +228,11 @@ namespace WitchyBND
             {
                 xw.WriteStartElement("row");
                 xw.WriteAttributeString("id", row.ID.ToString());
-                if (row.Name != null)
+                if (!string.IsNullOrEmpty(row.Name))
                 {
                     xw.WriteAttributeString("name", row.Name);
                 }
-                else if (row.ParamdexName != null)
+                else if (!string.IsNullOrEmpty(row.ParamdexName))
                 {
                     xw.WriteAttributeString("paramdexName", row.ParamdexName);
                 }
@@ -482,23 +522,27 @@ namespace WitchyBND
                         e);
                 }
             }
+
             NameStorage[game][paramName] = nameDict;
         }
+
         public static Byte[] Dummy8Read(string dummy8, int expectedLength)
         {
             Byte[] nval = new Byte[expectedLength];
             if (!(dummy8.StartsWith('[') && dummy8.EndsWith(']')))
                 return null;
-            string[] spl = dummy8.Substring(1, dummy8.Length-2).Split('|');
+            string[] spl = dummy8.Substring(1, dummy8.Length - 2).Split('|');
             if (nval.Length != spl.Length)
             {
                 return null;
             }
-            for (int i=0; i<nval.Length; i++)
+
+            for (int i = 0; i < nval.Length; i++)
             {
                 if (!byte.TryParse(spl[i], out nval[i]))
                     return null;
             }
+
             return nval;
         }
 
