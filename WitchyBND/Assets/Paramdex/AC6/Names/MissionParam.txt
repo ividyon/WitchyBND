@@ -64,3 +64,20 @@
 9204 Intermediate Support 3: Tetrapod ACs
 9205 Intermediate Support 4: Tank ACs
 9206 Advanced Mercenary Certification
+9400 Arena: 
+9401 Arena: 
+9402 Arena: 
+9403 Arena: 
+9404 Arena: 
+9405 Arena: 
+9406 Arena: 
+9407 Arena: 
+9408 Arena: 
+9409 Arena: 
+9410 Arena: 
+9411 Arena: 
+9412 Arena: 
+9413 Arena: 
+9414 Arena:  
+9415 Arena: 
+9416 Arena: 

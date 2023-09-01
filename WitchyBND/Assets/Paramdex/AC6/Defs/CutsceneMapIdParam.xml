@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PARAMDEF XmlVersion="0">
-  <ParamType>ACVI_NO_TYPE</ParamType> <!-- This is artifical, the actual param does not have any ParamType, the string offset is outside of the bounds of the file -->
+  <ParamType>CutsceneMapIdParam</ParamType>
   <DataVersion>3</DataVersion>
   <BigEndian>False</BigEndian>
   <Unicode>True</Unicode>

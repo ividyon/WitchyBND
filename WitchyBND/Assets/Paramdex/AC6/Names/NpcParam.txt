@@ -98,3 +98,448 @@
 21101001 Nosaac
 21201000 Chartreuse
 21301000 King
+30200000 Light MT
+30200001 Light MT
+30200090 Light MT
+30200099 Light MT
+30200100 Light MT
+30200101 Light MT
+30200199 Light MT
+30200200 Light MT
+30200201 Light MT
+30200202 Light MT
+30200299 Light MT
+30200300 Light MT
+30200301 Light MT
+30200399 Light MT
+30200400 Light MT
+30200401 Light MT
+30200499 Light MT
+30200500 Light MT
+30200501 Light MT
+30200503 Light MT
+30200599 Light MT
+30200600 Light MT
+30200601 Light MT
+30200699 Light MT
+30200700 Light MT
+30200799 Light MT
+30200800 Light MT
+30200801 Light MT
+30200810 Light MT
+30200811 Light MT
+30200820 Light MT
+30200821 Light MT
+30200830 Light MT
+30200831 Light MT
+30200900 Light MT
+30200901 Light MT
+30200902 Light MT
+30200903 Light MT
+30200904 Light MT
+30200915 Light MT
+30200950 Light MT
+30200951 Light MT
+30200991 Light MT
+30200992 Light MT
+30200993 Light MT
+30200994 Light MT
+30200995 Light MT
+30200996 Light MT
+30200998 Light MT
+30201000 Light MT
+30201001 Light MT
+30201002 Light MT
+30201003 Light MT
+30201004 Light MT
+30201005 Light MT
+30201021 Light MT
+30201022 Light MT
+30201023 Light MT
+30201024 Light MT
+30201025 Light MT
+30201026 Light MT
+30201027 Light MT
+30201028 Light MT
+30201100 Light MT
+30201101 Light MT
+30201102 Light MT
+30201103 Light MT
+30201104 Light MT
+30201105 Light MT
+30201106 Light MT
+30201107 Light MT
+30201108 Light MT
+30201109 Light MT
+30201111 Light MT
+30201112 Light MT
+30201113 Light MT
+30201114 Light MT
+30201115 Light MT
+30201120 Light MT
+30201121 Light MT
+30201122 Light MT
+30201123 Light MT
+30201124 Light MT
+30201125 Light MT
+30201126 Light MT
+30201127 Light MT
+30201200 Light MT
+30201201 Light MT
+30201202 Light MT
+30201203 Light MT
+30201204 Light MT
+30201205 Light MT
+30201206 Light MT
+30201207 Light MT
+30201208 Light MT
+30201209 Light MT
+30201210 Light MT
+30201212 Light MT
+30201301 Light MT
+30201303 Light MT
+30201304 Light MT
+30201305 Light MT
+30201311 Light MT
+30201400 Light MT
+30201402 Light MT
+30201403 Light MT
+30201404 Light MT
+30201406 Light MT
+30201407 Light MT
+30201408 Light MT
+30201409 Light MT
+30201410 Light MT
+30201411 Light MT
+30201412 Light MT
+30201413 Light MT
+30201414 Light MT
+30201415 Light MT
+30201416 Light MT
+30201417 Light MT
+30201418 Light MT
+30201419 Light MT
+30201420 Light MT
+30201421 Light MT
+30201422 Light MT
+30201423 Light MT
+30201424 Light MT
+30201425 Light MT
+30201426 Light MT
+30201427 Light MT
+30201428 Light MT
+30201429 Light MT
+30201430 Light MT
+30201500 Light MT
+30201501 Light MT
+30201502 Light MT
+30201503 Light MT
+30201504 Light MT
+30201505 Light MT
+30201506 Light MT
+30201507 Light MT
+30201508 Light MT
+30201509 Light MT
+30201510 Light MT
+30201511 Light MT
+30201512 Light MT
+30201513 Light MT
+30201514 Light MT
+30201515 Light MT
+30201516 Light MT
+30201517 Light MT
+30201518 Light MT
+30201519 Light MT
+30201600 Light MT
+30201602 Light MT
+30201603 Light MT
+30201604 Light MT
+30201700 Light MT
+30201701 Light MT
+30201800 Light MT
+30201801 Light MT
+30201802 Light MT
+30201803 Light MT
+30201810 Light MT
+30201812 Light MT
+30201813 Light MT
+30201814 Light MT
+30201815 Light MT
+30201816 Light MT
+30201817 Light MT
+30201818 Light MT
+30201819 Light MT
+30201820 Light MT
+30201822 Light MT
+30201830 Light MT
+30201831 Light MT
+30202000 Light MT
+30202001 Light MT
+31500000 Juggernaut - Mobile Artillery Platform
+31500900 Juggernaut - Mobile Artillery Platform
+31501000 Juggernaut - Mobile Artillery Platform
+31501001 Juggernaut - Mobile Artillery Platform
+32000000 Ekdromoi - Elite Craft
+32000010 Ekdromoi - Elite Craft
+32000100 Ekdromoi - Elite Craft
+32000101 Ekdromoi - Elite Craft
+32000110 Ekdromoi - Elite Craft
+32000200 Ekdromoi - Elite Craft
+32000210 Ekdromoi - Elite Craft
+32000900 Ekdromoi - Elite Craft
+32000901 Ekdromoi - Elite Craft
+32000902 Ekdromoi - Elite Craft
+32000903 Ekdromoi - Elite Craft
+32000950 Ekdromoi - Elite Craft
+32000951 Ekdromoi - Elite Craft
+32000953 Ekdromoi - Elite Craft
+32000955 Ekdromoi - Elite Craft
+32000956 Ekdromoi - Elite Craft
+32001100 Ekdromoi - Elite Craft
+32001200 Ekdromoi - Elite Craft
+32500000 Light Cavalry - Bipedal Mech
+32500001 Light Cavalry - Bipedal Mech
+32500099 Light Cavalry - Bipedal Mech
+32500100 Light Cavalry - Bipedal Mech
+32500101 Light Cavalry - Bipedal Mech
+32500102 Light Cavalry - Bipedal Mech
+32500199 Light Cavalry - Bipedal Mech
+32500400 Light Cavalry - Bipedal Mech
+32500401 Light Cavalry - Bipedal Mech
+32500402 Light Cavalry - Bipedal Mech
+32500499 Light Cavalry - Bipedal Mech
+32500600 Light Cavalry - Bipedal Mech
+32500601 Light Cavalry - Bipedal Mech
+32500699 Light Cavalry - Bipedal Mech
+32500700 Light Cavalry - Bipedal Mech
+32500701 Light Cavalry - Bipedal Mech
+32500799 Light Cavalry - Bipedal Mech
+32500900 Light Cavalry - Bipedal Mech
+32500901 Light Cavalry - Bipedal Mech
+32500902 Light Cavalry - Bipedal Mech
+32500903 Light Cavalry - Bipedal Mech
+32500910 Light Cavalry - Bipedal Mech
+32500950 Light Cavalry - Bipedal Mech
+32500951 Light Cavalry - Bipedal Mech
+32500953 Light Cavalry - Bipedal Mech
+32500998 Light Cavalry - Bipedal Mech
+32500999 Light Cavalry - Bipedal Mech
+32501000 Light Cavalry - Bipedal Mech
+32501002 Light Cavalry - Bipedal Mech
+32501003 Light Cavalry - Bipedal Mech
+32501004 Light Cavalry - Bipedal Mech
+32501010 Light Cavalry - Bipedal Mech
+32501100 Light Cavalry - Bipedal Mech
+32501101 Light Cavalry - Bipedal Mech
+32501102 Light Cavalry - Bipedal Mech
+32501103 Light Cavalry - Bipedal Mech
+32501104 Light Cavalry - Bipedal Mech
+32501105 Light Cavalry - Bipedal Mech
+32501106 Light Cavalry - Bipedal Mech
+32501110 Light Cavalry - Bipedal Mech
+32501400 Light Cavalry - Bipedal Mech
+32501401 Light Cavalry - Bipedal Mech
+32501402 Light Cavalry - Bipedal Mech
+32501403 Light Cavalry - Bipedal Mech
+32501404 Light Cavalry - Bipedal Mech
+32501405 Light Cavalry - Bipedal Mech
+32501406 Light Cavalry - Bipedal Mech
+32501407 Light Cavalry - Bipedal Mech
+32501408 Light Cavalry - Bipedal Mech
+32501409 Light Cavalry - Bipedal Mech
+32501410 Light Cavalry - Bipedal Mech
+32501412 Light Cavalry - Bipedal Mech
+32501413 Light Cavalry - Bipedal Mech
+32501414 Light Cavalry - Bipedal Mech
+32501415 Light Cavalry - Bipedal Mech
+32501416 Light Cavalry - Bipedal Mech
+32501417 Light Cavalry - Bipedal Mech
+32501418 Light Cavalry - Bipedal Mech
+32501600 Light Cavalry - Bipedal Mech
+32501601 Light Cavalry - Bipedal Mech
+32501602 Light Cavalry - Bipedal Mech
+32501603 Light Cavalry - Bipedal Mech
+32501700 Light Cavalry - Bipedal Mech
+32501701 Light Cavalry - Bipedal Mech
+32501702 Light Cavalry - Bipedal Mech
+32501703 Light Cavalry - Bipedal Mech
+32600000 Heavy Cavalry - Bipedal Mech
+32600090 Heavy Cavalry - Bipedal Mech
+32600091 Heavy Cavalry - Bipedal Mech
+32600099 Heavy Cavalry - Bipedal Mech
+32600100 Heavy Cavalry - Bipedal Mech
+32600190 Heavy Cavalry - Bipedal Mech
+32600199 Heavy Cavalry - Bipedal Mech
+32600300 Heavy Cavalry - Bipedal Mech
+32600390 Heavy Cavalry - Bipedal Mech
+32600399 Heavy Cavalry - Bipedal Mech
+32600900 Heavy Cavalry - Bipedal Mech
+32600901 Heavy Cavalry - Bipedal Mech
+32600902 Heavy Cavalry - Bipedal Mech
+32600903 Heavy Cavalry - Bipedal Mech
+32600950 Heavy Cavalry - Bipedal Mech
+32600951 Heavy Cavalry - Bipedal Mech
+32600953 Heavy Cavalry - Bipedal Mech
+32601000 Heavy Cavalry - Bipedal Mech
+32601001 Heavy Cavalry - Bipedal Mech
+32601100 Heavy Cavalry - Bipedal Mech
+32601101 Heavy Cavalry - Bipedal Mech
+32601102 Heavy Cavalry - Bipedal Mech
+32601300 Heavy Cavalry - Bipedal Mech
+33000000 Light Cavalry #2 - Bipedal Mech
+33000100 Light Cavalry #2 - Bipedal Mech
+33000200 Light Cavalry #2 - Bipedal Mech 
+33000900 Light Cavalry #2 - Bipedal Mech
+33000901 Light Cavalry #2 - Bipedal Mech
+33000902 Light Cavalry #2 - Bipedal Mech
+33000903 Light Cavalry #2 - Bipedal Mech
+33000950 Light Cavalry #2 - Bipedal Mech
+33000951 Light Cavalry #2 - Bipedal Mech
+33000953 Light Cavalry #2 - Bipedal Mech
+33001100 Light Cavalry #2 - Bipedal Mech
+33001200 Light Cavalry #2 - Bipedal Mech
+33001201 Light Cavalry #2 - Bipedal Mech
+33001202 Light Cavalry #2 - Bipedal Mech
+40000100 Cataphract
+40000101 Cataphract
+40000102 Cataphract
+40000900 Cataphract
+40000901 Cataphract
+40000902 Cataphract
+40000903 Cataphract
+40000950 Cataphract
+40000951 Cataphract
+40001100 Cataphract
+40001101 Cataphract
+41000000 Balteus
+41000100 Balteus
+41000200 Balteus
+41000901 Balteus
+41000902 Balteus
+41000903 Balteus
+41000950 Balteus
+41000951 Balteus
+41000953 Balteus
+41000960 Balteus
+42000000 Ayre
+42000050 Ayre
+42000901 Ayre
+42000902 Ayre
+42000903 Ayre
+42000950 Ayre
+42000951 Ayre
+42000953 Ayre
+42010000 ALLMIND
+42010050 ALLMIND
+42500000 CEL 240
+42500800 CEL 240
+42500901 CEL 240
+42500902 CEL 240
+42500903 CEL 240
+42500950 CEL 240
+42500951 CEL 240
+42500953 CEL 240
+50000000 Copter Drone
+50000200 Copter Drone
+50000900 Copter Drone
+50000901 Copter Drone
+50000902 Copter Drone
+50000903 Copter Drone
+50001000 Copter Drone
+50001001 Copter Drone
+50001002 Copter Drone
+50001003 Copter Drone
+50001200 Copter Drone
+50001800 Copter Drone
+50200000 Smart Cleaner
+50201000 Smart Cleaner
+50201001 Smart Cleaner
+50201002 Smart Cleaner
+51000000 Quadcopter
+51000001 Quadcopter
+51000002 Quadcopter
+51000099 Quadcopter
+51000100 Quadcopter
+51000101 Quadcopter
+51000110 Quadcopter
+51000900 Quadcopter
+51000901 Quadcopter
+51000902 Quadcopter
+51000903 Quadcopter
+51000990 Quadcopter
+51001000 Quadcopter
+51001001 Quadcopter
+51001002 Quadcopter
+51001003 Quadcopter
+51001004 Quadcopter
+51001021 Quadcopter
+51001031 Quadcopter
+51001040 Quadcopter
+51001041 Quadcopter
+51001101 Quadcopter
+51001102 Quadcopter
+51001110 Quadcopter
+51001111 Quadcopter
+51001112 Quadcopter
+60500000 HC Helicopter
+60500010 HC Helicopter
+60500011 HC Helicopter
+60500100 HC Helicopter
+60500101 HC Helicopter
+60500900 HC Helicopter
+60501010 HC Helicopter
+60501100 HC Helicopter
+60501101 HC Helicopter
+61000000 Sea Spider
+61000098 Sea Spider
+61000099 Sea Spider
+61000100 Sea Spider
+61000990 Sea Spider
+61000991 Sea Spider
+61000992 Sea Spider
+61000993 Sea Spider
+62500000 Ice Worm
+62500010 Ice Worm
+62501000 Ice Worm
+62501001 Ice Worm
+64000000 Strider #1
+64001000 Strider #1
+64200000 Strider #2
+72221000 RaD Missile
+72221001 RaD Missile
+72221002 RaD Missile
+73900000 Nepenthes
+74000000 Heavy Warship
+74000100 Heavy Warship
+74000200 Heavy Warship
+74000300 Heavy Warship
+74000400 Heavy Warship
+74000410 Heavy Warship
+74000500 Heavy Warship
+74000700 Heavy Warship
+74000900 Heavy Warship
+74000901 Heavy Warship
+74000902 Heavy Warship
+74000903 Heavy Warship
+74000904 Heavy Warship
+74000905 Heavy Warship
+74000906 Heavy Warship
+74000907 Heavy Warship
+74000908 Heavy Warship
+74000909 Heavy Warship
+74001000 Heavy Warship
+74001001 Heavy Warship
+74001500 Heavy Warship
+74001501 Heavy Warship
+74001502 Heavy Warship
+74001503 Heavy Warship
+74001504 Heavy Warship
+74001700 Heavy Warship
+74001701 Heavy Warship
+81350000 Enforcer
+81350901 Enforcer
+81350902 Enforcer
+81350903 Enforcer
+81350950 Enforcer
+81350951 Enforcer
+81350953 Enforcer

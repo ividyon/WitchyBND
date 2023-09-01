@@ -34,7 +34,7 @@
     <Field Def="s32 Unk0x60"></Field>
     <Field Def="s32 Unk0x64"></Field>
     <Field Def="s32 Unk0x68"></Field>
-    <Field Def="s32 Unk0x6C"></Field>
+    <Field Def="s32 getItemFlagId"></Field>
     <Field Def="s32 Unk0x70"></Field>
     <Field Def="s32 Unk0x74"></Field>
     <Field Def="s32 Unk0x78"></Field>
