@@ -924,7 +924,7 @@ namespace WitchyFormats
                 else
                     ParamType = br.GetASCII(paramTypeOffset);
 
-                if (string.IsNullOrWhiteSpace(ParamType))
+                if (string.IsNullOrEmpty(ParamType))
                     ParamType = null;
 
                 actualStringsOffset = paramTypeOffset;

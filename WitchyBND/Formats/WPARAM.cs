@@ -114,6 +114,8 @@ namespace WitchyBND
 
             // Meta data
             xw.WriteElementString("fileName", Path.GetFileName(sourceFile));
+            if (string.IsNullOrEmpty(param.ParamType))
+                xw.WriteElementString("type", param.ParamType);
             xw.WriteElementString("game", WBUtil.GameNames[game]);
             xw.WriteElementString("cellStyle", ((int)cellStyle).ToString());
             xw.WriteElementString("compression", param.Compression.ToString());
@@ -290,6 +292,8 @@ namespace WitchyBND
 
             Enum.TryParse(xml.SelectSingleNode("param/cellStyle")?.InnerText ?? "None", out CellStyle cellStyle);
 
+            param.ParamType = xml.SelectSingleNode("param/type")?.InnerText;
+
             // Enum.TryParse(xml.SelectSingleNode("param/game")?.InnerText ?? "", out WBUtil.GameType game);
             Enum.TryParse(xml.SelectSingleNode("param/compression")?.InnerText ?? "None", out DCX.Type compression);
             param.Compression = compression;
@@ -306,9 +310,8 @@ namespace WitchyBND
 
             var paramdef = new PARAMDEF();
 
-            var paramType = xml.SelectSingleNode("param/paramdef/type").InnerText;
-            param.ParamType = paramType;
-            paramdef.ParamType = paramType;
+            var paramdefType = xml.SelectSingleNode("param/paramdef/type").InnerText;
+            paramdef.ParamType = paramdefType;
 
             var bigEndian =
                 Convert.ToBoolean(Convert.ToInt32(xml.SelectSingleNode("param/paramdef/bigEndian").InnerText));

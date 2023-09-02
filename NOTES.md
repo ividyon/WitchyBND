@@ -1,3 +1,1 @@
-* Updated ACVI paramdefs to Vawser's latest version.
-* Updated the AC6 PARAM reading solution for parity with the method and tentative ParamType names used by DSMapStudio.
-
+* PARAM: Separated ParamType from Paramdef Type in the XML serialization, to ensure that "tentative" ParamTypes do not get written to params.
