@@ -198,7 +198,7 @@ public partial class TPF : SoulsFile<TPF>, IEnumerable<TPF.Texture>
             Format = br.ReadByte();
             Type = br.ReadEnum8<TexType>();
             Mipmaps = br.ReadByte();
-            Flags1 = br.AssertByte(0, 1, 2, 3);
+            Flags1 = br.AssertByte(0, 1, 2, 3, 128);
 
             if (platform != TPFPlatform.PC)
             {

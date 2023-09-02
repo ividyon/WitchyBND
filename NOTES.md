@@ -1,3 +1,3 @@
-* Added support for decrypting/encrypting Armored Core VI regulation.bin. Thanks to Nordgaren for the encryption key.
-* Added preliminary Paramdex support for Armored Core VI PARAM serialization. Thanks to Vawser for the preliminary paramdefs.
-  * Please note that this will mostly be a bunch of Unknown fields; this is more of a tool for reverse engineering than anything else.
+* Updated ACVI paramdefs to Vawser's latest version.
+* Updated the AC6 PARAM reading solution for parity with the method and tentative ParamType names used by DSMapStudio.
+

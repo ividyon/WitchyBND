@@ -7,9 +7,9 @@
   <FormatVersion>203</FormatVersion>
   <Fields>
     <!-- <Field Def="dummy8 paramSize[4]" /> -->
-    <Field Def="u8 color_red"></Field>
-    <Field Def="u8 color_green"></Field>
-    <Field Def="u8 color_blue"></Field>
-    <Field Def="u8 color_alpha"></Field>
+    <Field Def="u8 colorR"></Field>
+    <Field Def="u8 colorG"></Field>
+    <Field Def="u8 colorB"></Field>
+    <Field Def="u8 colorAlpha"></Field>
   </Fields>
 </PARAMDEF>

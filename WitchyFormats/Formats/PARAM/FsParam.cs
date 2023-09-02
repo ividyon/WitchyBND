@@ -918,7 +918,15 @@ namespace WitchyFormats
                 br.AssertInt32(0);
                 long paramTypeOffset = br.ReadInt64();
                 br.AssertPattern(0x14, 0x00);
-                ParamType = br.GetASCII(paramTypeOffset);
+                // Vawser: Some params lack the actual string, and the offset points beyond the bounds of the actual file stream
+                if (paramTypeOffset > br.Length)
+                    ParamType = null;
+                else
+                    ParamType = br.GetASCII(paramTypeOffset);
+
+                if (string.IsNullOrWhiteSpace(ParamType))
+                    ParamType = null;
+
                 actualStringsOffset = paramTypeOffset;
             }
             else

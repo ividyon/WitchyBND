@@ -7,8 +7,9 @@
   <FormatVersion>203</FormatVersion>
   <Fields>
     <!-- <Field Def="dummy8 paramSize[12]" /> -->
-    <Field Def="s32 Unk0x00"></Field>
-    <Field Def="s32 Unk0x04"></Field>
-    <Field Def="s32 Unk0x08"></Field>
+    <Field Def="s32 value"></Field>
+    <Field Def="s32 textId"></Field>
+    <Field Def="s8 compareType"></Field>
+    <Field Def="dummy8 padding[3]"></Field>
   </Fields>
 </PARAMDEF>

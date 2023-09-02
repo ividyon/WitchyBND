@@ -33,21 +33,58 @@ namespace WitchyBND
         }
 
         // Dictionary housing paramdefs for batched usage.
-        private static Dictionary<WBUtil.GameType, Dictionary<string, PARAMDEF>> ParamdefStorage { get; set; } =
-            new Dictionary<WBUtil.GameType, Dictionary<string, PARAMDEF>>();
+        private static Dictionary<WBUtil.GameType, Dictionary<string, PARAMDEF>> ParamdefStorage { get; } = new();
 
         // Dictionary housing param row names for batched usage.
         private static Dictionary<WBUtil.GameType, Dictionary<string, Dictionary<int, string>>>
-            NameStorage { get; set; } = new Dictionary<WBUtil.GameType, Dictionary<string, Dictionary<int, string>>>();
+            NameStorage { get; } = new();
+
+        // Temporary mapping of param file names to AC6 param types.
+        private static readonly Dictionary<string, string> ac6ParamMappings = new()
+        {
+            { "EquipParamWeapon", "EquipParamWeapon_TENTATIVE" }, //
+            { "EquipParamProtector", "EQUIP_PARAM_PROTECTOR_ST" },
+            { "EquipParamAccessory", "EQUIP_PARAM_ACCESSORY_ST" },
+            { "ReinforceParamProtector", "REINFORCE_PARAM_PROTECTOR_ST" },
+            { "NpcParam", "NPC_PARAM_ST" },
+            { "NpcTransformParam", "NpcTransformParam_TENTATIVE" }, //
+            { "AtkParam_Npc", "ATK_PARAM_ST" },
+            { "WepAbsorpPosParam", "WEP_ABSORP_POS_PARAM_ST" },
+            { "DirectionCameraParam", "DIRECTION_CAMERA_PARAM_ST" },
+            { "MovementAcTypeParam", "MovementAcTypeParam_TENTATIVE" }, //
+            { "MovementRideObjParam", "MovementRideObjParam_TENTATIVE" }, //
+            { "MovementFlyEnemyParam", "MovementFlyEnemyParam_TENTATIVE" }, //
+            { "ChrModelParam", "CHR_MODEL_PARAM_ST" },
+            { "MissionParam", "MissionParam_TENTATIVE" }, //
+            { "MailParam", "MAIL_PARAM_ST" },
+            { "EquipParamBooster", "EquipParamBooster_TENTATIVE" }, //
+            { "EquipParamGenerator", "EquipParamGenerator_TENTATIVE" }, //
+            { "EquipParamFcs", "EquipParamFcs_TENTATIVE" }, //
+            { "RuntimeSoundParam_Npc", "RuntimeSoundParam_TENTATIVE" }, //
+            { "RuntimeSoundParam_Pc", "RuntimeSoundParam_TENTATIVE" }, //
+            { "CutsceneGparamTimeParam", "CUTSCENE_GPARAM_TIME_PARAM_ST" },
+            { "CutsceneTimezoneConvertParam", "CUTSCENE_TIMEZONE_CONVERT_PARAM_ST" },
+            { "CutsceneMapIdParam", "CUTSCENE_MAP_ID_PARAM_ST" },
+            { "MapAreaParam", "MapAreaParam_TENTATIVE" }, //
+            { "RuntimeSoundGlobalParam", "RuntimeSoundGlobalParam_TENTATIVE" }, //
+        };
 
         public static bool Unpack(this FsParam param, string sourceFile, string sourceDir, WBUtil.GameType game)
         {
             string paramType = param.ParamType;
+            string paramName = Path.GetFileNameWithoutExtension(sourceFile);
 
             // Fixed cell style for now.
             CellStyle cellStyle = CellStyle.Attribute;
 
             PopulateParamdef(game);
+
+            // Temporary solution to handle AC6 paramdefs without paramtype.
+            if (string.IsNullOrWhiteSpace(paramType) &&
+                ac6ParamMappings.TryGetValue(paramName, out string newParamType))
+            {
+                paramType = newParamType;
+            }
 
             if (!ParamdefStorage[game].ContainsKey(paramType))
             {
@@ -68,8 +105,6 @@ namespace WitchyBND
                 // Nothing happened yet, so can just proceed to the next file.
                 return true;
             }
-
-            string paramName = Path.GetFileNameWithoutExtension(sourceFile);
 
             // Begin writing the XML
             var xws = new XmlWriterSettings();
@@ -142,16 +177,20 @@ namespace WitchyBND
                         fieldCounts[fieldName][value] = 0;
                     fieldCounts[fieldName][value]++;
 
-                    if (!fieldMaxes.ContainsKey(fieldName) || fieldCounts[fieldName][value] > fieldMaxes[fieldName].Item2)
+                    if (!fieldMaxes.ContainsKey(fieldName) ||
+                        fieldCounts[fieldName][value] > fieldMaxes[fieldName].Item2)
                         fieldMaxes[fieldName] = (value, fieldCounts[fieldName][value]);
 
                     prepRow.Fields[fieldName] = value;
                 }
+
                 rows.Add(prepRow);
             }
+
             int threshold = (int)(rows.Count * 0.6);
             string GetMajorityValue(KeyValuePair<string, int> c) => c.Value > threshold ? c.Key : null;
-            var defaultValues = fieldCounts.ToDictionary(e => e.Key, e => GetMajorityValue(e.Value.MaxBy(c => c.Value)));
+            var defaultValues =
+                fieldCounts.ToDictionary(e => e.Key, e => GetMajorityValue(e.Value.MaxBy(c => c.Value)));
 
             // Field info (def & default values)
             xw.WriteStartElement("fields");
@@ -188,11 +227,11 @@ namespace WitchyBND
             {
                 xw.WriteStartElement("row");
                 xw.WriteAttributeString("id", row.ID.ToString());
-                if (row.Name != null)
+                if (!string.IsNullOrEmpty(row.Name))
                 {
                     xw.WriteAttributeString("name", row.Name);
                 }
-                else if (row.ParamdexName != null)
+                else if (!string.IsNullOrEmpty(row.ParamdexName))
                 {
                     xw.WriteAttributeString("paramdexName", row.ParamdexName);
                 }
@@ -482,23 +521,27 @@ namespace WitchyBND
                         e);
                 }
             }
+
             NameStorage[game][paramName] = nameDict;
         }
+
         public static Byte[] Dummy8Read(string dummy8, int expectedLength)
         {
             Byte[] nval = new Byte[expectedLength];
             if (!(dummy8.StartsWith('[') && dummy8.EndsWith(']')))
                 return null;
-            string[] spl = dummy8.Substring(1, dummy8.Length-2).Split('|');
+            string[] spl = dummy8.Substring(1, dummy8.Length - 2).Split('|');
             if (nval.Length != spl.Length)
             {
                 return null;
             }
-            for (int i=0; i<nval.Length; i++)
+
+            for (int i = 0; i < nval.Length; i++)
             {
                 if (!byte.TryParse(spl[i], out nval[i]))
                     return null;
             }
+
             return nval;
         }
 

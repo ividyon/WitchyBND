@@ -3,12 +3,11 @@
 </p>
 
 # WitchyBND
-ivi's fork of Yabber, the binder unpacker and format serializer by TKGP, bundling contributions by various community members and adding some quality-of-life features.
-WitchyBND continues where Yabber+ by Nordgaren left off.
+A continuation of Yabber, the FromSoftware file format unpacker and serializer by TKGP, bundling contributions by various community members and adding some quality-of-life features. WitchyBND continues where Yabber+ by Nordgaren left off.
 
-This fork is focused on **ELDEN RING** development and is untested with other games in the series. TKGP's original Yabber is likely the best for those.
+WitchyBND supports FromSoftware games from Demon's Souls onwards, but is primarily tested with ELDEN RING and ARMORED CORE VI. Report any issues you may find with other games.
 
-New additions include:
+New additions to WitchyBND include:
 * Breaks down BND folder structure to avoid excessive nesting in unpacked folders
 * File globbing pattern support in the commandline
 * regulation.bin support (Decrypt->unpack and repack->encrypt)
@@ -28,15 +27,25 @@ Planned (but TBD):
 * Other formats from YabberAvocado (Let me know which ones are needed the most)
 * Other formats from other Yabber forks (Let me know which are flying around the community)
 
-## Yabber
-An unpacker/repacker for common Demon's Souls, Dark Souls 1-3, Bloodborne, Sekiro, Elden Ring, Armored Core VI file formats. Supports .bnd, .bhd/.bdt, .dcx, .fltparam, .fmg, .gparam, .luagnl, .luainfo, and .tpf.
-Does not support dvdbnds (the very large bhd/bdt pairs in the main game directory); use [UDSFM](https://www.nexusmods.com/darksouls/mods/1304) or [UXM](https://www.nexusmods.com/sekiro/mods/26) to unpack those first.  
-Requires [.NET Desktop Runtime 7.0](https://aka.ms/dotnet/7.0/windowsdesktop-runtime-win-x64.exe).  
+# Requirements
+* WitchyBND requires [.NET Desktop Runtime 7.0](https://aka.ms/dotnet/7.0/windowsdesktop-runtime-win-x64.exe) to function.
+* The game archives need to be unpacked with [UXM Selective Unpacker](https://www.nexusmods.com/eldenring/mods/1651) to access the files that Witchy can work with.
 
-Please see the included readme for detailed instructions.  
+# Basic usage
+Witchy works exactly like Yabber.
+
+* Unpack the game files using a tool like [UXM Selective Unpacker](https://www.nexusmods.com/eldenring/mods/1651). (For Armored Core VI, you may currently need a work-in-progress version from [?ServerName? Discord](http://discord.gg/servername) in #tools-and-resources)
+* Find the files you'd like to extract. (Information on general modding is available in the [Souls Modding Wiki](http://soulsmodding.wikidot.com/) or on [?ServerName? Discord](http://discord.gg/servername).)
+* Drag the files onto the WitchyBND.exe executable in the Witchy folder.
+* If Witchy supports that file format, it will now be unpacked.
+* To repack, simply drag the unpacked folder or file onto WitchyBND.exe again.
+
+If you only want to remove the DCX compression from a DCX archive, use **WitchyBND.DCX.exe** instead.
+
+If you find it tedious to drag files onto the EXE, run **WitchyBND.Context.exe** to create Windows right-click context menu entries instead; that way, you can just right-click any file and find the "WitchyBND" option in the context menu.
 
 # Contributors
-* *TKGP* - Basically everything
+* *TKGP* - Created SoulsFormats and Yabber
 * *katalash* - GPARAM support
 * *Nordgaren* - Yabber+ additions, Armored Core VI additions
 * *DSMapStudio team* - FSParam, Paramdex
@@ -48,6 +57,17 @@ Please see the included readme for detailed instructions.
 
 # Changelog
 ## WitchyBND
+
+### 1.0.7.2
+
+* Updated ACVI paramdefs to Vawser's latest version.
+* Updated the AC6 PARAM reading solution for parity with the method and tentative ParamType names used by DSMapStudio.
+
+### 1.0.7.1
+
+* Updated ACVI paramdefs to Vawser's latest version.
+* Applied a temporary solution to an issue that prevented some AC6 PARAMs from being read. Thanks to Vawser for the method.
+* Fixed an issue with reading AC6 GIIV TPFs.
 
 ### 1.0.7.0
 

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PARAMDEF XmlVersion="0">
-  <ParamType>ACVI_NO_TYPE</ParamType> <!-- This is artifical, the actual param does not have any ParamType, the string offset is outside of the bounds of the file -->
+  <ParamType>EquipParamGenerator_TENTATIVE</ParamType>
   <DataVersion>7</DataVersion>
   <BigEndian>False</BigEndian>
   <Unicode>True</Unicode>
@@ -12,13 +12,19 @@
     <Field Def="u16 Unk0x06"></Field>
     <Field Def="s32 Unk0x08"></Field>
     <Field Def="f32 weight"></Field>
-    <Field Def="s32 en_capacity"></Field>
-    <Field Def="s32 en_output"></Field>
+    <Field Def="s32 energyCapacity"></Field>
+    <Field Def="s32 energyOutput"></Field>
     <Field Def="s32 Unk0x18"></Field>
-    <Field Def="f32 Unk0x1C"></Field>
-    <Field Def="f32 Unk0x20"></Field>
-    <Field Def="f32 Unk0x24"></Field>
-    <Field Def="s32 Unk0x28"></Field>
+    <Field Def="f32 enRecharge"></Field>
+    <Field Def="f32 supplyRecovery">
+        <Description>It an inverse multipliers. 1x == 1000 (base value), 4x == 250, etc. Game value == 1000/x.</Description>
+    </Field>
+    <Field Def="f32 postRecoveryEnSupply">
+        <Description>It an inverse multipliers. 1x == 1000 (base value), 4x == 250, etc. Game value == 1000/x.</Description>
+    </Field>
+    <Field Def="s32 energyFirearmSpec">
+        <Description>It an inverse multipliers. 1x == 1000 (base value), 4x == 250, etc. Game value == 1000/x.</Description>
+    </Field>
     <Field Def="s32 Unk0x2C"></Field>
     <Field Def="s32 Unk0x30"></Field>
     <Field Def="s32 Unk0x34"></Field>
@@ -48,7 +54,9 @@
     <Field Def="s32 Unk0x94"></Field>
     <Field Def="s32 Unk0x98"></Field>
     <Field Def="s32 Unk0x9C"></Field>
-    <Field Def="s32 Unk0xA0"></Field>
+    <Field Def="s32 boosterEmitterColor">
+        <Description>Also affects shield color.</Description>
+    </Field>
     <Field Def="s32 Unk0xA4"></Field>
     <Field Def="s32 Unk0xA8"></Field>
     <Field Def="s32 Unk0xAC"></Field>

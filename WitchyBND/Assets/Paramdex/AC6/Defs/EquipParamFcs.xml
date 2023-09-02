@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PARAMDEF XmlVersion="0">
-  <ParamType>ACVI_NO_TYPE</ParamType> <!-- This is artifical, the actual param does not have any ParamType, the string offset is outside of the bounds of the file -->
+  <ParamType>EquipParamFcs_TENTATIVE</ParamType>
   <DataVersion>8</DataVersion>
   <BigEndian>False</BigEndian>
   <Unicode>True</Unicode>
@@ -14,7 +14,7 @@
     <Field Def="f32 weight"></Field>
     <Field Def="s32 Unk0x10"></Field>
     <Field Def="s32 Unk0x14"></Field>
-    <Field Def="s32 en_load"></Field>
+    <Field Def="s32 energyLoad"></Field>
     <Field Def="s32 Unk0x1C"></Field>
     <Field Def="f32 Unk0x20"></Field>
     <Field Def="f32 Unk0x24"></Field>
@@ -41,8 +41,9 @@
     <Field Def="s32 Unk0x78"></Field>
     <Field Def="s32 Unk0x7C"></Field>
     <Field Def="s32 Unk0x80"></Field>
-    <Field Def="f32 missile_lockon_time"></Field>
-    <Field Def="f32 Unk0x88"></Field>
+    <!-- Both the next two fields are inverse multipliers. 100 base value. Game value == 100/x. -->
+    <Field Def="f32 missileLockCorrection"></Field>
+    <Field Def="f32 multiLockCorrection"></Field>
     <Field Def="s32 Unk0x8C"></Field>
     <Field Def="f32 Unk0x90"></Field>
     <Field Def="f32 Unk0x94"></Field>
@@ -51,11 +52,11 @@
     <Field Def="f32 Unk0xA0"></Field>
     <Field Def="f32 Unk0xA4"></Field>
     <Field Def="f32 Unk0xA8"></Field>
-    <Field Def="f32 close_range_assist_1"></Field>
-    <Field Def="f32 close_range_assist_2"></Field>
-    <Field Def="f32 medium_range_assist_1"></Field>
-    <Field Def="f32 medium_range_assist_2"></Field>
-    <Field Def="f32 long_range_assist"></Field>
+    <Field Def="f32 closeRangeAssist_1"></Field>
+    <Field Def="f32 closeRangeAssist_2"></Field>
+    <Field Def="f32 mediumRangeAssist_1"></Field>
+    <Field Def="f32 mediumRangeAssist_2"></Field>
+    <Field Def="f32 longRangeAssist"></Field>
     <Field Def="s32 Unk0xC0"></Field>
     <Field Def="s32 Unk0xC4"></Field>
     <Field Def="s32 Unk0xC8"></Field>
