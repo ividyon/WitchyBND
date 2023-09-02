@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PARAMDEF XmlVersion="0">
-  <ParamType>EquipParamProtector</ParamType>
+  <ParamType>EQUIP_PARAM_PROTECTOR_ST</ParamType>
   <DataVersion>7</DataVersion>
   <BigEndian>False</BigEndian>
   <Unicode>True</Unicode>
@@ -256,10 +256,15 @@
     <Field Def="s32 Unk0x258"></Field>
     <Field Def="s32 Unk0x25C"></Field>
     <Field Def="s32 Unk0x260"></Field>
-    <!-- For the next three fields: Base value == 300, +1.0 == +10 points, +0.5 == +5 points, -1.0 == -10, etc. -->
-    <Field Def="f32 antiKineticDefense"></Field>
-    <Field Def="f32 antiEnergyDefense"></Field>
-    <Field Def="f32 antiExplosiveDefense"></Field>
+    <Field Def="f32 antiKineticDefense">
+        <Description>Base value is 300. +1.0 = +10 ingame, +0.5 = +5, etc.</Description>
+    </Field>
+    <Field Def="f32 antiEnergyDefense">
+        <Description>Base value is 300. +1.0 = +10 ingame, +0.5 = +5, etc.</Description>
+    </Field>
+    <Field Def="f32 antiExplosiveDefense">
+        <Description>Base value is 300. +1.0 = +10 ingame, +0.5 = +5, etc.</Description>
+    </Field>
     <Field Def="s32 Unk0x270"></Field>
     <Field Def="s32 Unk0x274"></Field>
     <Field Def="f32 Unk0x278"></Field>

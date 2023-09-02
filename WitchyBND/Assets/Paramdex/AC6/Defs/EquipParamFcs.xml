@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PARAMDEF XmlVersion="0">
-  <ParamType>EquipParamFcs</ParamType>
+  <ParamType>EquipParamFcs_TENTATIVE</ParamType>
   <DataVersion>8</DataVersion>
   <BigEndian>False</BigEndian>
   <Unicode>True</Unicode>

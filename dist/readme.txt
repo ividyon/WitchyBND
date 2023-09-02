@@ -1,5 +1,5 @@
 --| WitchyBND
---| 1.0.7.0
+--| 1.0.7.2
 --| Maintained by ivi, Yabber created by TKGP
 --| https://github.com/ividyon/WitchyBND
 
@@ -79,10 +79,20 @@ ivi - WitchyBND maintainer
 
 --| Changelog
 
+1.0.7.2
+    Updated ACVI paramdefs to Vawser's latest version.
+    Updated the AC6 PARAM reading solution for parity with the method and tentative ParamType names used by DSMapStudio.
+
+1.0.7.1
+    Updated ACVI paramdefs to Vawser's latest version.
+    Applied a temporary solution to an issue that prevented some AC6 PARAMs from being read. Thanks to Vawser for the method.
+    Fixed an issue with reading AC6 GIIV TPFs.
+
 1.0.7.0
     Added support for decrypting/encrypting Armored Core VI regulation.bin. Thanks to Nordgaren for the encryption key.
     Added preliminary Paramdex support for Armored Core VI PARAM serialization. Thanks to Vawser for the preliminary paramdefs.
         Please note that this will mostly be a bunch of Unknown fields; this is more of a tool for reverse engineering than anything else.
+
 1.0.6.2
     ACTUALLY enabled use of Oodle 28 as promised in previous updates notes, just forgot to actually merge Nordgaren's change...
     See previous notes.

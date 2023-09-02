@@ -58,6 +58,11 @@ If you find it tedious to drag files onto the EXE, run **WitchyBND.Context.exe**
 # Changelog
 ## WitchyBND
 
+### 1.0.7.2
+
+* Updated ACVI paramdefs to Vawser's latest version.
+* Updated the AC6 PARAM reading solution for parity with the method and tentative ParamType names used by DSMapStudio.
+
 ### 1.0.7.1
 
 * Updated ACVI paramdefs to Vawser's latest version.

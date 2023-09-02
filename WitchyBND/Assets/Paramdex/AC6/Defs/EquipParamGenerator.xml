@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PARAMDEF XmlVersion="0">
-  <ParamType>EquipParamGenerator</ParamType>
+  <ParamType>EquipParamGenerator_TENTATIVE</ParamType>
   <DataVersion>7</DataVersion>
   <BigEndian>False</BigEndian>
   <Unicode>True</Unicode>
@@ -16,10 +16,15 @@
     <Field Def="s32 energyOutput"></Field>
     <Field Def="s32 Unk0x18"></Field>
     <Field Def="f32 enRecharge"></Field>
-    <!-- The following two fields are inverse multipliers. 1x == 1000 (base value), 4x == 250, etc. Game value == 1000/x. -->
-    <Field Def="f32 supplyRecovery"></Field>
-    <Field Def="f32 postRecoveryEnSupply"></Field>
-    <Field Def="s32 energyFirearmSpec"></Field>
+    <Field Def="f32 supplyRecovery">
+        <Description>It an inverse multipliers. 1x == 1000 (base value), 4x == 250, etc. Game value == 1000/x.</Description>
+    </Field>
+    <Field Def="f32 postRecoveryEnSupply">
+        <Description>It an inverse multipliers. 1x == 1000 (base value), 4x == 250, etc. Game value == 1000/x.</Description>
+    </Field>
+    <Field Def="s32 energyFirearmSpec">
+        <Description>It an inverse multipliers. 1x == 1000 (base value), 4x == 250, etc. Game value == 1000/x.</Description>
+    </Field>
     <Field Def="s32 Unk0x2C"></Field>
     <Field Def="s32 Unk0x30"></Field>
     <Field Def="s32 Unk0x34"></Field>
@@ -49,7 +54,9 @@
     <Field Def="s32 Unk0x94"></Field>
     <Field Def="s32 Unk0x98"></Field>
     <Field Def="s32 Unk0x9C"></Field>
-    <Field Def="s32 Unk0xA0"></Field>
+    <Field Def="s32 boosterEmitterColor">
+        <Description>Also affects shield color.</Description>
+    </Field>
     <Field Def="s32 Unk0xA4"></Field>
     <Field Def="s32 Unk0xA8"></Field>
     <Field Def="s32 Unk0xAC"></Field>

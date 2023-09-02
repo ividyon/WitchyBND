@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PARAMDEF XmlVersion="0">
-  <ParamType>EquipParamBooster</ParamType> 
+  <ParamType>EquipParamBooster_TENTATIVE</ParamType> 
   <DataVersion>7</DataVersion>
   <BigEndian>False</BigEndian>
   <Unicode>True</Unicode>
@@ -48,11 +48,11 @@
     <Field Def="f32 boostModeJumpVelocity">
         <Description>Velocity upon jumping with boost movement.</Description>
     </Field>
-    <Field Def="f32 Unk0x68"></Field>
-    <Field Def="f32 Unk0x6C"></Field>
-    <Field Def="f32 Unk0x70"></Field>
-    <Field Def="f32 Unk0x74"></Field>
-    <Field Def="f32 Unk0x78"></Field>
+    <Field Def="f32 Unk0x68"></Field>  <!-- quickBoostVelocity related -->
+    <Field Def="f32 Unk0x6C"></Field> 
+    <Field Def="f32 Unk0x70"></Field> <!-- boostModeJumpVelocity related -->
+    <Field Def="f32 Unk0x74"></Field> <!-- boostModeJumpVelocity related -->
+    <Field Def="f32 Unk0x78"></Field> 
     <Field Def="s32 Unk0x7C"></Field>
     <Field Def="s32 Unk0x80"></Field>
     <Field Def="f32 quickBoostReloadTime">
@@ -82,9 +82,9 @@
     <Field Def="s32 Unk0xD4"></Field> <!-- Always 0 -->
     <Field Def="s32 Unk0xD8"></Field> <!-- Always 0 -->
     <Field Def="s32 Unk0xDC"></Field> <!-- Always 0 -->
-    <Field Def="f32 Unk0xE0"></Field> 
-    <Field Def="f32 Unk0xE4"></Field>
-    <Field Def="f32 Unk0xE8"></Field>
+    <Field Def="f32 Unk0xE0"></Field> <!-- boostModeJumpVelocity Related -->
+    <Field Def="f32 Unk0xE4"></Field> <!-- boostModeJumpVelocity Related -->
+    <Field Def="f32 Unk0xE8"></Field> <!-- boostModeJumpVelocity Related -->
     <Field Def="s32 Unk0xEC"></Field> <!-- Always 0 -->
     <Field Def="f32 Unk0xF0"></Field>
     <Field Def="f32 Unk0xF4"></Field>
@@ -98,18 +98,20 @@
     </Field>
     <Field Def="f32 Unk0x108"></Field>
     <Field Def="s32 Unk0x10C"></Field> <!-- Always 0 -->
-    <Field Def="f32 Unk0x110"></Field>
+    <Field Def="f32 assaultBoostReloadTime">
+        <Description>Duration after which Assault Boost will be available again.</Description>
+    </Field>
     <Field Def="s32 Unk0x114"></Field>
     <Field Def="f32 assaultBoostEnergyConsumption">
         <Description>EN consumed by Assault Boost.</Description>
     </Field>
     <Field Def="u16 Unk0x11C"></Field> <!-- Always 0 -->
-    <Field Def="u16 Unk0x11E"></Field>
-    <Field Def="f32 Unk0x120"></Field>
+    <Field Def="u16 meleeBoostInitialVelocity"></Field>
+    <Field Def="f32 meleeBoostContinuousVelocity"></Field>
     <Field Def="f32 Unk0x124"></Field>
     <Field Def="f32 Unk0x128"></Field>
     <Field Def="s32 Unk0x12C"></Field> <!-- Always 0 -->
-    <Field Def="s32 Unk0x130"></Field>
+    <Field Def="f32 meleeBoostEnergyConsumption"></Field>
     <Field Def="f32 Unk0x134"></Field>
     <Field Def="f32 Unk0x138"></Field>
     <Field Def="s32 Unk0x13C"></Field> <!-- Always 0 -->

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PARAMDEF XmlVersion="0">
-  <ParamType>CutsceneMapIdParam</ParamType>
+  <ParamType>CUTSCENE_MAP_ID_PARAM_ST</ParamType>
   <DataVersion>3</DataVersion>
   <BigEndian>False</BigEndian>
   <Unicode>True</Unicode>

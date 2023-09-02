@@ -42,31 +42,31 @@ namespace WitchyBND
         // Temporary mapping of param file names to AC6 param types.
         private static readonly Dictionary<string, string> ac6ParamMappings = new()
         {
-            {"EquipParamWeapon", "EQUIP_PARAM_WEAPON_ST"},
-            {"EquipParamProtector", "EQUIP_PARAM_PROTECTOR_ST"},
-            {"EquipParamAccessory", "EQUIP_PARAM_ACCESSORY_ST"},
-            {"ReinforceParamProtector", "REINFORCE_PARAM_PROTECTOR_ST"},
-            {"NpcParam", "NPC_PARAM_ST"},
-            {"NpcTransformParam", "NpcTransformParam"}, //
-            {"AtkParam_Npc", "ATK_PARAM_ST"},
-            {"WepAbsorpPosParam", "WEP_ABSORP_POS_PARAM_ST"},
-            {"DirectionCameraParam", "DIRECTION_CAMERA_PARAM_ST"},
-            {"MovementAcTypeParam", "MovementAcTypeParam"}, //
-            {"MovementRideObjParam", "MovementRideObjParam"}, //
-            {"MovementFlyEnemyParam", "MovementFlyEnemyParam"}, //
-            {"ChrModelParam", "CHR_MODEL_PARAM_ST"},
-            {"MissionParam", "MissionParam"}, //
-            {"MailParam", "MAIL_PARAM_ST"},
-            {"EquipParamBooster", "EquipParamBooster"}, //
-            {"EquipParamGenerator", "EquipParamGenerator"}, //
-            {"EquipParamFcs", "EquipParamFcs"}, //
-            {"RuntimeSoundParam_Npc", "RuntimeSoundParam"}, //
-            {"RuntimeSoundParam_Pc", "RuntimeSoundParam"}, //
-            {"CutsceneGparamTimeParam", "CUTSCENE_GPARAM_TIME_PARAM_ST"},
-            {"CutsceneTimezoneConvertParam", "CUTSCENE_TIMEZONE_CONVERT_PARAM_ST"},
-            {"CutsceneMapIdParam", "CUTSCENE_MAP_ID_PARAM_ST"},
-            {"MapAreaParam", "MapAreaParam"}, //
-            {"RuntimeSoundGlobalParam", "RuntimeSoundGlobalParam"}, //
+            { "EquipParamWeapon", "EquipParamWeapon_TENTATIVE" }, //
+            { "EquipParamProtector", "EQUIP_PARAM_PROTECTOR_ST" },
+            { "EquipParamAccessory", "EQUIP_PARAM_ACCESSORY_ST" },
+            { "ReinforceParamProtector", "REINFORCE_PARAM_PROTECTOR_ST" },
+            { "NpcParam", "NPC_PARAM_ST" },
+            { "NpcTransformParam", "NpcTransformParam_TENTATIVE" }, //
+            { "AtkParam_Npc", "ATK_PARAM_ST" },
+            { "WepAbsorpPosParam", "WEP_ABSORP_POS_PARAM_ST" },
+            { "DirectionCameraParam", "DIRECTION_CAMERA_PARAM_ST" },
+            { "MovementAcTypeParam", "MovementAcTypeParam_TENTATIVE" }, //
+            { "MovementRideObjParam", "MovementRideObjParam_TENTATIVE" }, //
+            { "MovementFlyEnemyParam", "MovementFlyEnemyParam_TENTATIVE" }, //
+            { "ChrModelParam", "CHR_MODEL_PARAM_ST" },
+            { "MissionParam", "MissionParam_TENTATIVE" }, //
+            { "MailParam", "MAIL_PARAM_ST" },
+            { "EquipParamBooster", "EquipParamBooster_TENTATIVE" }, //
+            { "EquipParamGenerator", "EquipParamGenerator_TENTATIVE" }, //
+            { "EquipParamFcs", "EquipParamFcs_TENTATIVE" }, //
+            { "RuntimeSoundParam_Npc", "RuntimeSoundParam_TENTATIVE" }, //
+            { "RuntimeSoundParam_Pc", "RuntimeSoundParam_TENTATIVE" }, //
+            { "CutsceneGparamTimeParam", "CUTSCENE_GPARAM_TIME_PARAM_ST" },
+            { "CutsceneTimezoneConvertParam", "CUTSCENE_TIMEZONE_CONVERT_PARAM_ST" },
+            { "CutsceneMapIdParam", "CUTSCENE_MAP_ID_PARAM_ST" },
+            { "MapAreaParam", "MapAreaParam_TENTATIVE" }, //
+            { "RuntimeSoundGlobalParam", "RuntimeSoundGlobalParam_TENTATIVE" }, //
         };
 
         public static bool Unpack(this FsParam param, string sourceFile, string sourceDir, WBUtil.GameType game)
@@ -79,19 +79,18 @@ namespace WitchyBND
 
             PopulateParamdef(game);
 
-            if (paramType == null || !ParamdefStorage[game].ContainsKey(paramType) || string.IsNullOrWhiteSpace(paramType))
+            // Temporary solution to handle AC6 paramdefs without paramtype.
+            if (string.IsNullOrWhiteSpace(paramType) &&
+                ac6ParamMappings.TryGetValue(paramName, out string newParamType))
             {
-                // Temporary solution to handle AC6 paramdefs without paramtype.
-                if (paramType == null)
-                {
-                    paramType = ac6ParamMappings[paramName];
-                }
-                else
-                {
-                    Console.WriteLine($"Param type {paramType} not found in {WBUtil.GameNames[game]} paramdefs.");
-                    // Don't hard-fail this because it can happen, just proceed to the next file.
-                    return true;
-                }
+                paramType = newParamType;
+            }
+
+            if (!ParamdefStorage[game].ContainsKey(paramType))
+            {
+                Console.WriteLine($"Param type {paramType} not found in {WBUtil.GameNames[game]} paramdefs.");
+                // Don't hard-fail this because it can happen, just proceed to the next file.
+                return true;
             }
 
             PARAMDEF paramdef = ParamdefStorage[game][paramType];
