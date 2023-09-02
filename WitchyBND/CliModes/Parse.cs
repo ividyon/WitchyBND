@@ -131,7 +131,7 @@ public static class Parse
             new Parsers.WBXF4(),
             new Parsers.WFFXDLSE(),
             new Parsers.WFMG(),
-            //GPARAM
+            new Parsers.WGPARAM(),
             //LUAGNL
             //LUAINFO
             //TPF
@@ -141,6 +141,7 @@ public static class Parse
             //MTD
             //PARAM
             //MSBE
+            //TAE
         };
     }
 }
