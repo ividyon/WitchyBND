@@ -16,23 +16,6 @@ public class WFXR : WXMLParser
         return Fxr3.Is(path);
     }
 
-    public override bool IsUnpacked(string path)
-    {
-        XmlDocument xDoc = new XmlDocument();
-
-        try
-        {
-            xDoc.Load(path);
-        }
-        catch (XmlException)
-        {
-            return false;
-        }
-
-        XmlElement root = xDoc.DocumentElement;
-        return root != null && root.Name == nameof(Fxr3);
-    }
-
     public override void Unpack(string path)
     {
         var fxr = Fxr3.Read(path);

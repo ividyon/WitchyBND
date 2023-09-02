@@ -19,6 +19,16 @@ public class WDCX : WFileParser
         return Program.Configuration.Dcx && DCX.Is(path);
     }
 
+    public override bool Exists(string path)
+    {
+        return File.Exists(path);
+    }
+
+    public override bool UnpackedExists(string path)
+    {
+        return File.Exists(path);
+    }
+
     public override bool IsUnpacked(string path)
     {
         var xmlPath = $"{path}-wbinder-dcx.xml";

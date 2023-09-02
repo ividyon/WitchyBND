@@ -46,7 +46,7 @@ public class WBND3 : WBinderParser
             if (!string.IsNullOrEmpty(root))
                 files.AddBeforeSelf(new XElement("root", root));
 
-            var xw = XmlWriter.Create($"{destDir}\\${GetXmlFilename()}", new XmlWriterSettings
+            var xw = XmlWriter.Create($"{destDir}\\${GetBinderXmlFilename()}", new XmlWriterSettings
             {
                 Indent = true
             });
@@ -58,7 +58,7 @@ public class WBND3 : WBinderParser
         {
             var bnd = new BND3();
 
-            var doc = XDocument.Load(GetXmlPath(srcPath));
+            var doc = XDocument.Load(GetBinderXmlPath(srcPath));
             if (doc.Root == null) throw new XmlException("XML has no root");
             XElement xml = doc.Root;
             string filename = doc.Root.Element("filename")!.Value;

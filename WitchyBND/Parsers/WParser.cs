@@ -18,6 +18,8 @@ public abstract class WFileParser
     public virtual WFileParserVerb Verb => WFileParserVerb.Unpack;
     public abstract string Name { get; }
     public abstract bool Is(string path);
+    public abstract bool Exists(string path);
+    public abstract bool UnpackedExists(string path);
     public abstract bool IsUnpacked(string path);
     public abstract void Unpack(string srcPath);
     public abstract void Repack(string srcPath);
@@ -27,6 +29,14 @@ public abstract class WSingleFileParser : WFileParser
 {
     public abstract string GetUnpackDestPath(string srcPath);
     public abstract string GetRepackDestPath(string srcPath);
+    public override bool Exists(string path)
+    {
+        return File.Exists(path);
+    }
+    public override bool UnpackedExists(string path)
+    {
+        return File.Exists(path);
+    }
 }
 
 public abstract class WFolderParser : WFileParser
@@ -46,27 +56,37 @@ public abstract class WFolderParser : WFileParser
         return $"{targetDir}\\{destFileName}";
     }
 
+    public override bool Exists(string path)
+    {
+        return File.Exists(path);
+    }
+
+    public override bool UnpackedExists(string path)
+    {
+        return Directory.Exists(path);
+    }
+
     public override bool IsUnpacked(string path)
     {
         if (!Directory.Exists(path)) return false;
 
-        string xmlPath = Path.Combine(path, GetXmlFilename());
+        string xmlPath = Path.Combine(path, GetBinderXmlFilename());
         if (!File.Exists(xmlPath)) return false;
 
         var doc = XDocument.Load(xmlPath);
         return doc.Root != null && doc.Root.Name == Name.ToLower();
     }
 
-    protected virtual string GetXmlFilename()
+    protected virtual string GetBinderXmlFilename()
     {
         return $"_witchy-{Name.ToLower()}.xml";
     }
 
-    protected virtual string GetXmlPath(string dir)
+    protected virtual string GetBinderXmlPath(string dir)
     {
         dir = string.IsNullOrEmpty(dir) ? dir : $"{dir}\\";
 
-        if (File.Exists($"{dir}{GetXmlFilename()}"))
+        if (File.Exists($"{dir}{GetBinderXmlFilename()}"))
         {
             return $"{dir}_witchy-{Name.ToLower()}.xml";
         }
@@ -76,7 +96,7 @@ public abstract class WFolderParser : WFileParser
             return $"{dir}_yabber-{Name.ToLower()}.xml";
         }
 
-        return $"{dir}{GetXmlFilename()}";
+        return $"{dir}{GetBinderXmlFilename()}";
     }
 }
 
@@ -191,5 +211,14 @@ public abstract class WXMLParser : WSingleFileParser
     public override string GetRepackDestPath(string srcPath)
     {
         return srcPath.Replace(".xml", "");
+    }
+
+    public override bool IsUnpacked(string path)
+    {
+        if (Path.GetExtension(path) != ".xml")
+            return false;
+
+        var doc = XDocument.Load(path);
+        return doc.Root != null && doc.Root.Name == Name.ToLower();
     }
 }

@@ -37,7 +37,7 @@ public class WFFXBND : WBinderParser
             new XElement("unk05", bnd.Unk05.ToString())
         );
 
-        var xw = XmlWriter.Create($"{destDir}\\{GetXmlFilename()}", new XmlWriterSettings
+        var xw = XmlWriter.Create($"{destDir}\\{GetBinderXmlFilename()}", new XmlWriterSettings
         {
             Indent = true,
         });
@@ -94,7 +94,7 @@ public class WFFXBND : WBinderParser
     {
         var bnd = new BND4();
 
-        var doc = XDocument.Load(GetXmlPath(srcPath));
+        var doc = XDocument.Load(GetBinderXmlPath(srcPath));
         if (doc.Root == null) throw new XmlException("XML has no root");
         XElement xml = doc.Root;
 

@@ -66,12 +66,18 @@ public static class Parse
     {
         foreach (string path in paths)
         {
+            if (!File.Exists(path) && !Directory.Exists(path))
+            {
+                Program.WriteError($"Path {path} does not exist.");
+                continue;
+            }
+
             string fileName = Path.GetFileName(path);
             var parsed = false;
 
             foreach (WFileParser parser in Parsers)
             {
-                if (parser.Is(path))
+                if (parser.Exists(path) && parser.Is(path))
                 {
                     switch (parser.Verb)
                     {
@@ -87,7 +93,7 @@ public static class Parse
                     parsed = true;
                     break;
                 }
-                if (parser.IsUnpacked(path))
+                if (parser.UnpackedExists(path) && parser.IsUnpacked(path))
                 {
                     switch (parser.Verb)
                     {
@@ -123,9 +129,8 @@ public static class Parse
             new Parsers.WBND4(),
             new Parsers.WBXF3(),
             new Parsers.WBXF4(),
-            //FFXDLSE
-            //FFX
-            //FMG
+            new Parsers.WFFXDLSE(),
+            new Parsers.WFMG(),
             //GPARAM
             //LUAGNL
             //LUAINFO
