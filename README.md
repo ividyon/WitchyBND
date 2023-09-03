@@ -58,6 +58,13 @@ If you find it tedious to drag files onto the EXE, run **WitchyBND.Context.exe**
 # Changelog
 ## WitchyBND
 
+### 1.0.7.3
+
+* Separated ParamType from Paramdef Type in the XML serialization, to ensure that "tentative" ParamTypes do not get written to params.
+* Fixed an issue that prevented params with duplicate field names from correctly serializing (such as AC6 BehaviorParam_PC).
+  * Duplicate field names will now have the byte offset appended instead of the SortID.
+* Fixed an issue where empty BNDs threw an exception when attempting to unpack them.
+
 ### 1.0.7.2
 
 * Updated ACVI paramdefs to Vawser's latest version.
