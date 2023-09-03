@@ -191,6 +191,8 @@ public static class WBUtil
     {
         string root = "";
 
+        if (paths.Count() == 0) return root;
+
         var rootPath = new string(
             paths.First().Substring(0, paths.Min(s => s.Length))
                 .TakeWhile((c, i) => paths.All(s => s[i] == c)).ToArray());
