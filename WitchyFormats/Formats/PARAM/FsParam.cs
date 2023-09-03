@@ -920,12 +920,12 @@ namespace WitchyFormats
                 br.AssertPattern(0x14, 0x00);
                 // Vawser: Some params lack the actual string, and the offset points beyond the bounds of the actual file stream
                 if (paramTypeOffset > br.Length)
-                    ParamType = null;
+                    ParamType = string.Empty;
                 else
                     ParamType = br.GetASCII(paramTypeOffset);
 
                 if (string.IsNullOrEmpty(ParamType))
-                    ParamType = null;
+                    ParamType = string.Empty;
 
                 actualStringsOffset = paramTypeOffset;
             }

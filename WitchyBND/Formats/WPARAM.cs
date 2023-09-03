@@ -71,7 +71,7 @@ namespace WitchyBND
 
         public static bool Unpack(this FsParam param, string sourceFile, string sourceDir, WBUtil.GameType game)
         {
-            string paramType = param.ParamType;
+            string paramTypeToParamdef = param.ParamType;
             string paramName = Path.GetFileNameWithoutExtension(sourceFile);
 
             // Fixed cell style for now.
@@ -80,20 +80,20 @@ namespace WitchyBND
             PopulateParamdef(game);
 
             // Temporary solution to handle AC6 paramdefs without paramtype.
-            if (string.IsNullOrWhiteSpace(paramType) &&
+            if (string.IsNullOrWhiteSpace(paramTypeToParamdef) &&
                 ac6ParamMappings.TryGetValue(paramName, out string newParamType))
             {
-                paramType = newParamType;
+                paramTypeToParamdef = newParamType;
             }
 
-            if (!ParamdefStorage[game].ContainsKey(paramType))
+            if (!ParamdefStorage[game].ContainsKey(paramTypeToParamdef))
             {
-                Console.WriteLine($"Param type {paramType} not found in {WBUtil.GameNames[game]} paramdefs.");
+                Console.WriteLine($"Param type {paramTypeToParamdef} not found in {WBUtil.GameNames[game]} paramdefs.");
                 // Don't hard-fail this because it can happen, just proceed to the next file.
                 return true;
             }
 
-            PARAMDEF paramdef = ParamdefStorage[game][paramType];
+            PARAMDEF paramdef = ParamdefStorage[game][paramTypeToParamdef];
 
             try
             {
@@ -101,7 +101,7 @@ namespace WitchyBND
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Could not carefully apply paramdef {paramType} to {Path.GetFileName(sourceFile)}.");
+                Console.WriteLine($"Could not carefully apply paramdef {paramTypeToParamdef} to {Path.GetFileName(sourceFile)}.");
                 // Nothing happened yet, so can just proceed to the next file.
                 return true;
             }
@@ -349,7 +349,7 @@ namespace WitchyBND
                 field.UnkB8 = xmlRow.Attributes["unkb8"].InnerText;
                 field.UnkC0 = xmlRow.Attributes["unkc0"].InnerText;
 
-                var defaultValue = xmlRow.Attributes["defaultValue"]?.InnerText ?? "";
+                var defaultValue = xmlRow.Attributes["defaultValue"]?.InnerText ?? string.Empty;
                 defaultValues[field.InternalName] = defaultValue;
 
                 paramdef.Fields.Add(field);
@@ -360,7 +360,7 @@ namespace WitchyBND
             foreach (XmlNode xmlRow in xml.SelectNodes("param/rows/row"))
             {
                 var id = int.Parse(xmlRow.Attributes["id"].InnerText);
-                var name = xmlRow.Attributes["name"]?.InnerText ?? "";
+                var name = xmlRow.Attributes["name"]?.InnerText ?? string.Empty;
 
                 var row = new FsParam.Row(id, name, param);
 
@@ -500,7 +500,7 @@ namespace WitchyBND
                 // Write something to the storage so the population process isn't repeated.
                 NameStorage[game][paramName] = new Dictionary<int, string>()
                 {
-                    { -9000, "" }
+                    { -9000, string.Empty }
                 };
                 return;
             }
