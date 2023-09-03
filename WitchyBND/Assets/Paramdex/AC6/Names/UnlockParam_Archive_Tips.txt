@@ -1,137 +1,103 @@
-1401030 EN Consumption 
-1401100 Toggle Targets 
-1401111 Targeting Controls 
-1401113 Target Assist 
-1401115 Targeting 
-1401116 Target Assist 
-1401117 Multi-Lock    
-1401121 Quick Boost 
-1401126 Quick Boost  
-1401141 Repair Kits 
-1401200 Assault Boost  
-1401300 Vertical Catapult  
-1411000 Sortie Using an Older AC  
-1411100 Jamming Rounds 
-1500000 Lock-on 
-1500005 Lock-on 
-1500010 Reloading 
-1500015 Reloading 
-1500100 Missile Lock 
-1500105 Missile Lock 
-1500200 Melee Weapons 
-1500205 Melee Weapons 
-1500300 Scanning 
-1501000 Charge Attacks 
-1501005 Charge Attacks 
-1501010 ACS Strain and Stagger 
-1501015 ACS Strain and Stagger 
-1501020 Direct Hits 
-1501025 Direct Hits 
-1501100 ACS Accumulative Strain 
-1501105 ACS Accumulative Strain 
-1501200 Shield Defense 
-1501205 Shield Defense 
-1501210 Attack Indicators and Initial Guard 
-1501215 Attack Indicators and Initial Guard 
-1501300 Assault Boost Attacks 
-1501305 Assault Boost Attacks 
-1501400 Surprise Attacks 
-1501405 Surprise Attacks 
-1502000 Double Trigger 
-1502005 Double Trigger    
-1502100 Boosters and Mobility 
-1502105 Boosters and Mobility 
-1502110 Generators and Basic Specs 
-1502115 Generators and Basic Specs 
-1502200 FCS and Engagement Distance 
-1502205 FCS and Engagement Distance 
-1502300 AC Assembly and Strategy 
-1502305 AC Assembly and Strategy 
-1503000 Reverse-Joint Parts 
-1503005 Reverse-Joint Parts 
-1503010 Area Attacks 
-1503015 Area Attacks 
-1503100 Weapon Types 
-1503105 Weapon Types 
-1503110 Energy Weapons and Overheating 
-1503115 Energy Weapons and Overheating 
-1503200 Weapon Type Tactics 
-1503205 Weapon Type Tactics 
-1503210 Ricochets 
-1504000 Tetrapod Parts 
-1504005 Tetrapod Parts  
-1504100 Recoil   
-1504105 Recoil    
-1504200 Hovering-Based Tactics 
-1504201 Hovering-Based Tactics 
-1505000 Tank Parts and Strategy 
-1505002 Drifting 
-1505005 Tank Parts and Strategy 
-1505007 Drifting 
-1506000 Adaptive Assemblies 
-1509090 Advantages of Disabling Target Assist 
-1600000 Evasive Aerial Maneuvers 
-1601000 The Right Assembly for the Job 
-1602000 Tactical Reloading 
-2000000 ASSEMBLY 
-2001000 MISSIONS 
-2001100 REPLAY MISSION 
-2002000 BUY 
-2002010 SELL 
-2003000 PAINT 
-2003100 DECALS 
-2003300 IMAGE EDITOR 
-2004000 ARENA 
-2004100 NEST 
-2004110 CUSTOM MATCH 
-2005000 AC DATA 
-2006000 AC TEST 
-2007000 TRAINING 
-2008000 ARCHIVES 
-2008100 TIPS 
-2009000 OS TUNING 
-2100000 Access Granted: PARTS SHOP 
-2100010 Products Updated: PARTS SHOP 
-2101000 Access Granted: OS TUNING/ARENA 
-2101010 Data Registry Updated: ARENA 
-2101020 Access Granted: NEST 
-2101030 New Category Added: ARENA 
-2101040 Verification Data Updated: ARENA 
-2102000 Access Granted: REPLAY MISSION 
-2103000 Access Granted: SORTIE 
-2103010 Access Granted: TRAINING 
-2103020 Training Exercises Updated: TRAINING 
-2104000 Access Granted: LOGHUNT 
-2105000 Access Granted: AC DESIGN 
-2106000 Prototype Issued: VE-60SNA 
-2107000 Certification: Advanced Mercenary 
-2107010 Certification: Elite Hunter 
-2107020 Certification: Evaluation Complete 
-2107030 Certification: Integration Complete 
-2107040 Certification: Stargazer 
-2107050 Certification: Perfect Mercenary 
-2107070 Certification: Omniscience 
-2201000 Arm Units 
-2202000 Back Units 
-2203000 Heads 
-2204000 Cores 
-2205000 Arms 
-2206000 Legs 
-2207000 Boosters 
-2208000 FCS 
-2209000 Generators 
-2210000 Assault Armor 
-2211000 Pulse Armor 
-2212000 Pulse Protection 
-2213000 Terminal Armor 
-2214000 Weight Control 
-2215000 Boost Kick 
-2216000 Weapon Bay 
-2217000 Manual Aiming 
-2218000 Quick Turn 
-2219000 System Abnormality: ACS Failure 
-2220000 System Abnormality: Shock 
-2221000 Basic Controls 
-2222000 Canceling Actions 
-2223000 System Abnormality: Camera Disruption 
+2221000 Basic Controls
+1401100 Toggle Targets
+1401111 Targeting Controls
+1401113 Target Assist
+1509090 Advantages of Disabling Target Assist
+1500000 Lock-on
+1500005 Lock-on
+1500100 Missile Lock
+1401117 Multi-Lock
+1411000 Sortie Using an Older AC
+1411100 Jamming Rounds
+1500105 Missile Lock
+1401141 Repair Kits
+1500300 Scanning
+1401030 EN Consumption
+1401121 Quick Boost
+1401126 Quick Boost
+1401200 Assault Boost
+1501300 Assault Boost Attacks
+1501305 Assault Boost Attacks
+1600000 Evasive Aerial Maneuvers
+1401300 Vertical Catapult
+1501010 ACS Strain and Stagger
+1501015 ACS Strain and Stagger
+1501020 Direct Hits
+1501025 Direct Hits
+1501100 ACS Accumulative Strain
+1501105 ACS Accumulative Strain
+1501400 Surprise Attacks
+1501405 Surprise Attacks
+1503100 Weapon Types
+1503105 Weapon Types
+1503200 Weapon Type Tactics
+1503205 Weapon Type Tactics
+1503210 Ricochets
+1500010 Reloading
+1500015 Reloading
+1602000 Tactical Reloading
+1503110 Energy Weapons and Overheating
+1503115 Energy Weapons and Overheating
+1501000 Charge Attacks
+1501005 Charge Attacks
+2222000 Canceling Actions
+1503010 Area Attacks
+1503015 Area Attacks
+1500200 Melee Weapons
+1500205 Melee Weapons
+1501200 Shield Defense
+1501205 Shield Defense
+1501210 Attack Indicators and Initial Guard
+1501215 Attack Indicators and Initial Guard
+1502000 Double Trigger
+1502005 Double Trigger
+1503000 Reverse-Joint Parts
+1503005 Reverse-Joint Parts
+1504000 Tetrapod Parts
+1504005 Tetrapod Parts
+1504100 Recoil
+1504105 Recoil
+1504200 Hovering-Based Tactics
 1504205 Hovering-Based Tactics
+1505000 Tank Parts and Strategy
+1505005 Tank Parts and Strategy
+1505002 Drifting
+1505007 Drifting
+1502100 Boosters and Mobility
+1502105 Boosters and Mobility
+1502200 FCS and Engagement Distance
+1502205 FCS and Engagement Distance
+1502110 Generators and Basic Specs
+1502115 Generators and Basic Specs
+1502300 AC Assembly and Strategy
+1502305 AC Assembly and Strategy
+1601000 The Right Assembly for the Job
+1506000 Adaptive Assemblies
+2223000 System Abnormality: Camera Disruption
+2220000 System Abnormality: Shock
+2219000 System Abnormality: ACS Failure
+2201000 Arm Units
+2202000 Back Units
+2203000 Heads
+2204000 Cores
+2205000 Arms
+2206000 Legs
+2207000 Boosters
+2208000 FCS
+2209000 Generators
+2000000 ASSEMBLY
+2001000 MISSIONS
+2001100 REPLAY MISSION
+2002000 BUY
+2002010 SELL
+2003000 PAINT
+2003100 DECALS
+2003300 IMAGE EDITOR
+2004000 ARENA
+2004100 NEST
+2005000 AC DATA
+2006000 AC TEST
+2007000 TRAINING
+2008000 ARCHIVES
+2008100 TIPS
+2009000 OS TUNING

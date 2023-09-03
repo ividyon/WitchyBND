@@ -36,7 +36,6 @@
 13021840 Observation Data: The City of Xylem
 13021850 Video Record: G4's Last Words
 13021860 Text Data: The Re-education Center
-13021870 Audio Record: Researcher's Log
 13021880 Video Record: Testing New Components
 13021890 Video Record: BAWS Guard's Last Words
 13021900 Video Record: The Collector's Last Words
