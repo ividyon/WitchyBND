@@ -1,5 +1,5 @@
 --| WitchyBND
---| 1.0.7.3
+--| 1.0.7.4
 --| Maintained by ivi, Yabber created by TKGP
 --| https://github.com/ividyon/WitchyBND
 
@@ -78,6 +78,10 @@ Vawser - preliminary Armored Core VI paramdefs
 ivi - WitchyBND maintainer
 
 --| Changelog
+
+1.0.7.4
+    Updated AC6 Paramdex to Vawser's latest version, fixing duplicate field name issues and more.
+    Fixed an issue that would incorrectly wipe correct ParamTypes from serialized PARAMs.
 
 1.0.7.3
     Separated ParamType from Paramdef Type in the XML serialization, to ensure that "tentative" ParamTypes do not get written to params.

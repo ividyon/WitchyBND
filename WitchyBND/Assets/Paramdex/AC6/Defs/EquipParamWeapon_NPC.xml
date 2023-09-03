@@ -260,7 +260,7 @@
     <Field Def="s32 baseChangePrice"></Field>
     <Field Def="s16 Unk0x23C"></Field>
     <Field Def="u8 Unk0x23E"></Field>
-    <Field Def="u8 Unk0x23E"></Field>
+    <Field Def="u8 Unk0x23F"></Field>
     <Field Def="s32 Unk0x240"></Field>
     <Field Def="s32 Unk0x244"></Field>
     <Field Def="f32 Unk0x248"></Field>

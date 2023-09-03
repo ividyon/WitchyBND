@@ -23,27 +23,27 @@
     </Field> 
     <Field Def="s32 Unk0x1C"></Field>
     <Field Def="s32 Unk0x20"></Field>
-    <Field Def="s32 Unk0x21"></Field>
-    <Field Def="s32 Unk0x1C"></Field>
-    <Field Def="s32 Unk0x20"></Field>
     <Field Def="s32 Unk0x24"></Field>
     <Field Def="s32 Unk0x28"></Field>
     <Field Def="s32 Unk0x2C"></Field>
     <Field Def="s32 Unk0x30"></Field>
-    <Field Def="f32 Unk0x34"></Field>
+    <Field Def="s32 Unk0x34"></Field>
     <Field Def="s32 Unk0x38"></Field>
-    <Field Def="f32 Unk0x3C"></Field>
+    <Field Def="s32 Unk0x3C"></Field>
     <Field Def="f32 Unk0x40"></Field>
-    <Field Def="f32 Unk0x44"></Field>
+    <Field Def="s32 Unk0x44"></Field>
     <Field Def="f32 Unk0x48"></Field>
-    <Field Def="s32 Unk0x4C"></Field>
+    <Field Def="f32 Unk0x4C"></Field>
     <Field Def="f32 Unk0x50"></Field>
     <Field Def="f32 Unk0x54"></Field>
-    <Field Def="f32 Unk0x58"></Field>
-    <Field Def="s32 Unk0x5C"></Field>
-    <Field Def="s32 Unk0x60"></Field>
-    <Field Def="s32 Unk0x64"></Field>
-    <Field Def="f32 Unk0x68"></Field>
+    <Field Def="s32 Unk0x58"></Field>
+    <Field Def="f32 Unk0x5C"></Field>
+    <Field Def="f32 rateOfFire"></Field>
+    <Field Def="f32 Unk0x64"></Field>
+    <Field Def="s32 Unk0x68"></Field>
+    <Field Def="s32 Unk0x6C"></Field>
+    <Field Def="s32 Unk0x70"></Field>
+    <Field Def="f32 Unk0x74"></Field>
     <Field Def="s32 weaponChargedAmmunitionConsumption">
         <Description>Ammunition consumed by charge attacks.</Description>
     </Field>
@@ -56,25 +56,22 @@
     <Field Def="s32 missileMaxLockCount">
         <Description>Maximum possible number of lock-ons for missiles and other homing weapons. Multi-lock is possible if this number is 2 or higher.</Description>
     </Field>
-    <Field Def="s32 Unk0x7C"></Field>
-    <Field Def="s32 Unk0x80"></Field>
+    <Field Def="s32 Unk0x88"></Field>
+    <Field Def="s32 Unk0x8C"></Field>
     <Field Def="s32 bulletShotgunParamIdA">
         <Description>References BulletShotgunParam</Description>
     </Field>
-    <Field Def="f32 Unk0x88"></Field>
+    <Field Def="f32 Unk0x94"></Field>
     <Field Def="f32 weaponAttackHeatBuildup">
         <Description>Heat buildup when attacking. Overheat occurs when value exceeds maximum tolerance.</Description>
     </Field>
     <Field Def="s32 bulletShotgunParamIdB">
         <Description>References BulletShotgunParam</Description>
     </Field>
-    <Field Def="f32 Unk0x94"></Field>
-    <Field Def="f32 Unk0x98"></Field>
-    <Field Def="s32 Unk0x9C"></Field>
     <Field Def="f32 Unk0xA0"></Field>
-    <Field Def="s32 Unk0xA4"></Field>
+    <Field Def="f32 Unk0xA4"></Field>
     <Field Def="s32 Unk0xA8"></Field>
-    <Field Def="s32 Unk0xAC"></Field>
+    <Field Def="f32 Unk0xAC"></Field>
     <Field Def="s32 Unk0xB0"></Field>
     <Field Def="s32 Unk0xB4"></Field>
     <Field Def="s32 Unk0xB8"></Field>
@@ -82,5 +79,8 @@
     <Field Def="s32 Unk0xC0"></Field>
     <Field Def="s32 Unk0xC4"></Field>
     <Field Def="s32 Unk0xC8"></Field>
+    <Field Def="s32 Unk0xCC"></Field>
+    <Field Def="s32 Unk0xD0"></Field>
+    <Field Def="s32 Unk0xD4"></Field>
   </Fields>
 </PARAMDEF>

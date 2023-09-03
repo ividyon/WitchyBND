@@ -264,10 +264,10 @@
     <Field Def="s32 baseChangePrice"></Field>
     <Field Def="s16 Unk0x23C"></Field>
     <Field Def="u8 Unk0x23E"></Field>
-    <Field Def="u8 Unk0x23E"></Field>
+    <Field Def="u8 Unk0x23F"></Field>
     <Field Def="u8 Unk0x240"></Field>
-    <Field Def="u8 Unk0x240"></Field>
-    <Field Def="u16 Unk0x240"></Field>
+    <Field Def="u8 Unk0x241"></Field>
+    <Field Def="u16 Unk0x242"></Field>
     <Field Def="s32 magazineRounds">
         <Description>Number of rounds loaded per magazine.</Description>
     </Field>
@@ -327,7 +327,7 @@
     <Field Def="s32 Unk0x2FC"></Field>
     <Field Def="s32 Unk0x300"></Field>
     <Field Def="s32 Unk0x304"></Field>
-    <Field Def="s32 Unk0x308"></Field>
+    <Field Def="s32 Unk0x308"></Field> <!-- WepMotionCategory -->
     <Field Def="s32 Unk0x30C"></Field>
     <Field Def="s32 Unk0x310"></Field>
     <Field Def="s32 Unk0x314"></Field>

@@ -115,7 +115,7 @@ namespace WitchyBND
 
             // Meta data
             xw.WriteElementString("fileName", Path.GetFileName(sourceFile));
-            if (string.IsNullOrEmpty(param.ParamType))
+            if (!string.IsNullOrEmpty(param.ParamType))
                 xw.WriteElementString("type", param.ParamType);
             xw.WriteElementString("game", WBUtil.GameNames[game]);
             xw.WriteElementString("cellStyle", ((int)cellStyle).ToString());
