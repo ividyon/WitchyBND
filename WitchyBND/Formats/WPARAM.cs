@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Xml;
 using SoulsFormats;
 using WitchyFormats;
@@ -471,14 +472,33 @@ namespace WitchyBND
                     .ToDictionary(x => x.Key, x => x.ToList());
                 foreach (KeyValuePair<string, List<PARAMDEF.Field>> pair in dupes)
                 {
-                    foreach (var dupe in pair.Value)
-                    {
-                        dupe.InternalName += $"_sid{dupe.SortID}";
-                    }
+                    // foreach (var dupe in pair.Value)
+                    // {
+                        // dupe.InternalName += $"_sid{dupe.SortID}";
+                    // }
                     // for (int i = 0; i < pair.Value.Count(); i++)
                     // {
-                    // pair.Value[i].InternalName += $"_xid{i}";
+                    //     PARAMDEF.Field fieldDef = pair.Value[i];
+                    //     fieldDef.InternalName += $"_xid{i}";
                     // }
+                    for (var i = 0; i < pair.Value.Count; i++)
+                    {
+                        int offset = 0;
+                        PARAMDEF.Field fieldDef = pair.Value[i];
+                        var index = paramdef.Fields.IndexOf(fieldDef);
+                        for (int j = 0; j < index; j++)
+                        {
+                            var prevDef = paramdef.Fields[j];
+                            var type = WBUtil.TypeForParamDefType(prevDef.DisplayType, prevDef.ArrayLength > 1);
+                            if (type == typeof(byte[]))
+                            {
+                                offset += prevDef.ArrayLength;
+                            }
+                            else
+                                offset += Marshal.SizeOf(type);
+                        }
+                        fieldDef.InternalName += $"_offset{offset}";
+                    }
                 }
 
                 ParamdefStorage[game][paramdef.ParamType] = paramdef;
