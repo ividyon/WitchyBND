@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PARAMMETA XmlVersion="0">
-  <Field></Field>
-  <Self></Self>
+    <Enum Name="BULLET_FOLLOW_TYPE" type="u8">
+        <Option Value="0" Name="No Follow" />
+        <Option Value="1" Name="Follow Shooter" />
+        <Option Value="2" Name="Follow Shooter Feet" />
+        <Option Value="3" Name="Follow Target" />
+        <Option Value="4" Name="Crawl Ground" />
+        <Option Value="5" Name="Follow Orientation of Spawn" />
+        <Option Value="6" Name="Follow Around Target" />
+        <Option Value="7" Name="Follow Parent Bullet" />
+        <Option Value="8" Name="Follow Along Ground" />
+        <Option Value="9" Name="Follow Parent Bullet (except direction)" />
+        <Option Value="10" Name="Follow Parent Bullet" />
+    </Enum>
+    <Field>
+        <FollowType AltName="Follow Type" Emum="BULLET_FOLLOW_TYPE" />
+    </Field>
+    <Self></Self>
 </PARAMMETA>

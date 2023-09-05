@@ -48,7 +48,7 @@ If you find it tedious to drag files onto the EXE, run **WitchyBND.Context.exe**
 * *TKGP* - Created SoulsFormats and Yabber
 * *katalash* - GPARAM support
 * *Nordgaren* - Yabber+ additions, Armored Core VI additions
-* *DSMapStudio team* - FSParam, Paramdex
+* *DSMapStudio team* - FsParam, Paramdex
 * *Meowmaritus, NamelessHoodie* - initial FXR serialization
 * *Avocado* - YabberAvocado additions
 * *NatsuDragneelTheFireDragon* - MQB support
@@ -57,6 +57,18 @@ If you find it tedious to drag files onto the EXE, run **WitchyBND.Context.exe**
 
 # Changelog
 ## WitchyBND
+
+### 1.0.7.4
+
+* Updated AC6 Paramdex to Vawser's latest version, fixing duplicate field name issues and more.
+* Fixed an issue that would incorrectly wipe correct ParamTypes from serialized PARAMs.
+
+### 1.0.7.3
+
+* Separated ParamType from Paramdef Type in the XML serialization, to ensure that "tentative" ParamTypes do not get written to params.
+* Fixed an issue that prevented params with duplicate field names from correctly serializing (such as AC6 BehaviorParam_PC).
+  * Duplicate field names will now have the byte offset appended instead of the SortID.
+* Fixed an issue where empty BNDs threw an exception when attempting to unpack them.
 
 ### 1.0.7.2
 

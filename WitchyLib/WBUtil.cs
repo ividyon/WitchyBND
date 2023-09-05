@@ -195,6 +195,38 @@ public static class WBUtil
         return false;
     }
 
+    public static Type TypeForParamDefType(PARAMDEF.DefType type, bool isArray)
+    {
+        switch (type)
+        {
+            case PARAMDEF.DefType.s8:
+                return typeof(sbyte);
+            case PARAMDEF.DefType.u8:
+                return typeof(byte);
+            case PARAMDEF.DefType.s16:
+                return typeof(short);
+            case PARAMDEF.DefType.u16:
+                return typeof(ushort);
+            case PARAMDEF.DefType.s32:
+            case PARAMDEF.DefType.b32:
+                return typeof(int);
+            case PARAMDEF.DefType.u32:
+                return typeof(uint);
+            case PARAMDEF.DefType.f32:
+            case PARAMDEF.DefType.angle32:
+                return typeof(float);
+            case PARAMDEF.DefType.f64:
+                return typeof(double);
+            case PARAMDEF.DefType.dummy8:
+                return isArray ? typeof(byte[]) : typeof(byte);
+            case PARAMDEF.DefType.fixstr:
+            case PARAMDEF.DefType.fixstrW:
+                return typeof(string);
+            default:
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
+        }
+    }
+
     public static string GetXmlPath(string type, string dir = "")
     {
         dir = string.IsNullOrEmpty(dir) ? dir : $"{dir}\\";
@@ -223,6 +255,8 @@ public static class WBUtil
     public static string FindCommonRootPath(IEnumerable<string> paths)
     {
         string root = "";
+
+        if (paths.Count() == 0) return root;
 
         var rootPath = new string(
             paths.First().Substring(0, paths.Min(s => s.Length))
