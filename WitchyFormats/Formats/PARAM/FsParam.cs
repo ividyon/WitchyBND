@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security;
 using SoulsFormats;
 using StudioUtils;
 
@@ -135,7 +132,7 @@ namespace WitchyFormats
         /// </summary>
         public class Row
         {
-            internal FsParam Parent;
+            internal readonly FsParam Parent;
 
             /// <summary>
             /// The ID for this row. Should be a unique identifier in theory but in practice it isn't always
@@ -177,7 +174,7 @@ namespace WitchyFormats
             /// <summary>
             /// The paramdef for this row.
             /// </summary>
-            public PARAMDEF Def => Parent.AppliedParamdef;
+            public PARAMDEF? Def => Parent.AppliedParamdef;
 
             internal Row(int id, string? name, FsParam parent, uint dataIndex)
             {
@@ -299,10 +296,10 @@ namespace WitchyFormats
         /// that is created on demand and therefore more lightweight. For new code, usage of this is not
         /// recommended.
         /// </summary>
-        public struct Cell
+        public readonly struct Cell
         {
-            private Row _row;
-            private Column _column;
+            private readonly Row _row;
+            private readonly Column _column;
 
             internal Cell(Row row, Column column)
             {
@@ -351,10 +348,10 @@ namespace WitchyFormats
             /// </summary>
             public Type ValueType { get; private set; }
 
-            private uint _byteOffset;
-            private uint _arrayLength;
-            private int _bitSize;
-            private uint _bitOffset;
+            private readonly uint _byteOffset;
+            private readonly uint _arrayLength;
+            private readonly int _bitSize;
+            private readonly uint _bitOffset;
 
             internal Column(PARAMDEF.Field def, uint byteOffset, uint arrayLength = 1)
             {
@@ -579,7 +576,7 @@ namespace WitchyFormats
         /// <summary>
         /// Identifies corresponding params and paramdefs.
         /// </summary>
-        public string ParamType { get; set; }
+        public string? ParamType { get; set; }
 
         /// <summary>
         /// Detected size of the row in bytes. Empty params will have a size of 0 and params constructed
@@ -617,12 +614,12 @@ namespace WitchyFormats
         /// List of columns created from the applied paramdef. You can iterate through these and use the columns
         /// to access the specific data of rows.
         /// </summary>
-        public IReadOnlyList<Column> Columns { get; private set; }
+        public IReadOnlyList<Column> Columns { get; private set; } = new List<Column>();
 
         /// <summary>
         /// The applied paramdef
         /// </summary>
-        public PARAMDEF? AppliedParamdef { get; private set; } = null;
+        public PARAMDEF? AppliedParamdef { get; private set; }
 
         /// <summary>
         /// Create an empty param. Param specific header data must be set before saving and ApplyParamdef()
@@ -630,7 +627,13 @@ namespace WitchyFormats
         /// </summary>
         public FsParam()
         {
-
+            BigEndian = false;
+            Format2D = FormatFlags1.None;
+            Format2E = FormatFlags2.None;
+            ParamdefDataVersion = 0;
+            ParamdefFormatVersion = 0;
+            Unk06 = 0;
+            ParamType = null;
         }
 
         /// <summary>
@@ -639,10 +642,17 @@ namespace WitchyFormats
         /// </summary>
         /// <param name="paramdef">The paramdef that this param conforms to</param>
         /// <param name="bigEndian">Whether the param is stored in big endian or not</param>
-        public FsParam(PARAMDEF paramdef, bool bigEndian = false)
+        /// <param name="regulationVersion">For versioned paramdefs, the regulation version to apply</param>
+        public FsParam(PARAMDEF paramdef, bool bigEndian = false, ulong regulationVersion = ulong.MaxValue)
         {
             BigEndian = bigEndian;
-            ApplyParamdef(paramdef);
+            Format2D = FormatFlags1.None;
+            Format2E = FormatFlags2.None;
+            ParamdefDataVersion = paramdef.DataVersion;
+            ParamdefFormatVersion = 0;
+            Unk06 = 0;
+            ParamType = paramdef.ParamType;
+            ApplyParamdef(paramdef, regulationVersion);
         }
 
         /// <summary>
@@ -660,8 +670,8 @@ namespace WitchyFormats
             ParamType = source.ParamType;
             RowSize = source.RowSize;
             _paramData = new StridedByteArray((uint)source._rows.Count, (uint)RowSize, BigEndian);
+            Columns = source.Columns;
             AppliedParamdef = source.AppliedParamdef;
-            ApplyParamdef(AppliedParamdef);
         }
 
         /// <summary>
@@ -750,23 +760,27 @@ namespace WitchyFormats
         /// set before this method is called.
         /// </summary>
         /// <param name="def">The paramdef to apply</param>
-        public void ApplyParamdef(PARAMDEF def)
+        /// <param name="regulationVersion">For version aware paramdefs, the regulation version of the param the
+        /// paramdef is being applied to</param>
+        public void ApplyParamdef(PARAMDEF def, ulong regulationVersion = ulong.MaxValue)
         {
             if (AppliedParamdef != null)
                 throw new ArgumentException("Param already has a paramdef applied.");
+
             AppliedParamdef = def;
             var columns = new List<Column>(def.Fields.Count);
 
             int bitOffset = -1;
             uint byteOffset = 0;
             uint lastSize = 0;
-            PARAMDEF.DefType bitType = PARAMDEF.DefType.u8;
+            var bitType = PARAMDEF.DefType.u8;
 
-            for (int i = 0; i < def.Fields.Count; i++)
+            foreach (var field in def.Fields)
             {
-                PARAMDEF.Field field = def.Fields[i];
-                PARAMDEF.DefType type = field.DisplayType;
-                bool isBitType = ParamUtil.IsBitType(type);
+                if (def.VersionAware && !field.IsValidForRegulationVersion(regulationVersion))
+                    continue;
+                var type = field.DisplayType;
+                var isBitType = ParamUtil.IsBitType(type);
                 if (!isBitType || (isBitType && field.BitSize == -1))
                 {
                     // Advance the offset if we were last reading bits
@@ -913,20 +927,14 @@ namespace WitchyFormats
             Unk06 = br.ReadInt16();
             ParamdefDataVersion = br.ReadInt16();
             ushort rowCount = br.ReadUInt16();
+            long paramTypeOffset = 0;
             if (Format2D.HasFlag(FormatFlags1.OffsetParamType))
             {
                 br.AssertInt32(0);
-                long paramTypeOffset = br.ReadInt64();
+                paramTypeOffset = br.ReadInt64();
                 br.AssertPattern(0x14, 0x00);
-                // Vawser: Some params lack the actual string, and the offset points beyond the bounds of the actual file stream
-                if (paramTypeOffset > br.Length)
-                    ParamType = string.Empty;
-                else
-                    ParamType = br.GetASCII(paramTypeOffset);
 
-                if (string.IsNullOrEmpty(ParamType))
-                    ParamType = string.Empty;
-
+                // ParamType itself will be checked after rows.
                 actualStringsOffset = paramTypeOffset;
             }
             else
@@ -988,17 +996,27 @@ namespace WitchyFormats
             else
                 RowSize = 0;
 
+            uint dataStart = 0;
             if (Rows.Count > 0)
             {
-                var dataStart = Rows.Min(row => row.DataIndex);
+                dataStart = Rows.Min(row => row.DataIndex);
                 br.Position = dataStart;
-                var rowData = br.ReadBytes(Rows.Count * (int)RowSize);
+                var rowData = br.ReadBytes(Rows.Count * RowSize);
                 _paramData = new StridedByteArray(rowData, (uint)RowSize, BigEndian);
 
                 // Convert raw data offsets into indices
                 foreach (var r in Rows)
                 {
                     r.DataIndex = (r.DataIndex - dataStart) / (uint)RowSize;
+                }
+            }
+
+            if (Format2D.HasFlag(FormatFlags1.OffsetParamType))
+            {
+                // Check if ParamTypeOffset is valid.
+                if (paramTypeOffset == dataStart + rowCount * RowSize)
+                {
+                    ParamType = br.GetASCII(paramTypeOffset);
                 }
             }
 
@@ -1026,7 +1044,11 @@ namespace WitchyFormats
             }
             bw.WriteInt16(Unk06);
             bw.WriteInt16(ParamdefDataVersion);
+
+            if (Rows.Count > ushort.MaxValue)
+                throw new OverflowException($"Param \"{AppliedParamdef.ParamType}\" has more than {ushort.MaxValue} rows and cannot be saved.");
             bw.WriteUInt16((ushort)Rows.Count);
+
             if (Format2D.HasFlag(FormatFlags1.OffsetParamType))
             {
                 bw.WriteInt32(0);

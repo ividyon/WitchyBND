@@ -8,6 +8,7 @@ using System.Xml.Serialization;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using SoulsFormats;
+using PARAMDEF = WitchyFormats.PARAMDEF;
 
 namespace WitchyLib;
 
@@ -58,9 +59,9 @@ public static class WBUtil
             xml.Load(witchyXmlPath);
 
             string filename = xml.SelectSingleNode("bnd4/filename").InnerText;
-            if (filename == "regulation.bin")
+            if (filename == "regulation.bin" && xml.SelectSingleNode("bnd4/game")?.InnerText != null)
             {
-                Enum.TryParse(xml.SelectSingleNode("bnd4/game").InnerText, out GameType regGame);
+                Enum.TryParse(xml.SelectSingleNode("bnd4/game")!.InnerText, out GameType regGame);
                 gameNullable = regGame;
             }
         }
@@ -142,24 +143,6 @@ public static class WBUtil
             GameType.AC6 => SFUtil.DecryptAC6Regulation(path),
             _ => throw new InvalidOperationException("Only Elden Ring and Armored Core VI have a regulation.bin")
         };
-    }
-
-    /// <summary>
-    /// General forking madness around SoulsFormats and Paramdex means that the
-    /// Paramdex repo and the DSMS Paramdex have diverged in DataVersions in paramdefs,
-    /// which for most end users should not be a big deal.
-    /// This function excludes the SF dataversion check.
-    /// </summary>
-    public static bool ApplyParamdefLessCarefully(this WitchyFormats.PARAM param, PARAMDEF paramdef)
-    {
-        if (param.ParamType == paramdef.ParamType &&
-            (param.DetectedSize == -1 || param.DetectedSize == paramdef.GetRowSize()))
-        {
-            param.ApplyParamdef(paramdef);
-            return true;
-        }
-
-        return false;
     }
 
     public static Type TypeForParamDefType(PARAMDEF.DefType type, bool isArray)
