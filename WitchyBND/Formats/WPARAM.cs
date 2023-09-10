@@ -7,7 +7,7 @@ using System.Xml;
 using SoulsFormats;
 using WitchyFormats;
 using WitchyLib;
-
+using PARAMDEF = WitchyFormats.PARAMDEF;
 namespace WitchyBND
 {
     static class WPARAM
@@ -122,6 +122,8 @@ namespace WitchyBND
             xw.WriteElementString("compression", param.Compression.ToString());
             xw.WriteElementString("format2D", ((byte)param.Format2D).ToString());
             xw.WriteElementString("format2E", ((byte)param.Format2E).ToString());
+            xw.WriteElementString("dataVersion", param.ParamdefDataVersion.ToString());
+            xw.WriteElementString("formatVersion", param.ParamdefFormatVersion.ToString());
             xw.WriteElementString("unk06", param.Unk06.ToString());
 
             // Embed paramdef in the XML so it serves as its own paramdef.
@@ -327,10 +329,16 @@ namespace WitchyBND
             paramdef.Compression = defCompression;
 
             paramdef.DataVersion = Convert.ToInt16(xml.SelectSingleNode("param/paramdef/dataVersion").InnerText);
-            param.ParamdefDataVersion = paramdef.DataVersion;
+            var dataVersionText = xml.SelectSingleNode("param/dataVersion")?.InnerText;
+            param.ParamdefDataVersion = !string.IsNullOrEmpty(dataVersionText)
+                ? Convert.ToInt16(dataVersionText)
+                : paramdef.DataVersion;
 
             paramdef.FormatVersion = Convert.ToInt16(xml.SelectSingleNode("param/paramdef/formatVersion").InnerText);
-            // param.ParamdefFormatVersion = (byte)paramdef.FormatVersion;
+            var formatVersionText = xml.SelectSingleNode("param/formatVersion")?.InnerText;
+            param.ParamdefFormatVersion = !string.IsNullOrEmpty(formatVersionText)
+                ? Convert.ToByte(formatVersionText)
+                : Convert.ToByte(paramdef.FormatVersion);
 
             paramdef.Fields = new List<PARAMDEF.Field>();
 
@@ -445,42 +453,15 @@ namespace WitchyBND
                 throw new Exception($"Paramdef path not found for {gameName}.");
             }
 
-            List<string> patchParamdefPaths = new();
-
-            var defsPatchPath = $@"{WBUtil.GetExeLocation()}\Assets\Paramdex\{gameName}\DefsPatch";
-            if (Directory.Exists(defsPatchPath))
-            {
-                patchParamdefPaths = Directory.GetDirectories(defsPatchPath).OrderByDescending(path => path).ToList();
-            }
-
             // Reading XML paramdefs
             foreach (string path in Directory.GetFiles(paramdefPath, "*.xml"))
             {
                 PARAMDEF paramdef = PARAMDEF.XmlDeserialize(path);
 
-                foreach (string patchPath in patchParamdefPaths)
-                {
-                    var patchParamdefPath = $@"{patchPath}\{Path.GetFileName(path)}";
-                    if (!File.Exists(patchParamdefPath)) continue;
-                    var patchParamdef = PARAMDEF.XmlDeserialize(patchParamdefPath);
-                    if (patchParamdef == null) continue;
-                    paramdef = patchParamdef;
-                    break;
-                }
-
                 var dupes = paramdef.Fields.GroupBy(x => x.InternalName).Where(x => x.Count() > 1)
                     .ToDictionary(x => x.Key, x => x.ToList());
                 foreach (KeyValuePair<string, List<PARAMDEF.Field>> pair in dupes)
                 {
-                    // foreach (var dupe in pair.Value)
-                    // {
-                        // dupe.InternalName += $"_sid{dupe.SortID}";
-                    // }
-                    // for (int i = 0; i < pair.Value.Count(); i++)
-                    // {
-                    //     PARAMDEF.Field fieldDef = pair.Value[i];
-                    //     fieldDef.InternalName += $"_xid{i}";
-                    // }
                     for (var i = 0; i < pair.Value.Count; i++)
                     {
                         int offset = 0;
