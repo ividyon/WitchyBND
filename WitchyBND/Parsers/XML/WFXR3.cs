@@ -7,7 +7,7 @@ using WitchyLib;
 
 namespace WitchyBND.Parsers;
 
-public class WFXR : WXMLParser
+public class WFXR3 : WXMLParser
 {
     public override string Name => "FXR";
 

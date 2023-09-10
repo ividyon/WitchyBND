@@ -136,7 +136,7 @@ public static class Parse
             new Parsers.WLUAINFO(),
             new Parsers.WTPF(),
             new Parsers.WZERO3(),
-            new Parsers.WFXR(),
+            new Parsers.WFXR3(),
             new Parsers.WMATBIN(),
             new Parsers.WMTD(),
             //PARAM
