@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WitchyFormats", "WitchyForm
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WitchyLib", "WitchyLib\WitchyLib.csproj", "{2A37A91C-15E8-4BD9-BF6D-670F19526597}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WitchyTests", "WitchyTests\WitchyTests.csproj", "{288705C9-CFE1-4B34-8B8F-F863131FF3F2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{0406FE88-F044-4A16-994E-6E3C9715AC60}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0406FE88-F044-4A16-994E-6E3C9715AC60}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0406FE88-F044-4A16-994E-6E3C9715AC60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{288705C9-CFE1-4B34-8B8F-F863131FF3F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{288705C9-CFE1-4B34-8B8F-F863131FF3F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{288705C9-CFE1-4B34-8B8F-F863131FF3F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{288705C9-CFE1-4B34-8B8F-F863131FF3F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
