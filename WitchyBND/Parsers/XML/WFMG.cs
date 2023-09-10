@@ -65,7 +65,7 @@ public class WFMG : WXMLParser
             fmg.Entries.Add(new FMG.Entry(id, text));
         }
 
-        string outPath = srcPath.Replace(".fmg.xml", ".fmg");
+        string outPath = GetRepackDestPath(srcPath);
         WBUtil.Backup(outPath);
         fmg.TryWriteSoulsFile(outPath);
     }

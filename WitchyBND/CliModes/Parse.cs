@@ -132,13 +132,13 @@ public static class Parse
             new Parsers.WFFXDLSE(),
             new Parsers.WFMG(),
             new Parsers.WGPARAM(),
-            //LUAGNL
-            //LUAINFO
-            //TPF
-            //ZERO3
+            new Parsers.WLUAGNL(),
+            new Parsers.WLUAINFO(),
+            new Parsers.WTPF(),
+            new Parsers.WZERO3(),
             new Parsers.WFXR(),
-            //MATBIN
-            //MTD
+            new Parsers.WMATBIN(),
+            new Parsers.WMTD(),
             //PARAM
             //MSBE
             //TAE
