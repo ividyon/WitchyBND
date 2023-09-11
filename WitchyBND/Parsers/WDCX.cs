@@ -17,7 +17,7 @@ public class WDCX : WSingleFileParser
     public override string Name => "DCX";
     public override bool Is(string path)
     {
-        return Program.Configuration.Dcx && DCX.Is(path);
+        return WitchyConfiguration.Dcx && DCX.Is(path);
     }
 
     public override string GetUnpackDestPath(string srcPath)

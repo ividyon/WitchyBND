@@ -32,11 +32,11 @@ public enum CliMode
     Config
 }
 
-internal class Configuration
+public static class WitchyConfiguration
 {
-    public bool Dry { get; set; }
-    public bool Bnd { get; set; }
-    public bool Dcx { get; set; }
+    public static bool Dry { get; set; } = false;
+    public static bool Bnd { get; set; } = false;
+    public static bool Dcx { get; set; } = false;
 }
 public class CliOptions
 {
@@ -59,10 +59,8 @@ public class CliOptions
     [Value(0, HelpText = "The paths that should be parsed by Witchy.")]
     public IEnumerable<string> Paths { get; set; }
 }
-
-static class Program
+internal static class Program
 {
-    public static Configuration Configuration;
     private static List<string> AccruedErrors;
     static WBUtil.GameType? game;
 
@@ -82,9 +80,9 @@ static class Program
             .WithParsed(opt => {
                 // Override configuration
                 if (opt.Dcx)
-                    Configuration.Dcx = true;
+                    WitchyConfiguration.Dcx = true;
                 if (opt.Bnd)
-                    Configuration.Bnd = true;
+                    WitchyConfiguration.Bnd = true;
 
                 // Set CLI mode
                 CliMode mode = CliMode.Parse;
@@ -564,12 +562,6 @@ static class Program
 
     static Program()
     {
-        Configuration = new Configuration
-        {
-            Dry = false,
-            Bnd = false,
-            Dcx = false
-        };
         AccruedErrors = new List<string>();
     }
 }

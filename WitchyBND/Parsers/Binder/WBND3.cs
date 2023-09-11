@@ -18,68 +18,68 @@ public class WBND3 : WBinderParser
     }
 
     public override void Unpack(string srcPath)
+    {
+        using var bnd = new BND3Reader(srcPath);
+        string srcName = Path.GetFileName(srcPath);
+        string destDir = GetUnpackDestDir(srcPath);
+        Directory.CreateDirectory(destDir);
+
+        var root = "";
+        if (Binder.HasNames(bnd.Format))
         {
-            var bnd = new BND3Reader(srcPath);
-            string srcName = Path.GetFileName(srcPath);
-            string destDir = GetUnpackDestDir(srcPath);
-            Directory.CreateDirectory(destDir);
-
-            var root = "";
-            if (Binder.HasNames(bnd.Format))
-            {
-                root = WBUtil.FindCommonRootPath(bnd.Files.Select(bndFile => bndFile.Name));
-            }
-
-            XElement files = WriteBinderFiles(bnd, destDir, root);
-
-            var xml =
-                new XElement(Name.ToLower(),
-                    new XElement("filename", srcName),
-                    new XElement("compression", bnd.Compression.ToString()),
-                    new XElement("version", bnd.Version),
-                    new XElement("format", bnd.Format.ToString()),
-                    new XElement("bigendian", bnd.BigEndian.ToString()),
-                    new XElement("bitbigendian", bnd.BitBigEndian.ToString()),
-                    new XElement("unk18", bnd.Unk18.ToString()),
-                    files);
-
-            if (!string.IsNullOrEmpty(root))
-                files.AddBeforeSelf(new XElement("root", root));
-
-            var xw = XmlWriter.Create($"{destDir}\\${GetBinderXmlFilename()}", new XmlWriterSettings
-            {
-                Indent = true
-            });
-            xml.WriteTo(xw);
-            xw.Close();
+            root = WBUtil.FindCommonRootPath(bnd.Files.Select(bndFile => bndFile.Name));
         }
 
-        public override void Repack(string srcPath)
+        XElement files = WriteBinderFiles(bnd, destDir, root);
+
+        var xml =
+            new XElement(Name.ToLower(),
+                new XElement("filename", srcName),
+                new XElement("compression", bnd.Compression.ToString()),
+                new XElement("version", bnd.Version),
+                new XElement("format", bnd.Format.ToString()),
+                new XElement("bigendian", bnd.BigEndian.ToString()),
+                new XElement("bitbigendian", bnd.BitBigEndian.ToString()),
+                new XElement("unk18", bnd.Unk18.ToString()),
+                files);
+
+        if (!string.IsNullOrEmpty(root))
+            files.AddBeforeSelf(new XElement("root", root));
+
+        var xw = XmlWriter.Create($"{destDir}\\{GetBinderXmlFilename()}", new XmlWriterSettings
         {
-            var bnd = new BND3();
+            Indent = true
+        });
+        xml.WriteTo(xw);
+        xw.Close();
+    }
 
-            var doc = XDocument.Load(GetBinderXmlPath(srcPath));
-            if (doc.Root == null) throw new XmlException("XML has no root");
-            XElement xml = doc.Root;
-            string filename = doc.Root.Element("filename")!.Value;
+    public override void Repack(string srcPath)
+    {
+        var bnd = new BND3();
 
-            string root = xml.Element("root")?.Value ?? "";
+        var doc = XDocument.Load(GetBinderXmlPath(srcPath));
+        if (doc.Root == null) throw new XmlException("XML has no root");
+        XElement xml = doc.Root;
+        string filename = doc.Root.Element("filename")!.Value;
 
-            Enum.TryParse(xml.Element("compression")?.Value ?? "None", out DCX.Type compression);
-            bnd.Compression = compression;
+        string root = xml.Element("root")?.Value ?? "";
 
-            bnd.Version = xml.Element("version")!.Value;
-            bnd.Format = (Binder.Format)Enum.Parse(typeof(Binder.Format), xml.Element("format")!.Value);
-            bnd.BigEndian = bool.Parse(xml.Element("bigendian")!.Value);
-            bnd.BitBigEndian = bool.Parse(xml.Element("bitbigendian")!.Value);
-            bnd.Unk18 = int.Parse(xml.Element("unk18")!.Value);
+        Enum.TryParse(xml.Element("compression")?.Value ?? "None", out DCX.Type compression);
+        bnd.Compression = compression;
 
-            if (xml.Element("files") != null)
-                ReadBinderFiles(bnd, xml.Element("files")!, srcPath, root);
+        bnd.Version = xml.Element("version")!.Value;
+        bnd.Format = (Binder.Format)Enum.Parse(typeof(Binder.Format), xml.Element("format")!.Value);
+        bnd.BigEndian = bool.Parse(xml.Element("bigendian")!.Value);
+        bnd.BitBigEndian = bool.Parse(xml.Element("bitbigendian")!.Value);
+        bnd.Unk18 = int.Parse(xml.Element("unk18")!.Value);
 
-            var destPath = GetRepackDestPath(srcPath, filename);
+        if (xml.Element("files") != null)
+            ReadBinderFiles(bnd, xml.Element("files")!, srcPath, root);
 
-            WBUtil.Backup(destPath);
-            bnd.Write(destPath);
-        }
+        var destPath = GetRepackDestPath(srcPath, filename);
+
+        WBUtil.Backup(destPath);
+        bnd.Write(destPath);
+    }
 }

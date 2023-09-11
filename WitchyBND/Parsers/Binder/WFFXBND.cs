@@ -15,7 +15,7 @@ public class WFFXBND : WBinderParser
     public override string Name => "FFXBND";
     public override bool Is(string path)
     {
-        return !Program.Configuration.Bnd && File.Exists(path) && (path.EndsWith(".ffxbnd") || path.EndsWith(".ffxbnd.dcx")) && BND4.Is(path);
+        return !WitchyConfiguration.Bnd && File.Exists(path) && (path.EndsWith(".ffxbnd") || path.EndsWith(".ffxbnd.dcx")) && BND4.Is(path);
     }
 
     public override void Unpack(string srcPath)
@@ -230,7 +230,7 @@ public class WFFXBND : WBinderParser
         bnd.Write(destPath);
     }
 
-    protected override string GetUnpackDestDir(string srcPath)
+    public override string GetUnpackDestDir(string srcPath)
     {
         string sourceDir = new FileInfo(srcPath).Directory?.FullName;
         string fileName = Path.GetFileName(srcPath);

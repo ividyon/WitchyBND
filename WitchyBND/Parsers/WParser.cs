@@ -43,14 +43,14 @@ public abstract class WFolderParser : WFileParser
 {
     public override WFileParserVerb Verb => WFileParserVerb.Unpack;
 
-    protected virtual string GetUnpackDestDir(string srcPath)
+    public virtual string GetUnpackDestDir(string srcPath)
     {
         string sourceDir = new FileInfo(srcPath).Directory?.FullName;
         string fileName = Path.GetFileName(srcPath);
         return $"{sourceDir}\\{fileName.Replace('.', '-')}";
     }
 
-    protected virtual string GetRepackDestPath(string srcDirPath, string destFileName)
+    public virtual string GetRepackDestPath(string srcDirPath, string destFileName)
     {
         string targetDir = new DirectoryInfo(srcDirPath).Parent?.FullName;
         return $"{targetDir}\\{destFileName}";
@@ -77,12 +77,12 @@ public abstract class WFolderParser : WFileParser
         return doc.Root != null && doc.Root.Name == Name.ToLower();
     }
 
-    protected virtual string GetBinderXmlFilename()
+    public virtual string GetBinderXmlFilename()
     {
         return $"_witchy-{Name.ToLower()}.xml";
     }
 
-    protected virtual string GetBinderXmlPath(string dir)
+    public virtual string GetBinderXmlPath(string dir)
     {
         dir = string.IsNullOrEmpty(dir) ? dir : $"{dir}\\";
 
