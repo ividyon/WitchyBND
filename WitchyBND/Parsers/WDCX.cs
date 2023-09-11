@@ -2,6 +2,7 @@
 using System.IO;
 using System.Xml;
 using SoulsFormats;
+using WitchyLib;
 
 namespace WitchyBND.Parsers;
 
@@ -10,7 +11,7 @@ namespace WitchyBND.Parsers;
 /// Only active when "DCX mode" is active, either through configuration or command-line.
 /// Will just decompress the DCX and nothing else.
 /// </summary>
-public class WDCX : WFileParser
+public class WDCX : WSingleFileParser
 {
 
     public override string Name => "DCX";
@@ -19,12 +20,33 @@ public class WDCX : WFileParser
         return Program.Configuration.Dcx && DCX.Is(path);
     }
 
+    public override string GetUnpackDestPath(string srcPath)
+    {
+        string sourceDir = new FileInfo(srcPath).Directory?.FullName;
+        if (srcPath.EndsWith(".dcx"))
+            return $"{sourceDir}\\{Path.GetFileNameWithoutExtension(srcPath)}";
+        return $"{srcPath}.undcx";
+    }
+
+    public override string GetRepackDestPath(string srcPath)
+    {
+        if (srcPath.EndsWith(".undcx"))
+            return srcPath.Substring(0, srcPath.Length - 6);
+        return srcPath + ".dcx";
+    }
+
+    public string GetXmlPath(string path, bool repack = false)
+    {
+        var innerPath = repack ? path : GetUnpackDestPath(path);
+        return $"{innerPath}-wbinder-dcx.xml";
+    }
+
     public override bool Exists(string path)
     {
         return File.Exists(path);
     }
 
-    public override bool UnpackedExists(string path)
+    public override bool ExistsUnpacked(string path)
     {
         return File.Exists(path);
     }
@@ -37,19 +59,14 @@ public class WDCX : WFileParser
 
     public override void Unpack(string srcPath)
     {
-        string sourceDir = new FileInfo(srcPath).Directory?.FullName;
-        string outPath;
-        if (srcPath.EndsWith(".dcx"))
-            outPath = $"{sourceDir}\\{Path.GetFileNameWithoutExtension(srcPath)}";
-        else
-            outPath = $"{srcPath}.undcx";
+        string outPath = GetUnpackDestPath(srcPath);
 
         byte[] bytes = DCX.Decompress(srcPath, out DCX.Type compression);
         File.WriteAllBytes(outPath, bytes);
 
         XmlWriterSettings xws = new XmlWriterSettings();
         xws.Indent = true;
-        XmlWriter xw = XmlWriter.Create($"{outPath}-wbinder-dcx.xml", xws);
+        XmlWriter xw = XmlWriter.Create(GetXmlPath(srcPath), xws);
 
         xw.WriteStartElement("dcx");
         xw.WriteElementString("compression", compression.ToString());
@@ -59,19 +76,13 @@ public class WDCX : WFileParser
 
     public override void Repack(string srcPath)
     {
-        string xmlPath = $"{srcPath}-wbinder-dcx.xml";
+        string xmlPath = GetXmlPath(srcPath, true);
         XmlDocument xml = new XmlDocument();
         xml.Load(xmlPath);
         DCX.Type compression = (DCX.Type)Enum.Parse(typeof(DCX.Type), xml.SelectSingleNode("dcx/compression").InnerText);
 
-        string outPath;
-        if (srcPath.EndsWith(".undcx"))
-            outPath = srcPath.Substring(0, srcPath.Length - 6);
-        else
-            outPath = srcPath + ".dcx";
-
-        if (File.Exists(outPath) && !File.Exists(outPath + ".bak"))
-            File.Move(outPath, outPath + ".bak");
+        var outPath = GetRepackDestPath(srcPath);
+        WBUtil.Backup(outPath);
 
         DCX.Compress(File.ReadAllBytes(srcPath), compression, outPath);
     }

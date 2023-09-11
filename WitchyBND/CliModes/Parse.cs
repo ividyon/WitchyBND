@@ -93,7 +93,7 @@ public static class Parse
                     parsed = true;
                     break;
                 }
-                if (parser.UnpackedExists(path) && parser.IsUnpacked(path))
+                if (parser.ExistsUnpacked(path) && parser.IsUnpacked(path))
                 {
                     switch (parser.Verb)
                     {

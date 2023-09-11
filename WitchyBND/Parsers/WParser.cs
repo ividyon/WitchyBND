@@ -19,7 +19,7 @@ public abstract class WFileParser
     public abstract string Name { get; }
     public abstract bool Is(string path);
     public abstract bool Exists(string path);
-    public abstract bool UnpackedExists(string path);
+    public abstract bool ExistsUnpacked(string path);
     public abstract bool IsUnpacked(string path);
     public abstract void Unpack(string srcPath);
     public abstract void Repack(string srcPath);
@@ -33,7 +33,7 @@ public abstract class WSingleFileParser : WFileParser
     {
         return File.Exists(path);
     }
-    public override bool UnpackedExists(string path)
+    public override bool ExistsUnpacked(string path)
     {
         return File.Exists(path);
     }
@@ -61,7 +61,7 @@ public abstract class WFolderParser : WFileParser
         return File.Exists(path);
     }
 
-    public override bool UnpackedExists(string path)
+    public override bool ExistsUnpacked(string path)
     {
         return Directory.Exists(path);
     }
