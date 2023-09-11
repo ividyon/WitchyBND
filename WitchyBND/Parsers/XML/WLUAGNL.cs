@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Xml;
 using SoulsFormats;
 using WitchyLib;
@@ -12,7 +13,7 @@ public class WLUAGNL : WXMLParser
 
     public override bool Is(string path)
     {
-        return LUAGNL.Is(path);
+        return Path.GetExtension(path) == ".luagnl";
     }
 
     public override void Unpack(string srcPath)

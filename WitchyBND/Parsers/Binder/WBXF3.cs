@@ -46,7 +46,7 @@ public class WBXF3 : WBinderParser
             bhdPath = $"{srcDirPath}\\{bhdName}";
         }
 
-        var bxf = new BXF3Reader(bhdPath, bdtPath);
+        var bxf = BXF3.Read(bhdPath, bdtPath);
         Directory.CreateDirectory(destDir);
 
         var root = "";

@@ -1,0 +1,306 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<MATBIN xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Compression>None</Compression>
+  <ShaderPath>C[Enemy][Wepon].spx</ShaderPath>
+  <SourcePath>C[c3050][WP_E_3450].matxml</SourcePath>
+  <Key>3409446934</Key>
+  <Params>
+    <Param>
+      <Name>g_GX_bOverrideCAParam</Name>
+      <Value xsi:type="xsd:boolean">true</Value>
+      <Key>2886469596</Key>
+      <Type>Bool</Type>
+    </Param>
+    <Param>
+      <Name>g_GX_bMeshDecal</Name>
+      <Value xsi:type="xsd:boolean">false</Value>
+      <Key>1463682445</Key>
+      <Type>Bool</Type>
+    </Param>
+    <Param>
+      <Name>g_GX_bEnabledEnvIDWriting</Name>
+      <Value xsi:type="xsd:boolean">false</Value>
+      <Key>4008839532</Key>
+      <Type>Bool</Type>
+    </Param>
+    <Param>
+      <Name>g_GX_PaintDecalSlotNo</Name>
+      <Value xsi:type="xsd:int">0</Value>
+      <Key>2875328505</Key>
+      <Type>Int</Type>
+    </Param>
+    <Param>
+      <Name>g_GX_bDisableShadowCasting</Name>
+      <Value xsi:type="xsd:boolean">false</Value>
+      <Key>123669002</Key>
+      <Type>Bool</Type>
+    </Param>
+    <Param>
+      <Name>g_GX_ShadowCullingMode</Name>
+      <Value xsi:type="xsd:int">0</Value>
+      <Key>3208775806</Key>
+      <Type>Int</Type>
+    </Param>
+    <Param>
+      <Name>g_GX_DisplayableLodLevel</Name>
+      <Value xsi:type="xsd:int">65535</Value>
+      <Key>3818785094</Key>
+      <Type>Int</Type>
+    </Param>
+    <Param>
+      <Name>g_GX_MaterialID</Name>
+      <Value xsi:type="xsd:int">60</Value>
+      <Key>1484653953</Key>
+      <Type>Int</Type>
+    </Param>
+    <Param>
+      <Name>g_GX_bDisableDecal</Name>
+      <Value xsi:type="xsd:boolean">true</Value>
+      <Key>2101085876</Key>
+      <Type>Bool</Type>
+    </Param>
+    <Param>
+      <Name>g_GX_bDisableDepthWrite</Name>
+      <Value xsi:type="xsd:boolean">false</Value>
+      <Key>3455322331</Key>
+      <Type>Bool</Type>
+    </Param>
+    <Param>
+      <Name>g_GX_bEnableSSR</Name>
+      <Value xsi:type="xsd:boolean">false</Value>
+      <Key>1455293798</Key>
+      <Type>Bool</Type>
+    </Param>
+    <Param>
+      <Name>g_GX_PrimCullNone</Name>
+      <Value xsi:type="xsd:boolean">false</Value>
+      <Key>1910244989</Key>
+      <Type>Bool</Type>
+    </Param>
+    <Param>
+      <Name>g_BlendMode</Name>
+      <Value xsi:type="xsd:int">0</Value>
+      <Key>833750065</Key>
+      <Type>Int</Type>
+    </Param>
+    <Param>
+      <Name>g_AlphaRef</Name>
+      <Value xsi:type="ArrayOfInt">
+        <int>0</int>
+        <int>0</int>
+      </Value>
+      <Key>694813642</Key>
+      <Type>Int2</Type>
+    </Param>
+    <Param>
+      <Name>g_DiffuseMapColor</Name>
+      <Value xsi:type="ArrayOfFloat">
+        <float>1</float>
+        <float>1</float>
+        <float>1</float>
+      </Value>
+      <Key>1976567466</Key>
+      <Type>Float3</Type>
+    </Param>
+    <Param>
+      <Name>C_Enemy__Wepon__snp_0_float_12</Name>
+      <Value xsi:type="xsd:float">1</Value>
+      <Key>1656556349</Key>
+      <Type>Float</Type>
+    </Param>
+    <Param>
+      <Name>C_Enemy__Wepon__snp_0_float_13</Name>
+      <Value xsi:type="xsd:float">0</Value>
+      <Key>1656687422</Key>
+      <Type>Float</Type>
+    </Param>
+    <Param>
+      <Name>C_Enemy__Wepon__snp_0_float_14</Name>
+      <Value xsi:type="xsd:float">1</Value>
+      <Key>1656818495</Key>
+      <Type>Float</Type>
+    </Param>
+    <Param>
+      <Name>C_Enemy__Wepon__snp_0_float_19</Name>
+      <Value xsi:type="xsd:float">1</Value>
+      <Key>1657473860</Key>
+      <Type>Float</Type>
+    </Param>
+    <Param>
+      <Name>C_Enemy__Wepon__snp_0_float_20</Name>
+      <Value xsi:type="xsd:float">1</Value>
+      <Key>1656556348</Key>
+      <Type>Float</Type>
+    </Param>
+    <Param>
+      <Name>C_Enemy__Wepon__snp_0_float_25</Name>
+      <Value xsi:type="xsd:float">1</Value>
+      <Key>1657211713</Key>
+      <Type>Float</Type>
+    </Param>
+    <Param>
+      <Name>C_Enemy__Wepon__snp_0_float_42</Name>
+      <Value xsi:type="xsd:float">0</Value>
+      <Key>1657342784</Key>
+      <Type>Float</Type>
+    </Param>
+    <Param>
+      <Name>C_Enemy__Wepon__snp_0_float_5</Name>
+      <Value xsi:type="xsd:float">0</Value>
+      <Key>1279986447</Key>
+      <Type>Float</Type>
+    </Param>
+    <Param>
+      <Name>C_Enemy__Wepon__snp_0_float_4</Name>
+      <Value xsi:type="xsd:float">1</Value>
+      <Key>1279855374</Key>
+      <Type>Float</Type>
+    </Param>
+    <Param>
+      <Name>C_Enemy__Wepon__snp_0_color_0</Name>
+      <Value xsi:type="ArrayOfFloat">
+        <float>0.501961</float>
+        <float>0.501961</float>
+        <float>0.501961</float>
+        <float>1</float>
+        <float>1</float>
+      </Value>
+      <Key>1283525395</Key>
+      <Type>Float5</Type>
+    </Param>
+    <Param>
+      <Name>C_Enemy__Wepon__snp_0_float_0</Name>
+      <Value xsi:type="xsd:float">0</Value>
+      <Key>1279331082</Key>
+      <Type>Float</Type>
+    </Param>
+    <Param>
+      <Name>C_Enemy__Wepon__snp_0_color_1</Name>
+      <Value xsi:type="ArrayOfFloat">
+        <float>0.558151</float>
+        <float>0.558151</float>
+        <float>0.558151</float>
+        <float>1</float>
+        <float>1</float>
+      </Value>
+      <Key>1283656468</Key>
+      <Type>Float5</Type>
+    </Param>
+    <Param>
+      <Name>C_Enemy__Wepon__snp_0_float_6</Name>
+      <Value xsi:type="xsd:float">0</Value>
+      <Key>1280117520</Key>
+      <Type>Float</Type>
+    </Param>
+    <Param>
+      <Name>C_Enemy__Wepon__snp_0_color_2</Name>
+      <Value xsi:type="ArrayOfFloat">
+        <float>0.501961</float>
+        <float>0.501961</float>
+        <float>0.501961</float>
+        <float>1</float>
+        <float>1</float>
+      </Value>
+      <Key>1283787541</Key>
+      <Type>Float5</Type>
+    </Param>
+    <Param>
+      <Name>group_6_CommonUV-UVParam</Name>
+      <Value xsi:type="ArrayOfFloat">
+        <float>1</float>
+        <float>1</float>
+      </Value>
+      <Key>3853388031</Key>
+      <Type>Float2</Type>
+    </Param>
+    <Param>
+      <Name>group_7_CommonUV-UVParam</Name>
+      <Value xsi:type="ArrayOfFloat">
+        <float>4</float>
+        <float>4</float>
+      </Value>
+      <Key>3855747328</Key>
+      <Type>Float2</Type>
+    </Param>
+    <Param>
+      <Name>group_8_CommonUV-UVParam</Name>
+      <Value xsi:type="ArrayOfFloat">
+        <float>4</float>
+        <float>4</float>
+      </Value>
+      <Key>3858106625</Key>
+      <Type>Float2</Type>
+    </Param>
+    <Param>
+      <Name>group_10_CommonUV-UVParam</Name>
+      <Value xsi:type="ArrayOfFloat">
+        <float>4</float>
+        <float>4</float>
+      </Value>
+      <Key>4046850346</Key>
+      <Type>Float2</Type>
+    </Param>
+    <Param>
+      <Name>g_GX_CameraFadeParamId</Name>
+      <Value xsi:type="xsd:int">0</Value>
+      <Key>3092252700</Key>
+      <Type>Int</Type>
+    </Param>
+  </Params>
+  <Samplers>
+    <Sampler>
+      <Type>C_Enemy_Wepon__snp_Texture2D_24_GSBlendMap_NormalMap</Type>
+      <Path>AET094_000_n.tif</Path>
+      <Key>276829061</Key>
+      <Unk14>
+        <X>0</X>
+        <Y>0</Y>
+      </Unk14>
+    </Sampler>
+    <Sampler>
+      <Type>C_Enemy_Wepon__snp_Texture2D_7_GSBlendMap_AlbedoMap</Type>
+      <Path>WP_E_3450_a.tif</Path>
+      <Key>4015723316</Key>
+      <Unk14>
+        <X>0</X>
+        <Y>0</Y>
+      </Unk14>
+    </Sampler>
+    <Sampler>
+      <Type>C_Enemy_Wepon__snp_Texture2D_0_GSBlendMap_NormalMap</Type>
+      <Path>WP_E_3450_n.tif</Path>
+      <Key>4031451983</Key>
+      <Unk14>
+        <X>0</X>
+        <Y>0</Y>
+      </Unk14>
+    </Sampler>
+    <Sampler>
+      <Type>C_Enemy_Wepon__snp_Texture2D_10_GSBlendMap_MetallicMap</Type>
+      <Path>WP_E_3450_m.tif</Path>
+      <Key>1601967170</Key>
+      <Unk14>
+        <X>0</X>
+        <Y>0</Y>
+      </Unk14>
+    </Sampler>
+    <Sampler>
+      <Type>C_Enemy_Wepon__snp_Texture2D_6_GSBlendMap_NormalMap</Type>
+      <Path>AET094_010_n.tif</Path>
+      <Key>4048753493</Key>
+      <Unk14>
+        <X>0</X>
+        <Y>0</Y>
+      </Unk14>
+    </Sampler>
+    <Sampler>
+      <Type>C_Enemy_Wepon__snp_Texture2D_8_GSBlendMap_NormalMap</Type>
+      <Path>AET094_010_n.tif</Path>
+      <Key>4054520663</Key>
+      <Unk14>
+        <X>0</X>
+        <Y>0</Y>
+      </Unk14>
+    </Sampler>
+  </Samplers>
+</MATBIN>

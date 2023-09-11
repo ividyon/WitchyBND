@@ -9,7 +9,7 @@ namespace WitchyBND.Parsers;
 
 public class WFXR3 : WXMLParser
 {
-    public override string Name => "FXR";
+    public override string Name => "FXR3";
 
     public override bool Is(string path)
     {

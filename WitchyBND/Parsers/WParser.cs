@@ -102,14 +102,14 @@ public abstract class WFolderParser : WFileParser
 
 public abstract class WBinderParser : WFolderParser
 {
-    protected static XElement WriteBinderFiles(BinderReader bnd, string destDirPath, string root)
+    protected static XElement WriteBinderFiles(IBinder bnd, string destDirPath, string root)
     {
         var files = new XElement("files");
         var pathCounts = new Dictionary<string, int>();
 
         for (int i = 0; i < bnd.Files.Count; i++)
         {
-            BinderFileHeader file = bnd.Files[i];
+            BinderFile file = bnd.Files[i];
 
             string path;
             if (Binder.HasNames(bnd.Format))
@@ -148,7 +148,7 @@ public abstract class WBinderParser : WFolderParser
             if (file.CompressionType != DCX.Type.Zlib)
                 fileElement.Add("compression_type", file.CompressionType.ToString());
 
-            byte[] bytes = bnd.ReadFile(file);
+            byte[] bytes = file.Bytes;
             string destPath =
                 $@"{destDirPath}\{Path.GetDirectoryName(path)}\{Path.GetFileNameWithoutExtension(path)}{suffix}{Path.GetExtension(path)}";
             Directory.CreateDirectory(Path.GetDirectoryName(destPath));

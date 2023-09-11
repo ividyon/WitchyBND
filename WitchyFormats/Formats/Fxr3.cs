@@ -13,6 +13,7 @@ namespace WitchyFormats
     /// Initial work by TKGP, Meowmaritus and NamelessHoodie.
     /// Currently maintained by ivi.
     /// </summary>
+    [XmlType(TypeName="fxr3")]
     public class Fxr3 : SoulsFile<Fxr3>
     {
         public FXRVersion Version { get; set; }

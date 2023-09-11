@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Xml;
 using SoulsFormats;
 using WitchyLib;
@@ -12,7 +13,7 @@ public class WFMG : WXMLParser
 
     public override bool Is(string path)
     {
-        return FMG.Is(path);
+        return Path.GetExtension(path) == ".fmg";
     }
 
     public override void Unpack(string srcPath)

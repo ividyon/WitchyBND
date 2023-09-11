@@ -19,7 +19,7 @@ public class WBND4 : WBinderParser
 
     public override void Unpack(string srcPath)
     {
-        using var bnd = new BND4Reader(srcPath);
+        var bnd = BND4.Read(srcPath);
         string srcName = Path.GetFileName(srcPath);
         string destDir = GetUnpackDestDir(srcPath);
         Directory.CreateDirectory(destDir);
@@ -55,7 +55,6 @@ public class WBND4 : WBinderParser
         });
         xml.WriteTo(xw);
         xw.Close();
-        bnd.Dispose();
     }
 
     public override void Repack(string srcPath)

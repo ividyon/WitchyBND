@@ -22,7 +22,7 @@ public class WFFXBND : WBinderParser
     {
         var destDir = GetUnpackDestDir(srcPath);
         var srcName = Path.GetFileName(srcPath);
-        var bnd = new BND4Reader(srcPath);
+        var bnd = BND4.Read(srcPath);
         Directory.CreateDirectory(destDir);
         var xml = new XElement("ffxbnd",
             new XElement("filename", srcName),
@@ -37,7 +37,7 @@ public class WFFXBND : WBinderParser
             new XElement("unk05", bnd.Unk05.ToString())
         );
 
-        var xw = XmlWriter.Create($"{destDir}\\{GetBinderXmlFilename()}", new XmlWriterSettings
+        using var xw = XmlWriter.Create($"{destDir}\\{GetBinderXmlFilename()}", new XmlWriterSettings
         {
             Indent = true,
         });
@@ -56,9 +56,9 @@ public class WFFXBND : WBinderParser
         var resDir = $@"{destDir}\resource";
         Directory.CreateDirectory(resDir);
 
-        foreach (BinderFileHeader file in bnd.Files)
+        foreach (BinderFile file in bnd.Files)
         {
-            byte[] bytes = bnd.ReadFile(file);
+            byte[] bytes = file.Bytes;
             string fileTargetDir;
             string fileTargetName = Path.GetFileName(file.Name);
             switch (Path.GetExtension(file.Name))

@@ -19,7 +19,7 @@ public class WBND3 : WBinderParser
 
     public override void Unpack(string srcPath)
     {
-        using var bnd = new BND3Reader(srcPath);
+        var bnd = BND3.Read(srcPath);
         string srcName = Path.GetFileName(srcPath);
         string destDir = GetUnpackDestDir(srcPath);
         Directory.CreateDirectory(destDir);
