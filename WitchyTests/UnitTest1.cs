@@ -18,7 +18,7 @@ public class Tests
     [Test]
     public void DCX()
     {
-        WitchyConfiguration.Dcx = true;
+        Configuration.Dcx = true;
 
         List<string> paths = Directory.GetFiles("./Samples/DCX", "*.dcx", SearchOption.AllDirectories).ToList();
 

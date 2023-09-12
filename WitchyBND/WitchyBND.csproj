@@ -31,6 +31,8 @@
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.2.0" />
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0-preview.7.23375.6" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0-preview.7.23375.6" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="PromptPlus" Version="4.0.4" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
@@ -50,10 +52,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>readme.txt</Link>
     </Content>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Assets\Paramdex\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Remove="SoulsFormats.dll" />
-    <None Remove="Yabber.dll" />
   </ItemGroup>
 </Project>

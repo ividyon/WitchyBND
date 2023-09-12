@@ -10,9 +10,9 @@ using System.Runtime.Versioning;
 using System.Threading;
 using System.Xml;
 using CommandLine;
+using Microsoft.Extensions.Configuration;
 using PPlus;
 using WitchyBND.CliModes;
-using WitchyBND.Parsers;
 using WitchyFormats;
 using WitchyLib;
 using GPARAM = WitchyFormats.GPARAM;
@@ -25,19 +25,12 @@ using MQB = WitchyFormats.MQB;
 namespace WitchyBND;
 
 [SupportedOSPlatform("windows")]
-
 public enum CliMode
 {
     Parse,
     Config
 }
 
-public static class WitchyConfiguration
-{
-    public static bool Dry { get; set; } = false;
-    public static bool Bnd { get; set; } = false;
-    public static bool Dcx { get; set; } = false;
-}
 public class CliOptions
 {
     // [Option('v', "verbose", Group = "verbosity", Default = false, HelpText = "Set output to verbose messages.")]
@@ -47,10 +40,13 @@ public class CliOptions
     //     HelpText = "Set output to quiet, reporting only errors.")]
     // public bool Quiet { get; set; }
 
-    [Option('b', "default-bnd", HelpText = "Perform basic unpacking of BND instead of using special Witchy methods, where present")]
+    [Option('b', "default-bnd",
+        HelpText = "Perform basic unpacking of BND instead of using special Witchy methods, where present")]
     public bool Bnd { get; set; }
 
-    [Option('n', "dry-run", HelpText = "Perform the actions as a \"dry run\", meaning that files will not actually be written or modified.")]
+    [Option('n', "dry-run",
+        HelpText =
+            "Perform the actions as a \"dry run\", meaning that files will not actually be written or modified.")]
     public bool Dry { get; set; }
 
     [Option('d', "dcx", HelpText = "Simply decompress DCX files instead of unpacking their content.")]
@@ -59,6 +55,7 @@ public class CliOptions
     [Value(0, HelpText = "The paths that should be parsed by Witchy.")]
     public IEnumerable<string> Paths { get; set; }
 }
+
 internal static class Program
 {
     private static List<string> AccruedErrors;
@@ -73,16 +70,14 @@ internal static class Program
         Assembly assembly = Assembly.GetExecutingAssembly();
         PromptPlus.DoubleDash($"{assembly.GetName().Name} {assembly.GetName().Version}");
 
-        var parser = new Parser(config => {
-            config.AutoHelp = true;
-        });
+        var parser = new Parser(config => { config.AutoHelp = true; });
         parser.ParseArguments<CliOptions>(args)
             .WithParsed(opt => {
                 // Override configuration
                 if (opt.Dcx)
-                    WitchyConfiguration.Dcx = true;
+                    Configuration.Dcx = true;
                 if (opt.Bnd)
-                    WitchyConfiguration.Bnd = true;
+                    Configuration.Bnd = true;
 
                 // Set CLI mode
                 CliMode mode = CliMode.Parse;
@@ -93,10 +88,10 @@ internal static class Program
                 switch (mode)
                 {
                     case CliMode.Parse:
-                        Parse.CliParseMode(opt);
+                        ParseMode.CliParseMode(opt);
                         break;
                     case CliMode.Config:
-                        Config.CliConfigMode(opt);
+                        ConfigMode.CliConfigMode(opt);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -117,294 +112,294 @@ internal static class Program
             fileName.Contains("regulation.bin") || fileName.Contains("regulation.bnd"))
             return UnpackRegulationFile(fileName, sourceDir, targetDir, progress);
 
-            if (DCX.Is(sourceFile))
-            {
-                Console.WriteLine($"Decompressing DCX: {fileName}...");
-                byte[] bytes = WBUtil.TryDecompressBytes(sourceFile, out DCX.Type compression);
+        if (DCX.Is(sourceFile))
+        {
+            Console.WriteLine($"Decompressing DCX: {fileName}...");
+            byte[] bytes = WBUtil.TryDecompressBytes(sourceFile, out DCX.Type compression);
 
-                if (BND3.Is(bytes))
+            if (BND3.Is(bytes))
+            {
+                Console.WriteLine($"Unpacking BND3: {fileName}...");
+                using (var bnd = new BND3Reader(bytes))
                 {
-                    Console.WriteLine($"Unpacking BND3: {fileName}...");
-                    using (var bnd = new BND3Reader(bytes))
-                    {
-                        bnd.Compression = compression;
-                        bnd.Unpack(fileName, targetDir, progress);
-                    }
+                    bnd.Compression = compression;
+                    bnd.Unpack(fileName, targetDir, progress);
                 }
-                // else if (WFFXBND.Is(bytes, fileName))
-                // {
-                //     Console.WriteLine($"Unpacking FFXBND: {fileName}...");
-                //     using (var bnd = new BND4Reader(bytes))
-                //     {
-                //         bnd.Compression = compression;
-                //         bnd.UnpackFFXBND(fileName, targetDir, progress);
-                //     }
-                // }
-                else if (BND4.Is(bytes))
+            }
+            // else if (WFFXBND.Is(bytes, fileName))
+            // {
+            //     Console.WriteLine($"Unpacking FFXBND: {fileName}...");
+            //     using (var bnd = new BND4Reader(bytes))
+            //     {
+            //         bnd.Compression = compression;
+            //         bnd.UnpackFFXBND(fileName, targetDir, progress);
+            //     }
+            // }
+            else if (BND4.Is(bytes))
+            {
+                Console.WriteLine($"Unpacking BND4: {fileName}...");
+                using (var bnd = new BND4Reader(bytes))
                 {
-                    Console.WriteLine($"Unpacking BND4: {fileName}...");
-                    using (var bnd = new BND4Reader(bytes))
-                    {
-                        bnd.Compression = compression;
-                        bnd.Unpack(fileName, targetDir, progress);
-                    }
+                    bnd.Compression = compression;
+                    bnd.Unpack(fileName, targetDir, progress);
                 }
-                else if (FFXDLSE.Is(bytes))
-                {
-                    Console.WriteLine($"Unpacking FFX: {fileName}...");
-                    var ffx = FFXDLSE.Read(bytes);
-                    ffx.Compression = compression;
-                    ffx.Unpack(sourceFile);
-                }
-                else if (sourceFile.EndsWith(".fmg.dcx"))
-                {
-                    Console.WriteLine($"Unpacking FMG: {fileName}...");
-                    FMG fmg = FMG.Read(bytes);
-                    fmg.Compression = compression;
-                    fmg.Unpack(sourceFile);
-                }
-                else if (GPARAM.Is(bytes))
-                {
-                    Console.WriteLine($"Unpacking GPARAM: {fileName}...");
-                    GPARAM gparam = GPARAM.Read(bytes);
-                    gparam.Compression = compression;
-                    gparam.Unpack(sourceFile);
-                }
-                else if (TPF.Is(bytes))
-                {
-                    Console.WriteLine($"Unpacking TPF: {fileName}...");
-                    TPF tpf = TPF.Read(bytes);
-                    tpf.Compression = compression;
-                    tpf.Unpack(fileName, targetDir, progress);
-                }
-                else if (MSBE.Is(bytes))
-                {
-                    Console.WriteLine($"Unpacking MSB: {fileName}...");
-                    MSBE msb = MSBE.Read(bytes);
-                    msb.Unpack(fileName, targetDir, progress);
-                }
-                else
-                {
-                    Console.WriteLine($"File format not recognized: {fileName}");
-                    return true;
-                }
+            }
+            else if (FFXDLSE.Is(bytes))
+            {
+                Console.WriteLine($"Unpacking FFX: {fileName}...");
+                var ffx = FFXDLSE.Read(bytes);
+                ffx.Compression = compression;
+                ffx.Unpack(sourceFile);
+            }
+            else if (sourceFile.EndsWith(".fmg.dcx"))
+            {
+                Console.WriteLine($"Unpacking FMG: {fileName}...");
+                FMG fmg = FMG.Read(bytes);
+                fmg.Compression = compression;
+                fmg.Unpack(sourceFile);
+            }
+            else if (GPARAM.Is(bytes))
+            {
+                Console.WriteLine($"Unpacking GPARAM: {fileName}...");
+                GPARAM gparam = GPARAM.Read(bytes);
+                gparam.Compression = compression;
+                gparam.Unpack(sourceFile);
+            }
+            else if (TPF.Is(bytes))
+            {
+                Console.WriteLine($"Unpacking TPF: {fileName}...");
+                TPF tpf = TPF.Read(bytes);
+                tpf.Compression = compression;
+                tpf.Unpack(fileName, targetDir, progress);
+            }
+            else if (MSBE.Is(bytes))
+            {
+                Console.WriteLine($"Unpacking MSB: {fileName}...");
+                MSBE msb = MSBE.Read(bytes);
+                msb.Unpack(fileName, targetDir, progress);
             }
             else
             {
-                if (BND3.Is(sourceFile))
+                Console.WriteLine($"File format not recognized: {fileName}");
+                return true;
+            }
+        }
+        else
+        {
+            if (BND3.Is(sourceFile))
+            {
+                Console.WriteLine($"Unpacking BND3: {fileName}...");
+                using (var bnd = new BND3Reader(sourceFile))
                 {
-                    Console.WriteLine($"Unpacking BND3: {fileName}...");
-                    using (var bnd = new BND3Reader(sourceFile))
+                    bnd.Unpack(fileName, targetDir, progress);
+                }
+            }
+            // else if (WFFXBND.Is(sourceFile))
+            // {
+            //     Console.WriteLine($"Unpacking FFXBND: {fileName}...");
+            //     using (var bnd = new BND4Reader(sourceFile))
+            //     {
+            //         bnd.UnpackFFXBND(fileName, targetDir, progress);
+            //     }
+            // }
+            else if (BND4.Is(sourceFile))
+            {
+                Console.WriteLine($"Unpacking BND4: {fileName}...");
+                using (var bnd = new BND4Reader(sourceFile))
+                {
+                    bnd.Unpack(fileName, targetDir, progress);
+                }
+            }
+            else if (BXF3.IsBHD(sourceFile))
+            {
+                string bdtExtension = Path.GetExtension(fileName).Replace("bhd", "bdt");
+                string bdtFilename = $"{Path.GetFileNameWithoutExtension(fileName)}{bdtExtension}";
+                string bdtPath = $"{sourceDir}\\{bdtFilename}";
+                if (File.Exists(bdtPath))
+                {
+                    Console.WriteLine($"Unpacking BXF3: {fileName}...");
+                    using (var bxf = new BXF3Reader(sourceFile, bdtPath))
                     {
-                        bnd.Unpack(fileName, targetDir, progress);
+                        bxf.Unpack(fileName, bdtFilename, targetDir, progress);
                     }
                 }
-                // else if (WFFXBND.Is(sourceFile))
-                // {
-                //     Console.WriteLine($"Unpacking FFXBND: {fileName}...");
-                //     using (var bnd = new BND4Reader(sourceFile))
-                //     {
-                //         bnd.UnpackFFXBND(fileName, targetDir, progress);
-                //     }
-                // }
-                else if (BND4.Is(sourceFile))
+                else
                 {
-                    Console.WriteLine($"Unpacking BND4: {fileName}...");
-                    using (var bnd = new BND4Reader(sourceFile))
+                    Console.WriteLine($"BDT not found for BHD: {fileName}");
+                    return true;
+                }
+            }
+            else if (BXF4.IsBHD(sourceFile))
+            {
+                string bdtExtension = Path.GetExtension(fileName).Replace("bhd", "bdt");
+                string bdtFilename = $"{Path.GetFileNameWithoutExtension(fileName)}{bdtExtension}";
+                string bdtPath = $"{sourceDir}\\{bdtFilename}";
+                if (File.Exists(bdtPath))
+                {
+                    Console.WriteLine($"Unpacking BXF4: {fileName}...");
+                    using (var bxf = new BXF4Reader(sourceFile, bdtPath))
                     {
-                        bnd.Unpack(fileName, targetDir, progress);
+                        bxf.Unpack(fileName, bdtFilename, targetDir, progress);
                     }
                 }
-                else if (BXF3.IsBHD(sourceFile))
+                else
                 {
-                    string bdtExtension = Path.GetExtension(fileName).Replace("bhd", "bdt");
-                    string bdtFilename = $"{Path.GetFileNameWithoutExtension(fileName)}{bdtExtension}";
-                    string bdtPath = $"{sourceDir}\\{bdtFilename}";
-                    if (File.Exists(bdtPath))
-                    {
-                        Console.WriteLine($"Unpacking BXF3: {fileName}...");
-                        using (var bxf = new BXF3Reader(sourceFile, bdtPath))
-                        {
-                            bxf.Unpack(fileName, bdtFilename, targetDir, progress);
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine($"BDT not found for BHD: {fileName}");
-                        return true;
-                    }
+                    Console.WriteLine($"BDT not found for BHD: {fileName}");
+                    return true;
                 }
-                else if (BXF4.IsBHD(sourceFile))
+            }
+            else if (FFXDLSE.Is(sourceFile))
+            {
+                Console.WriteLine($"Unpacking FFX: {fileName}...");
+                var ffx = FFXDLSE.Read(sourceFile);
+                ffx.Unpack(sourceFile);
+            }
+            else if (sourceFile.EndsWith(".ffx.xml") || sourceFile.EndsWith(".ffx.dcx.xml"))
+            {
+                Console.WriteLine($"Repacking FFX: {fileName}...");
+                WFFX.Repack(sourceFile);
+            }
+            else if (sourceFile.EndsWith(".fmg"))
+            {
+                Console.WriteLine($"Unpacking FMG: {fileName}...");
+                FMG fmg = FMG.Read(sourceFile);
+                fmg.Unpack(sourceFile);
+            }
+            else if (sourceFile.EndsWith(".fmg.xml") || sourceFile.EndsWith(".fmg.dcx.xml"))
+            {
+                Console.WriteLine($"Repacking FMG: {fileName}...");
+                WFMG.Repack(sourceFile);
+            }
+            else if (GPARAM.Is(sourceFile))
+            {
+                Console.WriteLine($"Unpacking GPARAM: {fileName}...");
+                GPARAM gparam = GPARAM.Read(sourceFile);
+                gparam.Unpack(sourceFile);
+            }
+            else if (sourceFile.EndsWith(".gparam.xml") || sourceFile.EndsWith(".gparam.dcx.xml")
+                                                        || sourceFile.EndsWith(".fltparam.xml") ||
+                                                        sourceFile.EndsWith(".fltparam.dcx.xml"))
+            {
+                Console.WriteLine($"Repacking GPARAM: {fileName}...");
+                WGPARAM.Repack(sourceFile);
+            }
+            else if (sourceFile.EndsWith(".luagnl"))
+            {
+                Console.WriteLine($"Unpacking LUAGNL: {fileName}...");
+                LUAGNL gnl = LUAGNL.Read(sourceFile);
+                gnl.Unpack(sourceFile);
+            }
+            else if (sourceFile.EndsWith(".luagnl.xml"))
+            {
+                Console.WriteLine($"Repacking LUAGNL: {fileName}...");
+                WLUAGNL.Repack(sourceFile);
+            }
+            else if (LUAINFO.Is(sourceFile))
+            {
+                Console.WriteLine($"Unpacking LUAINFO: {fileName}...");
+                LUAINFO info = LUAINFO.Read(sourceFile);
+                info.Unpack(sourceFile);
+            }
+            else if (sourceFile.EndsWith(".luainfo.xml"))
+            {
+                Console.WriteLine($"Repacking LUAINFO: {fileName}...");
+                WLUAINFO.Repack(sourceFile);
+            }
+            else if (TPF.Is(sourceFile))
+            {
+                Console.WriteLine($"Unpacking TPF: {fileName}...");
+                TPF tpf = TPF.Read(sourceFile);
+                return tpf.Unpack(fileName, targetDir, progress);
+            }
+            else if (Zero3.Is(sourceFile))
+            {
+                Console.WriteLine($"Unpacking 000: {fileName}...");
+                Zero3 z3 = Zero3.Read(sourceFile);
+                z3.Unpack(targetDir);
+            }
+            else if (Fxr3.Is(sourceFile))
+            {
+                Console.WriteLine($"Unpacking FXR: {fileName}...");
+                Fxr3 fxr = Fxr3.Read(sourceFile);
+                fxr.Unpack(fileName);
+            }
+            else if (sourceFile.EndsWith(".fxr.xml"))
+            {
+                Console.WriteLine($"Repacking FXR: {fileName}...");
+                return WFXR.Repack(sourceFile);
+            }
+            else if (MATBIN.Is(sourceFile))
+            {
+                Console.WriteLine($"Unpacking MATBIN: {fileName}...");
+                MATBIN matbin = MATBIN.Read(sourceFile);
+                matbin.Unpack(fileName);
+            }
+            else if (sourceFile.EndsWith(".matbin.xml"))
+            {
+                Console.WriteLine($"Repacking MATBIN: {fileName}...");
+                return WMATBIN.Repack(sourceFile);
+            }
+            else if (MTD.Is(sourceFile))
+            {
+                Console.WriteLine($"Unpacking MTD: {fileName}...");
+                MTD mtd = MTD.Read(sourceFile);
+                mtd.Unpack(fileName);
+            }
+            else if (sourceFile.EndsWith(".mtd.xml"))
+            {
+                Console.WriteLine($"Repacking MTD: {fileName}...");
+                return WMTD.Repack(sourceFile);
+            }
+            else if (sourceFile.EndsWith(".param"))
+            {
+                if (game == null)
                 {
-                    string bdtExtension = Path.GetExtension(fileName).Replace("bhd", "bdt");
-                    string bdtFilename = $"{Path.GetFileNameWithoutExtension(fileName)}{bdtExtension}";
-                    string bdtPath = $"{sourceDir}\\{bdtFilename}";
-                    if (File.Exists(bdtPath))
-                    {
-                        Console.WriteLine($"Unpacking BXF4: {fileName}...");
-                        using (var bxf = new BXF4Reader(sourceFile, bdtPath))
-                        {
-                            bxf.Unpack(fileName, bdtFilename, targetDir, progress);
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine($"BDT not found for BHD: {fileName}");
-                        return true;
-                    }
+                    game = WBUtil.DetermineParamdexGame(sourceDir);
                 }
-                else if (FFXDLSE.Is(sourceFile))
-                {
-                    Console.WriteLine($"Unpacking FFX: {fileName}...");
-                    var ffx = FFXDLSE.Read(sourceFile);
-                    ffx.Unpack(sourceFile);
-                }
-                else if (sourceFile.EndsWith(".ffx.xml") || sourceFile.EndsWith(".ffx.dcx.xml"))
-                {
-                    Console.WriteLine($"Repacking FFX: {fileName}...");
-                    WFFX.Repack(sourceFile);
-                }
-                else if (sourceFile.EndsWith(".fmg"))
-                {
-                    Console.WriteLine($"Unpacking FMG: {fileName}...");
-                    FMG fmg = FMG.Read(sourceFile);
-                    fmg.Unpack(sourceFile);
-                }
-                else if (sourceFile.EndsWith(".fmg.xml") || sourceFile.EndsWith(".fmg.dcx.xml"))
-                {
-                    Console.WriteLine($"Repacking FMG: {fileName}...");
-                    WFMG.Repack(sourceFile);
-                }
-                else if (GPARAM.Is(sourceFile))
-                {
-                    Console.WriteLine($"Unpacking GPARAM: {fileName}...");
-                    GPARAM gparam = GPARAM.Read(sourceFile);
-                    gparam.Unpack(sourceFile);
-                }
-                else if (sourceFile.EndsWith(".gparam.xml") || sourceFile.EndsWith(".gparam.dcx.xml")
-                    || sourceFile.EndsWith(".fltparam.xml") ||
-                    sourceFile.EndsWith(".fltparam.dcx.xml"))
-                {
-                    Console.WriteLine($"Repacking GPARAM: {fileName}...");
-                    WGPARAM.Repack(sourceFile);
-                }
-                else if (sourceFile.EndsWith(".luagnl"))
-                {
-                    Console.WriteLine($"Unpacking LUAGNL: {fileName}...");
-                    LUAGNL gnl = LUAGNL.Read(sourceFile);
-                    gnl.Unpack(sourceFile);
-                }
-                else if (sourceFile.EndsWith(".luagnl.xml"))
-                {
-                    Console.WriteLine($"Repacking LUAGNL: {fileName}...");
-                    WLUAGNL.Repack(sourceFile);
-                }
-                else if (LUAINFO.Is(sourceFile))
-                {
-                    Console.WriteLine($"Unpacking LUAINFO: {fileName}...");
-                    LUAINFO info = LUAINFO.Read(sourceFile);
-                    info.Unpack(sourceFile);
-                }
-                else if (sourceFile.EndsWith(".luainfo.xml"))
-                {
-                    Console.WriteLine($"Repacking LUAINFO: {fileName}...");
-                    WLUAINFO.Repack(sourceFile);
-                }
-                else if (TPF.Is(sourceFile))
-                {
-                    Console.WriteLine($"Unpacking TPF: {fileName}...");
-                    TPF tpf = TPF.Read(sourceFile);
-                    return tpf.Unpack(fileName, targetDir, progress);
-                }
-                else if (Zero3.Is(sourceFile))
-                {
-                    Console.WriteLine($"Unpacking 000: {fileName}...");
-                    Zero3 z3 = Zero3.Read(sourceFile);
-                    z3.Unpack(targetDir);
-                }
-                else if (Fxr3.Is(sourceFile))
-                {
-                    Console.WriteLine($"Unpacking FXR: {fileName}...");
-                    Fxr3 fxr = Fxr3.Read(sourceFile);
-                    fxr.Unpack(fileName);
-                }
-                else if (sourceFile.EndsWith(".fxr.xml"))
-                {
-                    Console.WriteLine($"Repacking FXR: {fileName}...");
-                    return WFXR.Repack(sourceFile);
-                }
-                else if (MATBIN.Is(sourceFile))
-                {
-                    Console.WriteLine($"Unpacking MATBIN: {fileName}...");
-                    MATBIN matbin = MATBIN.Read(sourceFile);
-                    matbin.Unpack(fileName);
-                }
-                else if (sourceFile.EndsWith(".matbin.xml"))
-                {
-                    Console.WriteLine($"Repacking MATBIN: {fileName}...");
-                    return WMATBIN.Repack(sourceFile);
-                }
-                else if (MTD.Is(sourceFile))
-                {
-                    Console.WriteLine($"Unpacking MTD: {fileName}...");
-                    MTD mtd = MTD.Read(sourceFile);
-                    mtd.Unpack(fileName);
-                }
-                else if (sourceFile.EndsWith(".mtd.xml"))
-                {
-                    Console.WriteLine($"Repacking MTD: {fileName}...");
-                    return WMTD.Repack(sourceFile);
-                }
-                else if (sourceFile.EndsWith(".param"))
-                {
-                    if (game == null)
-                    {
-                        game = WBUtil.DetermineParamdexGame(sourceDir);
-                    }
 
                 Console.WriteLine($"Unpacking PARAM: {fileName}...");
                 PARAM p = PARAM.Read(sourceFile);
 
-                    return p.Unpack(sourceFile, sourceDir, game.Value);
-                }
-                else if (sourceFile.EndsWith(".param.xml"))
-                {
-                    Console.WriteLine($"Repacking PARAM: {fileName}...");
-                    return WPARAM.Repack(sourceFile, sourceDir);
-                }
-                else if (MQB.Is(sourceFile))
-                {
-                    Console.WriteLine($"Converting MQB: {fileName}...");
-                    MQB mqb = MQB.Read(sourceFile);
-                    mqb.Unpack(fileName, sourceDir, progress);
-                }
-                else if (sourceFile.EndsWith(".mqb.xml"))
-                {
-                    Console.WriteLine($"Converting XML to MQB: {fileName}...");
-                    WMQB.Repack(sourceFile);
-                }
-                else
-                {
-                    Console.WriteLine($"File format not recognized: {fileName}");
-                    return true;
-                }
+                return p.Unpack(sourceFile, sourceDir, game.Value);
             }
-
-            return false;
+            else if (sourceFile.EndsWith(".param.xml"))
+            {
+                Console.WriteLine($"Repacking PARAM: {fileName}...");
+                return WPARAM.Repack(sourceFile, sourceDir);
+            }
+            else if (MQB.Is(sourceFile))
+            {
+                Console.WriteLine($"Converting MQB: {fileName}...");
+                MQB mqb = MQB.Read(sourceFile);
+                mqb.Unpack(fileName, sourceDir, progress);
+            }
+            else if (sourceFile.EndsWith(".mqb.xml"))
+            {
+                Console.WriteLine($"Converting XML to MQB: {fileName}...");
+                WMQB.Repack(sourceFile);
+            }
+            else
+            {
+                Console.WriteLine($"File format not recognized: {fileName}");
+                return true;
+            }
         }
 
-        private static bool UnpackRegulationFile(string fileName, string sourceDir, string targetDir, IProgress<float> progress)
-        {
+        return false;
+    }
 
-            if (fileName.Contains("regulation.bin"))
+    private static bool UnpackRegulationFile(string fileName, string sourceDir, string targetDir,
+        IProgress<float> progress)
+    {
+        if (fileName.Contains("regulation.bin"))
+        {
+            string destPath = Path.Combine(sourceDir, fileName);
+            Console.WriteLine($"Regulation Bin: {fileName}...");
+            BND4 bnd = WBUtil.DecryptRegulationBin(destPath, out WBUtil.GameType game);
+            using (var bndReader = new BND4Reader(bnd.Write()))
             {
-                string destPath = Path.Combine(sourceDir, fileName);
-                Console.WriteLine($"Regulation Bin: {fileName}...");
-                BND4 bnd = WBUtil.DecryptRegulationBin(destPath, out WBUtil.GameType game);
-                using (var bndReader = new BND4Reader(bnd.Write()))
-                {
-                    bndReader.Unpack(fileName, targetDir, progress, game);
-                }
+                bndReader.Unpack(fileName, targetDir, progress, game);
+            }
 
             return false;
         }
@@ -502,28 +497,29 @@ internal static class Program
             return true;
         }
 
-            if (sourceName.Contains("regulation-bnd-dcx") || sourceName.Contains("Data0") || sourceName.Contains("regulation-bin"))
-                return ReEncryptRegulationFile( sourceName, sourceDir, targetDir);
+        if (sourceName.Contains("regulation-bnd-dcx") || sourceName.Contains("Data0") ||
+            sourceName.Contains("regulation-bin"))
+            return ReEncryptRegulationFile(sourceName, sourceDir, targetDir);
 
         return false;
     }
 
-        private static bool ReEncryptRegulationFile(string sourceName, string sourceDir, string targetDir)
-        {
-            XmlDocument xml = new XmlDocument();
+    private static bool ReEncryptRegulationFile(string sourceName, string sourceDir, string targetDir)
+    {
+        XmlDocument xml = new XmlDocument();
 
         xml.Load(WBUtil.GetXmlPath("bnd4", sourceDir));
 
         string filename = xml.SelectSingleNode("bnd4/filename").InnerText;
         string regFile = $"{targetDir}\\{filename}";
 
-            if (filename.Contains("regulation.bin"))
-            {
-                Enum.TryParse(xml.SelectSingleNode("bnd4/game")?.InnerText ?? "ER", out WBUtil.GameType game);
-                BND4 bnd = BND4.Read(regFile);
-                WBUtil.EncryptRegulationBin(regFile, game, bnd);
-                return false;
-            }
+        if (filename.Contains("regulation.bin"))
+        {
+            Enum.TryParse(xml.SelectSingleNode("bnd4/game")?.InnerText ?? "ER", out WBUtil.GameType game);
+            BND4 bnd = BND4.Read(regFile);
+            WBUtil.EncryptRegulationBin(regFile, game, bnd);
+            return false;
+        }
 
         if (filename.Contains("Data0"))
         {

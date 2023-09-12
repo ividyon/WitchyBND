@@ -9,9 +9,9 @@ using WitchyLib;
 
 namespace WitchyBND.CliModes;
 
-public static class Parse
+public static class ParseMode
 {
-    private static List<WFileParser> Parsers;
+    public static List<WFileParser> Parsers;
 
     internal static void CliParseMode(CliOptions opt)
     {
@@ -118,7 +118,7 @@ public static class Parse
         }
     }
 
-    static Parse()
+    static ParseMode()
     {
         Parsers = new List<WFileParser>
         {

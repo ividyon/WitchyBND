@@ -5,7 +5,7 @@ using Microsoft.Win32;
 
 namespace WitchyBND.CliModes;
 
-public class Context
+public class ContextMode
 {
     public static void CliContextMode(CliOptions opt)
         {
