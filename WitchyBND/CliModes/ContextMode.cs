@@ -1,71 +1,77 @@
 ﻿using System;
-using System.IO;
-using System.Reflection;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.Win32;
+using PPlus;
+using WitchyBND.Context;
+using WitchyLib;
 
 namespace WitchyBND.CliModes;
 
 public class ContextMode
 {
+    private enum ContextChoices
+    {
+        [Display(Name = "Register WitchyBND context menu",
+            Description = "Add context menu entries for WitchyBND to right-click menus in Explorer.")]
+        Register,
+
+        [Display(Name = "Unregister WitchyBND context menu",
+            Description = "Remove context menu entries for WitchyBND from right-click menus in Explorer.")]
+        Unregister,
+
+        [Display(Name = "Unregister Yabber context menu",
+            Description = "Remove context menu entries for Yabber from right-click menus in Explorer.")]
+        UnregisterYabber,
+
+        [Display(Name = "Return to configuration menu")]
+        Return
+    }
+
     public static void CliContextMode(CliOptions opt)
+    {
+        PromptPlus.Clear();
+        PromptPlus.DoubleDash("WitchyBND context menu options");
+        var select = PromptPlus.Select<ContextChoices>("Select an option")
+            .Run();
+        switch (select.Value)
         {
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            Console.Write(
-                "==========URGENT!==========" +
-                "NO idea what happens if you try to overwrite WitchyBND that is already registered" +
-                "Unregister, first, if you have the old WitchyBND registered." +
-                $"{assembly.GetName().Name} {assembly.GetName().Version}\n\n" +
-                "This program will register WitchyBND.exe and WitchyBND.DCX.exe\n" +
-                "so that they can be run by right-clicking on a file or folder.\n" +
-                "Enter R to register, U to unregister, or anything else to exit.\n" +
-                "> ");
-            string choice = Console.ReadLine().ToUpper();
-            Console.WriteLine();
-
-            if (choice == "R" || choice == "U" || choice == "L")
-            {
-                try
-                {
-                    RegistryKey classes = Registry.CurrentUser.OpenSubKey("Software\\Classes", true);
-                    if (choice == "R")
-                    {
-                        string wbinderPath = Path.GetFullPath("WitchyBND.exe");
-                        RegistryKey yabberFileKey = classes.CreateSubKey("*\\shell\\yabber");
-                        RegistryKey yabberFileCommand = yabberFileKey.CreateSubKey("command");
-                        yabberFileKey.SetValue(null, "WitchyBND");
-                        yabberFileCommand.SetValue(null, $"\"{wbinderPath}\" \"%1\"");
-                        RegistryKey yabberDirKey = classes.CreateSubKey("directory\\shell\\yabber");
-                        RegistryKey yabberDirCommand = yabberDirKey.CreateSubKey("command");
-                        yabberDirKey.SetValue(null, "WitchyBND");
-                        yabberDirCommand.SetValue(null, $"\"{wbinderPath}\" \"%1\"");
-
-                        string dcxPath = Path.GetFullPath("WitchyBND.DCX.exe");
-                        RegistryKey dcxFileKey = classes.CreateSubKey("*\\shell\\yabberdcx");
-                        RegistryKey dcxFileCommand = dcxFileKey.CreateSubKey("command");
-                        dcxFileKey.SetValue(null, "WitchyBND.DCX");
-                        dcxFileCommand.SetValue(null, $"\"{dcxPath}\" \"%1\"");
-
-                        Console.WriteLine("Programs registered!");
-                    }
-                    else if (choice == "U")
-                    {
-                        classes.DeleteSubKeyTree("*\\shell\\yabber", false);
-                        classes.DeleteSubKeyTree("directory\\shell\\yabber", false);
-                        classes.DeleteSubKeyTree("*\\shell\\yabberdcx", false);
-                        Console.WriteLine("Programs unregistered.");
-                    }
-                    else if (choice == "L")
-                    {
-                        //MultipleInvokePromptMinimum
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Operation failed; try running As Administrator. Reason:\n{ex}");
-                }
-
-                Console.WriteLine("Press any key to exit.");
-                Console.ReadKey();
-            }
+            case ContextChoices.Register:
+                RegisterContext();
+                PromptPlus.WriteLine("Successfully registered WitchyBND context menu.");
+                break;
+            case ContextChoices.Unregister:
+                UnregisterContext();
+                PromptPlus.WriteLine("Successfully unregistered WitchyBND context menu.");
+                break;
+            case ContextChoices.UnregisterYabber:
+                UnregisterYabberContext();
+                PromptPlus.WriteLine("Successfully unregistered Yabber context menu.");
+                break;
+            case ContextChoices.Return:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
+
+        PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);
+        PromptPlus.ReadKey();
+    }
+
+    public static void UnregisterYabberContext()
+    {
+        RegistryKey classes = Registry.CurrentUser.OpenSubKey("Software\\Classes", true);
+        classes.DeleteSubKeyTree("*\\shell\\yabber", false);
+        classes.DeleteSubKeyTree("directory\\shell\\yabber", false);
+        classes.DeleteSubKeyTree("*\\shell\\yabberdcx", false);
+    }
+    public static void UnregisterContext()
+    {
+        ComUtilities.UnregisterComObject(ComUtilities.Target.User, typeof(ContextMenu));
+    }
+    public static void RegisterContext()
+    {
+        // Unregister first to be sure
+        UnregisterContext();
+        ComUtilities.RegisterComObject(ComUtilities.Target.User, typeof(ContextMenu));
+    }
 }
