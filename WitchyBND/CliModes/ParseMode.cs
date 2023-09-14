@@ -35,17 +35,8 @@ public static class ParseMode
         }
         catch (UnauthorizedAccessException e)
         {
-            using (Process current = Process.GetCurrentProcess())
-            {
-                var admin = new Process();
-                admin.StartInfo = current.StartInfo;
-                admin.StartInfo.FileName = current.MainModule.FileName;
-                admin.StartInfo.Arguments =
-                    Environment.CommandLine.Replace($"\"{Environment.GetCommandLineArgs()[0]}\"", "");
-                admin.StartInfo.Verb = "runas";
-                admin.Start();
-                return;
-            }
+            Console.Error.WriteLine("WitchyBND had no access to perform this action; perhaps try Administrator Mode?\n");
+            throw;
         }
         catch (FriendlyException ex)
         {

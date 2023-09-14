@@ -59,5 +59,9 @@
     <Content Include="Assets\Paramdex\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Remove="Assets\context.png" />
+    <Content Include="Assets\context.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 </Project>

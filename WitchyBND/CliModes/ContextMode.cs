@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using Microsoft.Win32;
 using PPlus;
 using WitchyBND.Context;
@@ -64,14 +65,17 @@ public class ContextMode
         classes.DeleteSubKeyTree("directory\\shell\\yabber", false);
         classes.DeleteSubKeyTree("*\\shell\\yabberdcx", false);
     }
+
     public static void UnregisterContext()
     {
         ComUtilities.UnregisterComObject(ComUtilities.Target.User, typeof(ContextMenu));
+        SendTo.DeleteSendToShortcuts();
     }
+
     public static void RegisterContext()
     {
-        // Unregister first to be sure
         UnregisterContext();
         ComUtilities.RegisterComObject(ComUtilities.Target.User, typeof(ContextMenu));
+        SendTo.AddSendToShortcuts();
     }
 }
