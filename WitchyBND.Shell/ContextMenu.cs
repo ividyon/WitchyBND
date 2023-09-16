@@ -4,12 +4,11 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Windows.Forms;
 using SharpShell.Attributes;
 using SharpShell.SharpContextMenu;
 
-namespace WitchyBND.Context
+namespace WitchyBND.Shell
 {
 // <summary>
 // The SubMenuExtension is an example shell context menu extension,
@@ -22,9 +21,10 @@ namespace WitchyBND.Context
     [COMServerAssociation(AssociationType.AllFiles)]
     [COMServerAssociation(AssociationType.Directory)]
     [Guid("CCE90C57-0A92-4CB7-8E9B-0CFA92138AE9")]
-    [ProgId("WitchyBND.ContextMenu")]
+    [ProgId("WitchyBND.Shell.ContextMenu")]
     public class ContextMenu : SharpContextMenu
     {
+        public static readonly string WitchyPath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? ".", "WitchyBND.exe");
         protected override bool CanShowMenu()
         {
             return true;
@@ -94,12 +94,12 @@ namespace WitchyBND.Context
 
         private void ProcessDcxMenuItemOnClick(object sender, EventArgs e)
         {
-            Process.Start(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "WitchyBND.exe"), $"--dcx {string.Join(" ", SelectedItemPaths.Select(p => $"\"{p}\""))}");
+            Process.Start(WitchyPath, $"--dcx {string.Join(" ", SelectedItemPaths.Select(p => $"\"{p}\""))}");
         }
 
         private void ProcessMenuItemOnClick(object sender, EventArgs e)
         {
-            Process.Start(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "WitchyBND.exe"), string.Join(" ", SelectedItemPaths.Select(p => $"\"{p}\"")));
+            Process.Start(WitchyPath, string.Join(" ", SelectedItemPaths.Select(p => $"\"{p}\"")));
         }
     }
 

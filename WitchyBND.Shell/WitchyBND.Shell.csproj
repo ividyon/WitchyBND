@@ -7,8 +7,8 @@
     <ProjectGuid>{5D3322F3-CC35-428E-8B28-2AE1F74B0417}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WitchyBND.Context</RootNamespace>
-    <AssemblyName>WitchyBND.Context</AssemblyName>
+    <RootNamespace>WitchyBND.Shell</RootNamespace>
+    <AssemblyName>WitchyBND.Shell</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SignAssembly>true</SignAssembly>

@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.Win32;
 
-namespace WitchyBND.Context
+namespace WitchyBND.Shell
 {
     /// <summary>
     /// Written by Simon Mourier

@@ -2,7 +2,7 @@
 using System.IO;
 using ShellLink;
 
-namespace WitchyBND.Context
+namespace WitchyBND.Shell
 {
     public static class SendTo
     {

@@ -43,7 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SoulsFormats\SoulsFormats.csproj" />
-    <ProjectReference Include="..\WitchyBND.Context\WitchyBND.Context.csproj" />
+    <ProjectReference Include="..\WitchyBND.Shell\WitchyBND.Shell.csproj" />
     <ProjectReference Include="..\WitchyFormats\WitchyFormats.csproj" />
     <ProjectReference Include="..\WitchyLib\WitchyLib.csproj" />
   </ItemGroup>
