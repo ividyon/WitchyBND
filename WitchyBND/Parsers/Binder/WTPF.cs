@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+using System.Xml.Linq;
 using PPlus;
 using SoulsFormats;
 using WitchyFormats.Utils;
@@ -34,49 +35,37 @@ public class WTPF : WFolderParser
         }
 
         Directory.CreateDirectory(targetDir);
-        var xws = new XmlWriterSettings();
-        xws.Indent = true;
-        var xw = XmlWriter.Create($"{targetDir}\\_witchy-tpf.xml", xws);
-        xw.WriteStartElement("tpf");
 
-        xw.WriteElementString("filename", sourceName);
-        xw.WriteElementString("compression", tpf.Compression.ToString());
-        xw.WriteElementString("encoding", $"0x{tpf.Encoding:X2}");
-        xw.WriteElementString("flag2", $"0x{tpf.Flag2:X2}");
-        xw.WriteElementString("platform", tpf.Platform.ToString());
+        var textures = new XElement("textures");
 
-        xw.WriteStartElement("textures");
-        for (int i = 0; i < tpf.Textures.Count; i++)
+        foreach (TPF.Texture texture in tpf.Textures)
         {
-            TPF.Texture texture = tpf.Textures[i];
-            xw.WriteStartElement("texture");
-            xw.WriteElementString("name", texture.Name + ".dds");
-            xw.WriteElementString("format", texture.Format.ToString());
-            xw.WriteElementString("flags1", $"0x{texture.Flags1:X2}");
+            var texElement = new XElement("texture");
+            texElement.WriteSanitizedBinderFilePath(texture.Name + ".dds", "name");
+            texElement.Add(new XElement("format", texture.Format.ToString()),
+                new XElement("flags1", $"0x{texture.Flags1:X2}"));
 
             if (texture.FloatStruct != null)
             {
-                xw.WriteStartElement("FloatStruct");
-                xw.WriteAttributeString("Unk00", texture.FloatStruct.Unk00.ToString());
+                var floatStruct = new XElement("FloatStruct");
+                floatStruct.SetAttributeValue("Unk00", texture.FloatStruct.Unk00.ToString());
                 foreach (float value in texture.FloatStruct.Values)
                 {
-                    xw.WriteElementString("Value", value.ToString());
+                    floatStruct.Add(new XElement("Value", value.ToString()));
                 }
 
-                xw.WriteEndElement();
+                texElement.Add(floatStruct);
             }
-
-            xw.WriteEndElement();
 
             try
             {
-                File.WriteAllBytes($"{targetDir}\\{texture.Name}.dds", texture.Headerize());
+                File.WriteAllBytes($"{targetDir}\\{WBUtil.SanitizeFilename(texture.Name)}.dds", texture.Headerize());
             }
             catch (EndOfStreamException)
             {
                 try
                 {
-                    File.WriteAllBytes($"{targetDir}\\{texture.Name}.dds",
+                    File.WriteAllBytes($"{targetDir}\\{WBUtil.SanitizeFilename(texture.Name)}.dds",
                         SecretHeaderizer.SecretHeaderize(texture));
                 }
                 catch (Exception e)
@@ -86,54 +75,71 @@ public class WTPF : WFolderParser
                     return;
                 }
             }
+            textures.Add(texElement);
         }
 
-        xw.WriteEndElement();
+        var xml = new XElement(Name.ToLower(),
+            new XElement("filename", sourceName),
+            new XElement("compression", tpf.Compression.ToString()),
+            new XElement("encoding", $"0x{tpf.Encoding:X2}"),
+            new XElement("flag2", $"0x{tpf.Flag2:X2}"),
+            new XElement("platform", tpf.Platform.ToString()),
+            textures
+        );
 
-        xw.WriteEndElement();
+        using var xw = XmlWriter.Create($"{targetDir}\\_witchy-tpf.xml", new XmlWriterSettings
+        {
+            Indent = true
+        });
+        xml.WriteTo(xw);
         xw.Close();
     }
 
     public override void Repack(string srcPath)
     {
         TPF tpf = new TPF();
-        XmlDocument xml = new XmlDocument();
+        // XmlDocument xml = new XmlDocument();
 
-        xml.Load(GetBinderXmlPath(srcPath));
+        // xml.Load(GetBinderXmlPath(srcPath));
+        var doc = XDocument.Load(GetBinderXmlPath(srcPath));
+        if (doc.Root == null) throw new XmlException("XML has no root");
+        XElement xml = doc.Root;
 
-        Enum.TryParse(xml.SelectSingleNode("tpf/platform")?.InnerText ?? "None", out TPF.TPFPlatform platform);
+        Enum.TryParse(xml.Element("platform")?.Value ?? "None", out TPF.TPFPlatform platform);
         tpf.Platform = platform;
 
-        string filename = xml.SelectSingleNode("tpf/filename").InnerText;
-        Enum.TryParse(xml.SelectSingleNode("tpf/compression")?.InnerText ?? "None", out DCX.Type compression);
+        string filename = xml.Element("filename")!.Value;
+
+        Enum.TryParse(xml.Element("compression")?.Value ?? "None", out DCX.Type compression);
         tpf.Compression = compression;
 
-        tpf.Encoding = Convert.ToByte(xml.SelectSingleNode("tpf/encoding").InnerText, 16);
-        tpf.Flag2 = Convert.ToByte(xml.SelectSingleNode("tpf/flag2").InnerText, 16);
+        tpf.Encoding = Convert.ToByte(xml.Element("encoding").Value, 16);
+        tpf.Flag2 = Convert.ToByte(xml.Element("flag2").Value, 16);
 
-        foreach (XmlNode texNode in xml.SelectNodes("tpf/textures/texture"))
+        foreach (XElement texNode in xml.Element("textures")!.Elements("texture"))
         {
-            string name = Path.GetFileNameWithoutExtension(texNode.SelectSingleNode("name").InnerText);
-            byte format = Convert.ToByte(texNode.SelectSingleNode("format").InnerText);
-            byte flags1 = Convert.ToByte(texNode.SelectSingleNode("flags1").InnerText, 16);
+            string inName = Path.GetFileNameWithoutExtension(texNode.GetSanitizedBinderFilePath("name"));
+            string outName = Path.GetFileNameWithoutExtension(texNode.GetSanitizedBinderFilePath("name", true));
+            byte format = Convert.ToByte(texNode.Element("format")!.Value);
+            byte flags1 = Convert.ToByte(texNode.Element("flags1")!.Value, 16);
 
             TPF.FloatStruct floatStruct = null;
-            XmlNode floatsNode = texNode.SelectSingleNode("FloatStruct");
+            XElement floatsNode = texNode.Element("FloatStruct");
             if (floatsNode != null)
             {
                 floatStruct = new TPF.FloatStruct();
-                floatStruct.Unk00 = int.Parse(floatsNode.Attributes["Unk00"].InnerText);
-                foreach (XmlNode valueNode in floatsNode.SelectNodes("Value"))
-                    floatStruct.Values.Add(float.Parse(valueNode.InnerText));
+                floatStruct.Unk00 = int.Parse(floatsNode.Attribute("Unk00").Value);
+                foreach (XElement valueNode in floatsNode.Elements("Value"))
+                    floatStruct.Values.Add(float.Parse(valueNode.Value));
             }
 
-            byte[] bytes = File.ReadAllBytes($"{srcPath}\\{name}.dds");
-            var texture = new TPF.Texture(name, format, flags1, bytes);
+            byte[] bytes = File.ReadAllBytes($"{srcPath}\\{outName}.dds");
+            var texture = new TPF.Texture(inName, format, flags1, bytes);
             texture.FloatStruct = floatStruct;
             tpf.Textures.Add(texture);
         }
 
-        string outPath = $"{srcPath}\\{filename}";
+        string outPath = GetRepackDestPath(srcPath, filename);
         WBUtil.Backup(outPath);
         try
         {

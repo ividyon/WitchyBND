@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Win32;
@@ -15,7 +16,48 @@ namespace WitchyLib;
 
 public static class WBUtil
 {
+    public static string FirstCharToUpper(this string input) =>
+        input switch
+        {
+            null => throw new ArgumentNullException(nameof(input)),
+            "" => throw new ArgumentException($"{nameof(input)} cannot be empty", nameof(input)),
+            _ => string.Concat(input[0].ToString().ToUpper(), input.AsSpan(1))
+        };
 
+    public static string SanitizeFilename(string path)
+    {
+        return Path.GetInvalidFileNameChars()
+            .Aggregate(path, (current, c) => current.Replace(c, '_'));
+    }
+
+    public static void WriteSanitizedBinderFilePath(this XElement element, string path, string pathElementName = "path")
+    {
+        string dir = Path.GetDirectoryName(path) ?? "";
+        string filename = Path.GetFileName(path);
+        string sanitized = SanitizeFilename(path);
+
+        if (filename == sanitized)
+        {
+            element.Add(new XElement(pathElementName, path));
+        }
+        else
+        {
+            element.Add(new XElement("in" + pathElementName.FirstCharToUpper(), path));
+            element.Add(new XElement("out" + pathElementName.FirstCharToUpper(), Path.Combine(dir, sanitized)));
+        }
+    }
+
+    public static string GetSanitizedBinderFilePath(this XElement element, string pathElementName = "path",  bool outName = false)
+    {
+        if (element.Element(pathElementName) != null)
+            return element.Element(pathElementName)!.Value;
+        var otherName =
+            outName ? "out" + pathElementName.FirstCharToUpper() : "in" + pathElementName.FirstCharToUpper();
+        if (element.Element(otherName) != null)
+            return element.Element(otherName)!.Value;
+
+        throw new InvalidDataException("File element is missing path.");
+    }
 
     public static List<string> ProcessPathGlobs(List<string> paths)
     {
@@ -141,7 +183,8 @@ public static class WBUtil
             }
             catch (Exception e2)
             {
-                throw new InvalidDataException($"File is not a regulation.bin BND for Elden Ring or Armored Core VI.", e2);
+                throw new InvalidDataException($"File is not a regulation.bin BND for Elden Ring or Armored Core VI.",
+                    e2);
             }
         }
     }
