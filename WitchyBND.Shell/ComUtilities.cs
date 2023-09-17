@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.Win32;
+using SharpShell.ServerRegistration;
 
 namespace WitchyBND.Shell
 {
@@ -14,6 +15,9 @@ namespace WitchyBND.Shell
     public static class ComUtilities
     {
         private const string ClsidRegistryKey = @"Software\Classes\CLSID";
+        private const string ClassesRegistryKey = @"Software\Classes";
+        private const string ContextMenuHandlerRegistryKey = @"Software\Classes\*\shellex\ContextMenuHandlers";
+        private const string DirContextMenuHandlerRegistryKey = @"Software\Classes\Directory\shellex\ContextMenuHandlers";
 
         public enum Target
         {
@@ -23,6 +27,7 @@ namespace WitchyBND.Shell
 
         public static void RegisterComObject(Target target, Type type, string assemblyPath = null)
         {
+            // ServerRegistrationManager.RegisterServer(new WitchyContextMenu(), RegistrationType.OS64Bit);
             RegisterComObject(target, type, assemblyPath, null);
         }
 
@@ -46,10 +51,34 @@ namespace WitchyBND.Shell
                 runtimeVersion = GetRuntimeVersion(type.Assembly);
             }
 
+            var guid = type.GUID.ToString("B");
+
             var root = target == Target.User ? Registry.CurrentUser : Registry.LocalMachine;
 
             using (RegistryKey key = EnsureSubKey(root,
-                       Path.Combine(ClsidRegistryKey, type.GUID.ToString("B"), "InprocServer32")))
+                       Path.Combine(ClassesRegistryKey, type.FullName)))
+            {
+                key.SetValue(null, type.FullName);
+            }
+            using (RegistryKey key = EnsureSubKey(root,
+                       Path.Combine(ClassesRegistryKey, type.FullName, "CLSID")))
+            {
+                key.SetValue(null, guid);
+            }
+
+            using (RegistryKey key = EnsureSubKey(root,
+                       Path.Combine(ContextMenuHandlerRegistryKey, type.FullName.Split('.').Last())))
+            {
+                key.SetValue(null, guid);
+            }
+            using (RegistryKey key = EnsureSubKey(root,
+                       Path.Combine(DirContextMenuHandlerRegistryKey, type.FullName.Split('.').Last())))
+            {
+                key.SetValue(null, guid);
+            }
+
+            using (RegistryKey key = EnsureSubKey(root,
+                       Path.Combine(ClsidRegistryKey, guid, "InprocServer32")))
             {
                 key.SetValue(null, "mscoree.dll");
                 key.SetValue("Assembly", type.Assembly.FullName);
@@ -60,8 +89,19 @@ namespace WitchyBND.Shell
                 key.SetValue("RuntimeVersion", runtimeVersion);
             }
 
-            using (RegistryKey key = EnsureSubKey(root, Path.Combine(ClsidRegistryKey, type.GUID.ToString("B"))))
+            using (RegistryKey key = EnsureSubKey(root,
+                       Path.Combine(ClsidRegistryKey, guid,
+                           "InprocServer32", type.Assembly.GetName().Version.ToString())))
             {
+                key.SetValue("Assembly", type.Assembly.FullName);
+                key.SetValue("Class", type.FullName);
+                key.SetValue("ThreadingModel", "Both");
+                key.SetValue("CodeBase", assemblyPath);
+            }
+
+            using (RegistryKey key = EnsureSubKey(root, Path.Combine(ClsidRegistryKey, guid)))
+            {
+                key.SetValue(null, type.FullName);
                 // cf http://stackoverflow.com/questions/2070999/is-the-implemented-categories-key-needed-when-registering-a-managed-com-compon
                 using (RegistryKey cats = EnsureSubKey(key,
                            @"Implemented Categories\{62C8FE65-4EBB-45e7-B440-6E39B2CDBF29}"))
@@ -78,6 +118,14 @@ namespace WitchyBND.Shell
                     }
                 }
             }
+
+            using (RegistryKey key = EnsureSubKey(root, Path.Combine(ClsidRegistryKey, guid, "ProgId")))
+            {
+                key.SetValue(null, type.FullName);
+            }
+
+            // Tell explorer the file association has been changed
+            SHChangeNotify(0x08000000, 0x0000, IntPtr.Zero, IntPtr.Zero);
         }
 
         public static void UnregisterComObject(Target target, Type type)
@@ -86,13 +134,34 @@ namespace WitchyBND.Shell
                 throw new ArgumentNullException(nameof(type));
 
             var root = target == Target.User ? Registry.CurrentUser : Registry.LocalMachine;
+            var guid = type.GUID.ToString("B");
             using (RegistryKey key = root.OpenSubKey(ClsidRegistryKey, true))
             {
-                if (key == null)
-                    return;
-
-                key.DeleteSubKeyTree(type.GUID.ToString("B"), false);
+                if (key != null)
+                    key.DeleteSubKeyTree(guid, false);
             }
+
+            using (RegistryKey key = root.OpenSubKey(ContextMenuHandlerRegistryKey, true))
+            {
+                if (key != null)
+                    key.DeleteSubKeyTree(type.FullName.Split('.').Last(), false);
+            }
+
+            using (RegistryKey key = root.OpenSubKey(DirContextMenuHandlerRegistryKey, true))
+            {
+                if (key != null)
+                    key.DeleteSubKeyTree(type.FullName.Split('.').Last(), false);
+            }
+
+
+            using (RegistryKey key = root.OpenSubKey(ClassesRegistryKey, true))
+            {
+                if (key != null)
+                    key.DeleteSubKeyTree(type.FullName, false);
+            }
+
+            // Tell explorer the file association has been changed
+            SHChangeNotify(0x08000000, 0x0000, IntPtr.Zero, IntPtr.Zero);
         }
 
         // kind of hack to determine clr version of an assembly
@@ -128,5 +197,8 @@ namespace WitchyBND.Shell
                 return parentKey.CreateSubKey(Path.GetFileName(name));
             }
         }
+
+        [DllImport("shell32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern void SHChangeNotify(uint wEventId, uint uFlags, IntPtr dwItem1, IntPtr dwItem2);
     }
 }

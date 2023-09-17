@@ -9,6 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>WitchyBND.Shell</RootNamespace>
     <AssemblyName>WitchyBND.Shell</AssemblyName>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SignAssembly>true</SignAssembly>
@@ -52,7 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ComUtilities.cs" />
-    <Compile Include="ContextMenu.cs" />
+    <Compile Include="WitchyContextMenu.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SendTo.cs" />
   </ItemGroup>

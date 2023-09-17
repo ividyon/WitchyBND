@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using SharpShell;
 using SharpShell.Attributes;
 using SharpShell.SharpContextMenu;
 
@@ -20,9 +21,10 @@ namespace WitchyBND.Shell
     [ComVisible(true)]
     [COMServerAssociation(AssociationType.AllFiles)]
     [COMServerAssociation(AssociationType.Directory)]
+    [COMServerAssociation(AssociationType.DirectoryBackground)]
     [Guid("CCE90C57-0A92-4CB7-8E9B-0CFA92138AE9")]
-    [ProgId("WitchyBND.Shell.ContextMenu")]
-    public class ContextMenu : SharpContextMenu
+    [ProgId("WitchyBND.Shell.WitchyContextMenu")]
+    public class WitchyContextMenu : SharpContextMenu
     {
         public static readonly string WitchyPath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? ".", "WitchyBND.exe");
         protected override bool CanShowMenu()
@@ -32,16 +34,41 @@ namespace WitchyBND.Shell
 
         protected override ContextMenuStrip CreateMenu()
         {
+            var count = SelectedItemPaths.Count();
+            bool plural = count > 1;
+            bool tooMany = count > 15;
+
             var menu = new ContextMenuStrip();
+
+            ToolStripMenuItem witchyShortcut = new ToolStripMenuItem
+            {
+                Text = "Process with WitchyBND...",
+                Image = Image.FromFile(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "Assets", "context.png"), true),
+            };
+
+            if (!tooMany)
+            {
+                if (SelectedItemPaths.Count() == 1 && Directory.Exists(SelectedItemPaths.First()))
+                {
+                    if (Directory.GetFiles(SelectedItemPaths.First(), "_witchy*.xml", SearchOption.TopDirectoryOnly)
+                            .Length > 0)
+                    {
+                        witchyShortcut.Click += ProcessMenuItemOnClick;
+                        menu.Items.Add(witchyShortcut);
+                    }
+                }
+                else
+                {
+                    witchyShortcut.Click += ProcessMenuItemOnClick;
+                    menu.Items.Add(witchyShortcut);
+                }
+            }
 
             ToolStripMenuItem witchyMenu = new ToolStripMenuItem
             {
                 Text = "WitchyBND",
                 Image = Image.FromFile(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "Assets", "context.png"), true),
             };
-            var count = SelectedItemPaths.Count();
-            bool plural = count > 1;
-            bool tooMany = count > 15;
             if (tooMany)
             {
                 ToolStripMenuItem tooManyMenuItem = new ToolStripMenuItem
@@ -53,14 +80,14 @@ namespace WitchyBND.Shell
             }
             else
             {
-                ToolStripMenuItem processMenuItem = new ToolStripMenuItem
-                {
-                    Text = plural
-                        ? $"Process {count} selected items..."
-                        : $"Process {count} selected item..."
-                };
-                processMenuItem.Click += ProcessMenuItemOnClick;
-                witchyMenu.DropDownItems.Add(processMenuItem);
+                // ToolStripMenuItem processMenuItem = new ToolStripMenuItem
+                // {
+                //     Text = plural
+                //         ? $"Process {count} selected items..."
+                //         : $"Process {count} selected item..."
+                // };
+                // processMenuItem.Click += ProcessMenuItemOnClick;
+                // witchyMenu.DropDownItems.Add(processMenuItem);
 
                 if (SelectedItemPaths.Any(p => p.EndsWith(".dcx")))
                 {
@@ -76,7 +103,7 @@ namespace WitchyBND.Shell
 
                 var allFilesMenuItem = new ToolStripMenuItem
                 {
-                    Text = "Process all files in folder..."
+                    Text = "Process all files in current folder..."
                 };
                 allFilesMenuItem.Click += AllFilesMenuItemOnClick;
                 witchyMenu.DropDownItems.Add(allFilesMenuItem);

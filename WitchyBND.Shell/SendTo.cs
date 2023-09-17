@@ -7,7 +7,6 @@ namespace WitchyBND.Shell
     public static class SendTo
     {
         private static readonly string sendToPath = Environment.GetFolderPath(Environment.SpecialFolder.SendTo);
-
         private static readonly string witchyPath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "WitchyBND.exe");
         private static readonly string shortcutPath = Path.Combine(sendToPath, "WitchyBND.lnk");
         private static readonly string shortcutPathDcx = Path.Combine(sendToPath, "WitchyBND (Decompress DCX).lnk");

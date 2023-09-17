@@ -68,7 +68,7 @@ public static class ParseMode
 
             foreach (WFileParser parser in Parsers)
             {
-                if (parser.Exists(path) && parser.Is(path))
+                if ((Configuration.Args.UnpackOnly || !Configuration.Args.RepackOnly) && parser.Exists(path) && parser.Is(path))
                 {
                     switch (parser.Verb)
                     {
@@ -84,7 +84,7 @@ public static class ParseMode
                     parsed = true;
                     break;
                 }
-                if (parser.ExistsUnpacked(path) && parser.IsUnpacked(path))
+                if ((Configuration.Args.RepackOnly || !Configuration.Args.UnpackOnly) && parser.ExistsUnpacked(path) && parser.IsUnpacked(path))
                 {
                     switch (parser.Verb)
                     {

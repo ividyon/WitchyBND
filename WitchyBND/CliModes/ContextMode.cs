@@ -68,14 +68,14 @@ public class ContextMode
 
     public static void UnregisterContext()
     {
-        ComUtilities.UnregisterComObject(ComUtilities.Target.User, typeof(ContextMenu));
+        ComUtilities.UnregisterComObject(ComUtilities.Target.User, typeof(WitchyContextMenu));
         SendTo.DeleteSendToShortcuts();
     }
 
     public static void RegisterContext()
     {
         UnregisterContext();
-        ComUtilities.RegisterComObject(ComUtilities.Target.User, typeof(ContextMenu));
+        ComUtilities.RegisterComObject(ComUtilities.Target.User, typeof(WitchyContextMenu));
         SendTo.AddSendToShortcuts();
     }
 }

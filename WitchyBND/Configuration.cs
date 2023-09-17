@@ -12,7 +12,16 @@ public static class Configuration
         public bool Dcx { get; set; }
     }
 
+    public class WitchyArgValues
+    {
+        public bool UnpackOnly { get; set; }
+
+        public bool RepackOnly { get; set; }
+    }
+
     private static WitchyConfigValues _values;
+
+    public static WitchyArgValues Args;
 
     public static bool Bnd
     {
@@ -28,6 +37,7 @@ public static class Configuration
     static Configuration()
     {
         _values = new WitchyConfigValues();
+        Args = new WitchyArgValues();
 
         IConfigurationRoot config = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json")

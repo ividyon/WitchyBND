@@ -40,7 +40,12 @@ public class CliOptions
     //     HelpText = "Set output to quiet, reporting only errors.")]
     // public bool Quiet { get; set; }
 
-    [Option('b', "default-bnd",
+    [Option('u', "unpack", HelpText = "Only perform unpack processing, no repacking.")]
+    public bool UnpackOnly { get; set; }
+
+    [Option('r', "repack", HelpText = "Only perform repack processing, no unpacking.")]
+    public bool RepackOnly { get; set; }
+    [Option('b', "bnd",
         HelpText = "Perform basic unpacking of BND instead of using special Witchy methods, where present")]
     public bool Bnd { get; set; }
 
@@ -78,6 +83,10 @@ internal static class Program
                     Configuration.Dcx = true;
                 if (opt.Bnd)
                     Configuration.Bnd = true;
+                if (opt.RepackOnly)
+                    Configuration.Args.RepackOnly = true;
+                if (opt.UnpackOnly)
+                    Configuration.Args.UnpackOnly = true;
 
                 // Set CLI mode
                 CliMode mode = CliMode.Parse;
