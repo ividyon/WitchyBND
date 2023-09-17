@@ -114,7 +114,7 @@ public static class ParseMode
         Parsers = new List<WFileParser>
         {
             new Parsers.WDCX(),
-            //Regulation file
+            new Parsers.WRegulation(),
             new Parsers.WFFXBND(),
             new Parsers.WBND3(),
             new Parsers.WBND4(),
@@ -130,7 +130,7 @@ public static class ParseMode
             new Parsers.WFXR3(),
             new Parsers.WMATBIN(),
             new Parsers.WMTD(),
-            //PARAM
+            new Parsers.WPARAM(),
             //MSBE
             //TAE
         };

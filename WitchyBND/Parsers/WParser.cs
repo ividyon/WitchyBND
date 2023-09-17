@@ -77,26 +77,28 @@ public abstract class WFolderParser : WFileParser
         return doc.Root != null && doc.Root.Name == Name.ToLower();
     }
 
-    public virtual string GetBinderXmlFilename()
+    public virtual string GetBinderXmlFilename(string name = null)
     {
-        return $"_witchy-{Name.ToLower()}.xml";
+        name ??= Name.ToLower();
+        return $"_witchy-{name}.xml";
     }
 
-    public virtual string GetBinderXmlPath(string dir)
+    public virtual string GetBinderXmlPath(string dir, string name = null)
     {
+        name ??= Name.ToLower();
         dir = string.IsNullOrEmpty(dir) ? dir : $"{dir}\\";
 
-        if (File.Exists($"{dir}{GetBinderXmlFilename()}"))
+        if (File.Exists($"{dir}{GetBinderXmlFilename(name)}"))
         {
-            return $"{dir}_witchy-{Name.ToLower()}.xml";
+            return $"{dir}_witchy-{name}.xml";
         }
 
-        if (File.Exists($"{dir}_yabber-{Name.ToLower()}.xml"))
+        if (File.Exists($"{dir}_yabber-{name}.xml"))
         {
-            return $"{dir}_yabber-{Name.ToLower()}.xml";
+            return $"{dir}_yabber-{name}.xml";
         }
 
-        return $"{dir}{GetBinderXmlFilename()}";
+        return $"{dir}{GetBinderXmlFilename(name)}";
     }
 }
 
