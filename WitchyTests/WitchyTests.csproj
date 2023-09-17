@@ -29,4 +29,8 @@
       <ProjectReference Include="..\WitchyBND\WitchyBND.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Samples\BND3Regulation\" />
+    </ItemGroup>
+
 </Project>

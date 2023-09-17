@@ -17,9 +17,15 @@ public class WBND3 : WBinderParser
         return File.Exists(path) && BND3.Is(path);
     }
 
+
     public override void Unpack(string srcPath)
     {
         var bnd = BND3.Read(srcPath);
+        Unpack(srcPath, bnd, null);
+    }
+
+    public void Unpack(string srcPath, BND3 bnd, WBUtil.GameType? game = null)
+    {
         string srcName = Path.GetFileName(srcPath);
         string destDir = GetUnpackDestDir(srcPath);
         Directory.CreateDirectory(destDir);
@@ -32,9 +38,11 @@ public class WBND3 : WBinderParser
 
         XElement files = WriteBinderFiles(bnd, destDir, root);
 
+        var filename = new XElement("filename", srcName);
+
         var xml =
             new XElement(Name.ToLower(),
-                new XElement("filename", srcName),
+                filename,
                 new XElement("compression", bnd.Compression.ToString()),
                 new XElement("version", bnd.Version),
                 new XElement("format", bnd.Format.ToString()),
@@ -42,6 +50,11 @@ public class WBND3 : WBinderParser
                 new XElement("bitbigendian", bnd.BitBigEndian.ToString()),
                 new XElement("unk18", bnd.Unk18.ToString()),
                 files);
+
+        if (game != null)
+        {
+            filename.AddAfterSelf(new XElement("game", game.ToString()));
+        }
 
         if (!string.IsNullOrEmpty(root))
             files.AddBeforeSelf(new XElement("root", root));

@@ -14,6 +14,7 @@ public static class ConfigMode
     {
         ToggleBnd,
         ToggleDcx,
+        ToggleParamDefaultValues,
         Context,
         Formats,
         Exit
@@ -38,6 +39,7 @@ public static class ConfigMode
                     "Enable to extract certain BND types into a custom, user-friendly structure. Disable for standard handling."
             },
             new ConfigMenuItem { Type = ConfigMenuItemType.ToggleDcx, Label = Configuration.Dcx ? "Toggle \"Only decompress DCX\" (Enabled)" : "Toggle \"Only decompress DCX\" (Disabled)" },
+            new ConfigMenuItem { Type = ConfigMenuItemType.ToggleParamDefaultValues, Label = Configuration.ParamDefaultValues ? "Toggle \"Store PARAM row default values\" (Enabled)" : "Toggle \"Store PARAM row default values\" (Disabled)" },
             new ConfigMenuItem { Type = ConfigMenuItemType.Context, Label = "Configure context menu" },
             new ConfigMenuItem { Type = ConfigMenuItemType.Formats, Label = "View available formats" },
             new ConfigMenuItem { Type = ConfigMenuItemType.Exit, Label = "Exit" },
@@ -57,6 +59,10 @@ If you want to unpack or repack a file or directory, you can either:
      ""WitchyBND"" in the context menu.
 
 Press any key to continue to the configuration screen...");
+
+        if (Configuration.Args.Passive)
+            return;
+
         PromptPlus.ReadKey();
         PromptPlus.Clear();
         while (true)
@@ -80,6 +86,14 @@ Press any key to continue to the configuration screen...");
                     break;
                 case ConfigMenuItemType.ToggleDcx:
                     Configuration.Dcx = !Configuration.Dcx;
+                    Configuration.UpdateConfiguration();
+                    PromptPlus.WriteLine("Successfully updated the configuration.");
+                    PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);
+                    PromptPlus.ReadKey();
+                    PromptPlus.Clear();
+                    break;
+                case ConfigMenuItemType.ToggleParamDefaultValues:
+                    Configuration.ParamDefaultValues = !Configuration.ParamDefaultValues;
                     Configuration.UpdateConfiguration();
                     PromptPlus.WriteLine("Successfully updated the configuration.");
                     PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);

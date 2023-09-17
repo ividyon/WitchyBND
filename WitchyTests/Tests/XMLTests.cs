@@ -1,155 +1,12 @@
-using System.Xml;
-using System.Xml.Linq;
-using WitchyBND;
-using WitchyBND.Parsers;
+﻿using WitchyBND.Parsers;
+using WitchyLib;
 
 namespace WitchyTests;
 
-public class Tests
+[TestFixture]
+public class XMLTests : TestBase
 {
-    [SetUp]
-    public void Setup()
-    {
-        Directory.Delete("./Results", true);
-        // Directory.CreateDirectory("./Results");
-        Thread.Sleep(1000);
-    }
-
-    [Test]
-    public void DCX()
-    {
-        Configuration.Dcx = true;
-
-        List<string> paths = Directory.GetFiles("./Samples/DCX", "*.dcx", SearchOption.AllDirectories).ToList();
-
-        var parser = new WDCX();
-
-        foreach (string path in paths)
-        {
-            var newPath = path.Replace(@"/Samples/", @"/Results/");
-            Directory.CreateDirectory(Path.GetDirectoryName(newPath));
-            File.Copy(path, newPath);
-
-            // Unpack
-
-            Assert.IsTrue(parser.Exists(newPath));
-            Assert.IsTrue(parser.Is(newPath));
-
-            parser.Unpack(newPath);
-            var destPath = parser.GetUnpackDestPath(newPath);
-
-            Assert.IsTrue(File.Exists(destPath));
-
-            File.Delete(newPath);
-
-            // Repack
-
-            Assert.IsTrue(parser.ExistsUnpacked(destPath));
-            Assert.IsTrue(parser.IsUnpacked(destPath));
-
-            parser.Repack(destPath);
-
-            Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath)));
-        }
-    }
-
-    [Test]
-    public void BND3()
-    {
-        List<string> paths = Directory.GetFiles("./Samples/BND3", "*bnd*", SearchOption.AllDirectories).ToList();
-
-        var parser = new WBND3();
-
-        foreach (string path in paths)
-        {
-            var newPath = path.Replace(@"/Samples/", @"/Results/");
-            var newDir = Path.GetDirectoryName(newPath);
-            Directory.CreateDirectory(newDir);
-
-            File.Copy(path, newPath);
-
-            // Unpack
-            Assert.IsTrue(parser.Exists(newPath));
-            Assert.IsTrue(parser.Is(newPath));
-
-            parser.Unpack(newPath);
-            var destPath = parser.GetUnpackDestDir(newPath);
-
-            Assert.IsTrue(Directory.Exists(destPath));
-            File.Delete(newPath);
-
-            // Repack
-            Assert.IsTrue(parser.ExistsUnpacked(destPath));
-            Assert.IsTrue(parser.IsUnpacked(destPath));
-
-            parser.Repack(destPath);
-
-            Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, Path.GetFileName(newPath))));
-
-        }
-    }
-
-    [Test]
-    public void BND4()
-    {
-        List<string> paths = Directory.GetFiles("./Samples/BND4", "*bnd*", SearchOption.AllDirectories).ToList();
-
-        var parser = new WBND4();
-
-        foreach (string path in paths)
-        {
-            var newPath = path.Replace(@"/Samples/", @"/Results/");
-            Directory.CreateDirectory(Path.GetDirectoryName(newPath));
-            File.Copy(path, newPath);
-
-            Assert.That(parser.Exists(newPath));
-            Assert.That(parser.Is(newPath));
-
-            parser.Unpack(newPath);
-            string? destPath = parser.GetUnpackDestDir(newPath);
-
-            File.Delete(newPath);
-
-            Assert.That(Directory.Exists(destPath));
-            Assert.That(parser.ExistsUnpacked(destPath));
-            Assert.That(parser.IsUnpacked(destPath));
-            parser.Repack(destPath);
-
-            Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, Path.GetFileName(newPath))));
-        }
-    }
-
-    [Test]
-    public void FFXBND()
-    {
-        List<string> paths = Directory.GetFiles("./Samples/FFXBND", "*ffxbnd*", SearchOption.AllDirectories).ToList();
-
-        var parser = new WFFXBND();
-
-        foreach (string path in paths)
-        {
-            var newPath = path.Replace(@"/Samples/", @"/Results/");
-            Directory.CreateDirectory(Path.GetDirectoryName(newPath));
-            File.Copy(path, newPath);
-
-            Assert.That(parser.Exists(newPath));
-            Assert.That(parser.Is(newPath));
-
-            parser.Unpack(newPath);
-            string? destPath = parser.GetUnpackDestDir(newPath);
-
-            File.Delete(newPath);
-
-            Assert.That(Directory.Exists(destPath));
-            Assert.That(parser.ExistsUnpacked(destPath));
-            Assert.That(parser.IsUnpacked(destPath));
-            parser.Repack(destPath);
-
-            Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, Path.GetFileName(newPath))));
-        }
-    }
-
-    [Test]
+[Test]
     public void FMG()
     {
         List<string> paths = Directory.GetFiles("./Samples/FMG", "*.fmg", SearchOption.AllDirectories).ToList();
@@ -359,45 +216,18 @@ public class Tests
         }
     }
 
-    // [Test]
-    // public void PARAM()
-    // {
-    //     List<string> paths = Directory.GetFiles("./Samples/PARAM", "*.param", SearchOption.AllDirectories).ToList();
-    //
-    //     var parser = new WPARAM();
-    //
-    //     foreach (string path in paths)
-    //     {
-    //         var newPath = path.Replace(@"/Samples/", @"/Results/");
-    //         Directory.CreateDirectory(Path.GetDirectoryName(newPath));
-    //         File.Copy(path, newPath);
-    //
-    //         Assert.That(parser.Exists(newPath));
-    //         Assert.That(parser.Is(newPath));
-    //
-    //         parser.Unpack(newPath);
-    //         string? destPath = parser.GetUnpackDestPath(newPath);
-    //
-    //         File.Delete(newPath);
-    //
-    //         Assert.That(File.Exists(destPath));
-    //         Assert.That(parser.ExistsUnpacked(destPath));
-    //         Assert.That(parser.IsUnpacked(destPath));
-    //         parser.Repack(destPath);
-    //
-    //         Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath)));
-    //     }
-    // }
-
     [Test]
-    public void TPF()
+    public void PARAM()
     {
-        List<string> paths = Directory.GetFiles("./Samples/TPF", "*.tpf", SearchOption.AllDirectories).ToList();
+        List<string> paths = Directory.GetFiles("./Samples/PARAM", "*.param", SearchOption.AllDirectories).ToList();
 
-        var parser = new WTPF();
+        var parser = new WPARAM();
 
         foreach (string path in paths)
         {
+            string fullPath = Path.GetDirectoryName(Path.GetFullPath(path)).TrimEnd(Path.DirectorySeparatorChar);
+            string gameName = fullPath.Split(Path.DirectorySeparatorChar).Last();
+            parser.Game = Enum.Parse<WBUtil.GameType>(gameName);
             var newPath = path.Replace(@"/Samples/", @"/Results/");
             Directory.CreateDirectory(Path.GetDirectoryName(newPath));
             File.Copy(path, newPath);
@@ -406,16 +236,16 @@ public class Tests
             Assert.That(parser.Is(newPath));
 
             parser.Unpack(newPath);
-            string? destPath = parser.GetUnpackDestDir(newPath);
+            string? destPath = parser.GetUnpackDestPath(newPath);
 
             File.Delete(newPath);
 
-            Assert.That(Directory.Exists(destPath));
+            Assert.That(File.Exists(destPath));
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
             parser.Repack(destPath);
 
-            Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, Path.GetFileName(newPath))));
+            Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath)));
         }
     }
 }

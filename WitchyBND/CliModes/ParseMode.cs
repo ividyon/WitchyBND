@@ -114,7 +114,8 @@ public static class ParseMode
         Parsers = new List<WFileParser>
         {
             new Parsers.WDCX(),
-            new Parsers.WRegulation(),
+            new Parsers.WBND3Regulation(),
+            new Parsers.WBND4Regulation(),
             new Parsers.WFFXBND(),
             new Parsers.WBND3(),
             new Parsers.WBND4(),

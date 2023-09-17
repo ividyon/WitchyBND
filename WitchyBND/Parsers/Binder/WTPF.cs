@@ -70,8 +70,8 @@ public class WTPF : WFolderParser
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(@"There was an error unpacking the TPF:");
-                    Console.WriteLine(e);
+                    PromptPlus.Error.WriteLine(@"There was an error unpacking the TPF:");
+                    PromptPlus.Error.WriteLine(e);
                     return;
                 }
             }
@@ -149,8 +149,8 @@ public class WTPF : WFolderParser
         {
             if (platform != TPF.TPFPlatform.PC)
             {
-                Console.WriteLine("Writing TPF failed.");
-                Console.WriteLine(
+                PromptPlus.Error.WriteLine("Writing TPF failed.");
+                PromptPlus.Error.WriteLine(
                     @"WitchyBND only officially supports repacking PC TPFs at the moment. Repacking console TPFs is not supported.");
                 return;
             }

@@ -10,6 +10,8 @@ public static class Configuration
     {
         public bool Bnd { get; set; }
         public bool Dcx { get; set; }
+
+        public bool ParamDefaultValues { get; set; }
     }
 
     public class WitchyArgValues
@@ -17,6 +19,8 @@ public static class Configuration
         public bool UnpackOnly { get; set; }
 
         public bool RepackOnly { get; set; }
+
+        public bool Passive { get; set; }
     }
 
     private static WitchyConfigValues _values;
@@ -34,6 +38,11 @@ public static class Configuration
         set => _values.Dcx = value;
     }
 
+    public static bool ParamDefaultValues
+    {
+        get => _values.ParamDefaultValues;
+        set => _values.ParamDefaultValues = value;
+    }
     static Configuration()
     {
         _values = new WitchyConfigValues();
@@ -42,6 +51,7 @@ public static class Configuration
         IConfigurationRoot config = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json")
             .AddJsonFile("appsettings.user.json", true)
+            .AddJsonFile("appsettings.override.json", true)
             .Build();
         _values = config.Get<WitchyConfigValues>();
     }

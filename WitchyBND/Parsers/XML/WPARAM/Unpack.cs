@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using PPlus;
 using WitchyFormats;
 using WitchyLib;
 
@@ -13,7 +14,7 @@ public partial class WPARAM
     public override void Unpack(string srcPath)
     {
         if (Game == null)
-            Game = WBUtil.DetermineParamdexGame(Path.GetDirectoryName(srcPath));
+            Game = WBUtil.DetermineParamdexGame(Path.GetDirectoryName(srcPath), Configuration.Args.Passive);
 
         if (Game == null)
             throw new InvalidDataException("Could not locate game type of PARAM.");
@@ -38,7 +39,7 @@ public partial class WPARAM
 
         if (!ParamdefStorage[game].ContainsKey(paramTypeToParamdef))
         {
-            Console.WriteLine($"Param type {paramTypeToParamdef} not found in {WBUtil.GameNames[game]} paramdefs.");
+            PromptPlus.Error.WriteLine($"Param type {paramTypeToParamdef} not found in {game.ToString()} paramdefs.");
             // Don't hard-fail this because it can happen, just proceed to the next file.
             return;
         }
@@ -51,7 +52,7 @@ public partial class WPARAM
         }
         catch (Exception e)
         {
-            Console.WriteLine(
+            PromptPlus.Error.WriteLine(
                 $"Could not carefully apply paramdef {paramTypeToParamdef} to {Path.GetFileName(srcPath)}.");
             // Nothing happened yet, so can just proceed to the next file.
             return;
@@ -67,7 +68,7 @@ public partial class WPARAM
         xw.WriteElementString("fileName", Path.GetFileName(srcPath));
         if (!string.IsNullOrEmpty(param.ParamType))
             xw.WriteElementString("type", param.ParamType);
-        xw.WriteElementString("game", WBUtil.GameNames[game]);
+        xw.WriteElementString("game", game.ToString());
         xw.WriteElementString("cellStyle", ((int)cellStyle).ToString());
         xw.WriteElementString("compression", param.Compression.ToString());
         xw.WriteElementString("format2D", ((byte)param.Format2D).ToString());
@@ -167,7 +168,7 @@ public partial class WPARAM
             xw.WriteAttributeString("unkc0", field.UnkC0);
 
             // Store common "default" values
-            if (defaultValues.TryGetValue(fieldName, out string value) && value != null)
+            if (Configuration.ParamDefaultValues && defaultValues.TryGetValue(fieldName, out string value) && value != null)
             {
                 xw.WriteAttributeString("defaultValue", value);
             }

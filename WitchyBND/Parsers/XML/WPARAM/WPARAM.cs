@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Xml;
+using PPlus;
 using SoulsFormats;
 using WitchyFormats;
 using WitchyLib;
@@ -14,7 +15,7 @@ namespace WitchyBND.Parsers;
 
 public partial class WPARAM : WXMLParser
 {
-    static WBUtil.GameType? Game;
+    public WBUtil.GameType? Game;
 
     private class WPARAMRow
     {
@@ -86,7 +87,7 @@ public partial class WPARAM : WXMLParser
         if (ParamdefStorage[game].Count > 0)
             return;
 
-        var gameName = WBUtil.GameNames[game];
+        var gameName = game.ToString();
         var paramdefPath = $@"{WBUtil.GetExeLocation()}\Assets\Paramdex\{gameName}\Defs";
 
         if (!Directory.Exists(paramdefPath))
@@ -133,13 +134,13 @@ public partial class WPARAM : WXMLParser
         if (NameStorage[game].ContainsKey(paramName) && NameStorage[game][paramName].Count > 0)
             return;
 
-        var gameName = WBUtil.GameNames[game];
+        var gameName = game.ToString();
         var namePath = $@"{WBUtil.GetExeLocation()}\Assets\Paramdex\{gameName}\Names\{paramName}.txt";
 
         if (!File.Exists(namePath))
         {
             // Quietly fail, it's just names after all.
-            Console.WriteLine($"Could not find names for {gameName} param {paramName} in Paramdex.");
+            PromptPlus.Error.WriteLine($"Could not find names for {gameName} param {paramName} in Paramdex.");
             // Write something to the storage so the population process isn't repeated.
             NameStorage[game][paramName] = new Dictionary<int, string>()
             {
@@ -158,7 +159,7 @@ public partial class WPARAM : WXMLParser
                 var result = nameDict.TryAdd(int.Parse(splitted[0]), splitted[1]);
                 if (result == false)
                 {
-                    Console.WriteLine($"Paramdex: Duplicate name for ID {splitted[0]}");
+                    PromptPlus.Error.WriteLine($"Paramdex: Duplicate name for ID {splitted[0]}");
                 }
             }
             catch (Exception e)

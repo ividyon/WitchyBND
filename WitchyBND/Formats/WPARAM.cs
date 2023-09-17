@@ -89,7 +89,7 @@ namespace WitchyBND
 
             if (!ParamdefStorage[game].ContainsKey(paramTypeToParamdef))
             {
-                Console.WriteLine($"Param type {paramTypeToParamdef} not found in {WBUtil.GameNames[game]} paramdefs.");
+                Console.WriteLine($"Param type {paramTypeToParamdef} not found in {game.ToString()} paramdefs.");
                 // Don't hard-fail this because it can happen, just proceed to the next file.
                 return true;
             }
@@ -117,7 +117,7 @@ namespace WitchyBND
             xw.WriteElementString("fileName", Path.GetFileName(sourceFile));
             if (!string.IsNullOrEmpty(param.ParamType))
                 xw.WriteElementString("type", param.ParamType);
-            xw.WriteElementString("game", WBUtil.GameNames[game]);
+            xw.WriteElementString("game", game.ToString());
             xw.WriteElementString("cellStyle", ((int)cellStyle).ToString());
             xw.WriteElementString("compression", param.Compression.ToString());
             xw.WriteElementString("format2D", ((byte)param.Format2D).ToString());
@@ -445,7 +445,7 @@ namespace WitchyBND
             if (ParamdefStorage[game].Count > 0)
                 return;
 
-            var gameName = WBUtil.GameNames[game];
+            var gameName = game.ToString();
             var paramdefPath = $@"{WBUtil.GetExeLocation()}\Assets\Paramdex\{gameName}\Defs";
 
             if (!Directory.Exists(paramdefPath))
@@ -491,7 +491,7 @@ namespace WitchyBND
             if (NameStorage[game].ContainsKey(paramName) && NameStorage[game][paramName].Count > 0)
                 return;
 
-            var gameName = WBUtil.GameNames[game];
+            var gameName = game.ToString();
             var namePath = $@"{WBUtil.GetExeLocation()}\Assets\Paramdex\{gameName}\Names\{paramName}.txt";
 
             if (!File.Exists(namePath))

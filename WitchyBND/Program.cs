@@ -2,6 +2,7 @@
 using SoulsFormats.AC4;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -10,6 +11,7 @@ using System.Runtime.Versioning;
 using System.Threading;
 using System.Xml;
 using CommandLine;
+using CommandLine.Text;
 using Microsoft.Extensions.Configuration;
 using PPlus;
 using WitchyBND.CliModes;
@@ -39,23 +41,31 @@ public class CliOptions
     // [Option('q', "quiet", Group = "verbosity", Default = false,
     //     HelpText = "Set output to quiet, reporting only errors.")]
     // public bool Quiet { get; set; }
+    [Option('h', "help", HelpText = "Display this help text.")]
+    public bool Help { get; set; }
 
-    [Option('u', "unpack", HelpText = "Only perform unpack processing, no repacking.")]
-    public bool UnpackOnly { get; set; }
-
-    [Option('r', "repack", HelpText = "Only perform repack processing, no unpacking.")]
-    public bool RepackOnly { get; set; }
-    [Option('b', "bnd",
-        HelpText = "Perform basic unpacking of BND instead of using special Witchy methods, where present")]
-    public bool Bnd { get; set; }
+    [Option('p', "passive", HelpText = "Will not prompt the user for any input or cause any delays. Suited for automatic execution in scripts.")]
+    public bool? Passive { get; set; }
 
     [Option('n', "dry-run",
         HelpText =
             "Perform the actions as a \"dry run\", meaning that files will not actually be written or modified.")]
-    public bool Dry { get; set; }
+    public bool? Dry { get; set; }
+
+    [Option('u', "unpack", HelpText = "Only perform unpack processing, no repacking.")]
+    public bool? UnpackOnly { get; set; }
+
+    [Option('r', "repack", HelpText = "Only perform repack processing, no unpacking.")]
+    public bool? RepackOnly { get; set; }
+    [Option('b', "bnd",
+        HelpText = "Perform basic unpacking of BND instead of using special Witchy methods, where present")]
+    public bool? Bnd { get; set; }
 
     [Option('d', "dcx", HelpText = "Simply decompress DCX files instead of unpacking their content.")]
-    public bool Dcx { get; set; }
+    public bool? Dcx { get; set; }
+
+    [Option('a', "param-default-values", HelpText = "Whether serialized PARAM will separately store default values for param rows.")]
+    public bool? ParamDefaultValues { get; set; }
 
     [Value(0, HelpText = "The paths that should be parsed by Witchy.")]
     public IEnumerable<string> Paths { get; set; }
@@ -73,20 +83,33 @@ internal static class Program
         PromptPlus.Config.DefaultCulture = new CultureInfo("en-us");
 
         Assembly assembly = Assembly.GetExecutingAssembly();
-        PromptPlus.DoubleDash($"{assembly.GetName().Name} {assembly.GetName().Version}");
 
-        var parser = new Parser(config => { config.AutoHelp = true; });
-        parser.ParseArguments<CliOptions>(args)
-            .WithParsed(opt => {
+        var parser = new Parser(with => { });
+        var parserResult = parser.ParseArguments<CliOptions>(args);
+            parserResult.WithParsed(opt => {
                 // Override configuration
-                if (opt.Dcx)
-                    Configuration.Dcx = true;
-                if (opt.Bnd)
-                    Configuration.Bnd = true;
-                if (opt.RepackOnly)
-                    Configuration.Args.RepackOnly = true;
-                if (opt.UnpackOnly)
-                    Configuration.Args.UnpackOnly = true;
+                if (opt.Help)
+                {
+                    DisplayHelp(parserResult);
+                    return;
+                }
+
+                PromptPlus.DoubleDash($"{assembly.GetName().Name} {assembly.GetName().Version}");
+
+                if (opt.Dcx != null)
+                    Configuration.Dcx = opt.Dcx.Value;
+                if (opt.Bnd != null)
+                    Configuration.Bnd = opt.Bnd.Value;
+                if (opt.ParamDefaultValues != null)
+                    Configuration.ParamDefaultValues = opt.ParamDefaultValues.Value;
+
+                // Arg-only configuration
+                if (opt.RepackOnly != null)
+                    Configuration.Args.RepackOnly = opt.RepackOnly.Value;
+                if (opt.UnpackOnly != null)
+                    Configuration.Args.UnpackOnly = opt.UnpackOnly.Value;
+                if (opt.Passive != null)
+                    Configuration.Args.Passive = opt.Passive.Value;
 
                 // Set CLI mode
                 CliMode mode = CliMode.Parse;
@@ -106,7 +129,32 @@ internal static class Program
                         throw new ArgumentOutOfRangeException();
                 }
             })
-            .WithNotParsed(errors => { });
+            .WithNotParsed(errors => { DisplayHelp(parserResult, errors); });
+    }
+
+    static void DisplayHelp<T>(ParserResult<T> result = null, IEnumerable<Error> errors = null)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var versionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+        var companyName = versionInfo.CompanyName;
+
+        if (result == null)
+            result = new Parser(with => { }).ParseArguments<T>(new[] { "--help" });
+
+        var helpText = HelpText.AutoBuild(result, h =>
+        {
+            h.AdditionalNewLineAfterOption = false;
+            h.Heading = $"{assembly.GetName().Name} v{assembly.GetName().Version}"; //change header
+            h.Copyright = $"Copyright (c) 2023 {companyName}"; //change copyright text
+            return HelpText.DefaultParsingErrorsHandler(result, h);
+        }, e => e);
+
+        PromptPlus.WriteLine(helpText);
+
+        PromptPlus.WriteLine(@$"
+{Constants.PressAnyKey}");
+
+        PromptPlus.ReadKey();
     }
 
     private static bool UnpackFile(string sourceFile, IProgress<float> progress)
@@ -363,7 +411,7 @@ internal static class Program
             {
                 if (game == null)
                 {
-                    game = WBUtil.DetermineParamdexGame(sourceDir);
+                    game = WBUtil.DetermineParamdexGame(sourceDir, Configuration.Args.Passive);
                 }
 
                 Console.WriteLine($"Unpacking PARAM: {fileName}...");

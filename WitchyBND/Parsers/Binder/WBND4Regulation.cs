@@ -10,10 +10,10 @@ using WitchyLib;
 
 namespace WitchyBND.Parsers;
 
-public class WRegulation : WBinderParser
+public class WBND4Regulation : WBinderParser
 {
 
-    public override string Name => "Regulation";
+    public override string Name => "Regulation BND4";
 
     private bool IsDS2Regulation(string path)
     {
@@ -39,11 +39,13 @@ public class WRegulation : WBinderParser
             game = WBUtil.GameType.DS2;
             return WBUtil.DecryptDS2Regulation(path);
         }
+
         if (IsDS3Regulation(path))
         {
             game = WBUtil.GameType.DS3;
             return SFUtil.DecryptDS3Regulation(path);
         }
+
         if (IsModernRegulation(path))
         {
             var binder = WBUtil.DecryptRegulationBin(path, out WBUtil.GameType myGame);
@@ -107,13 +109,16 @@ public class WRegulation : WBinderParser
         {
             case WBUtil.GameType.DS2:
             case WBUtil.GameType.DS2S:
-                PromptPlus.WriteLine(
-                    "DS2 files cannot be re-encrypted, yet, so re-packing this folder might ruin your encrypted bnd.");
-                var confirm = PromptPlus.Confirm("Proceed to repack BND (without encryption)?")
-                    .Run();
-                if (confirm.IsAborted || confirm.Value.IsNoResponseKey())
+                if (!Configuration.Args.Passive)
                 {
-                    return;
+                    PromptPlus.WriteLine(
+                        "DS2 files cannot be re-encrypted, yet, so re-packing this folder might ruin your encrypted bnd.");
+                    var confirm = PromptPlus.Confirm("Proceed to repack BND (without encryption)?")
+                        .Run();
+                    if (confirm.IsAborted || confirm.Value.IsNoResponseKey())
+                    {
+                        return;
+                    }
                 }
 
                 bndParser.Repack(srcPath);
