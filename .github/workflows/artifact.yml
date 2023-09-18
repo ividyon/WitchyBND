@@ -31,7 +31,7 @@ jobs:
       - name: Setup cache
         uses: actions/cache@v3
         with:
-          path: %userprofile%\.nuget\packages
+          path: '%userprofile%\.nuget\packages'
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
