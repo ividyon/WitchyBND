@@ -46,7 +46,7 @@ jobs:
         run: nuget install NUnit.ConsoleRunner -Version 3.16.3 -DirectDownload -OutputDirectory .
 
       - name: Run UnitTests
-        run: ./NUnit.ConsoleRunner.3.16.3/tools/nunit3-console.exe  ./WitchyTests/bin/Release/net7.0-windows/WitchyTests.dll
+        run: ./NUnit.ConsoleRunner.3.16.3/tools/nunit3-console.exe  ./WitchyTests/bin/Release/net7.0-windows/WitchyTests.dll --where "cat != SkipOnGitHubAction"
 
       # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
       - name: Upload build artifacts

@@ -1,4 +1,5 @@
-﻿using WitchyBND;
+﻿using Pose;
+using WitchyBND;
 using WitchyBND.Parsers;
 using WitchyLib;
 
@@ -305,14 +306,11 @@ public class XMLTests : TestBase
 
         var parser = new WPARAM();
 
-        foreach (string path in paths)
+        foreach (string path in paths.Select(GetCopiedPath))
         {
             string fullPath = Path.GetDirectoryName(Path.GetFullPath(path)).TrimEnd(Path.DirectorySeparatorChar);
             string gameName = fullPath.Split(Path.DirectorySeparatorChar).Last();
             parser.Game = Enum.Parse<WBUtil.GameType>(gameName);
-            var newPath = path.Replace("Samples", "Results");
-            Directory.CreateDirectory(Path.GetDirectoryName(newPath));
-            File.Copy(path, newPath);
 
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path));
@@ -331,7 +329,13 @@ public class XMLTests : TestBase
                     Configuration.Args.Location = Path.Combine(Path.GetDirectoryName(path), "Target");
                     Directory.CreateDirectory(Configuration.Args.Location);
                 }
-                parser.Unpack(path);
+
+                Shim exePathShim = Shim.Replace(() => WBUtil.GetExeLocation()).With(() => {
+                    return TestContext.CurrentContext.TestDirectory;
+                });
+                PoseContext.Isolate(() => {
+                    parser.Unpack(path);
+                }, exePathShim);
                 string? destPath = parser.GetUnpackDestPath(path);
 
                 File.Delete(path);
@@ -339,7 +343,10 @@ public class XMLTests : TestBase
                 Assert.That(File.Exists(destPath));
                 Assert.That(parser.ExistsUnpacked(destPath));
                 Assert.That(parser.IsUnpacked(destPath));
-                parser.Repack(destPath);
+
+                PoseContext.Isolate(() => {
+                    parser.Repack(destPath);
+                }, exePathShim);
 
                 var xml = WFileParser.LoadXml(destPath);
                 Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml)));

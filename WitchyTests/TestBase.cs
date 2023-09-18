@@ -53,4 +53,9 @@ public class TestBase
         File.Copy(path, newPath);
         return newPath;
     }
+
+    protected static string GetTestPath()
+    {
+        return TestContext.CurrentContext.TestDirectory;
+    }
 }

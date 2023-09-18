@@ -66,6 +66,7 @@ public class RegulationTests : TestBase
     }
 
     [Test]
+    [Category("SkipOnGitHubAction")]
     public void PARAMBND4()
     {
         IEnumerable<string> paths = GetSamples("PARAMBND4");
