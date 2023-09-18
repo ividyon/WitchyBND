@@ -62,16 +62,16 @@ jobs:
         uses: thedoctor0/zip-release@main
         with:
           type: 'zip'
-          filename: '../../../WitchyBND.zip'
-          directory: './bin/publish'
-          path: '.'
+          filename: './WitchyBND.zip'
+          directory: '.'
+          path: './bin/publish'
 
       # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
           name: 'WitchyBND-SHA${{ github.sha }}'
-          path: 'WitchyBND.zip'
+          path: './WitchyBND.zip'
 
       - name: Nexus meme 1
         run: |
@@ -85,4 +85,4 @@ jobs:
           -d "Hello world!"
           -g eldenring
           -dmfu -ddwm -dvu -dmv
-          3862 "WitchyBND.zip"
+          3862 "./WitchyBND.zip"
