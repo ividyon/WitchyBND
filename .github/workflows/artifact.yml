@@ -15,17 +15,20 @@ on:
   pull_request:
     branches: [ "main" ]
 
+env:
+  DOTNET_VERSION: '7.0.x'
+
 jobs:
   build:
     runs-on: windows-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 7.0.x
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1
@@ -36,9 +39,6 @@ jobs:
       - name: Restore nuget packages
         run: nuget restore ./WitchyBND.sln
 
-      - name: Build
-        run: msbuild ./WitchyBND/WitchyBND.csproj /p:Configuration=Release
-
       - name: Build Tests
         run: msbuild ./WitchyTests/WitchyTests.csproj /p:Configuration=Release
 
@@ -48,9 +48,15 @@ jobs:
       - name: Run UnitTests
         run: ./NUnit.ConsoleRunner.3.16.3/tools/nunit3-console.exe  ./WitchyTests/bin/Release/net7.0-windows/WitchyTests.dll --where "cat != SkipOnGitHubAction"
 
+      - name: Publish
+        run: |
+          cd WitchyBND
+          dotnet build --configuration Release --no-restore
+          dotnet publish -c Release -o ../bin/publish -r win-x64
+
       # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
           name: 'WitchyBND-SHA${{ github.sha }}'
-          path: ./bin/Release
+          path: ./bin/publish
