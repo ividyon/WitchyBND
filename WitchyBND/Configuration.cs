@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 
@@ -57,8 +58,9 @@ public static class Configuration
     {
         _values = new WitchyConfigValues();
         Args = new WitchyArgValues();
-
+        var path = AppContext.BaseDirectory;
         IConfigurationRoot config = new ConfigurationBuilder()
+            .SetBasePath(path)
             .AddJsonFile("appsettings.json")
             .AddJsonFile("appsettings.user.json", true)
             .AddJsonFile("appsettings.override.json", true)
