@@ -34,7 +34,7 @@ jobs:
         uses: Nuget/setup-nuget@v1
 
       - name: Restore nuget packages
-        run: nuget restore ./WitchyBND.Shell/WitchyBND.Shell.csproj
+        run: nuget restore ./WitchyBND.sln
 
       - name: Build
         run: msbuild ./WitchyBND/WitchyBND.csproj /p:Configuration=Release
