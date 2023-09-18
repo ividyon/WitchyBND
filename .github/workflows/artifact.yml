@@ -52,7 +52,7 @@ jobs:
         run: |
           cd WitchyBND
           dotnet build --configuration Release --no-restore
-          dotnet publish -c Release -o ../bin/publish -r win-x64 --no-self-contained
+          dotnet publish -c Release -o ../bin/publish -r win-x64 --self-contained
 
       # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
       - name: Upload build artifacts

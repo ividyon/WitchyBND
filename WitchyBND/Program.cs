@@ -7,13 +7,11 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
 using System.Threading;
-using System.Windows.Forms;
 using CommandLine;
 using CommandLine.Text;
 using PPlus;
 using WitchyBND.CliModes;
 using WitchyLib;
-using FolderBrowserDialog = FolderBrowserEx.FolderBrowserDialog;
 using PARAM = WitchyFormats.FsParam;
 
 namespace WitchyBND;
@@ -216,13 +214,12 @@ internal static class Program
                             if (Configuration.Args.Passive)
                                 throw new Exception("Cannot supply both \"passive\" and \"location\" options.");
                             PromptPlus.WriteLine("Prompting user for target directory...");
-                            var dirDialog = new FolderBrowserDialog();
-                            dirDialog.Title = "Select output folder...";
-                            DialogResult result = dirDialog.ShowDialog();
 
-                            if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(dirDialog.SelectedFolder))
+                            NativeFileDialogSharp.DialogResult dialogResult = NativeFileDialogSharp.Dialog.FolderPicker();
+
+                            if (dialogResult.IsOk && !string.IsNullOrWhiteSpace(dialogResult.Path))
                             {
-                                location = dirDialog.SelectedFolder;
+                                location = dialogResult.Path;
                                 PromptPlus.WriteLine($"Target directory set to: {location}");
                                 PromptPlus.WriteLine("");
                             }

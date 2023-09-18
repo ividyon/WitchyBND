@@ -66,14 +66,14 @@ public class ShellIntegrationMode
 
     public static void UnregisterContext()
     {
-        ComUtilities.UnregisterComObject(ComUtilities.Target.User, typeof(WitchyContextMenu));
+        Shellx.UnregisterContextMenu();
         SendTo.DeleteSendToShortcuts();
     }
 
     public static void RegisterContext()
     {
         UnregisterContext();
-        ComUtilities.RegisterComObject(ComUtilities.Target.User, typeof(WitchyContextMenu));
+        Shellx.RegisterContextMenu();
         SendTo.AddSendToShortcuts();
     }
 }
