@@ -14,19 +14,9 @@ public class TestBase
     [OneTimeSetUp]
     public void StartUp()
     {
-        Shim shim = Shim.Replace(() => Configuration.GetRoot()).With(() => {
-            Configuration.WitchyConfigValues values = new Configuration.WitchyConfigValues()
-            {
-                Bnd = false,
-                Dcx = false,
-                Recursive = false,
-                ParamDefaultValues = true,
-            };
-            var json = JsonConvert.SerializeObject(values);
-            return new ConfigurationBuilder()
-                .AddJsonStream(new MemoryStream(Encoding.ASCII.GetBytes(json)))
-                .Build();
-        });
+        Configuration.ReplaceConfig(new ConfigurationBuilder()
+            .AddJsonFile(Path.Combine(TestContext.CurrentContext.TestDirectory, "appsettings.json"))
+            .Build());
         Configuration.Args.Passive = true;
         Environment.SetEnvironmentVariable("PromptPlusOverUnitTest", "true");
         PromptPlus.Setup();
@@ -48,17 +38,17 @@ public class TestBase
     {
         if (Directory.Exists("./Results"))
             Directory.Delete("./Results", true);
-        Thread.Sleep(1000);
     }
 
-    protected static IEnumerable<string> GetSamples(string sampleDir)
+    protected static IEnumerable<string> GetSamples(string sampleDir, string pattern = "*")
     {
-        return Directory.GetFiles($"./Samples/{sampleDir}", "*", SearchOption.AllDirectories);
+        return Directory.GetFiles(Path.Combine(TestContext.CurrentContext.TestDirectory, "Samples", sampleDir), pattern,
+            SearchOption.AllDirectories);
     }
 
     protected static string GetCopiedPath(string path)
     {
-        var newPath = path.Replace(@"/Samples/", @"/Results/");
+        var newPath = path.Replace("Samples", "Results");
         Directory.CreateDirectory(Path.GetDirectoryName(newPath)!);
         File.Copy(path, newPath);
         return newPath;

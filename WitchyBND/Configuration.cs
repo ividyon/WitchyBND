@@ -55,20 +55,20 @@ public static class Configuration
         set => _values.Recursive = value;
     }
 
-    public static IConfigurationRoot GetRoot()
+    public static void ReplaceConfig(IConfigurationRoot config)
     {
-        return new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json")
-            .AddJsonFile("appsettings.user.json", true)
-            .AddJsonFile("appsettings.override.json", true)
-            .Build();
+        _values = config.Get<WitchyConfigValues>();
     }
 
     static Configuration()
     {
         _values = new WitchyConfigValues();
         Args = new WitchyArgValues();
-        IConfigurationRoot config = GetRoot();
+        IConfigurationRoot config = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json", true)
+            .AddJsonFile("appsettings.user.json", true)
+            .AddJsonFile("appsettings.override.json", true)
+            .Build();;
         _values = config.Get<WitchyConfigValues>();
     }
 

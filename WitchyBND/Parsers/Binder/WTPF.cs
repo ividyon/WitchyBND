@@ -26,7 +26,7 @@ public class WTPF : WFolderParser
     public override void Unpack(string srcPath)
     {
         var tpf = TPF.Read(srcPath);
-        var targetDir = GetUnpackDestDir(srcPath);
+        var destDir = GetUnpackDestDir(srcPath);
         var sourceName = Path.GetFileName(srcPath);
         if (!supportedPlatforms.Contains(tpf.Platform))
         {
@@ -35,7 +35,7 @@ public class WTPF : WFolderParser
                 srcPath));
         }
 
-        Directory.CreateDirectory(targetDir);
+        Directory.CreateDirectory(destDir);
 
         var textures = new XElement("textures");
 
@@ -60,11 +60,11 @@ public class WTPF : WFolderParser
 
             try
             {
-                File.WriteAllBytes($"{targetDir}\\{WBUtil.SanitizeFilename(texture.Name)}.dds", texture.Headerize());
+                File.WriteAllBytes($"{destDir}\\{WBUtil.SanitizeFilename(texture.Name)}.dds", texture.Headerize());
             }
             catch (EndOfStreamException)
             {
-                File.WriteAllBytes($"{targetDir}\\{WBUtil.SanitizeFilename(texture.Name)}.dds",
+                File.WriteAllBytes($"{destDir}\\{WBUtil.SanitizeFilename(texture.Name)}.dds",
                     SecretHeaderizer.SecretHeaderize(texture));
             }
 
@@ -84,7 +84,7 @@ public class WTPF : WFolderParser
         if (!string.IsNullOrEmpty(Configuration.Args.Location))
             filename.AddAfterSelf(new XElement("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath))));
 
-        using var xw = XmlWriter.Create($"{targetDir}\\_witchy-tpf.xml", new XmlWriterSettings
+        using var xw = XmlWriter.Create(GetBinderXmlPath(destDir), new XmlWriterSettings
         {
             Indent = true
         });
