@@ -1,4 +1,8 @@
 ﻿using System.Globalization;
+using System.Text;
+using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
+using Pose;
 using PPlus;
 using WitchyBND;
 
@@ -10,6 +14,19 @@ public class TestBase
     [OneTimeSetUp]
     public void StartUp()
     {
+        Shim shim = Shim.Replace(() => Configuration.GetRoot()).With(() => {
+            Configuration.WitchyConfigValues values = new Configuration.WitchyConfigValues()
+            {
+                Bnd = false,
+                Dcx = false,
+                Recursive = false,
+                ParamDefaultValues = true,
+            };
+            var json = JsonConvert.SerializeObject(values);
+            return new ConfigurationBuilder()
+                .AddJsonStream(new MemoryStream(Encoding.ASCII.GetBytes(json)))
+                .Build();
+        });
         Configuration.Args.Passive = true;
         Environment.SetEnvironmentVariable("PromptPlusOverUnitTest", "true");
         PromptPlus.Setup();
