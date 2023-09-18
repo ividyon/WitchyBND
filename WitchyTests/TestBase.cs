@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Pose;
 using PPlus;
 using WitchyBND;
+using WitchyLib;
 
 namespace WitchyTests;
 
@@ -18,6 +19,7 @@ public class TestBase
             .AddJsonFile(Path.Combine(TestContext.CurrentContext.TestDirectory, "appsettings.json"))
             .Build());
         Configuration.Args.Passive = true;
+        WBUtil.ExeLocation = TestContext.CurrentContext.TestDirectory;
         Environment.SetEnvironmentVariable("PromptPlusOverUnitTest", "true");
         PromptPlus.Setup();
         PromptPlus.Reset();

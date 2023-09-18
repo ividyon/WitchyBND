@@ -18,6 +18,8 @@ namespace WitchyLib;
 
 public static class WBUtil
 {
+    public static string ExeLocation;
+
     public static string FirstCharToUpper(this string input) =>
         input switch
         {
@@ -94,7 +96,7 @@ public static class WBUtil
 
     public static string GetExeLocation()
     {
-        return Path.GetDirectoryName(AppContext.BaseDirectory);
+        return ExeLocation;
     }
 
     public enum GameType
@@ -679,4 +681,8 @@ public static class WBUtil
         }
     }
 
+    static WBUtil()
+    {
+        ExeLocation = Path.GetDirectoryName(AppContext.BaseDirectory);
+    }
 }

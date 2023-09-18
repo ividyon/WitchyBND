@@ -2,6 +2,7 @@
 using WitchyBND;
 using WitchyBND.Parsers;
 using WitchyLib;
+using Is = Pose.Is;
 
 namespace WitchyTests;
 
@@ -329,13 +330,7 @@ public class XMLTests : TestBase
                     Configuration.Args.Location = Path.Combine(Path.GetDirectoryName(path), "Target");
                     Directory.CreateDirectory(Configuration.Args.Location);
                 }
-
-                Shim exePathShim = Shim.Replace(() => WBUtil.GetExeLocation()).With(() => {
-                    return TestContext.CurrentContext.TestDirectory;
-                });
-                PoseContext.Isolate(() => {
-                    parser.Unpack(path);
-                }, exePathShim);
+                parser.Unpack(path);
                 string? destPath = parser.GetUnpackDestPath(path);
 
                 File.Delete(path);
@@ -344,9 +339,7 @@ public class XMLTests : TestBase
                 Assert.That(parser.ExistsUnpacked(destPath));
                 Assert.That(parser.IsUnpacked(destPath));
 
-                PoseContext.Isolate(() => {
-                    parser.Repack(destPath);
-                }, exePathShim);
+                parser.Repack(destPath);
 
                 var xml = WFileParser.LoadXml(destPath);
                 Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml)));
