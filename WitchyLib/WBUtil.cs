@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -95,7 +94,7 @@ public static class WBUtil
 
     public static string GetExeLocation()
     {
-        return Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+        return Path.GetDirectoryName(AppContext.BaseDirectory);
     }
 
     public enum GameType
