@@ -14,8 +14,10 @@ public static class Configuration
         public bool Bnd { get; set; }
         public bool Dcx { get; set; }
         public bool ParamDefaultValues { get; set; }
-
         public bool Recursive { get; set; }
+        public ushort EndDelay { get; set; }
+
+        public bool PauseOnError { get; set; }
     }
 
     public class WitchyArgValues
@@ -50,10 +52,22 @@ public static class Configuration
         set => _values.ParamDefaultValues = value;
     }
 
+    public static bool PauseOnError
+    {
+        get => _values.PauseOnError;
+        set => _values.PauseOnError = value;
+    }
+
     public static bool Recursive
     {
         get => _values.Recursive;
         set => _values.Recursive = value;
+    }
+
+    public static ushort EndDelay
+    {
+        get => _values.EndDelay;
+        set => _values.EndDelay = value;
     }
 
     public static void ReplaceConfig(IConfigurationRoot config)

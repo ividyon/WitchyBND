@@ -16,6 +16,8 @@ public static class ConfigMode
         ToggleDcx,
         ToggleRecursive,
         ToggleParamDefaultValues,
+        ConfigureDelay,
+        TogglePauseOnError,
         Context,
         Formats,
         Help,
@@ -55,6 +57,15 @@ public static class ConfigMode
                 Type = ConfigMenuItemType.ToggleParamDefaultValues, Label = Configuration.ParamDefaultValues ? "Toggle \"Store PARAM field default values\" (Enabled)" : "Toggle \"Store PARAM field default values\" (Disabled)",
                 Description = @"Enable to separate the default values of PARAM row fields out from the rows.
 Disabling vastly increases XML output size."
+            },
+            new ConfigMenuItem
+            {
+                Type = ConfigMenuItemType.TogglePauseOnError, Label = Configuration.PauseOnError ? "Toggle \"Pause on Error\" (Enabled)" : "Toggle \"Pause on Error\" (Disabled)",
+                Description = @"Enable to pause the program and require a key press (unless in Passive mode) if it finishes with errors."
+            },
+            new ConfigMenuItem
+            {
+                Type = ConfigMenuItemType.ConfigureDelay, Label = $"Configure end delay ({Configuration.EndDelay}ms)"
             },
             new ConfigMenuItem { Type = ConfigMenuItemType.Context, Label = "Configure shell integration" },
             new ConfigMenuItem { Type = ConfigMenuItemType.Formats, Label = "View available formats" },
@@ -123,6 +134,30 @@ Press any key to continue to the configuration screen...");
                     PromptPlus.WriteLine("Successfully updated the configuration.");
                     PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);
                     PromptPlus.ReadKey();
+                    PromptPlus.Clear();
+                    break;
+                case ConfigMenuItemType.TogglePauseOnError:
+                    Configuration.PauseOnError = !Configuration.PauseOnError;
+                    Configuration.UpdateConfiguration();
+                    PromptPlus.WriteLine("Successfully updated the configuration.");
+                    PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);
+                    PromptPlus.ReadKey();
+                    PromptPlus.Clear();
+                    break;
+                case ConfigMenuItemType.ConfigureDelay:
+                    var input = PromptPlus.Input("Input new delay (in milliseconds)")
+                        .AcceptInput(char.IsNumber)
+                        .AddValidators(PromptValidators.IsTypeUInt16("Input is not within valid range"))
+                        .ValidateOnDemand()
+                        .Run();
+                    if (!input.IsAborted)
+                    {
+                        Configuration.EndDelay = Convert.ToUInt16(input.Value);
+                        Configuration.UpdateConfiguration();
+                        PromptPlus.WriteLine("Successfully updated the configuration.");
+                        PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);
+                        PromptPlus.ReadKey();
+                    }
                     PromptPlus.Clear();
                     break;
                 case ConfigMenuItemType.Context:

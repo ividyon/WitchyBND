@@ -31,4 +31,6 @@ Due to being a large rewrite, bugs are expected. Please diligently report them.
   * This behavior is optional and can be disabled in the configuration screen, or commandline.
 * Detection of file types now tries to avoid filename-based heuristics as much as possible.
 * Added support for TextureArray TPFs introduced in Armored Core VI.
+* Implemented DSMapStudio's TentativeParamType.CSV dictionary for handling Armored Core VI PARAM malfunctions.
 * Updated Paramdex to the newest version from DSMapStudio.
+* Fixed an issue where PARAMDEF versions would incorrectly overwrite PARAM versions in serialization.

@@ -120,7 +120,7 @@ public static class ParseMode
                     Program.ProcessedItems++;
                     break;
                 case false when !error && !recursive:
-                    Program.RegisterNotice(new WitchyNotice("Could not find valid parser.", path));
+                    PromptPlus.Error.WriteLine($"Could not find valid parser for {path}.");
                     break;
             }
         }

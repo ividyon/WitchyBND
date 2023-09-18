@@ -8,7 +8,6 @@ A successor to **Yabber**, the FromSoftware file format unpacker and serializer 
 WitchyBND is an unpacking/repacking/serializing software for common file formats used by FromSoftware's proprietary game engine, for games like Demon's Souls, Dark Souls 1-3, Bloodborne, Sekiro, Elden Ring and Armored Core VI. Witchy supports the formats DCX, FFXBND, BND3, BND4, BXF3, BXF4, FFXDLSE, FMG, GPARAM, LUAGNL, LUAINFO, TPF, Zero3, FXR3, MATBIN, MTD, PARAM, and MQB.
 
 # Requirements
-
 The game archives need to be unpacked with [UXM Selective Unpacker](https://github.com/Nordgaren/UXM-Selective-Unpack) to access the files that Witchy can work with.
 
 WitchyBND should run out-of-the-box on Windows versions newer than Windows 8.
@@ -17,11 +16,9 @@ WitchyBND should run out-of-the-box on Windows versions newer than Windows 8.
 * In case of unexpected issues, or if using Wine on Linux, [.NET Desktop Runtime 7.0](https://aka.ms/dotnet/7.0/windowsdesktop-runtime-win-x64.exe) may be necessary.
 
 # How to use
-
 Information on using Yabber (and therefore Witchy) is spread widely across the community. Visit the [Souls Modding Wiki](http://soulsmodding.wikidot.com/) or [?ServerName? Discord](http://discord.gg/servername) to get started.
 
 ## Shell context menu
-
 The most comfortable integration of WitchyBND is found in the context menu. Witchy does not come with an installer, so you need to briefly launch it and register the context menu with Windows yourself.
 
 * Launch WitchyBND.exe in the Witchy folder.
@@ -33,7 +30,6 @@ From now on, **WitchyBND** menu options should appear when you right-click files
 To remove the context menu options, simply use the **"Unregister WitchyBND shell integration"** option. You may need to restart Explorer afterwards.
 
 ## Basic workflow
-
 * Unpack the game files using a tool like [UXM Selective Unpacker](https://www.nexusmods.com/eldenring/mods/1651).
 * Find the files you'd like to extract.
 * Use the right-click context menu "WitchyBND" option to process the selected files.
@@ -46,11 +42,9 @@ To remove the context menu options, simply use the **"Unregister WitchyBND shell
 If you only want to remove the DCX compression from a DCX archive, use the **(DCX)** option in the context menu instead.
 
 ## Upgrading from Yabber
-
 For all intents and purposes, Witchy should be treated as a new version of Yabber. It functions mostly the same and is used for all the same purposes. All the original workflows are preserved.
 
 # Contributors
-
 * *TKGP* - SoulsFormats and Yabber
 * *katalash* - GPARAM support
 * *Nordgaren* - Yabber+ additions, Armored Core VI additions

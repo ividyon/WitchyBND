@@ -266,12 +266,9 @@ internal static class Program
                     RegisterException(e);
                 }
 
-
-                int pause = 2000;
-                if (AccruedErrors.Count > 0)
+                int pause = Configuration.EndDelay;
+                if (Configuration.PauseOnError && AccruedErrors.Count > 0)
                     pause = -1;
-                else if (AccruedNotices.Count > 0)
-                    pause = 6000;
                 var completedString = ProcessedItems == 1
                     ? "Operation completed on 1 item."
                     : $"Operation completed on {ProcessedItems} items.";
@@ -317,9 +314,8 @@ internal static class Program
 
                     if (pause > 0)
                     {
-                        PromptPlus.WriteLine($"Closing in {pause / 1000} second(s)...");
+                        PromptPlus.WriteLine($"Closing in {TimeSpan.FromMilliseconds(pause).TotalSeconds} second(s)...");
                         Thread.Sleep(pause);
-                        return;
                     }
                 }
             })
