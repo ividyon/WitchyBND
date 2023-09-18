@@ -83,10 +83,10 @@
     
     <Target Name="IncludeShell" BeforeTargets="DeleteSuperfluousFiles">
         <Message Text="Including Shell DLL..." />
-        <Copy SourceFiles="..\WitchyBND.Shell\bin\Release\WitchyBND.Shell.dll;..\WitchyBND.Shell\bin\Release\SharpShell.dll" DestinationFolder="$(PublishDir)" />
+        <Copy SourceFiles=".\bin\Release\net7.0-windows\WitchyBND.Shell.dll;.\bin\Release\net7.0-windows\SharpShell.dll" DestinationFolder="$(PublishDir)" />
     </Target>
 
-    <Target Name="DeleteSuperfluousFiles" AfterTargets="_CopyResolvedFilesToPublishAlways" BeforeTargets="Publish">
+    <Target Name="DeleteSuperfluousFiles" BeforeTargets="Publish">
         <Message Text="Removing superfluous files..."/>
         <Delete Files="$(PublishDir)nfd.lib"/>
         <Delete Files="$(PublishDir)nfd.pdb"/>

@@ -62,7 +62,7 @@ jobs:
         uses: thedoctor0/zip-release@main
         with:
           type: 'zip'
-          filename: '../../../WitchyBND-${{ github.ref_name }}.zip'
+          filename: '../../../WitchyBND.zip'
           directory: './bin/publish'
           path: '.'
 
@@ -72,17 +72,17 @@ jobs:
 
       - name: Nexus meme 2
         run: drmu nexusmods upload
-          -f "WitchyBND-${{ github.ref_name }}"
+          -f "WitchyBND-test"
           -v "${{ github.ref_name }}"
           -t Main
           -d "Hello world!"
           -g eldenring
           -dmfu -ddwm -dvu -dmv
-          3862 "../../../WitchyBND-${{ github.ref_name }}.zip"
+          3862 "../../../WitchyBND.zip"
 
       # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
           name: 'WitchyBND-SHA${{ github.sha }}'
-          path: '../../../WitchyBND-${{ github.ref_name }}.zip'
+          path: '../../../WitchyBND.zip'
