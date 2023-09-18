@@ -30,8 +30,9 @@ public class WTPF : WFolderParser
         var sourceName = Path.GetFileName(srcPath);
         if (!supportedPlatforms.Contains(tpf.Platform))
         {
-            PromptPlus.Error.WriteLine(
-                @"WitchyBND currently only supports unpacking PC, PS3 and PS4 TPFs. There may be issues with other console TPFs.");
+            Program.RegisterError(new WitchyError(
+                "WitchyBND currently only supports unpacking PC, PS3 and PS4 TPFs. There may be issues with other console TPFs.",
+                srcPath));
         }
 
         Directory.CreateDirectory(targetDir);
@@ -63,29 +64,25 @@ public class WTPF : WFolderParser
             }
             catch (EndOfStreamException)
             {
-                try
-                {
-                    File.WriteAllBytes($"{targetDir}\\{WBUtil.SanitizeFilename(texture.Name)}.dds",
-                        SecretHeaderizer.SecretHeaderize(texture));
-                }
-                catch (Exception e)
-                {
-                    PromptPlus.Error.WriteLine(@"There was an error unpacking the TPF:");
-                    PromptPlus.Error.WriteLine(e);
-                    return;
-                }
+                File.WriteAllBytes($"{targetDir}\\{WBUtil.SanitizeFilename(texture.Name)}.dds",
+                    SecretHeaderizer.SecretHeaderize(texture));
             }
+
             textures.Add(texElement);
         }
 
+        var filename = new XElement("filename", sourceName);
         var xml = new XElement(Name.ToLower(),
-            new XElement("filename", sourceName),
+            filename,
             new XElement("compression", tpf.Compression.ToString()),
             new XElement("encoding", $"0x{tpf.Encoding:X2}"),
             new XElement("flag2", $"0x{tpf.Flag2:X2}"),
             new XElement("platform", tpf.Platform.ToString()),
             textures
         );
+
+        if (!string.IsNullOrEmpty(Configuration.Args.Location))
+            filename.AddAfterSelf(new XElement("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath))));
 
         using var xw = XmlWriter.Create($"{targetDir}\\_witchy-tpf.xml", new XmlWriterSettings
         {
@@ -107,8 +104,6 @@ public class WTPF : WFolderParser
 
         Enum.TryParse(xml.Element("platform")?.Value ?? "None", out TPF.TPFPlatform platform);
         tpf.Platform = platform;
-
-        string filename = xml.Element("filename")!.Value;
 
         Enum.TryParse(xml.Element("compression")?.Value ?? "None", out DCX.Type compression);
         tpf.Compression = compression;
@@ -139,7 +134,7 @@ public class WTPF : WFolderParser
             tpf.Textures.Add(texture);
         }
 
-        string outPath = GetRepackDestPath(srcPath, filename);
+        string outPath = GetRepackDestPath(srcPath, xml);
         WBUtil.Backup(outPath);
         try
         {
@@ -147,15 +142,8 @@ public class WTPF : WFolderParser
         }
         catch (Exception e) when (e is not NoOodleFoundException)
         {
-            if (platform != TPF.TPFPlatform.PC)
-            {
-                PromptPlus.Error.WriteLine("Writing TPF failed.");
-                PromptPlus.Error.WriteLine(
-                    @"WitchyBND only officially supports repacking PC TPFs at the moment. Repacking console TPFs is not supported.");
-                return;
-            }
-
-            throw;
+            if (platform == TPF.TPFPlatform.PC) throw;
+            Program.RegisterError(new WitchyError("WitchyBND only officially supports repacking PC TPFs at the moment. Repacking console TPFs is not supported.", srcPath));
         }
     }
 }

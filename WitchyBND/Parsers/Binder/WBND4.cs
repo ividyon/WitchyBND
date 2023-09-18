@@ -52,6 +52,9 @@ public class WBND4 : WBinderParser
                 new XElement("unk05", bnd.Unk05.ToString()),
                 files);
 
+        if (!string.IsNullOrEmpty(Configuration.Args.Location))
+            filename.AddAfterSelf(new XElement("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath))));
+
         if (game != null)
         {
             filename.AddAfterSelf(new XElement("game", game.ToString()));
@@ -71,10 +74,7 @@ public class WBND4 : WBinderParser
     {
         var bnd = new BND4();
 
-        var doc = XDocument.Load(GetBinderXmlPath(srcPath));
-        if (doc.Root == null) throw new XmlException("XML has no root");
-        XElement xml = doc.Root;
-        string filename = doc.Root.Element("filename")!.Value;
+        XElement xml = LoadXml(GetBinderXmlPath(srcPath));
 
         string root = xml.Element("root")?.Value ?? "";
 
@@ -93,7 +93,7 @@ public class WBND4 : WBinderParser
         if (xml.Element("files") != null)
             ReadBinderFiles(bnd, xml.Element("files")!, srcPath, root);
 
-        var destPath = GetRepackDestPath(srcPath, filename);
+        var destPath = GetRepackDestPath(srcPath, xml);
 
         WBUtil.Backup(destPath);
         bnd.Write(destPath);

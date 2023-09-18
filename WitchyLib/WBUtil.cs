@@ -99,6 +99,10 @@ public static class WBUtil
 
     public enum GameType
     {
+        [Display(Name = "Armored Core 4")]
+        AC4,
+        [Display(Name = "Armored Core For Answer")]
+        ACFA,
         [Display(Name = "Bloodborne")]
         BB,
         [Display(Name = "Demon's Souls")]
@@ -142,7 +146,7 @@ public static class WBUtil
 
         if (gameNullable != null)
         {
-            Console.WriteLine($"Determined game for Paramdex: {gameNullable.Value.ToString()}");
+            PromptPlus.Error.WriteLine($"Determined game for Paramdex: {gameNullable.Value.ToString()}".PromptPlusEscape());
         }
         else
         {
@@ -151,7 +155,7 @@ public static class WBUtil
             {
                 var select = PromptPlus.Select<GameType>("Please select the Paramdex of one of the following games")
                     .Run();
-                if (select.IsAborted || select.Value == null)
+                if (select.IsAborted)
                 {
                     throw new Exception("Could not determine PARAM type.");
                 }
@@ -177,7 +181,7 @@ public static class WBUtil
             game = GameType.ER;
             return SFUtil.DecryptERRegulation(path);
         }
-        catch (Exception e1)
+        catch (Exception)
         {
             try
             {
@@ -590,9 +594,9 @@ public static class WBUtil
         {
             return DCX.Decompress(sourceFile, out compression);
         }
-        catch (NoOodleFoundException ex)
+        catch (NoOodleFoundException)
         {
-            string oo2corePath = WBUtil.GetOodlePath();
+            string oo2corePath = GetOodlePath();
             if (oo2corePath == null)
                 throw;
 
@@ -609,7 +613,7 @@ public static class WBUtil
         {
             DCX.Compress(data, type, path);
         }
-        catch (NoOodleFoundException ex)
+        catch (NoOodleFoundException)
         {
             string oo2corePath = WBUtil.GetOodlePath();
             if (oo2corePath == null)
@@ -627,7 +631,7 @@ public static class WBUtil
         {
             file.Write(path);
         }
-        catch (NoOodleFoundException ex)
+        catch (NoOodleFoundException)
         {
             string oo2corePath = GetOodlePath();
             if (oo2corePath == null)
@@ -645,7 +649,7 @@ public static class WBUtil
         {
             file.Write(bhdPath, bdtPath);
         }
-        catch (NoOodleFoundException ex)
+        catch (NoOodleFoundException)
         {
             string oo2corePath = GetOodlePath();
             if (oo2corePath == null)
@@ -663,7 +667,7 @@ public static class WBUtil
         {
             file.Write(bhdPath, bdtPath);
         }
-        catch (NoOodleFoundException ex)
+        catch (NoOodleFoundException)
         {
             string oo2corePath = GetOodlePath();
             if (oo2corePath == null)

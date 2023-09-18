@@ -10,8 +10,9 @@ public static class Configuration
     {
         public bool Bnd { get; set; }
         public bool Dcx { get; set; }
-
         public bool ParamDefaultValues { get; set; }
+
+        public bool Recursive { get; set; }
     }
 
     public class WitchyArgValues
@@ -21,6 +22,8 @@ public static class Configuration
         public bool RepackOnly { get; set; }
 
         public bool Passive { get; set; }
+
+        public string Location { get; set; }
     }
 
     private static WitchyConfigValues _values;
@@ -43,6 +46,13 @@ public static class Configuration
         get => _values.ParamDefaultValues;
         set => _values.ParamDefaultValues = value;
     }
+
+    public static bool Recursive
+    {
+        get => _values.Recursive;
+        set => _values.Recursive = value;
+    }
+
     static Configuration()
     {
         _values = new WitchyConfigValues();

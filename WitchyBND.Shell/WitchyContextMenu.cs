@@ -42,7 +42,7 @@ namespace WitchyBND.Shell
 
             ToolStripMenuItem witchyShortcut = new ToolStripMenuItem
             {
-                Text = "Process with WitchyBND...",
+                Text = "WitchyBND",
                 Image = Image.FromFile(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "Assets", "context.png"), true),
             };
 
@@ -66,7 +66,7 @@ namespace WitchyBND.Shell
 
             ToolStripMenuItem witchyMenu = new ToolStripMenuItem
             {
-                Text = "WitchyBND",
+                Text = "WitchyBND...",
                 Image = Image.FromFile(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "Assets", "context.png"), true),
             };
             if (tooMany)
@@ -80,43 +80,66 @@ namespace WitchyBND.Shell
             }
             else
             {
-                // ToolStripMenuItem processMenuItem = new ToolStripMenuItem
-                // {
-                //     Text = plural
-                //         ? $"Process {count} selected items..."
-                //         : $"Process {count} selected item..."
-                // };
-                // processMenuItem.Click += ProcessMenuItemOnClick;
-                // witchyMenu.DropDownItems.Add(processMenuItem);
+                ToolStripMenuItem processMenuItem = new ToolStripMenuItem
+                {
+                    Text = "Process here"
+                };
+                processMenuItem.Click += ProcessMenuItemOnClick;
+                witchyMenu.DropDownItems.Add(processMenuItem);
+
+                ToolStripMenuItem processRecursiveMenuItem = new ToolStripMenuItem
+                {
+                    Text = "Process here (Recursive)"
+                };
+                processRecursiveMenuItem.Click += ProcessRecursiveMenuItemOnClick;
+                witchyMenu.DropDownItems.Add(processRecursiveMenuItem);
 
                 if (SelectedItemPaths.Any(p => p.EndsWith(".dcx")))
                 {
                     ToolStripMenuItem processDcxMenuItem = new ToolStripMenuItem
                     {
-                        Text = plural
-                            ? $"Process {count} selected items (Decompress DCX)..."
-                            : $"Process {count} selected item (Decompress DCX)..."
+                        Text = "Process here (DCX compression)"
                     };
                     processDcxMenuItem.Click += ProcessDcxMenuItemOnClick;
                     witchyMenu.DropDownItems.Add(processDcxMenuItem);
                 }
 
-                var allFilesMenuItem = new ToolStripMenuItem
+                ToolStripMenuItem processToMenuItem = new ToolStripMenuItem
                 {
-                    Text = "Process all files in current folder..."
+                    Text = "Process to..."
                 };
-                allFilesMenuItem.Click += AllFilesMenuItemOnClick;
-                witchyMenu.DropDownItems.Add(allFilesMenuItem);
+                processToMenuItem.Click += ProcessToMenuItemOnClick;
+                witchyMenu.DropDownItems.Add(processToMenuItem);
+
+                ToolStripMenuItem processRecursiveToMenuItem = new ToolStripMenuItem
+                {
+                    Text = "Process to... (Recursive)"
+                };
+                processRecursiveToMenuItem.Click += ProcessRecursiveToMenuItemOnClick;
+                witchyMenu.DropDownItems.Add(processRecursiveToMenuItem);
+
+                if (SelectedItemPaths.Any(p => p.EndsWith(".dcx")))
+                {
+                    ToolStripMenuItem processDcxToMenuItem = new ToolStripMenuItem
+                    {
+                        Text = "Process to... (DCX compression)"
+                    };
+                    processDcxToMenuItem.Click += ProcessDcxToMenuItemOnClick;
+                    witchyMenu.DropDownItems.Add(processDcxToMenuItem);
+                }
             }
 
             menu.Items.Add(witchyMenu);
             return menu;
         }
 
-        private void AllFilesMenuItemOnClick(object sender, EventArgs e)
+        private void ProcessMenuItemOnClick(object sender, EventArgs e)
         {
-            if (SelectedItemPaths.Count() > 0)
-                Process.Start(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "WitchyBND.exe"), $"{Path.GetDirectoryName(SelectedItemPaths.First())}\\*.*");
+            Process.Start(WitchyPath, string.Join(" ", SelectedItemPaths.Select(p => $"\"{p}\"")));
+        }
+        private void ProcessToMenuItemOnClick(object sender, EventArgs e)
+        {
+            Process.Start(WitchyPath, $"--location prompt {string.Join(" ", SelectedItemPaths.Select(p => $"\"{p}\""))}");
         }
 
         private void ProcessDcxMenuItemOnClick(object sender, EventArgs e)
@@ -124,10 +147,27 @@ namespace WitchyBND.Shell
             Process.Start(WitchyPath, $"--dcx {string.Join(" ", SelectedItemPaths.Select(p => $"\"{p}\""))}");
         }
 
-        private void ProcessMenuItemOnClick(object sender, EventArgs e)
+        private void ProcessDcxToMenuItemOnClick(object sender, EventArgs e)
         {
-            Process.Start(WitchyPath, string.Join(" ", SelectedItemPaths.Select(p => $"\"{p}\"")));
+            Process.Start(WitchyPath, $"--location prompt --dcx {string.Join(" ", SelectedItemPaths.Select(p => $"\"{p}\""))}");
         }
+
+        private void ProcessRecursiveMenuItemOnClick(object sender, EventArgs e)
+        {
+            Process.Start(WitchyPath, $"--recursive {string.Join(" ", SelectedItemPaths.Select(p => $"\"{p}\""))}");
+        }
+
+        private void ProcessRecursiveToMenuItemOnClick(object sender, EventArgs e)
+        {
+            Process.Start(WitchyPath, $"--location prompt --recursive {string.Join(" ", SelectedItemPaths.Select(p => $"\"{p}\""))}");
+        }
+
+        // private void AllFilesMenuItemOnClick(object sender, EventArgs e)
+        // {
+        //     if (SelectedItemPaths.Count() > 0)
+        //         Process.Start(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "WitchyBND.exe"), $"{Path.GetDirectoryName(SelectedItemPaths.First())}\\*.*");
+        // }
+
     }
 
 }

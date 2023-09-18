@@ -39,7 +39,7 @@ public partial class WPARAM
 
         if (!ParamdefStorage[game].ContainsKey(paramTypeToParamdef))
         {
-            PromptPlus.Error.WriteLine($"Param type {paramTypeToParamdef} not found in {game.ToString()} paramdefs.");
+            Program.RegisterError( new WitchyError($"Param type {paramTypeToParamdef} not found in {game.ToString()} paramdefs.", srcPath));
             // Don't hard-fail this because it can happen, just proceed to the next file.
             return;
         }
@@ -50,10 +50,9 @@ public partial class WPARAM
         {
             param.ApplyParamdef(paramdef);
         }
-        catch (Exception e)
+        catch (Exception)
         {
-            PromptPlus.Error.WriteLine(
-                $"Could not carefully apply paramdef {paramTypeToParamdef} to {Path.GetFileName(srcPath)}.");
+            Program.RegisterError( new WitchyError($"Could not carefully apply paramdef {paramTypeToParamdef}.", srcPath));
             // Nothing happened yet, so can just proceed to the next file.
             return;
         }
@@ -68,7 +67,12 @@ public partial class WPARAM
         xw.WriteElementString("fileName", Path.GetFileName(srcPath));
         if (!string.IsNullOrEmpty(param.ParamType))
             xw.WriteElementString("type", param.ParamType);
+
         xw.WriteElementString("game", game.ToString());
+
+        if (!string.IsNullOrEmpty(Configuration.Args.Location))
+            xw.WriteElementString("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath)));
+
         xw.WriteElementString("cellStyle", ((int)cellStyle).ToString());
         xw.WriteElementString("compression", param.Compression.ToString());
         xw.WriteElementString("format2D", ((byte)param.Format2D).ToString());

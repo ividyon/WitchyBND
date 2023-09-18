@@ -16,9 +16,9 @@ public class WFXR3 : WXMLParser
         return Fxr3.Is(path);
     }
 
-    public override void Unpack(string path)
+    public override void Unpack(string srcPath)
     {
-        var fxr = Fxr3.Read(path);
+        var fxr = Fxr3.Read(srcPath);
 
         XDocument xDoc = new XDocument();
 
@@ -28,20 +28,24 @@ public class WFXR3 : WXMLParser
             thing.Serialize(xmlWriter, fxr);
         }
 
-        xDoc.Save(GetUnpackDestPath(path));
+        var destPath = GetUnpackDestPath(srcPath);
+        xDoc.Save(destPath);
+        AddLocationToXml(destPath);
     }
 
-    public override void Repack(string path)
+    public override void Repack(string srcPath)
     {
-        XDocument XML = XDocument.Load(path);
+
+        XElement xml = LoadXml(srcPath);
+
         XmlSerializer serializer = new XmlSerializer(typeof(Fxr3));
-        XmlReader xmlReader = XML.CreateReader();
+        XmlReader xmlReader = xml.CreateReader();
 
         var fxr = (Fxr3)serializer.Deserialize(xmlReader);
         if (fxr == null)
             throw new Exception();
 
-        string outPath = GetRepackDestPath(path);
+        string outPath = GetRepackDestPath(srcPath, xml);
         WBUtil.Backup(outPath);
         fxr.Write(outPath);
     }

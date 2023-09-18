@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
@@ -694,7 +695,6 @@ namespace WitchyFormats
                 br.AssertInt32(0);
                 int propertyCount2 = br.ReadInt32();
                 int fieldOffset = br.ReadInt32();
-                // Console.WriteLine($"fieldOffset: {fieldOffset}");
                 br.AssertInt32(0);
                 int section10Offset = br.ReadInt32();
                 br.AssertInt32(0);

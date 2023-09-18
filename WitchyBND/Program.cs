@@ -1,6 +1,4 @@
-﻿using SoulsFormats;
-using SoulsFormats.AC4;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -9,20 +7,14 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
 using System.Threading;
-using System.Xml;
+using System.Windows.Forms;
 using CommandLine;
 using CommandLine.Text;
-using Microsoft.Extensions.Configuration;
 using PPlus;
 using WitchyBND.CliModes;
-using WitchyFormats;
 using WitchyLib;
-using GPARAM = WitchyFormats.GPARAM;
-using MATBIN = WitchyFormats.MATBIN;
-using MTD = WitchyFormats.MTD;
-using TPF = WitchyFormats.TPF;
+using FolderBrowserDialog = FolderBrowserEx.FolderBrowserDialog;
 using PARAM = WitchyFormats.FsParam;
-using MQB = WitchyFormats.MQB;
 
 namespace WitchyBND;
 
@@ -33,6 +25,84 @@ public enum CliMode
     Config
 }
 
+public enum WitchyErrorType
+{
+    Generic,
+    NoOodle,
+    NoAccess,
+    Exception
+}
+
+public class WitchyError
+{
+    public string Message { get; set; }
+    public WitchyErrorType Type { get; set; } = WitchyErrorType.Generic;
+    public string Source { get; set; } = null;
+    public short ErrorCode { get; set; } = -1;
+
+    public WitchyError(string message)
+    {
+        Message = message;
+    }
+
+    public WitchyError(string message, string source)
+    {
+        Message = message;
+        Source = source;
+    }
+
+    public WitchyError(string message, string source, WitchyErrorType type)
+    {
+        Message = message;
+        Source = source;
+        Type = type;
+    }
+
+    public WitchyError(string message, string source, WitchyErrorType type, short errorCode)
+    {
+        Message = message;
+        Source = source;
+        Type = type;
+        ErrorCode = errorCode;
+    }
+
+    public WitchyError(string message, string source, short errorCode)
+    {
+        Message = message;
+        Source = source;
+        ErrorCode = errorCode;
+    }
+
+    public WitchyError(string message, WitchyErrorType type)
+    {
+        Message = message;
+        Type = type;
+    }
+
+    public WitchyError(string message, short errorCode)
+    {
+        Message = message;
+        ErrorCode = errorCode;
+    }
+}
+
+public class WitchyNotice
+{
+    public string Message { get; set; }
+    public string Source { get; set; } = null;
+
+    public WitchyNotice(string message)
+    {
+        Message = message;
+    }
+
+    public WitchyNotice(string message, string source)
+    {
+        Message = message;
+        Source = source;
+    }
+}
+
 public class CliOptions
 {
     // [Option('v', "verbose", Group = "verbosity", Default = false, HelpText = "Set output to verbose messages.")]
@@ -41,31 +111,42 @@ public class CliOptions
     // [Option('q', "quiet", Group = "verbosity", Default = false,
     //     HelpText = "Set output to quiet, reporting only errors.")]
     // public bool Quiet { get; set; }
-    [Option('h', "help", HelpText = "Display this help text.")]
-    public bool Help { get; set; }
 
-    [Option('p', "passive", HelpText = "Will not prompt the user for any input or cause any delays. Suited for automatic execution in scripts.")]
-    public bool? Passive { get; set; }
+    [Option('c', "recursive", HelpText = "Attempt to process files contained within binders recursively.")]
+    public bool Recursive { get; set; }
 
-    [Option('n', "dry-run",
+    [Option('p', "passive",
         HelpText =
-            "Perform the actions as a \"dry run\", meaning that files will not actually be written or modified.")]
-    public bool? Dry { get; set; }
+            "Will not prompt the user for any input or cause any delays. Suited for automatic execution in scripts.")]
+    public bool Passive { get; set; }
 
-    [Option('u', "unpack", HelpText = "Only perform unpack processing, no repacking.")]
-    public bool? UnpackOnly { get; set; }
+    [Option('l', "location",
+        HelpText = "Specifies a path to unpack binders to. Enter \"prompt\" to open a folder dialog instead.")]
+    public string Location { get; set; }
 
-    [Option('r', "repack", HelpText = "Only perform repack processing, no unpacking.")]
-    public bool? RepackOnly { get; set; }
-    [Option('b', "bnd",
-        HelpText = "Perform basic unpacking of BND instead of using special Witchy methods, where present")]
-    public bool? Bnd { get; set; }
+    [Option('a', "param-default-values",
+        HelpText =
+            "Whether serialized PARAM will separately store default values for param rows. Provide \"true\" or \"false\".")]
+    public bool? ParamDefaultValues { get; set; }
 
     [Option('d', "dcx", HelpText = "Simply decompress DCX files instead of unpacking their content.")]
-    public bool? Dcx { get; set; }
+    public bool Dcx { get; set; }
 
-    [Option('a', "param-default-values", HelpText = "Whether serialized PARAM will separately store default values for param rows.")]
-    public bool? ParamDefaultValues { get; set; }
+    [Option('b', "bnd",
+        HelpText = "Perform basic unpacking of BND instead of using special Witchy methods, where present")]
+    public bool Bnd { get; set; }
+
+    [Option('r', "repack", HelpText = "Only perform repack processing, no unpacking.", SetName = "pack")]
+    public bool RepackOnly { get; set; }
+
+    [Option('u', "unpack", HelpText = "Only perform unpack processing, no repacking.", SetName = "pack")]
+    public bool UnpackOnly { get; set; }
+
+    [Option('h', "help", HelpText = "Display this help screen.")]
+    public bool Help { get; set; }
+
+    [Option('v', "version", HelpText = "Display version information.")]
+    public bool Version { get; set; }
 
     [Value(0, HelpText = "The paths that should be parsed by Witchy.")]
     public IEnumerable<string> Paths { get; set; }
@@ -73,9 +154,11 @@ public class CliOptions
 
 internal static class Program
 {
-    private static List<string> AccruedErrors;
-    static WBUtil.GameType? game;
+    private static List<WitchyError> AccruedErrors;
+    private static List<WitchyNotice> AccruedNotices;
+    public static int ProcessedItems = 0;
 
+    [STAThread]
     static void Main(string[] args)
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
@@ -84,537 +167,267 @@ internal static class Program
 
         Assembly assembly = Assembly.GetExecutingAssembly();
 
-        var parser = new Parser(with => { });
+        var parser = new Parser(with => {
+            // with.AutoHelp = false;
+            // with.AutoVersion = false;
+        });
         var parserResult = parser.ParseArguments<CliOptions>(args);
-            parserResult.WithParsed(opt => {
-                // Override configuration
-                if (opt.Help)
+        parserResult.WithParsed(opt => {
+                try
                 {
-                    DisplayHelp(parserResult);
-                    return;
+                    // Override configuration
+                    if (opt.Help)
+                    {
+                        DisplayHelp(parserResult);
+                        return;
+                    }
+
+                    if (opt.Version)
+                    {
+                        var assembly = Assembly.GetExecutingAssembly();
+                        PromptPlus.WriteLine($"{assembly.GetName().Name} v{assembly.GetName().Version.ToString()}"
+                            .PromptPlusEscape());
+                        return;
+                    }
+
+                    PromptPlus.DoubleDash($"{assembly.GetName().Name} {assembly.GetName().Version}");
+
+                    if (opt.Dcx)
+                        Configuration.Dcx = opt.Dcx;
+                    if (opt.Bnd)
+                        Configuration.Bnd = opt.Bnd;
+                    if (opt.ParamDefaultValues != null)
+                        Configuration.ParamDefaultValues = opt.ParamDefaultValues.Value;
+                    if (opt.Recursive)
+                        Configuration.Recursive = opt.Recursive;
+
+                    // Arg-only configuration
+                    if (opt.RepackOnly)
+                        Configuration.Args.RepackOnly = opt.RepackOnly;
+                    if (opt.UnpackOnly)
+                        Configuration.Args.UnpackOnly = opt.UnpackOnly;
+                    if (opt.Passive)
+                        Configuration.Args.Passive = opt.Passive;
+                    if (!string.IsNullOrWhiteSpace(opt.Location))
+                    {
+                        string location = opt.Location;
+                        if (opt.Location == "prompt")
+                        {
+                            if (Configuration.Args.Passive)
+                                throw new Exception("Cannot supply both \"passive\" and \"location\" options.");
+                            PromptPlus.WriteLine("Prompting user for target directory...");
+                            var dirDialog = new FolderBrowserDialog();
+                            dirDialog.Title = "Select output folder...";
+                            DialogResult result = dirDialog.ShowDialog();
+
+                            if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(dirDialog.SelectedFolder))
+                            {
+                                location = dirDialog.SelectedFolder;
+                                PromptPlus.WriteLine($"Target directory set to: {location}");
+                                PromptPlus.WriteLine("");
+                            }
+                            else
+                            {
+                                return;
+                            }
+                        }
+
+                        if (!string.IsNullOrEmpty(location))
+                        {
+                            location = Path.GetFullPath(location);
+
+                            if (!Directory.Exists(location))
+                            {
+                                throw new DirectoryNotFoundException($"Location {location} is invalid.");
+                            }
+
+                            Configuration.Args.Location = location;
+                        }
+                    }
+
+                    // Set CLI mode
+                    CliMode mode = CliMode.Parse;
+                    if (!opt.Paths.Any())
+                        mode = CliMode.Config;
+
+                    // Execute
+                    switch (mode)
+                    {
+                        case CliMode.Parse:
+                            DisplayConfiguration();
+                            ParseMode.CliParseMode(opt);
+                            break;
+                        case CliMode.Config:
+                            ConfigMode.CliConfigMode(opt);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                }
+                catch (Exception e)
+                {
+                    RegisterException(e);
                 }
 
-                PromptPlus.DoubleDash($"{assembly.GetName().Name} {assembly.GetName().Version}");
 
-                if (opt.Dcx != null)
-                    Configuration.Dcx = opt.Dcx.Value;
-                if (opt.Bnd != null)
-                    Configuration.Bnd = opt.Bnd.Value;
-                if (opt.ParamDefaultValues != null)
-                    Configuration.ParamDefaultValues = opt.ParamDefaultValues.Value;
+                int pause = 2000;
+                if (AccruedErrors.Count > 0)
+                    pause = -1;
+                else if (AccruedNotices.Count > 0)
+                    pause = 6000;
+                var completedString = ProcessedItems == 1
+                    ? "Operation completed on 1 item."
+                    : $"Operation completed on {ProcessedItems} items.";
+                PromptPlus.WriteLine("");
+                PromptPlus.WriteLine(string.Concat(Enumerable.Repeat("-", completedString.Length)));
+                PromptPlus.WriteLine(completedString);
+                if (ProcessedItems > 0)
+                    if (AccruedErrors.Count > 0)
+                    {
+                        PromptPlus.WriteLine("");
+                        PromptPlus.SingleDash("Errors during operation");
+                        foreach (WitchyError error in AccruedErrors)
+                        {
+                            if (error.Source != null)
+                                PromptPlus.Error.WriteLine($"{error.Source}: {error.Message}".PromptPlusEscape());
+                            else
+                                PromptPlus.Error.WriteLine($"{error.Message}".PromptPlusEscape());
+                        }
+                    }
 
-                // Arg-only configuration
-                if (opt.RepackOnly != null)
-                    Configuration.Args.RepackOnly = opt.RepackOnly.Value;
-                if (opt.UnpackOnly != null)
-                    Configuration.Args.UnpackOnly = opt.UnpackOnly.Value;
-                if (opt.Passive != null)
-                    Configuration.Args.Passive = opt.Passive.Value;
-
-                // Set CLI mode
-                CliMode mode = CliMode.Parse;
-                if (!opt.Paths.Any())
-                    mode = CliMode.Config;
-
-                // Execute
-                switch (mode)
+                if (AccruedNotices.Count > 0)
                 {
-                    case CliMode.Parse:
-                        ParseMode.CliParseMode(opt);
-                        break;
-                    case CliMode.Config:
-                        ConfigMode.CliConfigMode(opt);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    PromptPlus.WriteLine("");
+                    PromptPlus.SingleDash("Notices during operation");
+                    foreach (WitchyNotice notice in AccruedNotices)
+                    {
+                        if (notice.Source != null)
+                            PromptPlus.Error.WriteLine($"{notice.Source}: {notice.Message}".PromptPlusEscape());
+                        else
+                            PromptPlus.Error.WriteLine($"{notice.Message}".PromptPlusEscape());
+                    }
+                }
+
+                if (!Configuration.Args.Passive)
+                {
+                    PromptPlus.WriteLine("");
+                    if (pause == -1)
+                    {
+                        PromptPlus.WriteLine(Constants.PressAnyKey);
+                        PromptPlus.ReadKey();
+                        return;
+                    }
+
+                    if (pause > 0)
+                    {
+                        PromptPlus.WriteLine($"Closing in {pause / 1000} second(s)...");
+                        Thread.Sleep(pause);
+                        return;
+                    }
                 }
             })
             .WithNotParsed(errors => { DisplayHelp(parserResult, errors); });
     }
 
-    static void DisplayHelp<T>(ParserResult<T> result = null, IEnumerable<Error> errors = null)
+    public static void DisplayConfiguration()
+    {
+        var infoTable = new Dictionary<string, string>()
+        {
+            { "Specialized BND handling", Configuration.Bnd.ToString() },
+            { "DCX decompression only", Configuration.Dcx.ToString() },
+            { "Store PARAM field default values", Configuration.ParamDefaultValues.ToString() },
+            { "Recursive binder processing", Configuration.Recursive.ToString() },
+        };
+        if (Configuration.Args.Passive)
+            infoTable.Add("Location", Configuration.Args.Passive.ToString());
+        if (!string.IsNullOrEmpty(Configuration.Args.Location))
+            infoTable.Add("Location", Configuration.Args.Location);
+        if (Configuration.Args.RepackOnly)
+            infoTable.Add("Location", Configuration.Args.RepackOnly.ToString());
+        if (Configuration.Args.UnpackOnly)
+            infoTable.Add("Location", Configuration.Args.UnpackOnly.ToString());
+
+        var longest = infoTable.Keys.MaxBy(s => s.Length).Length;
+
+        PromptPlus.SingleDash("Configuration");
+        foreach ((string name, string value) in infoTable)
+        {
+            PromptPlus.WriteLine($"{name.PadLeft(longest)}: {value}");
+        }
+        PromptPlus.WriteLine("-------------");
+        PromptPlus.WriteLine("");
+    }
+
+    public static void DisplayHelp(ParserResult<CliOptions> result = null, IEnumerable<Error> errors = null)
+    {
+        DisplayHelp<CliOptions>(result, errors);
+    }
+
+    public static void DisplayHelp<T>(ParserResult<T> result = null, IEnumerable<Error> errors = null)
     {
         var assembly = Assembly.GetExecutingAssembly();
-        var versionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+        var versionInfo = FileVersionInfo.GetVersionInfo(Path.Combine(AppContext.BaseDirectory, "WitchyBND.exe"));
         var companyName = versionInfo.CompanyName;
 
         if (result == null)
             result = new Parser(with => { }).ParseArguments<T>(new[] { "--help" });
 
-        var helpText = HelpText.AutoBuild(result, h =>
-        {
+        var helpText = HelpText.AutoBuild(result, h => {
+            h.AutoHelp = false;
+            h.AutoVersion = false;
             h.AdditionalNewLineAfterOption = false;
             h.Heading = $"{assembly.GetName().Name} v{assembly.GetName().Version}"; //change header
             h.Copyright = $"Copyright (c) 2023 {companyName}"; //change copyright text
             return HelpText.DefaultParsingErrorsHandler(result, h);
         }, e => e);
 
-        PromptPlus.WriteLine(helpText);
-
-        PromptPlus.WriteLine(@$"
-{Constants.PressAnyKey}");
-
-        PromptPlus.ReadKey();
+        PromptPlus.WriteLine(helpText.ToString().PromptPlusEscape());
     }
 
-    private static bool UnpackFile(string sourceFile, IProgress<float> progress)
+    public static void RegisterNotice(string message, bool write = true)
     {
-        string sourceDir = new FileInfo(sourceFile).Directory?.FullName;
-        string fileName = Path.GetFileName(sourceFile);
-        string targetDir = $"{sourceDir}\\{fileName.Replace('.', '-')}";
-        if (File.Exists(targetDir))
-            targetDir += "-ybr";
+        RegisterNotice(new WitchyNotice(message), write);
+    }
 
-        if (fileName.Contains("regulation.bnd.dcx") || fileName.Contains("Data0") ||
-            fileName.Contains("regulation.bin") || fileName.Contains("regulation.bnd"))
-            return UnpackRegulationFile(fileName, sourceDir, targetDir, progress);
-
-        if (DCX.Is(sourceFile))
+    public static void RegisterNotice(WitchyNotice notice, bool write = true)
+    {
+        AccruedNotices.Add(notice);
+        if (write)
         {
-            Console.WriteLine($"Decompressing DCX: {fileName}...");
-            byte[] bytes = WBUtil.TryDecompressBytes(sourceFile, out DCX.Type compression);
-
-            if (BND3.Is(bytes))
-            {
-                Console.WriteLine($"Unpacking BND3: {fileName}...");
-                using (var bnd = new BND3Reader(bytes))
-                {
-                    bnd.Compression = compression;
-                    bnd.Unpack(fileName, targetDir, progress);
-                }
-            }
-            // else if (WFFXBND.Is(bytes, fileName))
-            // {
-            //     Console.WriteLine($"Unpacking FFXBND: {fileName}...");
-            //     using (var bnd = new BND4Reader(bytes))
-            //     {
-            //         bnd.Compression = compression;
-            //         bnd.UnpackFFXBND(fileName, targetDir, progress);
-            //     }
-            // }
-            else if (BND4.Is(bytes))
-            {
-                Console.WriteLine($"Unpacking BND4: {fileName}...");
-                using (var bnd = new BND4Reader(bytes))
-                {
-                    bnd.Compression = compression;
-                    bnd.Unpack(fileName, targetDir, progress);
-                }
-            }
-            else if (FFXDLSE.Is(bytes))
-            {
-                Console.WriteLine($"Unpacking FFX: {fileName}...");
-                var ffx = FFXDLSE.Read(bytes);
-                ffx.Compression = compression;
-                ffx.Unpack(sourceFile);
-            }
-            else if (sourceFile.EndsWith(".fmg.dcx"))
-            {
-                Console.WriteLine($"Unpacking FMG: {fileName}...");
-                FMG fmg = FMG.Read(bytes);
-                fmg.Compression = compression;
-                fmg.Unpack(sourceFile);
-            }
-            else if (GPARAM.Is(bytes))
-            {
-                Console.WriteLine($"Unpacking GPARAM: {fileName}...");
-                GPARAM gparam = GPARAM.Read(bytes);
-                gparam.Compression = compression;
-                gparam.Unpack(sourceFile);
-            }
-            else if (TPF.Is(bytes))
-            {
-                Console.WriteLine($"Unpacking TPF: {fileName}...");
-                TPF tpf = TPF.Read(bytes);
-                tpf.Compression = compression;
-                tpf.Unpack(fileName, targetDir, progress);
-            }
-            else if (MSBE.Is(bytes))
-            {
-                Console.WriteLine($"Unpacking MSB: {fileName}...");
-                MSBE msb = MSBE.Read(bytes);
-                msb.Unpack(fileName, targetDir, progress);
-            }
+            if (notice.Source != null)
+                PromptPlus.Error.WriteLine($"{notice.Source}: {notice.Message}".PromptPlusEscape());
             else
-            {
-                Console.WriteLine($"File format not recognized: {fileName}");
-                return true;
-            }
+                PromptPlus.Error.WriteLine(notice.Message.PromptPlusEscape());
         }
-        else
+    }
+
+    public static void RegisterException(Exception e, string source = null)
+    {
+        RegisterError(new WitchyError($@"Unhandled exception: Please inform the author by providing the following text:
+{e.ToString().PromptPlusEscape()}
+", source, WitchyErrorType.Exception, 1));
+    }
+
+    public static void RegisterError(string message, bool write = true)
+    {
+        RegisterError(new WitchyError(message), write);
+    }
+
+    public static void RegisterError(WitchyError error, bool write = true)
+    {
+        AccruedErrors.Add(error);
+        if (write)
         {
-            if (BND3.Is(sourceFile))
-            {
-                Console.WriteLine($"Unpacking BND3: {fileName}...");
-                using (var bnd = new BND3Reader(sourceFile))
-                {
-                    bnd.Unpack(fileName, targetDir, progress);
-                }
-            }
-            // else if (WFFXBND.Is(sourceFile))
-            // {
-            //     Console.WriteLine($"Unpacking FFXBND: {fileName}...");
-            //     using (var bnd = new BND4Reader(sourceFile))
-            //     {
-            //         bnd.UnpackFFXBND(fileName, targetDir, progress);
-            //     }
-            // }
-            else if (BND4.Is(sourceFile))
-            {
-                Console.WriteLine($"Unpacking BND4: {fileName}...");
-                using (var bnd = new BND4Reader(sourceFile))
-                {
-                    bnd.Unpack(fileName, targetDir, progress);
-                }
-            }
-            else if (BXF3.IsBHD(sourceFile))
-            {
-                string bdtExtension = Path.GetExtension(fileName).Replace("bhd", "bdt");
-                string bdtFilename = $"{Path.GetFileNameWithoutExtension(fileName)}{bdtExtension}";
-                string bdtPath = $"{sourceDir}\\{bdtFilename}";
-                if (File.Exists(bdtPath))
-                {
-                    Console.WriteLine($"Unpacking BXF3: {fileName}...");
-                    using (var bxf = new BXF3Reader(sourceFile, bdtPath))
-                    {
-                        bxf.Unpack(fileName, bdtFilename, targetDir, progress);
-                    }
-                }
-                else
-                {
-                    Console.WriteLine($"BDT not found for BHD: {fileName}");
-                    return true;
-                }
-            }
-            else if (BXF4.IsBHD(sourceFile))
-            {
-                string bdtExtension = Path.GetExtension(fileName).Replace("bhd", "bdt");
-                string bdtFilename = $"{Path.GetFileNameWithoutExtension(fileName)}{bdtExtension}";
-                string bdtPath = $"{sourceDir}\\{bdtFilename}";
-                if (File.Exists(bdtPath))
-                {
-                    Console.WriteLine($"Unpacking BXF4: {fileName}...");
-                    using (var bxf = new BXF4Reader(sourceFile, bdtPath))
-                    {
-                        bxf.Unpack(fileName, bdtFilename, targetDir, progress);
-                    }
-                }
-                else
-                {
-                    Console.WriteLine($"BDT not found for BHD: {fileName}");
-                    return true;
-                }
-            }
-            else if (FFXDLSE.Is(sourceFile))
-            {
-                Console.WriteLine($"Unpacking FFX: {fileName}...");
-                var ffx = FFXDLSE.Read(sourceFile);
-                ffx.Unpack(sourceFile);
-            }
-            else if (sourceFile.EndsWith(".ffx.xml") || sourceFile.EndsWith(".ffx.dcx.xml"))
-            {
-                Console.WriteLine($"Repacking FFX: {fileName}...");
-                WFFX.Repack(sourceFile);
-            }
-            else if (sourceFile.EndsWith(".fmg"))
-            {
-                Console.WriteLine($"Unpacking FMG: {fileName}...");
-                FMG fmg = FMG.Read(sourceFile);
-                fmg.Unpack(sourceFile);
-            }
-            else if (sourceFile.EndsWith(".fmg.xml") || sourceFile.EndsWith(".fmg.dcx.xml"))
-            {
-                Console.WriteLine($"Repacking FMG: {fileName}...");
-                WFMG.Repack(sourceFile);
-            }
-            else if (GPARAM.Is(sourceFile))
-            {
-                Console.WriteLine($"Unpacking GPARAM: {fileName}...");
-                GPARAM gparam = GPARAM.Read(sourceFile);
-                gparam.Unpack(sourceFile);
-            }
-            else if (sourceFile.EndsWith(".gparam.xml") || sourceFile.EndsWith(".gparam.dcx.xml")
-                                                        || sourceFile.EndsWith(".fltparam.xml") ||
-                                                        sourceFile.EndsWith(".fltparam.dcx.xml"))
-            {
-                Console.WriteLine($"Repacking GPARAM: {fileName}...");
-                WGPARAM.Repack(sourceFile);
-            }
-            else if (sourceFile.EndsWith(".luagnl"))
-            {
-                Console.WriteLine($"Unpacking LUAGNL: {fileName}...");
-                LUAGNL gnl = LUAGNL.Read(sourceFile);
-                gnl.Unpack(sourceFile);
-            }
-            else if (sourceFile.EndsWith(".luagnl.xml"))
-            {
-                Console.WriteLine($"Repacking LUAGNL: {fileName}...");
-                WLUAGNL.Repack(sourceFile);
-            }
-            else if (LUAINFO.Is(sourceFile))
-            {
-                Console.WriteLine($"Unpacking LUAINFO: {fileName}...");
-                LUAINFO info = LUAINFO.Read(sourceFile);
-                info.Unpack(sourceFile);
-            }
-            else if (sourceFile.EndsWith(".luainfo.xml"))
-            {
-                Console.WriteLine($"Repacking LUAINFO: {fileName}...");
-                WLUAINFO.Repack(sourceFile);
-            }
-            else if (TPF.Is(sourceFile))
-            {
-                Console.WriteLine($"Unpacking TPF: {fileName}...");
-                TPF tpf = TPF.Read(sourceFile);
-                return tpf.Unpack(fileName, targetDir, progress);
-            }
-            else if (Zero3.Is(sourceFile))
-            {
-                Console.WriteLine($"Unpacking 000: {fileName}...");
-                Zero3 z3 = Zero3.Read(sourceFile);
-                z3.Unpack(targetDir);
-            }
-            else if (Fxr3.Is(sourceFile))
-            {
-                Console.WriteLine($"Unpacking FXR: {fileName}...");
-                Fxr3 fxr = Fxr3.Read(sourceFile);
-                fxr.Unpack(fileName);
-            }
-            else if (sourceFile.EndsWith(".fxr.xml"))
-            {
-                Console.WriteLine($"Repacking FXR: {fileName}...");
-                return WFXR.Repack(sourceFile);
-            }
-            else if (MATBIN.Is(sourceFile))
-            {
-                Console.WriteLine($"Unpacking MATBIN: {fileName}...");
-                MATBIN matbin = MATBIN.Read(sourceFile);
-                matbin.Unpack(fileName);
-            }
-            else if (sourceFile.EndsWith(".matbin.xml"))
-            {
-                Console.WriteLine($"Repacking MATBIN: {fileName}...");
-                return WMATBIN.Repack(sourceFile);
-            }
-            else if (MTD.Is(sourceFile))
-            {
-                Console.WriteLine($"Unpacking MTD: {fileName}...");
-                MTD mtd = MTD.Read(sourceFile);
-                mtd.Unpack(fileName);
-            }
-            else if (sourceFile.EndsWith(".mtd.xml"))
-            {
-                Console.WriteLine($"Repacking MTD: {fileName}...");
-                return WMTD.Repack(sourceFile);
-            }
-            else if (sourceFile.EndsWith(".param"))
-            {
-                if (game == null)
-                {
-                    game = WBUtil.DetermineParamdexGame(sourceDir, Configuration.Args.Passive);
-                }
-
-                Console.WriteLine($"Unpacking PARAM: {fileName}...");
-                PARAM p = PARAM.Read(sourceFile);
-
-                return p.Unpack(sourceFile, sourceDir, game.Value);
-            }
-            else if (sourceFile.EndsWith(".param.xml"))
-            {
-                Console.WriteLine($"Repacking PARAM: {fileName}...");
-                return WPARAM.Repack(sourceFile, sourceDir);
-            }
-            else if (MQB.Is(sourceFile))
-            {
-                Console.WriteLine($"Converting MQB: {fileName}...");
-                MQB mqb = MQB.Read(sourceFile);
-                mqb.Unpack(fileName, sourceDir, progress);
-            }
-            else if (sourceFile.EndsWith(".mqb.xml"))
-            {
-                Console.WriteLine($"Converting XML to MQB: {fileName}...");
-                WMQB.Repack(sourceFile);
-            }
+            if (error.Source != null)
+                PromptPlus.Error.WriteLine($"{error.Source}: {error.Message}".PromptPlusEscape());
             else
-            {
-                Console.WriteLine($"File format not recognized: {fileName}");
-                return true;
-            }
+                PromptPlus.Error.WriteLine(error.Message.PromptPlusEscape());
         }
-
-        return false;
-    }
-
-    private static bool UnpackRegulationFile(string fileName, string sourceDir, string targetDir,
-        IProgress<float> progress)
-    {
-        if (fileName.Contains("regulation.bin"))
-        {
-            string destPath = Path.Combine(sourceDir, fileName);
-            Console.WriteLine($"Regulation Bin: {fileName}...");
-            BND4 bnd = WBUtil.DecryptRegulationBin(destPath, out WBUtil.GameType game);
-            using (var bndReader = new BND4Reader(bnd.Write()))
-            {
-                bndReader.Unpack(fileName, targetDir, progress, game);
-            }
-
-            return false;
-        }
-
-        if (fileName.Contains("Data0"))
-        {
-            string destPath = Path.Combine(sourceDir, "Data0.bdt");
-            BND4 bnd = SFUtil.DecryptDS3Regulation(destPath);
-            Console.WriteLine($"Unpacking DS3 Regulation Bin: {fileName}...");
-            using (var bndReader = new BND4Reader(bnd.Write()))
-            {
-                bndReader.Unpack(fileName, targetDir, progress);
-            }
-
-            return false;
-        }
-
-        if (fileName.Contains("enc_regulation.bnd.dcx"))
-        {
-            string destPath = Path.Combine(sourceDir, fileName);
-            BND4 bnd;
-            if (!BND4.IsRead(destPath, out bnd))
-            {
-                bnd = WBUtil.DecryptDS2Regulation(destPath);
-            }
-
-            Console.WriteLine($"Unpacking DS2 Regulation Bin: {fileName}...");
-            using (var bndReader = new BND4Reader(bnd.Write()))
-            {
-                bndReader.Unpack(fileName, targetDir, progress);
-            }
-
-            return false;
-        }
-
-        throw new InvalidOperationException(
-            "This state is unreachable. Please contact Nordgaren about this regulation.bin.");
-    }
-
-    public static bool Confirm(string message)
-    {
-        ConsoleKey response;
-        do
-        {
-            Console.Write($"{message} [y/n] ");
-            response = Console.ReadKey(false).Key;
-            if (response != ConsoleKey.Enter)
-            {
-                Console.WriteLine();
-            }
-        } while (response != ConsoleKey.Y && response != ConsoleKey.N);
-
-        return (response == ConsoleKey.Y);
-    }
-
-    private static bool RepackDir(string sourceDir, IProgress<float> progress)
-    {
-        string sourceName = new DirectoryInfo(sourceDir).Name;
-        string targetDir = new DirectoryInfo(sourceDir).Parent.FullName;
-
-
-        if (File.Exists($"{sourceDir}\\_witchy-bnd3.xml") || File.Exists($"{sourceDir}\\_yabber-bnd3.xml"))
-        {
-            Console.WriteLine($"Repacking BND3: {sourceName}...");
-            WBND3.Repack(sourceDir, targetDir);
-        }
-        else if (File.Exists($"{sourceDir}\\_witchy-ffxbnd.xml"))
-        {
-            Console.WriteLine($"Repacking FFXBND: {sourceName}...");
-            WFFXBND.Repack(sourceDir, targetDir);
-        }
-        else if (File.Exists($"{sourceDir}\\_witchy-bnd4.xml") || File.Exists($"{sourceDir}\\_yabber-bnd4.xml"))
-        {
-            Console.WriteLine($"Repacking BND4: {sourceName}...");
-            WBND4.Repack(sourceDir, targetDir);
-        }
-        else if (File.Exists($"{sourceDir}\\_witchy-bxf3.xml") || File.Exists($"{sourceDir}\\_yabber-bxf3.xml"))
-        {
-            Console.WriteLine($"Repacking BXF3: {sourceName}...");
-            WBXF3.Repack(sourceDir, targetDir);
-        }
-        else if (File.Exists($"{sourceDir}\\_witchy-bxf4.xml") || File.Exists($"{sourceDir}\\_yabber-bxf4.xml"))
-        {
-            Console.WriteLine($"Repacking BXF4: {sourceName}...");
-            WBXF4.Repack(sourceDir, targetDir);
-        }
-        else if (File.Exists($"{sourceDir}\\_witchy-tpf.xml") || File.Exists($"{sourceDir}\\_yabber-tpf.xml"))
-        {
-            Console.WriteLine($"Repacking TPF: {sourceName}...");
-            return WTPF.Repack(sourceDir, targetDir);
-        }
-        else
-        {
-            Console.WriteLine($"WitchyBND or Yabber XML not found in: {sourceName}");
-            return true;
-        }
-
-        if (sourceName.Contains("regulation-bnd-dcx") || sourceName.Contains("Data0") ||
-            sourceName.Contains("regulation-bin"))
-            return ReEncryptRegulationFile(sourceName, sourceDir, targetDir);
-
-        return false;
-    }
-
-    private static bool ReEncryptRegulationFile(string sourceName, string sourceDir, string targetDir)
-    {
-        XmlDocument xml = new XmlDocument();
-
-        xml.Load(WBUtil.GetXmlPath("bnd4", sourceDir));
-
-        string filename = xml.SelectSingleNode("bnd4/filename").InnerText;
-        string regFile = $"{targetDir}\\{filename}";
-
-        if (filename.Contains("regulation.bin"))
-        {
-            Enum.TryParse(xml.SelectSingleNode("bnd4/game")?.InnerText ?? "ER", out WBUtil.GameType game);
-            BND4 bnd = BND4.Read(regFile);
-            WBUtil.EncryptRegulationBin(regFile, game, bnd);
-            return false;
-        }
-
-        if (filename.Contains("Data0"))
-        {
-            BND4 bnd = BND4.Read(regFile);
-            SFUtil.EncryptDS3Regulation(regFile, bnd);
-            return false;
-        }
-
-        if (filename.Contains("enc_regulation.bnd.dcx"))
-        {
-            if (!Confirm(
-                    "DS2 files cannot be re-encrypted, yet, so re-packing this folder might ruin your encrypted bnd."))
-            {
-                return false;
-            }
-
-            string destPath = Path.Combine(sourceDir, sourceName);
-            BND4
-                bnd = BND4.Read(
-                    destPath); //WBUtil.DecryptDS2Regulation(destPath); I will have to investigate re-encrypting DS2 regulation later.
-            Console.WriteLine($"Repacking DS2 Regulation Bin: {sourceName}...");
-            WBND4.Repack(sourceDir, targetDir);
-            return false;
-        }
-
-        throw new InvalidOperationException(
-            "This state is unreachable. If your regulation bin is named correctly, please contact Nordgaren about this regulation.bin. Otherwise" +
-            "make sure your bnd contains the original bnd name.");
-    }
-
-    public static void WriteError(string message)
-    {
-        PromptPlus.Error.WriteLine(message);
-        AccruedErrors.Add(message);
     }
 
     static Program()
     {
-        AccruedErrors = new List<string>();
+        AccruedErrors = new List<WitchyError>();
+        AccruedNotices = new List<WitchyNotice>();
     }
 }

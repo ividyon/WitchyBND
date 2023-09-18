@@ -24,8 +24,10 @@ public class WFFXBND : WBinderParser
         var srcName = Path.GetFileName(srcPath);
         var bnd = BND4.Read(srcPath);
         Directory.CreateDirectory(destDir);
+
+        var filename = new XElement("filename", srcName);
         var xml = new XElement("ffxbnd",
-            new XElement("filename", srcName),
+            filename,
             new XElement("compression", bnd.Compression.ToString()),
             new XElement("version", bnd.Version),
             new XElement("format", bnd.Format.ToString()),
@@ -36,6 +38,9 @@ public class WFFXBND : WBinderParser
             new XElement("unk04", bnd.Unk04.ToString()),
             new XElement("unk05", bnd.Unk05.ToString())
         );
+
+        if (!string.IsNullOrEmpty(Configuration.Args.Location))
+            filename.AddAfterSelf(new XElement("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath))));
 
         using var xw = XmlWriter.Create($"{destDir}\\{GetBinderXmlFilename()}", new XmlWriterSettings
         {
@@ -94,11 +99,7 @@ public class WFFXBND : WBinderParser
     {
         var bnd = new BND4();
 
-        var doc = XDocument.Load(GetBinderXmlPath(srcPath));
-        if (doc.Root == null) throw new XmlException("XML has no root");
-        XElement xml = doc.Root;
-
-        string filename = xml.Element("filename")!.Value;
+        XElement xml = LoadXml(GetBinderXmlPath(srcPath));
 
         Enum.TryParse(xml.Element("compression")?.Value ?? "None", out DCX.Type compression);
         bnd.Compression = compression;
@@ -225,7 +226,7 @@ public class WFFXBND : WBinderParser
             bnd.Files.Add(file);
         }
 
-        string destPath = GetRepackDestPath(srcPath, filename);
+        string destPath = GetRepackDestPath(srcPath, xml);
         WBUtil.Backup(destPath);
         bnd.Write(destPath);
     }

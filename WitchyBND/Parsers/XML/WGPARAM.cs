@@ -6,6 +6,7 @@ using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Xml;
+using System.Xml.Linq;
 using SoulsFormats;
 using WitchyLib;
 using GPARAM = WitchyFormats.GPARAM;
@@ -23,52 +24,56 @@ public class WGPARAM : WXMLParser
     public override void Unpack(string srcPath)
     {
       GPARAM gparam = GPARAM.Read(srcPath);
-      string str = srcPath + ".xml";
-      if (File.Exists(str))
-        WBUtil.Backup(str);
-      using (XmlWriter xmlWriter1 = XmlWriter.Create(str, new XmlWriterSettings()
+      string destPath = GetUnpackDestPath(srcPath);
+      if (File.Exists(destPath))
+        WBUtil.Backup(destPath);
+      using (XmlWriter xw = XmlWriter.Create(destPath, new XmlWriterSettings()
       {
         Indent = true
       }))
       {
-        xmlWriter1.WriteStartElement(Name.ToLower());
-        xmlWriter1.WriteElementString("compression", gparam.Compression.ToString());
-        xmlWriter1.WriteElementString("game", gparam.Game.ToString());
-        xmlWriter1.WriteElementString("unk0D", gparam.Unk0D.ToString());
-        xmlWriter1.WriteElementString("unk14", gparam.Unk14.ToString());
-        xmlWriter1.WriteElementString("unk40", gparam.Unk40.ToString());
+        xw.WriteStartElement(Name.ToLower());
+        xw.WriteElementString("filename", Path.GetFileName(srcPath));
+        if (!string.IsNullOrEmpty(Configuration.Args.Location))
+          xw.WriteElementString("sourcePath", Path.GetDirectoryName(srcPath));
+
+        xw.WriteElementString("compression", gparam.Compression.ToString());
+        xw.WriteElementString("game", gparam.Game.ToString());
+        xw.WriteElementString("unk0D", gparam.Unk0D.ToString());
+        xw.WriteElementString("unk14", gparam.Unk14.ToString());
+        xw.WriteElementString("unk40", gparam.Unk40.ToString());
         if (gparam.Game == GPARAM.GPGame.Sekiro)
-          xmlWriter1.WriteElementString("unk50", gparam.Unk50.ToString());
-        xmlWriter1.WriteStartElement("groups");
+          xw.WriteElementString("unk50", gparam.Unk50.ToString());
+        xw.WriteStartElement("groups");
         foreach (GPARAM.Group group in gparam.Groups)
         {
-          xmlWriter1.WriteStartElement("group");
-          xmlWriter1.WriteAttributeString("name1", group.Name1);
+          xw.WriteStartElement("group");
+          xw.WriteAttributeString("name1", group.Name1);
           if (gparam.Game == GPARAM.GPGame.DarkSouls3 || gparam.Game == GPARAM.GPGame.Sekiro)
           {
-            xmlWriter1.WriteAttributeString("name2", group.Name2);
-            xmlWriter1.WriteStartElement("comments");
+            xw.WriteAttributeString("name2", group.Name2);
+            xw.WriteStartElement("comments");
             foreach (string comment in group.Comments)
-              xmlWriter1.WriteElementString("comment", comment);
-            xmlWriter1.WriteEndElement();
+              xw.WriteElementString("comment", comment);
+            xw.WriteEndElement();
           }
           foreach (GPARAM.Param obj in group.Params)
           {
-            xmlWriter1.WriteStartElement("param");
-            xmlWriter1.WriteAttributeString("name1", obj.Name1);
+            xw.WriteStartElement("param");
+            xw.WriteAttributeString("name1", obj.Name1);
             if (gparam.Game == GPARAM.GPGame.DarkSouls3 || gparam.Game == GPARAM.GPGame.Sekiro)
-              xmlWriter1.WriteAttributeString("name2", obj.Name2);
-            xmlWriter1.WriteAttributeString("type", obj.Type.ToString());
+              xw.WriteAttributeString("name2", obj.Name2);
+            xw.WriteAttributeString("type", obj.Type.ToString());
             for (int index = 0; index < obj.Values.Count; ++index)
             {
-              xmlWriter1.WriteStartElement("value");
-              xmlWriter1.WriteAttributeString("id", obj.ValueIDs[index].ToString());
+              xw.WriteStartElement("value");
+              xw.WriteAttributeString("id", obj.ValueIDs[index].ToString());
               if (gparam.Game == GPARAM.GPGame.Sekiro)
-                xmlWriter1.WriteAttributeString("timeOfDay", obj.TimeOfDay[index].ToString());
+                xw.WriteAttributeString("timeOfDay", obj.TimeOfDay[index].ToString());
               if (obj.Type == GPARAM.ParamType.Float2)
               {
                 Vector2 vector2 = (Vector2) obj.Values[index];
-                XmlWriter xmlWriter2 = xmlWriter1;
+                XmlWriter xmlWriter2 = xw;
                 DefaultInterpolatedStringHandler interpolatedStringHandler = new DefaultInterpolatedStringHandler(1, 2);
                 interpolatedStringHandler.AppendFormatted<float>(vector2.X);
                 interpolatedStringHandler.AppendLiteral(" ");
@@ -79,7 +84,7 @@ public class WGPARAM : WXMLParser
               else if (obj.Type == GPARAM.ParamType.Float3)
               {
                 Vector3 vector3 = (Vector3) obj.Values[index];
-                XmlWriter xmlWriter3 = xmlWriter1;
+                XmlWriter xmlWriter3 = xw;
                 DefaultInterpolatedStringHandler interpolatedStringHandler = new DefaultInterpolatedStringHandler(2, 3);
                 interpolatedStringHandler.AppendFormatted<float>(vector3.X);
                 interpolatedStringHandler.AppendLiteral(" ");
@@ -92,7 +97,7 @@ public class WGPARAM : WXMLParser
               else if (obj.Type == GPARAM.ParamType.Float4)
               {
                 Vector4 vector4 = (Vector4) obj.Values[index];
-                XmlWriter xmlWriter4 = xmlWriter1;
+                XmlWriter xmlWriter4 = xw;
                 DefaultInterpolatedStringHandler interpolatedStringHandler = new DefaultInterpolatedStringHandler(3, 4);
                 interpolatedStringHandler.AppendFormatted<float>(vector4.X);
                 interpolatedStringHandler.AppendLiteral(" ");
@@ -107,7 +112,7 @@ public class WGPARAM : WXMLParser
               else if (obj.Type == GPARAM.ParamType.Byte4)
               {
                 byte[] numArray = (byte[]) obj.Values[index];
-                XmlWriter xmlWriter5 = xmlWriter1;
+                XmlWriter xmlWriter5 = xw;
                 DefaultInterpolatedStringHandler interpolatedStringHandler = new DefaultInterpolatedStringHandler(3, 4);
                 interpolatedStringHandler.AppendFormatted<byte>(numArray[0], "X2");
                 interpolatedStringHandler.AppendLiteral(" ");
@@ -120,29 +125,29 @@ public class WGPARAM : WXMLParser
                 xmlWriter5.WriteString(stringAndClear);
               }
               else
-                xmlWriter1.WriteString(obj.Values[index].ToString());
-              xmlWriter1.WriteEndElement();
+                xw.WriteString(obj.Values[index].ToString());
+              xw.WriteEndElement();
             }
-            xmlWriter1.WriteEndElement();
+            xw.WriteEndElement();
           }
-          xmlWriter1.WriteEndElement();
+          xw.WriteEndElement();
         }
-        xmlWriter1.WriteEndElement();
-        xmlWriter1.WriteStartElement("unk3s");
+        xw.WriteEndElement();
+        xw.WriteStartElement("unk3s");
         foreach (GPARAM.Unk3 unk3 in gparam.Unk3s)
         {
-          xmlWriter1.WriteStartElement("unk3");
-          xmlWriter1.WriteAttributeString("group_index", unk3.GroupIndex.ToString());
+          xw.WriteStartElement("unk3");
+          xw.WriteAttributeString("group_index", unk3.GroupIndex.ToString());
           if (gparam.Game == GPARAM.GPGame.Sekiro)
-            xmlWriter1.WriteAttributeString("unk0C", unk3.Unk0C.ToString());
+            xw.WriteAttributeString("unk0C", unk3.Unk0C.ToString());
           foreach (int valueId in unk3.ValueIDs)
-            xmlWriter1.WriteElementString("value_id", valueId.ToString());
-          xmlWriter1.WriteEndElement();
+            xw.WriteElementString("value_id", valueId.ToString());
+          xw.WriteEndElement();
         }
-        xmlWriter1.WriteEndElement();
-        xmlWriter1.WriteElementString("unk_block_2", string.Join(" ", gparam.UnkBlock2.Select((Func<byte, string>) (b => b.ToString("X2")))));
-        xmlWriter1.WriteEndElement();
-        xmlWriter1.Close();
+        xw.WriteEndElement();
+        xw.WriteElementString("unk_block_2", string.Join(" ", gparam.UnkBlock2.Select((Func<byte, string>) (b => b.ToString("X2")))));
+        xw.WriteEndElement();
+        xw.Close();
       }
     }
 
@@ -256,15 +261,9 @@ public class WGPARAM : WXMLParser
       {
         ' '
       }, StringSplitOptions.RemoveEmptyEntries).Select((Func<string, byte>) (s => Convert.ToByte(s, 16))).ToArray();
-      string path;
-      if (srcPath.EndsWith(".gparam.xml"))
-        path = srcPath.Replace(".gparam.xml", ".gparam");
-      else if (srcPath.EndsWith(".gparam.dcx.xml"))
-        path = srcPath.Replace(".gparam.dcx.xml", ".gparam.dcx");
-      else if (srcPath.EndsWith(".fltparam.xml"))
-        path = srcPath.Replace(".fltparam.xml", ".fltparam");
-      else
-        path = srcPath.EndsWith(".fltparam.dcx.xml") ? srcPath.Replace(".fltparam.dcx.xml", ".fltparam.dcx") : throw new InvalidOperationException("Invalid GPARAM xml filename.");
+
+      XElement xml = LoadXml(srcPath);
+      string path = GetRepackDestPath(srcPath, xml);
       if (File.Exists(path))
         WBUtil.Backup(path);
       gparam.TryWriteSoulsFile(path);

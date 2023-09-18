@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
+using WitchyBND.CliModes;
 using WitchyLib;
 
 namespace WitchyBND.Parsers;
@@ -23,12 +25,37 @@ public abstract class WFileParser
     public abstract bool IsUnpacked(string path);
     public abstract void Unpack(string srcPath);
     public abstract void Repack(string srcPath);
+
+    public static void AddLocationToXml(string path)
+    {
+        XElement xml = LoadXml(path);
+        AddLocationToXml(path, xml);
+    }
+
+    public static XElement RemoveLocationFromXml(XElement xml)
+    {
+        xml.Element("filename")?.Remove();
+        xml.Element("sourcePath")?.Remove();
+        return xml;
+    }
+    public static void AddLocationToXml(string path, XElement xml)
+    {
+        if (!string.IsNullOrEmpty(Configuration.Args.Location))
+            xml.AddFirst("sourcePath", Path.GetDirectoryName(path));
+        xml.AddFirst("filename", Path.GetFileName(path));
+    }
+    public static XElement LoadXml(string path)
+    {
+        XDocument doc = XDocument.Load(path);
+        if (doc.Root == null) throw new XmlException("XML has no root");
+        return doc.Root;
+    }
 }
 
 public abstract class WSingleFileParser : WFileParser
 {
     public abstract string GetUnpackDestPath(string srcPath);
-    public abstract string GetRepackDestPath(string srcPath);
+    public abstract string GetRepackDestPath(string srcPath, XElement xml);
     public override bool Exists(string path)
     {
         return File.Exists(path);
@@ -46,15 +73,30 @@ public abstract class WFolderParser : WFileParser
     public virtual string GetUnpackDestDir(string srcPath)
     {
         string sourceDir = new FileInfo(srcPath).Directory?.FullName;
+        if (!string.IsNullOrEmpty(Configuration.Args.Location))
+            sourceDir = Configuration.Args.Location;
         string fileName = Path.GetFileName(srcPath);
         return $"{sourceDir}\\{fileName.Replace('.', '-')}";
     }
 
-    public virtual string GetRepackDestPath(string srcDirPath, string destFileName)
+    public virtual string GetRepackDestPath(string srcDirPath, XElement xml, string filenameElement = "filename")
     {
+        var filename = xml.Element(filenameElement)?.Value;
+        if (filename == null)
+            throw new InvalidDataException("XML does not have filename.");
+        var sourceDir = xml.Element("sourcePath")?.Value;
+        if (sourceDir != null)
+        {
+            return $"{sourceDir}\\{filename}";
+        }
         string targetDir = new DirectoryInfo(srcDirPath).Parent?.FullName;
-        return $"{targetDir}\\{destFileName}";
+        return $"{targetDir}\\{filename}";
     }
+    // public virtual string GetRepackDestPath(string srcDirPath, string destFileName)
+    // {
+    //     string targetDir = new DirectoryInfo(srcDirPath).Parent?.FullName;
+    //     return $"{targetDir}\\{destFileName}";
+    // }
 
     public override bool Exists(string path)
     {
@@ -108,6 +150,7 @@ public abstract class WBinderParser : WFolderParser
     {
         var files = new XElement("files");
         var pathCounts = new Dictionary<string, int>();
+        var resultingPaths = new List<string>();
 
         for (int i = 0; i < bnd.Files.Count; i++)
         {
@@ -154,9 +197,15 @@ public abstract class WBinderParser : WFolderParser
             string destPath =
                 $@"{destDirPath}\{Path.GetDirectoryName(path)}\{Path.GetFileNameWithoutExtension(path)}{suffix}{Path.GetExtension(path)}";
             Directory.CreateDirectory(Path.GetDirectoryName(destPath));
+            resultingPaths.Add(destPath);
             File.WriteAllBytes(destPath, bytes);
 
             files.Add(fileElement);
+        }
+
+        if (Configuration.Recursive)
+        {
+            ParseMode.ParseFiles(resultingPaths, true);
         }
 
         return files;
@@ -207,11 +256,18 @@ public abstract class WXMLParser : WSingleFileParser
 
     public override string GetUnpackDestPath(string srcPath)
     {
-        return $"{srcPath}.xml";
+        if (string.IsNullOrEmpty(Configuration.Args.Location))
+            return $"{srcPath}.xml";
+        return $"{Configuration.Args.Location}\\{Path.GetFileName(srcPath)}.xml";
     }
 
-    public override string GetRepackDestPath(string srcPath)
+    public override string GetRepackDestPath(string srcPath, XElement xml)
     {
+        var path = xml.Element("sourcePath")?.Value;
+        if (path != null)
+        {
+            return $"{path}\\{Path.GetFileName(srcPath).Replace(".xml", "")}";
+        }
         return srcPath.Replace(".xml", "");
     }
 

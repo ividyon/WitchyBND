@@ -20,11 +20,30 @@ public class TestBase
         PromptPlus.Config.DefaultCulture = new CultureInfo("en-us");
     }
 
+    [SetUp]
+    public void Init()
+    {
+        Configuration.Args.Location = null;
+    }
+
     [TearDown]
     public void Cleanup()
     {
         if (Directory.Exists("./Results"))
             Directory.Delete("./Results", true);
         Thread.Sleep(1000);
+    }
+
+    protected static IEnumerable<string> GetSamples(string sampleDir)
+    {
+        return Directory.GetFiles($"./Samples/{sampleDir}", "*", SearchOption.AllDirectories);
+    }
+
+    protected static string GetCopiedPath(string path)
+    {
+        var newPath = path.Replace(@"/Samples/", @"/Results/");
+        Directory.CreateDirectory(Path.GetDirectoryName(newPath)!);
+        File.Copy(path, newPath);
+        return newPath;
     }
 }

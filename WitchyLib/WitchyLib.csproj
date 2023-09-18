@@ -6,17 +6,26 @@
         <Title>WitchyLib</Title>
         <AssemblyTitle>WitchyLib</AssemblyTitle>
     </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+        <DebugType>embedded</DebugType>
+        <PlatformTarget>x64</PlatformTarget>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+        <DebugType>embedded</DebugType>
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+        <PlatformTarget>x64</PlatformTarget>
+        <PublishSingleFile>True</PublishSingleFile>
+    </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="BouncyCastle.Cryptography" Version="2.2.0" />
         <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
         <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="8.0.0-preview.2.23128.3" />
-        <PackageReference Include="PromptPlus" Version="4.0.4" />
+        <PackageReference Include="PromptPlus" Version="4.0.5" />
         <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
         <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.4.355802">
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.Windows.Compatibility" Version="7.0.0" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\SoulsFormats\SoulsFormats.csproj" />

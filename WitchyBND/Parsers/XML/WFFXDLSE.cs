@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using System.Xml;
+using System.Xml.Linq;
 using SoulsFormats;
 using WitchyLib;
 
@@ -15,8 +17,10 @@ public class WFFXDLSE : WXMLParser
     public override void Unpack(string srcPath)
     {
         FFXDLSE ffx = FFXDLSE.Read(srcPath);
-        using (var sw = new StreamWriter($"{srcPath}.xml"))
+        var xmlPath = GetUnpackDestPath(srcPath);
+        using (var sw = new StreamWriter(xmlPath))
             ffx.XmlSerialize(sw);
+        AddLocationToXml(srcPath);
     }
 
     public override void Repack(string srcPath)
@@ -25,7 +29,9 @@ public class WFFXDLSE : WXMLParser
         using (var sr = new StreamReader(srcPath))
             ffx = FFXDLSE.XmlDeserialize(sr);
 
-        string outPath = srcPath.Replace(".ffx.xml", ".ffx").Replace(".ffx.dcx.xml", ".ffx.dcx");
+        XElement xml = LoadXml(srcPath);
+
+        string outPath = GetRepackDestPath(srcPath, xml);
         WBUtil.Backup(outPath);
         ffx.TryWriteSoulsFile(outPath);
     }

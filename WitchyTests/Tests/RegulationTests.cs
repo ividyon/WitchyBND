@@ -1,4 +1,9 @@
-﻿using WitchyBND.Parsers;
+﻿using System.Xml;
+using System.Xml.Linq;
+using WitchyBND;
+using WitchyBND.Parsers;
+using WitchyLib;
+using static System.Enum;
 
 namespace WitchyTests;
 
@@ -7,62 +12,108 @@ public class RegulationTests : TestBase
 {
 
     [Test]
-    public void BND3Regulation()
+    public void PARAMBND3()
     {
-        List<string> paths = Directory.GetFiles("./Samples/BND3Regulation", "*", SearchOption.AllDirectories).ToList();
+        IEnumerable<string> paths = GetSamples("PARAMBND3");
 
-        var parser = new WBND3Regulation();
+        var parser = new WPARAMBND3();
 
-        foreach (string path in paths)
+        foreach (string path in paths.Select(GetCopiedPath))
         {
-            var newPath = path.Replace(@"/Samples/", @"/Results/");
-            Directory.CreateDirectory(Path.GetDirectoryName(newPath));
-            File.Copy(path, newPath);
+            Assert.That(parser.Exists(path));
+            Assert.That(parser.Is(path));
 
-            Assert.That(parser.Exists(newPath));
-            Assert.That(parser.Is(newPath));
+            byte[] backup = {};
+            for (int i = 0; i < 2; i++)
+            {
+                if (i == 0)
+                {
+                    backup = File.ReadAllBytes(path);
+                    Configuration.Args.Location = null;
+                }
+                else
+                {
+                    File.WriteAllBytes(path, backup);
+                    Configuration.Args.Location = Path.Combine(Path.GetDirectoryName(path), "Target");
+                    Directory.CreateDirectory(Configuration.Args.Location);
+                }
+                parser.Unpack(path);
+                string? destPath = parser.GetUnpackDestDir(path);
 
-            parser.Unpack(newPath);
-            string? destPath = parser.GetUnpackDestDir(newPath);
 
-            File.Delete(newPath);
+                var xml = WFileParser.LoadXml(parser.GetBinderXmlPath(destPath, "bnd3"));
+                XElement? gameElement = xml.Element("game");
+                if (gameElement == null) throw new XmlException("XML has no Game element");
+                TryParse(xml.Element("game")!.Value, out WBUtil.GameType game);
 
-            Assert.That(Directory.Exists(destPath));
-            Assert.That(parser.ExistsUnpacked(destPath));
-            Assert.That(parser.IsUnpacked(destPath));
-            parser.Repack(destPath);
+                string fullPath = Path.GetDirectoryName(Path.GetFullPath(path))!.TrimEnd(Path.DirectorySeparatorChar);
+                string gameName = fullPath.Split(Path.DirectorySeparatorChar).Last();
+                var dirGame = Parse<WBUtil.GameType>(gameName);
 
-            Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, Path.GetFileName(newPath))));
+                Assert.That(game, Is.EqualTo(dirGame),
+                    $"XML game {game.ToString()} was not directory game {dirGame.ToString()}");
+
+                File.Delete(path);
+
+                Assert.That(Directory.Exists(destPath));
+                Assert.That(parser.ExistsUnpacked(destPath));
+                Assert.That(parser.IsUnpacked(destPath));
+                parser.Repack(destPath);
+
+                Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)), Is.True);
+            }
         }
     }
 
     [Test]
-    public void BND4Regulation()
+    public void PARAMBND4()
     {
-        List<string> paths = Directory.GetFiles("./Samples/BND4Regulation", "*", SearchOption.AllDirectories).ToList();
+        IEnumerable<string> paths = GetSamples("PARAMBND4");
 
-        var parser = new WBND4Regulation();
+        var parser = new WPARAMBND4();
 
-        foreach (string path in paths)
+        foreach (string path in paths.Select(GetCopiedPath))
         {
-            var newPath = path.Replace(@"/Samples/", @"/Results/");
-            Directory.CreateDirectory(Path.GetDirectoryName(newPath));
-            File.Copy(path, newPath);
+            Assert.That(parser.Exists(path));
+            Assert.That(parser.Is(path));
+            byte[] backup = {};
+            for (int i = 0; i < 2; i++)
+            {
+                if (i == 0)
+                {
+                    backup = File.ReadAllBytes(path);
+                    Configuration.Args.Location = null;
+                }
+                else
+                {
+                    File.WriteAllBytes(path, backup);
+                    Configuration.Args.Location = Path.Combine(Path.GetDirectoryName(path), "Target");
+                    Directory.CreateDirectory(Configuration.Args.Location);
+                }
+                parser.Unpack(path);
+                string? destPath = parser.GetUnpackDestDir(path);
 
-            Assert.That(parser.Exists(newPath));
-            Assert.That(parser.Is(newPath));
+                var xml = WFileParser.LoadXml(parser.GetBinderXmlPath(destPath, "bnd4"));
+                XElement? gameElement = xml.Element("game");
+                if (gameElement == null) throw new XmlException("XML has no Game element");
+                TryParse(xml.Element("game")!.Value, out WBUtil.GameType game);
 
-            parser.Unpack(newPath);
-            string? destPath = parser.GetUnpackDestDir(newPath);
+                string fullPath = Path.GetDirectoryName(Path.GetFullPath(path))!.TrimEnd(Path.DirectorySeparatorChar);
+                string gameName = fullPath.Split(Path.DirectorySeparatorChar).Last();
+                var dirGame = Parse<WBUtil.GameType>(gameName);
 
-            File.Delete(newPath);
+                Assert.That(game, Is.EqualTo(dirGame),
+                    $"XML game {game.ToString()} was not directory game {dirGame.ToString()}");
 
-            Assert.That(Directory.Exists(destPath));
-            Assert.That(parser.ExistsUnpacked(destPath));
-            Assert.That(parser.IsUnpacked(destPath));
-            parser.Repack(destPath);
+                File.Delete(path);
 
-            Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, Path.GetFileName(newPath))));
+                Assert.That(Directory.Exists(destPath));
+                Assert.That(parser.ExistsUnpacked(destPath));
+                Assert.That(parser.IsUnpacked(destPath));
+                parser.Repack(destPath);
+
+                Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)), Is.True);
+            }
         }
     }
 }

@@ -14,9 +14,11 @@ public static class ConfigMode
     {
         ToggleBnd,
         ToggleDcx,
+        ToggleRecursive,
         ToggleParamDefaultValues,
         Context,
         Formats,
+        Help,
         Exit
     }
 
@@ -38,17 +40,32 @@ public static class ConfigMode
                 Description =
                     "Enable to extract certain BND types into a custom, user-friendly structure. Disable for standard handling."
             },
-            new ConfigMenuItem { Type = ConfigMenuItemType.ToggleDcx, Label = Configuration.Dcx ? "Toggle \"Only decompress DCX\" (Enabled)" : "Toggle \"Only decompress DCX\" (Disabled)" },
-            new ConfigMenuItem { Type = ConfigMenuItemType.ToggleParamDefaultValues, Label = Configuration.ParamDefaultValues ? "Toggle \"Store PARAM row default values\" (Enabled)" : "Toggle \"Store PARAM row default values\" (Disabled)" },
-            new ConfigMenuItem { Type = ConfigMenuItemType.Context, Label = "Configure context menu" },
+            new ConfigMenuItem
+            {
+                Type = ConfigMenuItemType.ToggleDcx, Label = Configuration.Dcx ? "Toggle \"DCX decompression only\" (Enabled)" : "Toggle \"DCX decompression only\" (Disabled)",
+                Description = "Enable to exclusively decompress DCX files and leave their contents intact."
+            },
+            new ConfigMenuItem
+            {
+                Type = ConfigMenuItemType.ToggleRecursive, Label = Configuration.Recursive ? "Toggle \"Recursive binder processing\" (Enabled)" : "Toggle \"Recursive binder processing\" (Disabled)",
+                Description = "Enable to recursively attempt to process any file inside unpacked binders. Very performance-intensive."
+            },
+            new ConfigMenuItem
+            {
+                Type = ConfigMenuItemType.ToggleParamDefaultValues, Label = Configuration.ParamDefaultValues ? "Toggle \"Store PARAM field default values\" (Enabled)" : "Toggle \"Store PARAM field default values\" (Disabled)",
+                Description = @"Enable to separate the default values of PARAM row fields out from the rows.
+Disabling vastly increases XML output size."
+            },
+            new ConfigMenuItem { Type = ConfigMenuItemType.Context, Label = "Configure shell integration" },
             new ConfigMenuItem { Type = ConfigMenuItemType.Formats, Label = "View available formats" },
+            new ConfigMenuItem { Type = ConfigMenuItemType.Help, Label = "View help screen" },
             new ConfigMenuItem { Type = ConfigMenuItemType.Exit, Label = "Exit" },
         };
     }
 
     public static void CliConfigMode(CliOptions opt)
     {
-        PromptPlus.WriteLine($@"Welcome to WitchyBND!
+        PromptPlus.WriteLine(@"Welcome to WitchyBND!
 
 Launching the program without specifying any files will open this configuration screen.
 If you want to unpack or repack a file or directory, you can either:
@@ -92,6 +109,14 @@ Press any key to continue to the configuration screen...");
                     PromptPlus.ReadKey();
                     PromptPlus.Clear();
                     break;
+                case ConfigMenuItemType.ToggleRecursive:
+                    Configuration.Recursive = !Configuration.Recursive;
+                    Configuration.UpdateConfiguration();
+                    PromptPlus.WriteLine("Successfully updated the configuration.");
+                    PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);
+                    PromptPlus.ReadKey();
+                    PromptPlus.Clear();
+                    break;
                 case ConfigMenuItemType.ToggleParamDefaultValues:
                     Configuration.ParamDefaultValues = !Configuration.ParamDefaultValues;
                     Configuration.UpdateConfiguration();
@@ -101,13 +126,19 @@ Press any key to continue to the configuration screen...");
                     PromptPlus.Clear();
                     break;
                 case ConfigMenuItemType.Context:
-                    ContextMode.CliContextMode(opt);
+                    ShellIntegrationMode.CliShellIntegrationMode(opt);
                     PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);
                     PromptPlus.Clear();
                     break;
                 case ConfigMenuItemType.Formats:
                     PromptPlus.WriteLine(
                         $"WitchyBND supports the following formats:\n{string.Join(", ", ParseMode.Parsers.Select(p => p.Name))}");
+                    PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);
+                    PromptPlus.ReadKey();
+                    PromptPlus.Clear();
+                    break;
+                case ConfigMenuItemType.Help:
+                    Program.DisplayHelp();
                     PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);
                     PromptPlus.ReadKey();
                     PromptPlus.Clear();

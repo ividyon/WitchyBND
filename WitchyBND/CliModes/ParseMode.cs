@@ -17,94 +17,111 @@ public static class ParseMode
     {
         var paths = opt.Paths.ToList();
 
-        bool error = false;
-        int errorcode = 0;
-
         paths = WBUtil.ProcessPathGlobs(paths);
 
-        try
-        {
-            ParseFiles(paths);
-        }
-        catch (DllNotFoundException ex) when (ex.Message.Contains("oo2core_6_win64.dll"))
-        {
-            PromptPlus.Error.WriteLine(
-                "ERROR: oo2core_6_win64.dll not found. Please copy this library from the game directory to WitchyBND's directory.");
-            errorcode = 3;
-            error = true;
-        }
-        catch (UnauthorizedAccessException e)
-        {
-            Console.Error.WriteLine("WitchyBND had no access to perform this action; perhaps try Administrator Mode?\n");
-            throw;
-        }
-        catch (FriendlyException ex)
-        {
-            Console.WriteLine();
-            Console.Error.WriteLine($"ERROR: {ex.Message}");
-            errorcode = 4;
-            error = true;
-        }
-
-        if (!error) return;
-
-        Console.WriteLine("One or more errors were encountered and displayed above.\nPress any key to exit.");
-        Console.ReadKey();
-        Environment.Exit(errorcode);
+        ParseFiles(paths);
     }
 
-    private static void ParseFiles(List<string> paths)
+    public static void ParseFiles(List<string> paths, bool recursive = false)
     {
         foreach (string path in paths)
         {
             if (!File.Exists(path) && !Directory.Exists(path))
             {
-                Program.WriteError($"Path {path} does not exist.");
+                if (!recursive)
+                    Program.RegisterNotice($"Path {path} does not exist.");
                 continue;
             }
 
             string fileName = Path.GetFileName(path);
             var parsed = false;
+            var error = false;
 
             foreach (WFileParser parser in Parsers)
             {
-                if ((Configuration.Args.UnpackOnly || !Configuration.Args.RepackOnly) && parser.Exists(path) && parser.Is(path))
+                try
                 {
-                    switch (parser.Verb)
+                    if ((Configuration.Args.UnpackOnly || !Configuration.Args.RepackOnly) && parser.Exists(path) &&
+                        parser.Is(path))
                     {
-                        case WFileParserVerb.Serialize:
-                            PromptPlus.WriteLine($"Serializing {parser.Name}: {fileName}...");
-                            break;
-                        case WFileParserVerb.Unpack:
-                        default:
-                            PromptPlus.WriteLine($"Unpacking {parser.Name}: {fileName}...");
-                            break;
+                        switch (parser.Verb)
+                        {
+                            case WFileParserVerb.Serialize:
+                                PromptPlus.WriteLine(recursive
+                                    ? $"Serializing {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
+                                    : $"Serializing {parser.Name}: {fileName.PromptPlusEscape()}...");
+                                break;
+                            case WFileParserVerb.Unpack:
+                            default:
+                                PromptPlus.WriteLine(recursive
+                                    ? $"Unpacking {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
+                                    : $"Unpacking {parser.Name}: {fileName.PromptPlusEscape()}...");
+                                break;
+                        }
+
+                        parser.Unpack(path);
+                        parsed = true;
+                        break;
                     }
-                    parser.Unpack(path);
-                    parsed = true;
-                    break;
+
+                    if ((Configuration.Args.RepackOnly || !Configuration.Args.UnpackOnly) &&
+                        parser.ExistsUnpacked(path) && parser.IsUnpacked(path))
+                    {
+                        switch (parser.Verb)
+                        {
+                            case WFileParserVerb.Serialize:
+                                PromptPlus.WriteLine(recursive
+                                    ? $"Deserializing {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
+                                    : $"Deserializing {parser.Name}: {fileName.PromptPlusEscape()}...");
+                                break;
+                            case WFileParserVerb.Unpack:
+                            default:
+                                PromptPlus.WriteLine(recursive
+                                    ? $"Repacking {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
+                                    : $"Repacking {parser.Name}: {fileName.PromptPlusEscape()}...");
+                                break;
+                        }
+
+                        parser.Repack(path);
+                        parsed = true;
+                        break;
+                    }
                 }
-                if ((Configuration.Args.RepackOnly || !Configuration.Args.UnpackOnly) && parser.ExistsUnpacked(path) && parser.IsUnpacked(path))
+                catch (DllNotFoundException e) when (e.Message.Contains("oo2core_6_win64.dll") ||
+                                                     e.Message.Contains("oo2core_8_win64.dll"))
                 {
-                    switch (parser.Verb)
-                    {
-                        case WFileParserVerb.Serialize:
-                            PromptPlus.WriteLine($"Deserializing {parser.Name}: {fileName}...");
-                            break;
-                        case WFileParserVerb.Unpack:
-                        default:
-                            PromptPlus.WriteLine($"Repacking {parser.Name}: {fileName}...");
-                            break;
-                    }
-                    parser.Repack(path);
-                    parsed = true;
-                    break;
+                    Program.RegisterError(new WitchyError(
+                        "ERROR: Oodle DLL not found. Please copy oo2core_6_win64.dll or oo2core_8_win64.dll from the game directory to WitchyBND's directory.",
+                        WitchyErrorType.NoOodle));
+                    error = true;
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    Program.RegisterError(new WitchyError(
+                        "WitchyBND had no access to perform this action; perhaps try Administrator Mode?", path,
+                        WitchyErrorType.NoAccess));
+                    error = true;
+                }
+                catch (FriendlyException e)
+                {
+                    Program.RegisterError(new WitchyError(e.Message, path));
+                    error = true;
+                }
+                catch (Exception e)
+                {
+                    Program.RegisterException(e, path);
+                    error = true;
                 }
             }
 
-            if (!parsed)
+            switch (parsed)
             {
-                Program.WriteError($"Could not find valid parser for \"{path}\"");
+                case true:
+                    Program.ProcessedItems++;
+                    break;
+                case false when !error && !recursive:
+                    Program.RegisterNotice(new WitchyNotice("Could not find valid parser.", path));
+                    break;
             }
         }
     }
@@ -114,8 +131,8 @@ public static class ParseMode
         Parsers = new List<WFileParser>
         {
             new Parsers.WDCX(),
-            new Parsers.WBND3Regulation(),
-            new Parsers.WBND4Regulation(),
+            new Parsers.WPARAMBND3(),
+            new Parsers.WPARAMBND4(),
             new Parsers.WFFXBND(),
             new Parsers.WBND3(),
             new Parsers.WBND4(),
@@ -132,6 +149,7 @@ public static class ParseMode
             new Parsers.WMATBIN(),
             new Parsers.WMTD(),
             new Parsers.WPARAM(),
+            new Parsers.WMQB(),
             //MSBE
             //TAE
         };

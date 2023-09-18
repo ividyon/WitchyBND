@@ -57,15 +57,19 @@ public class WBXF3 : WBinderParser
 
         XElement files = WriteBinderFiles(bxf, destDir, root);
 
+        var bdtFilename = new XElement("bdt_filename", bdtName);
         var xml =
             new XElement(Name.ToLower(),
                 new XElement("bhd_filename", bhdName),
-                new XElement("bdt_filename", bdtName),
+                bdtFilename,
                 new XElement("version", bxf.Version),
                 new XElement("format", bxf.Format.ToString()),
                 new XElement("bigendian", bxf.BigEndian.ToString()),
                 new XElement("bitbigendian", bxf.BitBigEndian.ToString()),
                 files);
+
+        if (!string.IsNullOrEmpty(Configuration.Args.Location))
+            bdtFilename.AddAfterSelf(new XElement("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath))));
 
         if (!string.IsNullOrEmpty(root))
             files.AddBeforeSelf(new XElement("root", root));
@@ -82,11 +86,7 @@ public class WBXF3 : WBinderParser
     {
         var bxf = new BXF3();
 
-        var doc = XDocument.Load(GetBinderXmlPath(srcPath));
-        if (doc.Root == null) throw new XmlException("XML has no root");
-        XElement xml = doc.Root;
-        string bhdName = doc.Root.Element("bhd_filename")!.Value;
-        string bdtName = doc.Root.Element("bdt_filename")!.Value;
+        XElement xml = LoadXml(GetBinderXmlPath(srcPath));
 
         string root = xml.Element("root")?.Value ?? "";
 
@@ -98,8 +98,8 @@ public class WBXF3 : WBinderParser
         if (xml.Element("files") != null)
             ReadBinderFiles(bxf, xml.Element("files")!, srcPath, root);
 
-        var bhdDestPath = GetRepackDestPath(srcPath, bhdName);
-        var bdtDestPath = GetRepackDestPath(srcPath, bdtName);
+        var bhdDestPath = GetRepackDestPath(srcPath, xml, "bhd_filename");
+        var bdtDestPath = GetRepackDestPath(srcPath, xml, "bdt_filename");
         WBUtil.Backup(bhdDestPath);
         WBUtil.Backup(bdtDestPath);
         bxf.Write(bhdDestPath, bdtDestPath);

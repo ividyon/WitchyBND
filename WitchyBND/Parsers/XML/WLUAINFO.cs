@@ -1,5 +1,7 @@
 ﻿using System;
+using System.IO;
 using System.Xml;
+using System.Xml.Linq;
 using SoulsFormats;
 using WitchyLib;
 
@@ -20,8 +22,13 @@ public class WLUAINFO : WXMLParser
         LUAINFO info = LUAINFO.Read(srcPath);
         XmlWriterSettings xws = new XmlWriterSettings();
         xws.Indent = true;
-        XmlWriter xw = XmlWriter.Create($"{srcPath}.xml", xws);
+        XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath), xws);
         xw.WriteStartElement("luainfo");
+
+        xw.WriteElementString("filename", Path.GetFileName(srcPath));
+        if (!string.IsNullOrEmpty(Configuration.Args.Location))
+            xw.WriteElementString("sourcePath", Path.GetDirectoryName(srcPath));
+
         xw.WriteElementString("bigendian", info.BigEndian.ToString());
         xw.WriteElementString("longformat", info.LongFormat.ToString());
         xw.WriteStartElement("goals");
@@ -46,22 +53,21 @@ public class WLUAINFO : WXMLParser
     public override void Repack(string srcPath)
     {
         LUAINFO info = new LUAINFO();
-        XmlDocument xml = new XmlDocument();
-        xml.Load(srcPath);
-        info.BigEndian = bool.Parse(xml.SelectSingleNode("luainfo/bigendian").InnerText);
-        info.LongFormat = bool.Parse(xml.SelectSingleNode("luainfo/longformat").InnerText);
+        XElement xml = LoadXml(srcPath);
+        info.BigEndian = bool.Parse(xml.Element("bigendian").Value);
+        info.LongFormat = bool.Parse(xml.Element("longformat").Value);
 
-        foreach (XmlNode node in xml.SelectNodes("luainfo/goals/goal"))
+        foreach (XElement node in xml.Element("goals")?.Elements("goal") ?? new XElement[]{})
         {
-            int id = int.Parse(node.Attributes["id"].InnerText);
-            string name = node.SelectSingleNode("name").InnerText;
-            bool battleInterrupt = bool.Parse(node.SelectSingleNode("battleinterrupt").InnerText);
-            bool logicInterrupt = bool.Parse(node.SelectSingleNode("logicinterrupt").InnerText);
-            string logicInterruptName = node.SelectSingleNode("logicinterruptname")?.InnerText;
+            int id = int.Parse(node.Attribute("id").Value);
+            string name = node.Element("name").Value;
+            bool battleInterrupt = bool.Parse(node.Element("battleinterrupt").Value);
+            bool logicInterrupt = bool.Parse(node.Element("logicinterrupt").Value);
+            string logicInterruptName = node.Element("logicinterruptname")?.Value;
             info.Goals.Add(new LUAINFO.Goal(id, name, battleInterrupt, logicInterrupt, logicInterruptName));
         }
 
-        string outPath = GetRepackDestPath(srcPath);
+        string outPath = GetRepackDestPath(srcPath, xml);
         WBUtil.Backup(outPath);
         info.TryWriteSoulsFile(outPath);
     }

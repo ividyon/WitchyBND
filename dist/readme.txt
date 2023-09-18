@@ -64,7 +64,6 @@ TPF
 Extension: .tpf
 A DDS texture container, used in all games. Console versions are not supported.
 
-
 --| Contributors
 
 TKGP - Basically everything

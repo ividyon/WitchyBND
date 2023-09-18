@@ -139,13 +139,13 @@ public partial class WPARAM : WXMLParser
 
         if (!File.Exists(namePath))
         {
-            // Quietly fail, it's just names after all.
-            PromptPlus.Error.WriteLine($"Could not find names for {gameName} param {paramName} in Paramdex.");
             // Write something to the storage so the population process isn't repeated.
             NameStorage[game][paramName] = new Dictionary<int, string>()
             {
                 { -9000, string.Empty }
             };
+            // Quietly fail, it's just names after all.
+            Program.RegisterNotice($"Could not find names for {gameName} param {paramName} in Paramdex.");
             return;
         }
 
@@ -159,7 +159,7 @@ public partial class WPARAM : WXMLParser
                 var result = nameDict.TryAdd(int.Parse(splitted[0]), splitted[1]);
                 if (result == false)
                 {
-                    PromptPlus.Error.WriteLine($"Paramdex: Duplicate name for ID {splitted[0]}");
+                    Program.RegisterNotice($"Paramdex: Duplicate name for ID {splitted[0]}");
                 }
             }
             catch (Exception e)

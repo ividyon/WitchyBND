@@ -32,17 +32,13 @@ public class WMTD : WXMLParser
         if (File.Exists(targetFile)) WBUtil.Backup(targetFile);
 
         WBUtil.XmlSerialize<MTD>(mtd, targetFile);
+        AddLocationToXml(targetFile);
     }
 
     public override void Repack(string srcPath)
     {
-        string outPath;
-        if (srcPath.EndsWith(".mtd.xml"))
-            outPath = srcPath.Replace(".mtd.xml", ".mtd");
-        else if (srcPath.EndsWith(".mtd.dcx.xml"))
-            outPath = srcPath.Replace(".mtd.dcx.xml", ".mtd.dcx");
-        else
-            throw new InvalidOperationException("Invalid MTD xml filename.");
+        XElement xml = LoadXml(srcPath);
+        string outPath = GetRepackDestPath(srcPath, xml);
 
         if (File.Exists(outPath)) WBUtil.Backup(outPath);
 

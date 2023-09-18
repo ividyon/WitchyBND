@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+using System.Xml.Linq;
 using SoulsFormats;
 using WitchyLib;
 
@@ -21,8 +23,13 @@ public class WLUAGNL : WXMLParser
         LUAGNL gnl = LUAGNL.Read(srcPath);
         XmlWriterSettings xws = new XmlWriterSettings();
         xws.Indent = true;
-        XmlWriter xw = XmlWriter.Create($"{srcPath}.xml", xws);
+        XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath), xws);
         xw.WriteStartElement("luagnl");
+
+        xw.WriteElementString("filename", Path.GetFileName(srcPath));
+        if (!string.IsNullOrEmpty(Configuration.Args.Location))
+            xw.WriteElementString("sourcePath", Path.GetDirectoryName(srcPath));
+
         xw.WriteElementString("bigendian", gnl.BigEndian.ToString());
         xw.WriteElementString("longformat", gnl.LongFormat.ToString());
         xw.WriteStartElement("globals");
@@ -40,17 +47,16 @@ public class WLUAGNL : WXMLParser
     public override void Repack(string srcPath)
     {
         LUAGNL gnl = new LUAGNL();
-        XmlDocument xml = new XmlDocument();
-        xml.Load(srcPath);
-        gnl.BigEndian = bool.Parse(xml.SelectSingleNode("luagnl/bigendian").InnerText);
-        gnl.LongFormat = bool.Parse(xml.SelectSingleNode("luagnl/longformat").InnerText);
+        XElement xml = LoadXml(srcPath);
+        gnl.BigEndian = bool.Parse(xml.Element("bigendian").Value);
+        gnl.LongFormat = bool.Parse(xml.Element("longformat").Value);
 
-        foreach (XmlNode node in xml.SelectNodes("luagnl/globals/global"))
+        foreach (XElement node in xml.Element("globals")?.Elements("global") ?? new XElement[]{})
         {
-            gnl.Globals.Add(node.InnerText);
+            gnl.Globals.Add(node.Value);
         }
 
-        string outPath = GetRepackDestPath(srcPath);
+        string outPath = GetRepackDestPath(srcPath, xml);
         WBUtil.Backup(outPath);
         gnl.TryWriteSoulsFile(outPath);
     }

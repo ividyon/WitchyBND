@@ -32,17 +32,13 @@ public class WMATBIN : WXMLParser
         if (File.Exists(targetFile)) WBUtil.Backup(targetFile);
 
         WBUtil.XmlSerialize<MATBIN>(matbin, targetFile);
+        AddLocationToXml(targetFile);
     }
 
     public override void Repack(string srcPath)
     {
-        string outPath;
-        if (srcPath.EndsWith(".matbin.xml"))
-            outPath = srcPath.Replace(".matbin.xml", ".matbin");
-        else if (srcPath.EndsWith(".matbin.dcx.xml"))
-            outPath = srcPath.Replace(".matbin.dcx.xml", ".matbin.dcx");
-        else
-            throw new InvalidOperationException("Invalid MATBIN xml filename.");
+        XElement xml = LoadXml(srcPath);
+        string outPath = GetRepackDestPath(srcPath, xml);
 
         if (File.Exists(outPath)) WBUtil.Backup(outPath);
 

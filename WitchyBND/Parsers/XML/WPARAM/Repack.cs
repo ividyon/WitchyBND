@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using System.Xml.Linq;
 using SoulsFormats;
 using WitchyFormats;
 using WitchyLib;
@@ -145,7 +146,8 @@ public partial class WPARAM
                 param.AddRow(row);
             }
 
-            string outPath = GetRepackDestPath(srcPath);
+            XElement xelem = LoadXml(srcPath);
+            string outPath = GetRepackDestPath(srcPath, xelem);
             WBUtil.Backup(outPath);
             param.TryWriteSoulsFile(outPath);
     }

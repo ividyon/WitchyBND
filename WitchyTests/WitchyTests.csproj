@@ -30,7 +30,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Samples\BND3Regulation\" />
+      <Folder Include="Samples\PARAMBND3\" />
     </ItemGroup>
 
 </Project>

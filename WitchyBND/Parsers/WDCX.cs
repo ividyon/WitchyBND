@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Xml;
+using System.Xml.Linq;
 using SoulsFormats;
 using WitchyLib;
 
@@ -28,8 +29,11 @@ public class WDCX : WSingleFileParser
         return $"{srcPath}.undcx";
     }
 
-    public override string GetRepackDestPath(string srcPath)
+    public override string GetRepackDestPath(string srcPath, XElement xml)
     {
+        var path = xml.Element("sourcePath")?.Value;
+        if (path != null)
+            srcPath = $"{path}\\{Path.GetFileName(srcPath)}";
         if (srcPath.EndsWith(".undcx"))
             return srcPath.Substring(0, srcPath.Length - 6);
         return srcPath + ".dcx";
@@ -69,6 +73,11 @@ public class WDCX : WSingleFileParser
         XmlWriter xw = XmlWriter.Create(GetXmlPath(srcPath), xws);
 
         xw.WriteStartElement("dcx");
+
+        xw.WriteElementString("filename", Path.GetFileName(srcPath));
+        if (!string.IsNullOrEmpty(Configuration.Args.Location))
+            xw.WriteElementString("sourcePath", Path.GetDirectoryName(srcPath));
+
         xw.WriteElementString("compression", compression.ToString());
         xw.WriteEndElement();
         xw.Close();
@@ -77,11 +86,11 @@ public class WDCX : WSingleFileParser
     public override void Repack(string srcPath)
     {
         string xmlPath = GetXmlPath(srcPath, true);
-        XmlDocument xml = new XmlDocument();
-        xml.Load(xmlPath);
-        DCX.Type compression = (DCX.Type)Enum.Parse(typeof(DCX.Type), xml.SelectSingleNode("dcx/compression").InnerText);
+        XElement xml = LoadXml(xmlPath);
 
-        var outPath = GetRepackDestPath(srcPath);
+        DCX.Type compression = (DCX.Type)Enum.Parse(typeof(DCX.Type), xml.Element("compression").Value);
+
+        var outPath = GetRepackDestPath(srcPath, xml);
         WBUtil.Backup(outPath);
 
         DCX.Compress(File.ReadAllBytes(srcPath), compression, outPath);
