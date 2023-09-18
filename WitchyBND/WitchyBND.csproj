@@ -32,23 +32,23 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <TrimmableAssembly Include="Microsoft.CSharp" />
-        <PackageReference Include="CommandLineParser" Version="2.9.1" />
-        <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0-preview.7.23375.6" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0-preview.7.23375.6" />
-        <PackageReference Include="NativeFileDialogSharp" Version="0.6.0-alpha" />
-        <PackageReference Include="securifybv.ShellLink" Version="0.1.0" />
+        <TrimmableAssembly Include="Microsoft.CSharp"/>
+        <PackageReference Include="CommandLineParser" Version="2.9.1"/>
+        <PackageReference Include="Microsoft.CSharp" Version="4.7.0"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0-preview.7.23375.6"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0-preview.7.23375.6"/>
+        <PackageReference Include="NativeFileDialogSharp" Version="0.6.0-alpha"/>
+        <PackageReference Include="securifybv.ShellLink" Version="0.1.0"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\SoulsFormats\SoulsFormats.csproj" />
-        <ProjectReference Include="..\WitchyFormats\WitchyFormats.csproj" />
-        <ProjectReference Include="..\WitchyLib\WitchyLib.csproj" />
+        <ProjectReference Include="..\SoulsFormats\SoulsFormats.csproj"/>
+        <ProjectReference Include="..\WitchyFormats\WitchyFormats.csproj"/>
+        <ProjectReference Include="..\WitchyLib\WitchyLib.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="Assets\Paramdex\**" />
+        <None Remove="Assets\Paramdex\**"/>
         <Content Include="..\dist\readme.txt">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <Link>readme.txt</Link>
@@ -59,29 +59,41 @@
         <Content Include="Assets\Paramdex\**">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
-        <None Remove="Assets\context.png" />
+        <None Remove="Assets\context.png"/>
         <Content Include="Assets\context.png">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
 
-    <Target Name="DeleteSuperfluousFiles" AfterTargets="_CopyResolvedFilesToPublishAlways" BeforeTargets="Publish">
-        <Message Text="Removing superfluous files..." />
-        <Delete Files="$(PublishDir)nfd.lib" />
-        <Delete Files="$(PublishDir)nfd.pdb" />
+    <Target Name="CleanPublishDir" BeforeTargets="Clean">
+        <Message Text="Cleaning publish directory..."/>
+        <RemoveDir Directories="$(PublishDir)"/>
+        <MakeDir Directories="$(PublishDir)"/>
     </Target>
 
-    <Target Name="CleanPublishDir" BeforeTargets="Build">
-        <Message Text="Cleaning publish directory..." />
-        <RemoveDir Directories="$(PublishDir)" />
-        <MakeDir Directories="$(PublishDir)" />
+    <Target Name="BuildShell" BeforeTargets="AfterBuild">
+        <MSBuild Projects="..\WitchyBND.Shell\WitchyBND.Shell.csproj" BuildInParallel="$(BuildInParallel)" Targets="Build">
+            <Output TaskParameter="TargetOutputs" ItemName="BuiltShell"/>
+        </MSBuild>
     </Target>
+    
+    <Target Name="IncludeShell" BeforeTargets="DeleteSuperfluousFiles">
+        <Message Text="Including Shell DLL..." />
+        <Copy SourceFiles="..\WitchyBND.Shell\bin\Release\WitchyBND.Shell.dll;..\WitchyBND.Shell\bin\Release\SharpShell.dll" DestinationFolder="$(PublishDir)" />
+    </Target>
+
+    <Target Name="DeleteSuperfluousFiles" AfterTargets="_CopyResolvedFilesToPublishAlways" BeforeTargets="Publish">
+        <Message Text="Removing superfluous files..."/>
+        <Delete Files="$(PublishDir)nfd.lib"/>
+        <Delete Files="$(PublishDir)nfd.pdb"/>
+    </Target>
+
     <Target Name="ZipParamdex" AfterTargets="DeleteSuperfluousFiles" BeforeTargets="Publish">
-        <Message Text="Zipping Paramdex..." />
-        <ZipDirectory DestinationFile="$(PublishDir)Assets\Paramdex.zip" SourceDirectory="$(PublishDir)Assets\Paramdex" />
+        <Message Text="Zipping Paramdex..."/>
+        <ZipDirectory DestinationFile="$(PublishDir)Assets\Paramdex.zip" SourceDirectory="$(PublishDir)Assets\Paramdex"/>
     </Target>
     <Target Name="DeleteParamdex" AfterTargets="ZipParamdex" BeforeTargets="Publish">
-        <Message Text="Deleting Paramdex loose files..." />
-        <RemoveDir Directories="$(PublishDir)Assets\Paramdex" />
+        <Message Text="Deleting Paramdex loose files..."/>
+        <RemoveDir Directories="$(PublishDir)Assets\Paramdex"/>
     </Target>
 </Project>

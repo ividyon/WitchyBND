@@ -2,7 +2,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.Win32;
 using PPlus;
-using WitchyBND.Shell;
 
 namespace WitchyBND.CliModes;
 
@@ -66,14 +65,15 @@ public class ShellIntegrationMode
 
     public static void UnregisterContext()
     {
-        Shellx.UnregisterContextMenu();
+        Shell.UnregisterSimpleContextMenu();
+        Shell.UnregisterComplexContextMenu();
         SendTo.DeleteSendToShortcuts();
     }
 
     public static void RegisterContext()
     {
         UnregisterContext();
-        Shellx.RegisterContextMenu();
+        Shell.RegisterComplexContextMenu();
         SendTo.AddSendToShortcuts();
     }
 }

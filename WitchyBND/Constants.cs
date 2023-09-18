@@ -1,6 +1,4 @@
-﻿using WitchyBND.Shell;
-
-namespace WitchyBND;
+﻿namespace WitchyBND;
 
 public static class Constants
 {
