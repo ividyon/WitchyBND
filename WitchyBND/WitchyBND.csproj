@@ -9,12 +9,6 @@
         <RootNamespace>WitchyBND</RootNamespace>
         <Title>WitchyBND</Title>
     </PropertyGroup>
-    <ItemGroup>
-        <Content Update="WitchyBND.Shell.dll">
-            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </Content>
-    </ItemGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
         <DebugType>embedded</DebugType>
         <OutputPath>..\bin\Debug\</OutputPath>

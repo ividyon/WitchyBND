@@ -23,7 +23,10 @@ jobs:
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
-      
+
+    - name: .NET Restore
+      uses: zyactions/dotnet-restore@v1
+
     - name: Build
       uses: EasyDesk/action-dotnet-build@v1
       with:
@@ -39,7 +42,13 @@ jobs:
           
         # (Optional) True if warnings should be treated as errors, defaults to false.
         # warnings-as-errors: true
-    
+
+    - name: Install NUnit.ConsoleRunner
+      run: nuget install NUnit.ConsoleRunner -Version 3.16.3 -DirectDownload -OutputDirectory .
+
+    - name: Run UnitTests
+      run: ./NUnit.ConsoleRunner.3.16.3/tools/nunit3-console.exe  path/to/test.dll
+
     # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
