@@ -17,40 +17,40 @@ on:
 
 jobs:
   build:
-  runs-on: windows-latest
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 7.0.x
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 7.0.x
 
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@master
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@master
 
-    - name: Setup Nuget
-      uses: Nuget/setup-nuget@master
+      - name: Setup Nuget
+        uses: Nuget/setup-nuget@master
 
-    - name: Restore nuget packages
-      run: nuget restore ./WitchyBND.Shell/WitchyBND.Shell.csproj
+      - name: Restore nuget packages
+        run: nuget restore ./WitchyBND.Shell/WitchyBND.Shell.csproj
 
-    - name: Build
-      run: msbuild ./WitchyBND/WitchyBND.csproj /p:Configuration=Release
+      - name: Build
+        run: msbuild ./WitchyBND/WitchyBND.csproj /p:Configuration=Release
 
-    - name: Build Tests
-      run: msbuild ./WitchyTests/WitchyTests.csproj /p:Configuration=Release
+      - name: Build Tests
+        run: msbuild ./WitchyTests/WitchyTests.csproj /p:Configuration=Release
 
-    - name: Install NUnit.ConsoleRunner
-      run: nuget install NUnit.ConsoleRunner -Version 3.16.3 -DirectDownload -OutputDirectory .
+      - name: Install NUnit.ConsoleRunner
+        run: nuget install NUnit.ConsoleRunner -Version 3.16.3 -DirectDownload -OutputDirectory .
 
-    - name: Run UnitTests
-      run: ./NUnit.ConsoleRunner.3.16.3/tools/nunit3-console.exe  ./WitchyTests/bin/Release/WitchyTests.dll
+      - name: Run UnitTests
+        run: ./NUnit.ConsoleRunner.3.16.3/tools/nunit3-console.exe  ./WitchyTests/bin/Release/WitchyTests.dll
 
-    # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: 'WitchyBND-SHA${{ github.sha }}'
-        path: ./bin/Release
+      # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: 'WitchyBND-SHA${{ github.sha }}'
+          path: ./bin/Release
