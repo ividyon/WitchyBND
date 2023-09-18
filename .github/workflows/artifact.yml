@@ -30,29 +30,29 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Add msbuild to PATH
+      - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v1
 
       - name: Setup Nuget
         uses: Nuget/setup-nuget@v1
 
-      - name: Restore nuget packages
+      - name: Restore Nuget packages
         run: nuget restore ./WitchyBND.sln
 
-      - name: Build Tests
+      - name: Build tests
         run: msbuild ./WitchyTests/WitchyTests.csproj /p:Configuration=Release
 
       - name: Install NUnit.ConsoleRunner
         run: nuget install NUnit.ConsoleRunner -Version 3.16.3 -DirectDownload -OutputDirectory .
 
-      - name: Run UnitTests
+      - name: Run unit tests
         run: ./NUnit.ConsoleRunner.3.16.3/tools/nunit3-console.exe  ./WitchyTests/bin/Release/net7.0-windows/WitchyTests.dll --where "cat != SkipOnGitHubAction"
 
-      - name: Publish
+      - name: Publish application
         run: |
           cd WitchyBND
           dotnet build --configuration Release --no-restore
-          dotnet publish -c Release -o ../bin/publish -r win-x64
+          dotnet publish -c Release -o ../bin/publish -r win-x64 --no-self-contained
 
       # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
       - name: Upload build artifacts
