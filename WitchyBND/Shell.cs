@@ -10,15 +10,25 @@ public static class Shellx
 {
     private static RegistryKey Root = Registry.CurrentUser;
     private static string ClassesKey = @"Software\Classes";
-    private static string ProgId = typeof(Shellx).FullName;
+    private static string ProgIdQuick = "WitchyBND.A";
+    private static string ProgId = "WitchyBND.B";
     public static readonly string WitchyPath = Path.Combine(WBUtil.GetExeLocation() ?? ".", "WitchyBND.exe");
 
     public static void RegisterContextMenu()
     {
-        using (RegistryKey key = EnsureSubKey(ClassesKey, "*", "shell", ProgId ))
+        using (RegistryKey key = EnsureSubKey(ClassesKey, "*", "shell", ProgIdQuick))
         {
             key.SetValue("Icon", Path.Combine(WBUtil.GetExeLocation(), "WitchyBND.exe"));
             key.SetValue("MUIVerb", "WitchyBND");
+            using (RegistryKey commandKey = EnsureSubKey(ClassesKey, "*", "shell", ProgIdQuick, "command"))
+            {
+                commandKey.SetValue(null, $"\"{WitchyPath}\" %1");
+            }
+        }
+        using (RegistryKey key = EnsureSubKey(ClassesKey, "*", "shell", ProgId ))
+        {
+            key.SetValue("Icon", Path.Combine(WBUtil.GetExeLocation(), "WitchyBND.exe"));
+            key.SetValue("MUIVerb", "WitchyBND...");
             key.SetValue("ExtendedSubCommandsKey", @$"*\shell\{ProgId}");
         }
         using (RegistryKey key = EnsureSubKey(ClassesKey, "*", "shell", ProgId, "Shell", "ProcessHere" ))
@@ -83,7 +93,10 @@ public static class Shellx
         using (RegistryKey key = Root.OpenSubKey(Path.Combine(ClassesKey, "*", "shell"), true))
         {
             if (key != null)
+            {
+                key.DeleteSubKeyTree(ProgIdQuick, false);
                 key.DeleteSubKeyTree(ProgId, false);
+            }
         }
     }
 
@@ -104,7 +117,4 @@ public static class Shellx
             return parentKey.CreateSubKey(Path.GetFileName(joinedName));
         }
     }
-
-    [DllImport("shell32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    private static extern void SHChangeNotify(uint wEventId, uint uFlags, IntPtr dwItem1, IntPtr dwItem2);
 }

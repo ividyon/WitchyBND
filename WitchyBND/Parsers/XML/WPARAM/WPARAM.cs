@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Xml;
@@ -82,13 +83,43 @@ public partial class WPARAM : WXMLParser
         return Path.GetExtension(path) == ".param";
     }
 
+    public static void UnpackParamdex()
+    {
+        var paramdexPath = $@"{WBUtil.GetExeLocation()}\Assets\Paramdex";
+        var zipPath = $@"{WBUtil.GetExeLocation()}\Assets\Paramdex.zip";
+        if (File.Exists(zipPath))
+        {
+            PromptPlus.Error.WriteLine("");
+            PromptPlus.Error.WriteLine("Located Paramdex archive; replacing existing Paramdex.");
+            if (Directory.Exists(paramdexPath))
+                Directory.Delete(paramdexPath, true);
+            using (ZipArchive archive = ZipFile.OpenRead(zipPath))
+            {
+                if (!Directory.Exists(paramdexPath))
+                    Directory.CreateDirectory(paramdexPath);
+                PromptPlus.Error.WriteLine("Extracting Paramdex archive. This is a one-time operation.");
+                archive.ExtractToDirectory(paramdexPath, true);
+            }
+
+            File.Delete(zipPath);
+            PromptPlus.Error.WriteLine("Successfully extracted Paramdex archive.");
+            PromptPlus.Error.WriteLine("");
+        }
+    }
+
     public static void PopulateParamdef(WBUtil.GameType game)
     {
         if (ParamdefStorage[game].Count > 0)
             return;
 
+        UnpackParamdex();
+
+        var paramdexPath = $@"{WBUtil.GetExeLocation()}\Assets\Paramdex";
+        if (!Directory.Exists(paramdexPath))
+            throw new DirectoryNotFoundException("Could not locate Assets\\Paramdex folder.");
+
         var gameName = game.ToString();
-        var paramdefPath = $@"{WBUtil.GetExeLocation()}\Assets\Paramdex\{gameName}\Defs";
+        var paramdefPath = $@"{paramdexPath}\{gameName}\Defs";
 
         if (!Directory.Exists(paramdefPath))
         {
