@@ -17,44 +17,30 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+  runs-on: windows-latest
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
       with:
-        fetch-depth: 0
+        dotnet-version: 7.0.x
 
-    - name: Build Shell
-      uses: EasyDesk/action-dotnet-build@v1
-      with:
-        # (Optional) Additional arguments for dotnet build.
-        # build-args: -v normal
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@master
 
-        # (Optional) Build configuration, defaults to 'Release'.
-        # If the version starts with the 'v' prefix, it will be removed to conform to the requirements of dotnet pack.
-        build-configuration: Release
+    - name: Setup Nuget
+      uses: Nuget/setup-nuget@master
 
-        # (Optional) The path of the project to build; if omitted, the whole solution is built.
-        path: ./WitchyBND.Shell/WitchyBND.Shell.csproj
-          
-        # (Optional) True if warnings should be treated as errors, defaults to false.
-        # warnings-as-errors: true
+    - name: Restore nuget packages
+      run: nuget restore ./WitchyBND.Shell/WitchyBND.Shell.csproj
 
     - name: Build
-      uses: EasyDesk/action-dotnet-build@v1
-      with:
-        # (Optional) Additional arguments for dotnet build.
-        # build-args: -v normal
+      run: msbuild ./WitchyBND/WitchyBND.csproj /p:Configuration=Release
 
-        # (Optional) Build configuration, defaults to 'Release'.
-        # If the version starts with the 'v' prefix, it will be removed to conform to the requirements of dotnet pack.
-        build-configuration: Release
-
-        # (Optional) The path of the project to build; if omitted, the whole solution is built.
-        path: ./WitchyBND.sln
-
-        # (Optional) True if warnings should be treated as errors, defaults to false.
-        # warnings-as-errors: true
+    - name: Build Tests
+      run: msbuild ./WitchyTests/WitchyTests.csproj /p:Configuration=Release
 
     - name: Install NUnit.ConsoleRunner
       run: nuget install NUnit.ConsoleRunner -Version 3.16.3 -DirectDownload -OutputDirectory .
