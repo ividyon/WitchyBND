@@ -44,11 +44,8 @@ jobs:
       - name: Restore packages
         run: nuget restore ./WitchyBND.sln -LockedMode
 
-      - name: Build WitchyBND
-        run: dotnet build -c Release --no-restore ./WitchyBND/WitchyBND.csproj
-
-      - name: Build Shell
-        run: dotnet build -c Release --no-restore ./WitchyBND.Shell/WitchyBND.Shell.csproj
+      - name: Build
+        run: dotnet build -c Release --no-restore ./WitchyTests/WitchyTests.csproj # Builds WitchyBND which builds Shell
 
       - name: Install test runner
         run: nuget install NUnit.ConsoleRunner -Version 3.16.3 -DirectDownload -OutputDirectory .
