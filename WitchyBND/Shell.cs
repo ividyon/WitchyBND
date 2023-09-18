@@ -19,8 +19,8 @@ public static class Shell
     private const string ClassesRegistryKey = @"Software\Classes";
     private const string ContextMenuHandlerRegistryKey = @"Software\Classes\*\shellex\ContextMenuHandlers";
     private const string DirContextMenuHandlerRegistryKey = @"Software\Classes\Directory\shellex\ContextMenuHandlers";
-    private const string ComplexMenuGuid = "";
-    private const string ComplexMenuFullName = "";
+    private const string ComplexMenuGuid = "{cce90c57-0a92-4cb7-8e9b-0cfa92138ae9}";
+    private const string ComplexMenuFullName = "WitchyBND.Shell.WitchyContextMenu";
 
     public static void RegisterSimpleContextMenu()
     {
@@ -110,11 +110,11 @@ public static class Shell
 
     public static void RegisterComplexContextMenu()
     {
-        var assemblyPath = "";
+        var assemblyPath = $"file:///{WBUtil.GetExeLocation().Replace(Path.DirectorySeparatorChar, '/').TrimEnd('/')}/WitchyBND.Shell.dll";
         var runtimeVersion = "v4.0.30319";
-        var assemblyFullName = "";
-        var version = "";
-        var progId = "";
+        var version = "1.0.0.0";
+        var assemblyFullName = $"WitchyBND.Shell, Version={version}, Culture=neutral, PublicKeyToken=1eff254c75ae9a19";
+        var progId = ComplexMenuFullName;
 
             using (RegistryKey key = EnsureSubKey(ClassesRegistryKey, ComplexMenuFullName))
             {

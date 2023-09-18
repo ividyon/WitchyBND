@@ -3,49 +3,55 @@
 </p>
 
 # WitchyBND
-A continuation of Yabber, the FromSoftware file format unpacker and serializer by TKGP, bundling contributions by various community members and adding some quality-of-life features. WitchyBND continues where Yabber+ by Nordgaren left off.
+A successor to **Yabber**, the FromSoftware file format unpacker and serializer by TKGP, featuring a comprehensive rewrite, added features and comfort, and bundled contributions by the community.
 
-WitchyBND supports FromSoftware games from Demon's Souls onwards, but is primarily tested with ELDEN RING and ARMORED CORE VI. Report any issues you may find with other games.
-
-New additions to WitchyBND include:
-* Breaks down BND folder structure to avoid excessive nesting in unpacked folders
-* File globbing pattern support in the commandline
-* regulation.bin support (Decrypt->unpack and repack->encrypt)
-* Slightly improved Oodle DLL detection
-* PARAM support (using Paramdex and DefPatch. Compact, readable output)
-* FXR support
-* MATBIN support (by Avocado)
-* MTD support (by Avocado)
-* ELDEN RING GPARAM support (by Avocado)
-* Console TPF unpacking (but not repacking)
-* Minor fixes like ELDEN RING envmap TPF unpack
-* MQB support (by NatsuDragneelTheFireDragon)
-* Support for Armored Core VI DCX archives
-
-Planned (but TBD):
-* Small UI for quality-of-life actions outside of unpacking/repacking (like duplicating AEGs, CHRs, PARTSBND...)
-* Other formats from YabberAvocado (Let me know which ones are needed the most)
-* Other formats from other Yabber forks (Let me know which are flying around the community)
+WitchyBND is an unpacking/repacking/serializing software for common file formats used by FromSoftware's proprietary game engine, for games like Demon's Souls, Dark Souls 1-3, Bloodborne, Sekiro, Elden Ring and Armored Core VI. Witchy supports the formats DCX, FFXBND, BND3, BND4, BXF3, BXF4, FFXDLSE, FMG, GPARAM, LUAGNL, LUAINFO, TPF, Zero3, FXR3, MATBIN, MTD, PARAM, and MQB.
 
 # Requirements
-* WitchyBND requires [.NET Desktop Runtime 7.0](https://aka.ms/dotnet/7.0/windowsdesktop-runtime-win-x64.exe) to function.
-* The game archives need to be unpacked with [UXM Selective Unpacker](https://www.nexusmods.com/eldenring/mods/1651) to access the files that Witchy can work with.
 
-# Basic usage
-Witchy works exactly like Yabber.
+The game archives need to be unpacked with [UXM Selective Unpacker](https://github.com/Nordgaren/UXM-Selective-Unpack) to access the files that Witchy can work with.
 
-* Unpack the game files using a tool like [UXM Selective Unpacker](https://www.nexusmods.com/eldenring/mods/1651). (For Armored Core VI, you may currently need a work-in-progress version from [?ServerName? Discord](http://discord.gg/servername) in #tools-and-resources)
-* Find the files you'd like to extract. (Information on general modding is available in the [Souls Modding Wiki](http://soulsmodding.wikidot.com/) or on [?ServerName? Discord](http://discord.gg/servername).)
-* Drag the files onto the WitchyBND.exe executable in the Witchy folder.
-* If Witchy supports that file format, it will now be unpacked.
-* To repack, simply drag the unpacked folder or file onto WitchyBND.exe again.
+WitchyBND should run out-of-the-box on Windows versions newer than Windows 8.
 
-If you only want to remove the DCX compression from a DCX archive, use **WitchyBND.DCX.exe** instead.
+* For older versions, WitchyBND's context menu integration may require [.NET Framework 4.6](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net46).
+* In case of unexpected issues, or if using Wine on Linux, [.NET Desktop Runtime 7.0](https://aka.ms/dotnet/7.0/windowsdesktop-runtime-win-x64.exe) may be necessary.
 
-If you find it tedious to drag files onto the EXE, run **WitchyBND.Context.exe** to create Windows right-click context menu entries instead; that way, you can just right-click any file and find the "WitchyBND" option in the context menu.
+# How to use
+
+Information on using Yabber (and therefore Witchy) is spread widely across the community. Visit the [Souls Modding Wiki](http://soulsmodding.wikidot.com/) or [?ServerName? Discord](http://discord.gg/servername) to get started.
+
+## Shell context menu
+
+The most comfortable integration of WitchyBND is found in the context menu. Witchy does not come with an installer, so you need to briefly launch it and register the context menu with Windows yourself.
+
+* Launch WitchyBND.exe in the Witchy folder.
+* Navigate the configuration screen to the **"Configure shell integration"** option, and confirm.
+* Navigate to the **"Register WitchyBND shell integration"** option, and confirm.
+
+From now on, **WitchyBND** menu options should appear when you right-click files and folders in Explorer.
+
+To remove the context menu options, simply use the **"Unregister WitchyBND shell integration"** option. You may need to restart Explorer afterwards.
+
+## Basic workflow
+
+* Unpack the game files using a tool like [UXM Selective Unpacker](https://www.nexusmods.com/eldenring/mods/1651).
+* Find the files you'd like to extract.
+* Use the right-click context menu "WitchyBND" option to process the selected files.
+  * If processing over 15 files, you may need to use the "Send to..." menu. 
+  * You can also drag the files onto the WitchyBND executable in the Witchy folder.
+* If Witchy supports that file format, it will now be processed.
+* To reverse the process, simply use the right-click context menu again.
+  * You can also drag the unpacked folder (or converted file) or file back onto WitchyBND.exe again.
+
+If you only want to remove the DCX compression from a DCX archive, use the **(DCX)** option in the context menu instead.
+
+## Upgrading from Yabber
+
+For all intents and purposes, Witchy should be treated as a new version of Yabber. It functions mostly the same and is used for all the same purposes. All the original workflows are preserved.
 
 # Contributors
-* *TKGP* - Created SoulsFormats and Yabber
+
+* *TKGP* - SoulsFormats and Yabber
 * *katalash* - GPARAM support
 * *Nordgaren* - Yabber+ additions, Armored Core VI additions
 * *DSMapStudio team* - FsParam, Paramdex
@@ -55,8 +61,47 @@ If you find it tedious to drag files onto the EXE, run **WitchyBND.Context.exe**
 * *Vawser* - preliminary Armored Core VI paramdefs
 * *ivi* - WitchyBND maintainer
 
+Special thanks to Nordgaren, The12thAvenger, philiquaz, george_kingbore, katalash, TKGP and many more for various assistance during development.
+
 # Changelog
 ## WitchyBND
+
+### 2.0.0.0
+
+This is a major rewrite of WitchyBND to make it more extendable and customizable, as well as more comfortable to use for the end user. There are many changes to all aspects of the software, but overall it should still perform the same functions, just with more options than before, and with cleaner output.
+
+**Please empty your old Witchy folder before installing this version**, due to the many file removals.
+
+Due to being a large rewrite, bugs are expected. Please diligently report them.
+
+* Major rewrite to the entire program.
+* WitchyBND no longer requires external .NET runtimes to function for most computers.
+  * Operating systems older than Windows 8 may need to install the .NET Framework 4.6 runtime to use the shell integration.
+* Dramatically reduced the amount of files shipped with the program.
+* Removed all executables except for WitchyBND.exe.
+  * Registering the context menu is now done via the new configuration screen.
+  * DCX decompression is now accessible via the context menu, commandline, or configuration screen.
+* Added support for advanced commandline arguments, use the "--help" option for more information.
+* Added a configuration screen that appears when launching WitchyBND without any arguments.
+* Improved the Explorer context menu integration with new options in a dropdown menu.
+  * Visit the configuration screen to enable the new shell integration.
+  * Witchy's context menu is now separate from Yabber's.
+* Added "Send to" shortcuts, for use when selecting more than 15 files (a Windows limitation).
+* Implemented "recursive" binder handling, accessible via context menu, commandline, or configuration screen.
+  * This will recursively process any files inside any unpacked binders right away.
+* Implemented "Process to..." to decouple unpack location from source location.
+  * In the context menu, opens a dialog to select the destination folder.
+  * In the commandline, a path can directly be provided.
+  * Processing files with this option adds their original path to the Witchy XML. When repacking, that path will be used.
+* Compressed the Paramdex shipped with Witchy into a ZIP file.
+  * The Paramdex will be unpacked automatically when needed for the first time, and replace any existing files.
+* Added special handling of certain BNDs, beginning with FFXBND.
+  * FFXBND no longer has a file list in its XML manifest. Files are distributed automatically when repacking.
+  * TPFs in the FFXBND will now automatically unpack to DDS files.
+  * This behavior is optional and can be disabled in the configuration screen, or commandline.
+* Detection of file types now tries to avoid filename-based heuristics as much as possible.
+* Added support for TextureArray TPFs introduced in Armored Core VI.
+* Updated Paramdex to the newest version from DSMapStudio.
 
 ### 1.0.7.4
 

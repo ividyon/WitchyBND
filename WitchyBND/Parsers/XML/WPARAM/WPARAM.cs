@@ -46,35 +46,7 @@ public partial class WPARAM : WXMLParser
     private static Dictionary<WBUtil.GameType, Dictionary<string, Dictionary<int, string>>>
         NameStorage { get; } = new();
 
-    // Temporary mapping of param file names to AC6 param types.
-    private static readonly Dictionary<string, string> ac6ParamMappings = new()
-    {
-        { "EquipParamWeapon", "EquipParamWeapon_TENTATIVE" }, //
-        { "EquipParamProtector", "EQUIP_PARAM_PROTECTOR_ST" },
-        { "EquipParamAccessory", "EQUIP_PARAM_ACCESSORY_ST" },
-        { "ReinforceParamProtector", "REINFORCE_PARAM_PROTECTOR_ST" },
-        { "NpcParam", "NPC_PARAM_ST" },
-        { "NpcTransformParam", "NpcTransformParam_TENTATIVE" }, //
-        { "AtkParam_Npc", "ATK_PARAM_ST" },
-        { "WepAbsorpPosParam", "WEP_ABSORP_POS_PARAM_ST" },
-        { "DirectionCameraParam", "DIRECTION_CAMERA_PARAM_ST" },
-        { "MovementAcTypeParam", "MovementAcTypeParam_TENTATIVE" }, //
-        { "MovementRideObjParam", "MovementRideObjParam_TENTATIVE" }, //
-        { "MovementFlyEnemyParam", "MovementFlyEnemyParam_TENTATIVE" }, //
-        { "ChrModelParam", "CHR_MODEL_PARAM_ST" },
-        { "MissionParam", "MissionParam_TENTATIVE" }, //
-        { "MailParam", "MAIL_PARAM_ST" },
-        { "EquipParamBooster", "EquipParamBooster_TENTATIVE" }, //
-        { "EquipParamGenerator", "EquipParamGenerator_TENTATIVE" }, //
-        { "EquipParamFcs", "EquipParamFcs_TENTATIVE" }, //
-        { "RuntimeSoundParam_Npc", "RuntimeSoundParam_TENTATIVE" }, //
-        { "RuntimeSoundParam_Pc", "RuntimeSoundParam_TENTATIVE" }, //
-        { "CutsceneGparamTimeParam", "CUTSCENE_GPARAM_TIME_PARAM_ST" },
-        { "CutsceneTimezoneConvertParam", "CUTSCENE_TIMEZONE_CONVERT_PARAM_ST" },
-        { "CutsceneMapIdParam", "CUTSCENE_MAP_ID_PARAM_ST" },
-        { "MapAreaParam", "MapAreaParam_TENTATIVE" }, //
-        { "RuntimeSoundGlobalParam", "RuntimeSoundGlobalParam_TENTATIVE" }, //
-    };
+    private static Dictionary<string, string> _ac6TentativeParamTypes;
 
     public override string Name => "PARAM";
 
@@ -107,7 +79,7 @@ public partial class WPARAM : WXMLParser
         }
     }
 
-    public static void PopulateParamdef(WBUtil.GameType game)
+    public static void PopulateParamdex(WBUtil.GameType game)
     {
         if (ParamdefStorage[game].Count > 0)
             return;
@@ -117,6 +89,11 @@ public partial class WPARAM : WXMLParser
         var paramdexPath = $@"{WBUtil.GetExeLocation()}\Assets\Paramdex";
         if (!Directory.Exists(paramdexPath))
             throw new DirectoryNotFoundException("Could not locate Assets\\Paramdex folder.");
+
+        // Populate tentative types
+        var lines = File.ReadAllLines($@"{paramdexPath}\AC6\Defs\TentativeParamType.csv").ToList();
+        lines.RemoveAt(0);
+        _ac6TentativeParamTypes = lines.ToDictionary(a => a.Split(",")[0], b => b.Split(",")[1]);
 
         var gameName = game.ToString();
         var paramdefPath = $@"{paramdexPath}\{gameName}\Defs";

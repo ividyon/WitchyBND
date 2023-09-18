@@ -63,9 +63,12 @@
         <Content Include="Assets\context.png">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
+        <None Include="..\WitchyBND.Shell\bin\Release\**">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
-    <Target Name="CleanPublishDir" BeforeTargets="Clean">
+    <Target Name="CleanPublishDir" BeforeTargets="BeforeBuild">
         <Message Text="Cleaning publish directory..."/>
         <RemoveDir Directories="$(PublishDir)"/>
         <MakeDir Directories="$(PublishDir)"/>
@@ -86,6 +89,7 @@
         <Message Text="Removing superfluous files..."/>
         <Delete Files="$(PublishDir)nfd.lib"/>
         <Delete Files="$(PublishDir)nfd.pdb"/>
+        <Delete Files="$(PublishDir)SharpShell.xml"/>
     </Target>
 
     <Target Name="ZipParamdex" AfterTargets="DeleteSuperfluousFiles" BeforeTargets="Publish">

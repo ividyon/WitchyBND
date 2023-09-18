@@ -17,7 +17,7 @@ public class ShellIntegrationMode
             Description = "Remove context menu entries for WitchyBND from right-click menus in Explorer.")]
         Unregister,
 
-        [Display(Name = "Unregister Yabber context menu",
+        [Display(Name = "Unregister old Witchy/Yabber context menu",
             Description = "Remove context menu entries for Yabber from right-click menus in Explorer.")]
         UnregisterYabber,
 
@@ -65,7 +65,7 @@ public class ShellIntegrationMode
 
     public static void UnregisterContext()
     {
-        Shell.UnregisterSimpleContextMenu();
+        // Shell.UnregisterSimpleContextMenu();
         Shell.UnregisterComplexContextMenu();
         SendTo.DeleteSendToShortcuts();
     }

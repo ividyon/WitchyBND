@@ -28,11 +28,11 @@ public partial class WPARAM
         // Fixed cell style for now.
         CellStyle cellStyle = CellStyle.Attribute;
 
-        PopulateParamdef(game);
+        PopulateParamdex(game);
 
         // Temporary solution to handle AC6 paramdefs without paramtype.
-        if (string.IsNullOrWhiteSpace(paramTypeToParamdef) &&
-            ac6ParamMappings.TryGetValue(paramName, out string newParamType))
+        if (game == WBUtil.GameType.AC6 && string.IsNullOrWhiteSpace(paramTypeToParamdef) &&
+            _ac6TentativeParamTypes.TryGetValue(paramName, out string newParamType))
         {
             paramTypeToParamdef = newParamType;
         }
