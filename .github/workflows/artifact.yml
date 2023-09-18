@@ -30,10 +30,13 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Build application
-        run: msbuild -c Release -t:restore -p:RestorePackagesConfig=true ./WitchyBND.sln
+      - name: Restore packages
+        run: nuget restore ./WitchyBND.sln
 
-      - name: Install NUnit.ConsoleRunner
+      - name: Build application
+        run: dotnet build -c Release --no-restore ./WitchyBND.sln
+
+      - name: Install test runner
         run: nuget install NUnit.ConsoleRunner -Version 3.16.3 -DirectDownload -OutputDirectory .
 
       - name: Run unit tests
