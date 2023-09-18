@@ -28,10 +28,10 @@ jobs:
           dotnet-version: 7.0.x
 
       - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@master
+        uses: microsoft/setup-msbuild@v1
 
       - name: Setup Nuget
-        uses: Nuget/setup-nuget@master
+        uses: Nuget/setup-nuget@v1
 
       - name: Restore nuget packages
         run: nuget restore ./WitchyBND.Shell/WitchyBND.Shell.csproj
