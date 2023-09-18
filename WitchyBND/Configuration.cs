@@ -59,7 +59,7 @@ public static class Configuration
         _values = new WitchyConfigValues();
         Args = new WitchyArgValues();
         IConfigurationRoot config = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
+            .SetBasePath(AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar))
             .AddJsonFile("appsettings.json")
             .AddJsonFile("appsettings.user.json", true)
             .AddJsonFile("appsettings.override.json", true)
