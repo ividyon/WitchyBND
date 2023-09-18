@@ -60,7 +60,6 @@ public static class Configuration
         _values = new WitchyConfigValues();
         Args = new WitchyArgValues();
         IConfigurationRoot config = new ConfigurationBuilder()
-            .SetBasePath(WBUtil.GetExeLocation())
             .AddJsonFile("appsettings.json")
             .AddJsonFile("appsettings.user.json", true)
             .AddJsonFile("appsettings.override.json", true)
