@@ -49,9 +49,9 @@
 
     <ItemGroup>
         <None Remove="Assets\Paramdex\**"/>
-        <Content Include="..\dist\readme.txt">
+        <Content Include="..\README.md">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <Link>readme.txt</Link>
+            <Link>README.txt</Link>
         </Content>
         <Content Include="appsettings.json">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
