@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using SharpShell;
 using SharpShell.Attributes;
 using SharpShell.SharpContextMenu;
 

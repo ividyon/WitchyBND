@@ -24,8 +24,21 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: .NET Restore
-      uses: zyactions/dotnet-restore@v1
+    - name: Build Shell
+      uses: EasyDesk/action-dotnet-build@v1
+      with:
+        # (Optional) Additional arguments for dotnet build.
+        # build-args: -v normal
+
+        # (Optional) Build configuration, defaults to 'Release'.
+        # If the version starts with the 'v' prefix, it will be removed to conform to the requirements of dotnet pack.
+        build-configuration: Release
+
+        # (Optional) The path of the project to build; if omitted, the whole solution is built.
+        path: ./WitchyBND.Shell/WitchyBND.Shell.csproj
+          
+        # (Optional) True if warnings should be treated as errors, defaults to false.
+        # warnings-as-errors: true
 
     - name: Build
       uses: EasyDesk/action-dotnet-build@v1
@@ -39,7 +52,7 @@ jobs:
 
         # (Optional) The path of the project to build; if omitted, the whole solution is built.
         path: ./WitchyBND.sln
-          
+
         # (Optional) True if warnings should be treated as errors, defaults to false.
         # warnings-as-errors: true
 

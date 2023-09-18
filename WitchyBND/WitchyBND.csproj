@@ -29,16 +29,12 @@
         <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="BouncyCastle.Cryptography" Version="2.2.0" />
         <PackageReference Include="CommandLineParser" Version="2.9.1" />
         <PackageReference Include="FolderBrowserEx" Version="1.0.1" />
         <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0-preview.7.23375.6" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0-preview.7.23375.6" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-        <PackageReference Include="PromptPlus" Version="4.0.5" />
         <PackageReference Include="securifybv.ShellLink" Version="0.1.0" />
-        <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
         <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.4.355802">
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
