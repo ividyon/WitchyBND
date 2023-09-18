@@ -33,6 +33,9 @@ jobs:
       - name: Install NUnit.ConsoleRunner
         run: nuget install NUnit.ConsoleRunner -Version 3.16.3 -DirectDownload -OutputDirectory .
 
+      - name: Restore test packages
+        run: nuget restore ./WitchyTests/WitchyTests.csproj
+
       - name: Build tests
         run: dotnet build -c Release ./WitchyTests/WitchyTests.csproj
 
