@@ -17,6 +17,7 @@
         <PublishReadyToRun>true</PublishReadyToRun>
         <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
         <DeleteExistingFiles>true</DeleteExistingFiles>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
         <OutputPath>..\bin\Debug\</OutputPath>
@@ -51,7 +52,7 @@
         <None Remove="Assets\Paramdex\**"/>
         <Content Include="..\README.md">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <Link>README.txt</Link>
+            <Link>README.md</Link>
         </Content>
         <Content Include="appsettings.json">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>

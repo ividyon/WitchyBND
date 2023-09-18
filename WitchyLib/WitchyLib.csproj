@@ -5,6 +5,7 @@
         <IsPackable>false</IsPackable>
         <Title>WitchyLib</Title>
         <AssemblyTitle>WitchyLib</AssemblyTitle>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
         <DebugType>embedded</DebugType>
