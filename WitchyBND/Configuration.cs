@@ -58,9 +58,8 @@ public static class Configuration
     {
         _values = new WitchyConfigValues();
         Args = new WitchyArgValues();
-        var path = AppContext.BaseDirectory;
         IConfigurationRoot config = new ConfigurationBuilder()
-            .SetBasePath(path)
+            .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json")
             .AddJsonFile("appsettings.user.json", true)
             .AddJsonFile("appsettings.override.json", true)
