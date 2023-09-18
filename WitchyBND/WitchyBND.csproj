@@ -81,9 +81,9 @@
         </MSBuild>
     </Target>
     
-    <Target Name="IncludeShell" BeforeTargets="DeleteSuperfluousFiles">
+    <Target Name="IncludeShell" AfterTargets="BuildShell">
         <Message Text="Including Shell DLL..." />
-        <Copy SourceFiles=".\bin\Release\net7.0-windows\win-x64\WitchyBND.Shell.dll;.\bin\Release\net7.0-windows\win-x64\SharpShell.dll" DestinationFolder="$(PublishDir)" />
+        <Copy SourceFiles="..\WitchyBND.Shell\bin\Release\WitchyBND.Shell.dll;..\WitchyBND.Shell\bin\Release\SharpShell.dll" DestinationFolder="$(PublishDir)" />
     </Target>
 
     <Target Name="DeleteSuperfluousFiles" BeforeTargets="Publish">
