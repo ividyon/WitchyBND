@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
+using WitchyLib;
 
 namespace WitchyBND;
 
@@ -59,7 +60,7 @@ public static class Configuration
         _values = new WitchyConfigValues();
         Args = new WitchyArgValues();
         IConfigurationRoot config = new ConfigurationBuilder()
-            .SetBasePath(AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar))
+            .SetBasePath(WBUtil.GetExeLocation())
             .AddJsonFile("appsettings.json")
             .AddJsonFile("appsettings.user.json", true)
             .AddJsonFile("appsettings.override.json", true)
