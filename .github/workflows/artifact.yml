@@ -85,4 +85,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: 'WitchyBND-SHA${{ github.sha }}'
-          path: ./bin/publish
+          path: '../../../WitchyBND-${{ github.ref_name }}.zip'
