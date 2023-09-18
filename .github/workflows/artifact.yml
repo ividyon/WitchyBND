@@ -17,6 +17,8 @@ on:
 
 env:
   DOTNET_VERSION: '7.0.x'
+  NEXUSMOD_API_KEY: ${{ secrets.NEXUSMODS_API_KEY }}
+  NEXUSMOD_COOKIE_SID_DEVELOP: ${{ secrets.NEXUSMODS_SESSION_COOKIE }}
 
 jobs:
   build:
@@ -46,6 +48,28 @@ jobs:
         run: |
           cd WitchyBND
           dotnet publish -c Release --no-restore
+
+      - name: Archive Release
+        uses: thedoctor0/zip-release@main
+        with:
+          type: 'zip'
+          filename: '../../../WitchyBND-${{ github.ref_name }}.zip'
+          directory: './bin/publish'
+          path: '.'
+
+      - name: Nexus meme 1
+        run: |
+          dotnet tool install -g Digitalroot.ModUploader
+          drmu nexusmods check
+
+      - name: Nexus meme 2
+        run: drmu nexusmods 3862 "../../../WitchyBND-${{ github.ref_name }}.zip"
+          -f "WitchyBND-${{ github.ref_name }}.zip"
+          -v "${{ github.ref_name }}"
+          -t Main
+          -d "Hello world!"
+          -g eldenring
+          -dmfu -ddwm -dvu -dmv
 
       # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
       - name: Upload build artifacts

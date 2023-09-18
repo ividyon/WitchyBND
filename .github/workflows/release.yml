@@ -19,25 +19,30 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
         with:
-          fetch-depth: 0
-      - name: Build
-        uses: EasyDesk/action-dotnet-build@v1
-        with:
-          # (Optional) Additional arguments for dotnet build.
-          # build-args: -v normal
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
-          # (Optional) Build configuration, defaults to 'Release'.
-          # If the version starts with the 'v' prefix, it will be removed to conform to the requirements of dotnet pack.
-          build-configuration: Release
+      - name: Restore packages
+        run: nuget restore ./WitchyBND.sln
 
-          # (Optional) The path of the project to build; if omitted, the whole solution is built.
-          path: ./WitchyBND.sln
+      - name: Build application
+        run: dotnet build -c Release --no-restore ./WitchyBND.sln
 
-          # (Optional) True if warnings should be treated as errors, defaults to false.
-          # warnings-as-errors: true
+      - name: Install test runner
+        run: nuget install NUnit.ConsoleRunner -Version 3.16.3 -DirectDownload -OutputDirectory .
+
+      - name: Run unit tests
+        run: ./NUnit.ConsoleRunner.3.16.3/tools/nunit3-console.exe  ./WitchyTests/bin/Release/net7.0-windows/WitchyTests.dll --where "cat != SkipOnGitHubAction"
+
+      - name: Publish application
+        run: |
+          cd WitchyBND
+          dotnet publish -c Release --no-restore
 
       # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
       - name: Archive Release
@@ -45,7 +50,7 @@ jobs:
         with:
           type: 'zip'
           filename: '../../../WitchyBND-${{ github.ref_name }}.zip'
-          directory: './bin/Release/net7.0-windows'
+          directory: './bin/publish'
           path: '.'
 
       - name: Upload Release
