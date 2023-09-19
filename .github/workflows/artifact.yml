@@ -30,8 +30,8 @@ jobs:
 
       - name: Set variables
         run: |
-          $notes = Get-Content .\NOTES.md -Raw 
-          echo "NOTES=\"$notes\"" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          $notes = Get-Content .\NOTES.md -Raw
+          echo $notes
 
       - name: Setup cache
         uses: actions/cache@v3
@@ -86,7 +86,7 @@ jobs:
           -f "WitchyBND-test"
           -v "v0.0.0.1"
           -t Main
-          -d "${{ env.NOTES }}"
+          -d "$notes"
           -g eldenring
           -dmfu -ddwm -dvu -dmv
           3862 "./WitchyBND.zip"
