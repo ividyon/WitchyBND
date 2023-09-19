@@ -77,7 +77,7 @@ jobs:
         run: |
           dotnet tool install -g Digitalroot.ModUploader && drmu nexusmods upload
           -f "WitchyBND-test"
-          -v "${{ github.ref_name }}"
+          -v "v0.0.0.1"
           -t Main
           -d "Hello world!"
           -g eldenring
