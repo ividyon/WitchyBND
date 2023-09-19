@@ -2,10 +2,10 @@
   <img src="https://github.com/ividyon/WitchyBND/blob/main/public/logo.png?raw=true" />
 </p>
 
-# WitchyBND v2.0.0.1
-A successor to **Yabber**, the FromSoftware file format unpacker and serializer by TKGP, featuring a comprehensive rewrite, added features and comfort, and bundled contributions by the community.
-
+# WitchyBND v2.0.0.2
 WitchyBND is an unpacking/repacking/serializing software for common file formats used by FromSoftware's proprietary game engine, for games like Demon's Souls, Dark Souls 1-3, Bloodborne, Sekiro, Elden Ring and Armored Core VI. Witchy supports the formats DCX, FFXBND, BND3, BND4, BXF3, BXF4, FFXDLSE, FMG, GPARAM, LUAGNL, LUAINFO, TPF, Zero3, FXR3, MATBIN, MTD, PARAM, and MQB.
+
+A successor to **Yabber**, the FromSoftware file format unpacker and serializer by TKGP, featuring a comprehensive rewrite, added features and comfort, and bundled contributions by the community.
 
 # Requirements
 The game archives need to be unpacked with [UXM Selective Unpacker](https://github.com/Nordgaren/UXM-Selective-Unpack) to access the files that Witchy can work with.
@@ -60,7 +60,7 @@ Special thanks to Nordgaren, The12thAvenger, philiquaz, george_kingbore, katalas
 # Changelog
 ## WitchyBND
 
-### 2.0.0.1
+### 2.0.0.2
 
 A critical bugfix release.
 
