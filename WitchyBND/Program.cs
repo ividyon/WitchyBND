@@ -332,13 +332,13 @@ internal static class Program
             { "Recursive binder processing", Configuration.Recursive.ToString() },
         };
         if (Configuration.Args.Passive)
-            infoTable.Add("Location", Configuration.Args.Passive.ToString());
+            infoTable.Add("Passive", Configuration.Args.Passive.ToString());
         if (!string.IsNullOrEmpty(Configuration.Args.Location))
             infoTable.Add("Location", Configuration.Args.Location);
         if (Configuration.Args.RepackOnly)
-            infoTable.Add("Location", Configuration.Args.RepackOnly.ToString());
+            infoTable.Add("Repack only", Configuration.Args.RepackOnly.ToString());
         if (Configuration.Args.UnpackOnly)
-            infoTable.Add("Location", Configuration.Args.UnpackOnly.ToString());
+            infoTable.Add("Unpack only", Configuration.Args.UnpackOnly.ToString());
 
         var longest = infoTable.Keys.MaxBy(s => s.Length).Length;
 
