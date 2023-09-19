@@ -77,6 +77,7 @@ jobs:
         run: dotnet tool install -g Digitalroot.ModUploader
 
       - name: Upload to Elden Ring Nexus
+        continue-on-error: true
         run: drmu nexusmods upload
           -f "WitchyBND"
           -v "${{ github.ref_name }}"
@@ -87,6 +88,7 @@ jobs:
           3862 "WitchyBND-${{ github.ref_name }}.zip"
 
       - name: Upload to ACVI Nexus
+        continue-on-error: true
         run: drmu nexusmods upload
           -f "WitchyBND"
           -v "${{ github.ref_name }}"
@@ -97,6 +99,7 @@ jobs:
           20 "WitchyBND-${{ github.ref_name }}.zip"
 
       - name: Upload to DS1 Nexus
+        continue-on-error: true
         run: drmu nexusmods upload
           -f "WitchyBND"
           -v "${{ github.ref_name }}"
@@ -107,6 +110,7 @@ jobs:
           1865 "WitchyBND-${{ github.ref_name }}.zip"
 
       - name: Upload to DS1R Nexus
+        continue-on-error: true
         run: drmu nexusmods upload
           -f "WitchyBND"
           -v "${{ github.ref_name }}"
@@ -117,6 +121,7 @@ jobs:
           653 "WitchyBND-${{ github.ref_name }}.zip"
 
       - name: Upload to DS2 Nexus
+        continue-on-error: true
         run: drmu nexusmods upload
           -f "WitchyBND"
           -v "${{ github.ref_name }}"
@@ -127,6 +132,7 @@ jobs:
           1192 "WitchyBND-${{ github.ref_name }}.zip"
 
       - name: Upload to DS3 Nexus
+        continue-on-error: true
         run: drmu nexusmods upload
           -f "WitchyBND"
           -v "${{ github.ref_name }}"
@@ -137,6 +143,7 @@ jobs:
           1676 "WitchyBND-${{ github.ref_name }}.zip"
 
       - name: Upload to Sekiro Nexus
+        continue-on-error: true
         run: drmu nexusmods upload
           -f "WitchyBND"
           -v "${{ github.ref_name }}"
@@ -147,11 +154,12 @@ jobs:
           1633 "WitchyBND-${{ github.ref_name }}.zip"
 
       - name: Upload to Bloodborne Nexus
+        continue-on-error: true
         run: drmu nexusmods upload
           -f "WitchyBND"
           -v "${{ github.ref_name }}"
           -t Main
           -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
-          -g sekiro
+          -g bloodborne
           -ddwm
           20 "WitchyBND-${{ github.ref_name }}.zip"
