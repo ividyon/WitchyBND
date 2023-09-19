@@ -28,11 +28,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set variables
-        run: |
-          $notes = Get-Content .\NOTES.md -Raw
-          echo $notes
-
       - name: Setup cache
         uses: actions/cache@v3
         with:
@@ -86,7 +81,7 @@ jobs:
           -f "WitchyBND-test"
           -v "v0.0.0.1"
           -t Main
-          -d "$notes"
+          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
           -g eldenring
           -dmfu -ddwm -dvu -dmv
           3862 "./WitchyBND.zip"
