@@ -91,9 +91,12 @@ public partial class WPARAM : WXMLParser
             throw new DirectoryNotFoundException("Could not locate Assets\\Paramdex folder.");
 
         // Populate tentative types
-        var lines = File.ReadAllLines($@"{paramdexPath}\AC6\Defs\TentativeParamType.csv").ToList();
-        lines.RemoveAt(0);
-        _ac6TentativeParamTypes = lines.ToDictionary(a => a.Split(",")[0], b => b.Split(",")[1]);
+        if (game == WBUtil.GameType.AC6)
+        {
+            var lines = File.ReadAllLines($@"{paramdexPath}\AC6\Defs\TentativeParamType.csv").ToList();
+            lines.RemoveAt(0);
+            _ac6TentativeParamTypes = lines.ToDictionary(a => a.Split(",")[0], b => b.Split(",")[1]);
+        }
 
         var gameName = game.ToString();
         var paramdefPath = $@"{paramdexPath}\{gameName}\Defs";

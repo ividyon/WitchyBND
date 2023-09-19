@@ -22,9 +22,6 @@ public partial class WPARAM
 
             Enum.TryParse(xml.SelectSingleNode("param/cellStyle")?.InnerText ?? "None", out CellStyle cellStyle);
 
-            param.ParamType = xml.SelectSingleNode("param/type")?.InnerText;
-
-            // Enum.TryParse(xml.SelectSingleNode("param/game")?.InnerText ?? "", out WBUtil.GameType game);
             Enum.TryParse(xml.SelectSingleNode("param/compression")?.InnerText ?? "None", out DCX.Type compression);
             param.Compression = compression;
 
@@ -40,8 +37,11 @@ public partial class WPARAM
 
             var paramdef = new PARAMDEF();
 
-            var paramdefType = xml.SelectSingleNode("param/paramdef/type").InnerText;
-            paramdef.ParamType = paramdefType;
+            paramdef.ParamType = xml.SelectSingleNode("param/paramdef/type")!.InnerText;
+            string paramTypeText = xml.SelectSingleNode("param/type")?.InnerText;
+            param.ParamType = !string.IsNullOrEmpty(paramTypeText)
+                ? paramTypeText
+                : paramdef.ParamType;
 
             var bigEndian =
                 Convert.ToBoolean(Convert.ToInt32(xml.SelectSingleNode("param/paramdef/bigEndian").InnerText));
@@ -56,13 +56,13 @@ public partial class WPARAM
             paramdef.Compression = defCompression;
 
             paramdef.DataVersion = Convert.ToInt16(xml.SelectSingleNode("param/paramdef/dataVersion").InnerText);
-            var dataVersionText = xml.SelectSingleNode("param/dataVersion")?.InnerText;
+            string dataVersionText = xml.SelectSingleNode("param/dataVersion")?.InnerText;
             param.ParamdefDataVersion = !string.IsNullOrEmpty(dataVersionText)
                 ? Convert.ToInt16(dataVersionText)
                 : paramdef.DataVersion;
 
             paramdef.FormatVersion = Convert.ToInt16(xml.SelectSingleNode("param/paramdef/formatVersion").InnerText);
-            var formatVersionText = xml.SelectSingleNode("param/formatVersion")?.InnerText;
+            string formatVersionText = xml.SelectSingleNode("param/formatVersion")?.InnerText;
             param.ParamdefFormatVersion = !string.IsNullOrEmpty(formatVersionText)
                 ? Convert.ToByte(formatVersionText)
                 : Convert.ToByte(paramdef.FormatVersion);
