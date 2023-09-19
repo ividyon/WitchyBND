@@ -65,7 +65,7 @@ jobs:
           name: 'WitchyBND-SHA${{ github.sha }}'
           path: './bin/publish'
 
-      - name: Archive Release
+      - name: Archive release
         uses: thedoctor0/zip-release@main
         with:
           type: 'zip'
@@ -74,8 +74,7 @@ jobs:
           path: './bin/publish/**/*'
 
       - name: Upload to Elden Ring Nexus
-        run: |
-          dotnet tool install -g Digitalroot.ModUploader && drmu nexusmods upload
+        run: dotnet tool install -g Digitalroot.ModUploader && drmu nexusmods upload
           -f "WitchyBND-test"
           -v "v0.0.0.1"
           -t Main
