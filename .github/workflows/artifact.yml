@@ -17,8 +17,6 @@ on:
 
 env:
   DOTNET_VERSION: '7.0.x'
-  NEXUSMOD_API_KEY: ${{ secrets.NEXUSMODS_API_KEY }}
-  NEXUSMOD_COOKIE_SID_DEVELOP: ${{ secrets.NEXUSMODS_SESSION_COOKIE }}
   NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
 
 jobs:
@@ -64,34 +62,3 @@ jobs:
         with:
           name: 'WitchyBND-SHA${{ github.sha }}'
           path: './bin/publish'
-
-      - name: Archive release
-        uses: thedoctor0/zip-release@main
-        with:
-          type: 'zip'
-          filename: '../../WitchyBND.zip'
-          directory: './bin/publish'
-          path: '.'
-
-      - name: Setup mod uploader
-        run: dotnet tool install -g Digitalroot.ModUploader
-
-      - name: Upload to Elden Ring Nexus
-        run: drmu nexusmods upload
-          -f "WitchyBND-test"
-          -v "v0.0.0.1"
-          -t Main
-          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
-          -g eldenring
-          -dmfu -ddwm -dvu -dmv
-          3862 "./WitchyBND.zip"
-
-#      - name: Upload to AC6 Nexus
-#        run: drmu nexusmods upload
-#          -f "WitchyBND-test"
-#          -v "v0.0.0.1"
-#          -t Main
-#          -d "${{ env.NOTES }}"
-#          -g armoredcore6firesofrubicon
-#          -dmfu -ddwm -dvu -dmv
-#          3862 "./WitchyBND.zip"
