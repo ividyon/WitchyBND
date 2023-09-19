@@ -1,3 +1,5 @@
+An important bugfix release.
+
 ### PSA for v2
 
 WitchyBND v2.0.0.0 introduced a **breaking change** with regulation files and PARAMs. Attempting to repack a PARAM XML with v2.0.0.0+ which was unpacked with an older Witchy version will cause the process to break.
@@ -10,6 +12,7 @@ To properly update:
 
 ### Changes in v2.0.0.1
 
+* Fixed a critical issue with binder file root paths that caused them to become corrupted due to a missing slash.
 * Added some failsafes to make the PARAM breaking changes less catastrophic.
 * Fixed an oversight where "Pause on Error" was not toggled to TRUE by default.
 * Fixed an oversight where the AC6 TentativeParamTypes would be queried even if not interfacing with non-AC6 PARAMs.

@@ -223,7 +223,7 @@ public abstract class WBinderParser : WFolderParser
             string path = file.Element("path")!.Value;
             string suffix = file.Element("suffix")?.Value ?? "";
             string strCompression = file.Element("compression_type")?.Value ?? DCX.Type.Zlib.ToString();
-            string name = root + path;
+            string name = Path.Combine(root, path);
 
             if (!Enum.TryParse(strFlags, out Binder.FileFlags flags))
                 throw new FriendlyException(
