@@ -83,7 +83,7 @@
     
     <Target Name="IncludeShell" AfterTargets="BuildShell">
         <Message Text="Including Shell DLL..." />
-        <Copy SourceFiles="..\WitchyBND.Shell\bin\Release\WitchyBND.Shell.dll;..\WitchyBND.Shell\bin\Release\SharpShell.dll" DestinationFolder="$(PublishDir)" />
+        <Copy SourceFiles="..\WitchyBND.Shell\bin\$(Configuration)\WitchyBND.Shell.dll;..\WitchyBND.Shell\bin\$(Configuration)\SharpShell.dll" DestinationFolder="$(PublishDir)" />
     </Target>
 
     <Target Name="DeleteSuperfluousFiles" BeforeTargets="Publish">
