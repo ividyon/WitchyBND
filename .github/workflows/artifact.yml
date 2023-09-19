@@ -30,8 +30,8 @@ jobs:
 
       - name: Set variables
         run: |
-          NOTE=$(cat ./NOTES.md)
-          echo "NOTES=$NOTE" >> $GITHUB_ENV
+          $notes = Get-Content .\NOTES.md -Raw 
+          echo "NOTES=$note" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Setup cache
         uses: actions/cache@v3
