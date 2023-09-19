@@ -6,6 +6,7 @@
     <IsPackable>false</IsPackable>
     <Title>WitchyFormats</Title>
     <AssemblyTitle>WitchyFormats</AssemblyTitle>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">

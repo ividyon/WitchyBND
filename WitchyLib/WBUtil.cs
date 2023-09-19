@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
+using System.Xml.Linq;
 using System.Xml.Serialization;
+using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Win32;
 using Newtonsoft.Json;
+using PPlus;
 using SoulsFormats;
 using PARAMDEF = WitchyFormats.PARAMDEF;
 
@@ -14,40 +18,116 @@ namespace WitchyLib;
 
 public static class WBUtil
 {
+    public static string ExeLocation;
+
+    public static string FirstCharToUpper(this string input) =>
+        input switch
+        {
+            null => throw new ArgumentNullException(nameof(input)),
+            "" => throw new ArgumentException($"{nameof(input)} cannot be empty", nameof(input)),
+            _ => string.Concat(input[0].ToString().ToUpper(), input.AsSpan(1))
+        };
+
+    public static string SanitizeFilename(string path)
+    {
+        return Path.GetInvalidFileNameChars()
+            .Aggregate(path, (current, c) => current.Replace(c, '_'));
+    }
+
+    public static void WriteSanitizedBinderFilePath(this XElement element, string path, string pathElementName = "path")
+    {
+        string dir = Path.GetDirectoryName(path) ?? "";
+        string filename = Path.GetFileName(path);
+        string sanitized = SanitizeFilename(path);
+
+        if (filename == sanitized)
+        {
+            element.Add(new XElement(pathElementName, path));
+        }
+        else
+        {
+            element.Add(new XElement("in" + pathElementName.FirstCharToUpper(), path));
+            element.Add(new XElement("out" + pathElementName.FirstCharToUpper(), Path.Combine(dir, sanitized)));
+        }
+    }
+
+    public static string GetSanitizedBinderFilePath(this XElement element, string pathElementName = "path",
+        bool outName = false)
+    {
+        if (element.Element(pathElementName) != null)
+            return element.Element(pathElementName)!.Value;
+        var otherName =
+            outName ? "out" + pathElementName.FirstCharToUpper() : "in" + pathElementName.FirstCharToUpper();
+        if (element.Element(otherName) != null)
+            return element.Element(otherName)!.Value;
+
+        throw new InvalidDataException("File element is missing path.");
+    }
+
+    public static List<string> ProcessPathGlobs(List<string> paths)
+    {
+        var processedPaths = new List<string>();
+        foreach (string path in paths)
+        {
+            if (path.Contains('*'))
+            {
+                var matcher = new Matcher();
+                var rootParts = path.Split(Path.DirectorySeparatorChar).TakeWhile(part => !part.Contains('*')).ToList();
+                var root = string.Join(Path.DirectorySeparatorChar, rootParts);
+                var rest = path.Substring(root.Length + 1);
+
+                matcher = matcher.AddInclude(rest.Replace(Path.DirectorySeparatorChar.ToString(), "/"));
+                var files = Directory.GetFiles(Path.Combine(Environment.CurrentDirectory, root), "*",
+                    SearchOption.AllDirectories);
+                var match = matcher.Match(Path.Combine(Environment.CurrentDirectory, root), files);
+                if (match.HasMatches)
+                {
+                    processedPaths.AddRange(match.Files.Select(m => Path.Combine(root, m.Path)).ToList());
+                }
+            }
+            else
+            {
+                processedPaths.Add(path);
+            }
+        }
+
+        return processedPaths.Select(path => Path.GetFullPath(path)).ToList();
+    }
+
     public static string GetExeLocation()
     {
-        return Path.GetDirectoryName(AppContext.BaseDirectory);
+        return ExeLocation;
     }
 
     public enum GameType
     {
+        [Display(Name = "Armored Core 4")]
+        AC4,
+        [Display(Name = "Armored Core For Answer")]
+        ACFA,
+        [Display(Name = "Bloodborne")]
         BB,
+        [Display(Name = "Demon's Souls")]
         DES,
+        [Display(Name = "Dark Souls")]
         DS1,
+        [Display(Name = "Dark Souls Remastered")]
         DS1R,
+        [Display(Name = "Dark Souls 2")]
         DS2,
+        [Display(Name = "Dark Souls 2: Scholar of the First Sin")]
         DS2S,
+        [Display(Name = "Dark Souls 3")]
         DS3,
+        [Display(Name = "Elden Ring")]
         ER,
+        [Display(Name = "Sekiro")]
         SDT,
+        [Display(Name = "Armored Core VI")]
         AC6
     }
 
-    public static Dictionary<GameType, string> GameNames = new Dictionary<GameType, string>()
-    {
-        { GameType.BB, "BB" },
-        { GameType.DES, "DES" },
-        { GameType.DS1, "DS1" },
-        { GameType.DS1R, "DS1R" },
-        { GameType.DS2, "DS2" },
-        { GameType.DS2S, "DS2S" },
-        { GameType.DS3, "DS3" },
-        { GameType.ER, "ER" },
-        { GameType.SDT, "SDT" },
-        { GameType.AC6, "AC6" },
-    };
-
-    public static GameType DetermineParamdexGame(string path)
+    public static GameType DetermineParamdexGame(string path, bool passive)
     {
         GameType? gameNullable = null;
 
@@ -68,22 +148,26 @@ public static class WBUtil
 
         if (gameNullable != null)
         {
-            Console.WriteLine($"Determined game for Paramdex: {GameNames[gameNullable.Value]}");
+            PromptPlus.Error.WriteLine($"Determined game for Paramdex: {gameNullable.Value.ToString()}".PromptPlusEscape());
         }
         else
         {
-            Console.WriteLine("Could not determine param game version.");
-            Console.WriteLine("Please input a game from the following list:");
-            Console.WriteLine(String.Join(", ", GameNames.Values));
-            Console.Write($"Game: ");
-            string input = Console.ReadLine().ToUpper();
-            var flippedDict = GameNames.ToDictionary(pair => pair.Value, pair => pair.Key);
-            if (string.IsNullOrEmpty(input) || !flippedDict.ContainsKey(input))
+            PromptPlus.Error.WriteLine("Could not determine param game version.");
+            if (!passive)
+            {
+                var select = PromptPlus.Select<GameType>("Please select the Paramdex of one of the following games")
+                    .Run();
+                if (select.IsAborted)
+                {
+                    throw new Exception("Could not determine PARAM type.");
+                }
+
+                gameNullable = select.Value;
+            }
+            else
             {
                 throw new Exception("Could not determine PARAM type.");
             }
-
-            gameNullable = flippedDict[input];
         }
 
         return gameNullable.Value;
@@ -99,7 +183,7 @@ public static class WBUtil
             game = GameType.ER;
             return SFUtil.DecryptERRegulation(path);
         }
-        catch (Exception e1)
+        catch (Exception)
         {
             try
             {
@@ -108,7 +192,8 @@ public static class WBUtil
             }
             catch (Exception e2)
             {
-                throw new InvalidDataException($"File is not a regulation.bin BND for Elden Ring or Armored Core VI.", e2);
+                throw new InvalidDataException($"File is not a regulation.bin BND for Elden Ring or Armored Core VI.",
+                    e2);
             }
         }
     }
@@ -228,6 +313,9 @@ public static class WBUtil
     /// </summary>
     public static string UnrootBNDPath(string path, string root)
     {
+        if (string.IsNullOrEmpty(root))
+            return path;
+
         path = path.Substring(root.Length);
 
         Match drive = DriveRx.Match(path);
@@ -508,9 +596,9 @@ public static class WBUtil
         {
             return DCX.Decompress(sourceFile, out compression);
         }
-        catch (NoOodleFoundException ex)
+        catch (NoOodleFoundException)
         {
-            string oo2corePath = WBUtil.GetOodlePath();
+            string oo2corePath = GetOodlePath();
             if (oo2corePath == null)
                 throw;
 
@@ -527,7 +615,7 @@ public static class WBUtil
         {
             DCX.Compress(data, type, path);
         }
-        catch (NoOodleFoundException ex)
+        catch (NoOodleFoundException)
         {
             string oo2corePath = WBUtil.GetOodlePath();
             if (oo2corePath == null)
@@ -545,7 +633,7 @@ public static class WBUtil
         {
             file.Write(path);
         }
-        catch (NoOodleFoundException ex)
+        catch (NoOodleFoundException)
         {
             string oo2corePath = GetOodlePath();
             if (oo2corePath == null)
@@ -563,7 +651,7 @@ public static class WBUtil
         {
             file.Write(bhdPath, bdtPath);
         }
-        catch (NoOodleFoundException ex)
+        catch (NoOodleFoundException)
         {
             string oo2corePath = GetOodlePath();
             if (oo2corePath == null)
@@ -581,7 +669,7 @@ public static class WBUtil
         {
             file.Write(bhdPath, bdtPath);
         }
-        catch (NoOodleFoundException ex)
+        catch (NoOodleFoundException)
         {
             string oo2corePath = GetOodlePath();
             if (oo2corePath == null)
@@ -593,4 +681,8 @@ public static class WBUtil
         }
     }
 
+    static WBUtil()
+    {
+        ExeLocation = Path.GetDirectoryName(AppContext.BaseDirectory);
+    }
 }

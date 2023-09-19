@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
@@ -13,6 +14,7 @@ namespace WitchyFormats
     /// Initial work by TKGP, Meowmaritus and NamelessHoodie.
     /// Currently maintained by ivi.
     /// </summary>
+    [XmlType(TypeName="fxr3")]
     public class Fxr3 : SoulsFile<Fxr3>
     {
         public FXRVersion Version { get; set; }
@@ -693,7 +695,6 @@ namespace WitchyFormats
                 br.AssertInt32(0);
                 int propertyCount2 = br.ReadInt32();
                 int fieldOffset = br.ReadInt32();
-                // Console.WriteLine($"fieldOffset: {fieldOffset}");
                 br.AssertInt32(0);
                 int section10Offset = br.ReadInt32();
                 br.AssertInt32(0);

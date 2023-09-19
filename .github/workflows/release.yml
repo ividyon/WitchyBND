@@ -15,37 +15,55 @@ on:
 permissions:
   contents: write
 
+env:
+  DOTNET_VERSION: '7.0.x'
+  NEXUSMOD_API_KEY: ${{ secrets.NEXUSMODS_API_KEY }}
+  NEXUSMOD_COOKIE_SID_DEVELOP: ${{ secrets.NEXUSMODS_SESSION_COOKIE }}
+  NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+
 jobs:
   build:
     runs-on: windows-latest
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Setup cache
+        uses: actions/cache@v3
         with:
-          fetch-depth: 0
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore packages
+        run: nuget restore ./WitchyBND.sln -LockedMode
+
       - name: Build
-        uses: EasyDesk/action-dotnet-build@v1
-        with:
-          # (Optional) Additional arguments for dotnet build.
-          # build-args: -v normal
+        run: dotnet build -c Release --no-restore ./WitchyTests/WitchyTests.csproj # Builds WitchyBND which builds Shell
 
-          # (Optional) Build configuration, defaults to 'Release'.
-          # If the version starts with the 'v' prefix, it will be removed to conform to the requirements of dotnet pack.
-          build-configuration: Release
+      - name: Install test runner
+        run: nuget install NUnit.ConsoleRunner -Version 3.16.3 -DirectDownload -OutputDirectory .
 
-          # (Optional) The path of the project to build; if omitted, the whole solution is built.
-          path: ./WitchyBND.sln
+      - name: Run unit tests
+        run: ./NUnit.ConsoleRunner.3.16.3/tools/nunit3-console.exe  ./WitchyTests/bin/Release/net7.0-windows/WitchyTests.dll --where "cat != SkipOnGitHubAction"
 
-          # (Optional) True if warnings should be treated as errors, defaults to false.
-          # warnings-as-errors: true
+      - name: Publish application
+        run: |
+          cd WitchyBND
+          dotnet publish -c Release --no-restore
 
-      # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
-      - name: Archive Release
+      - name: Archive release
         uses: thedoctor0/zip-release@main
         with:
           type: 'zip'
-          filename: '../../../WitchyBND-${{ github.ref_name }}.zip'
-          directory: './bin/Release/net7.0-windows'
+          filename: '../../WitchyBND-${{ github.ref_name }}.zip'
+          directory: './bin/publish'
           path: '.'
 
       - name: Upload Release
@@ -54,3 +72,86 @@ jobs:
           artifacts: 'WitchyBND-${{ github.ref_name }}.zip'
           bodyFile: "./NOTES.md"
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup mod uploader
+        run: dotnet tool install -g Digitalroot.ModUploader
+
+      - name: Upload to Elden Ring Nexus
+        run: drmu nexusmods upload
+          -f "WitchyBND"
+          -v "${{ github.ref_name }}"
+          -t Main
+          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
+          -g eldenring
+          -ddwm
+          3862 "WitchyBND-${{ github.ref_name }}.zip"
+
+      - name: Upload to ACVI Nexus
+        run: drmu nexusmods upload
+          -f "WitchyBND"
+          -v "${{ github.ref_name }}"
+          -t Main
+          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
+          -g armoredcore6firesofrubicon
+          -ddwm
+          20 "WitchyBND-${{ github.ref_name }}.zip"
+
+      - name: Upload to DS1 Nexus
+        run: drmu nexusmods upload
+          -f "WitchyBND"
+          -v "${{ github.ref_name }}"
+          -t Main
+          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
+          -g darksouls
+          -ddwm
+          1865 "WitchyBND-${{ github.ref_name }}.zip"
+
+      - name: Upload to DS1R Nexus
+        run: drmu nexusmods upload
+          -f "WitchyBND"
+          -v "${{ github.ref_name }}"
+          -t Main
+          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
+          -g darksoulsremastered
+          -ddwm
+          653 "WitchyBND-${{ github.ref_name }}.zip"
+
+      - name: Upload to DS2 Nexus
+        run: drmu nexusmods upload
+          -f "WitchyBND"
+          -v "${{ github.ref_name }}"
+          -t Main
+          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
+          -g darksouls2
+          -ddwm
+          1192 "WitchyBND-${{ github.ref_name }}.zip"
+
+      - name: Upload to DS3 Nexus
+        run: drmu nexusmods upload
+          -f "WitchyBND"
+          -v "${{ github.ref_name }}"
+          -t Main
+          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
+          -g darksouls3
+          -ddwm
+          1676 "WitchyBND-${{ github.ref_name }}.zip"
+
+      - name: Upload to Sekiro Nexus
+        run: drmu nexusmods upload
+          -f "WitchyBND"
+          -v "${{ github.ref_name }}"
+          -t Main
+          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
+          -g sekiro
+          -ddwm
+          1633 "WitchyBND-${{ github.ref_name }}.zip"
+
+      - name: Upload to Bloodborne Nexus
+        run: drmu nexusmods upload
+          -f "WitchyBND"
+          -v "${{ github.ref_name }}"
+          -t Main
+          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
+          -g sekiro
+          -ddwm
+          20 "WitchyBND-${{ github.ref_name }}.zip"
