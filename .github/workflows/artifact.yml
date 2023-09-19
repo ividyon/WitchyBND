@@ -28,6 +28,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Set variables
+        run: |
+          NOTE=$(cat ./NOTES.md)
+          echo "NOTES=$NOTE" >> $GITHUB_ENV
+
       - name: Setup cache
         uses: actions/cache@v3
         with:
@@ -69,16 +74,29 @@ jobs:
         uses: thedoctor0/zip-release@main
         with:
           type: 'zip'
-          filename: './WitchyBND.zip'
-          directory: '.'
-          path: './bin/publish/**/*'
+          filename: '../../WitchyBND.zip'
+          directory: './bin/publish'
+          path: '.'
+
+      - name: Setup mod uploader
+        run: dotnet tool install -g Digitalroot.ModUploader
 
       - name: Upload to Elden Ring Nexus
-        run: dotnet tool install -g Digitalroot.ModUploader && drmu nexusmods upload
+        run: drmu nexusmods upload
           -f "WitchyBND-test"
           -v "v0.0.0.1"
           -t Main
-          -d "Hello world!"
+          -d "${{ env.NOTES }}"
           -g eldenring
           -dmfu -ddwm -dvu -dmv
           3862 "./WitchyBND.zip"
+
+#      - name: Upload to AC6 Nexus
+#        run: drmu nexusmods upload
+#          -f "WitchyBND-test"
+#          -v "v0.0.0.1"
+#          -t Main
+#          -d "${{ env.NOTES }}"
+#          -g armoredcore6firesofrubicon
+#          -dmfu -ddwm -dvu -dmv
+#          3862 "./WitchyBND.zip"
