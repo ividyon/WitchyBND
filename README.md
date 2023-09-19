@@ -74,7 +74,7 @@ To properly update:
 * Update your WitchyBND to v2.0.0.0+.
 * Unpack the regulation file, then PARAMs, with the new version. You are now updated.
 
-#### Changes in v2.0.0.1
+#### Changes in v2.0.0.2
 
 * Fixed a critical issue with binder file root paths that caused them to become corrupted due to a missing slash.
 * Added some failsafes to make the PARAM breaking changes less catastrophic.
