@@ -15,6 +15,14 @@ WitchyBND should run out-of-the-box on Windows versions newer than Windows 8.
 * For older versions, WitchyBND's context menu integration may require [.NET Framework 4.6](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net46).
 * In case of unexpected issues, or if using Wine on Linux, [.NET Desktop Runtime 7.0](https://aka.ms/dotnet/7.0/windowsdesktop-runtime-win-x64.exe) may be necessary.
 
+# Updating WitchyBND
+
+To update WitchyBND, unpack the new version into the same folder as before, and overwrite all files.
+
+Registering the WitchyBND context menu will put the files `WitchyBND.Shell.dll` and `Assets\context.png` in use, preventing them from being overwritten.
+
+You have to first unregister the context menu in the configuration screen, and restart the Explorer process, then exit WitchyBND, to allow overwriting them.
+
 # How to use
 Information on using Yabber (and therefore Witchy) is spread widely across the community. Visit the [Souls Modding Wiki](http://soulsmodding.wikidot.com/) or [?ServerName? Discord](http://discord.gg/servername) to get started.
 
@@ -59,6 +67,16 @@ Special thanks to Nordgaren, The12thAvenger, philiquaz, george_kingbore, katalas
 
 # Changelog
 ## WitchyBND
+
+### 2.0.1.0
+
+Reminder: The context menu for Witchy needs to be unregistered before updating it to a new version, otherwise the Shell DLL file and context menu icon will report being "in use" and not allow replacing them.
+Before applying this update, you have to manually kill the "explorer.exe" process in the Task Manager after unregistering the context menu. This will no longer be required for future releases.
+
+* Fixed an issue where the Witchy icon would appear overly large in the context menu.
+* Fixed an issue where context menu options would incorrectly appear for folders which do not contain a Witchy XML manifest.
+* Added an Explorer restart to the context menu unregister process.
+* Added documentation on updating Witchy to the README file.
 
 ### 2.0.0.2
 

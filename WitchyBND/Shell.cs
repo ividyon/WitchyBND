@@ -1,14 +1,19 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Microsoft.Win32;
+using PPlus;
 using WitchyLib;
 
 namespace WitchyBND;
 
 public static class Shell
 {
+    const int WM_USER = 0x0400; //http://msdn.microsoft.com/en-us/library/windows/desktop/ms644931(v=vs.85).aspx
+
     private static RegistryKey Root = Registry.CurrentUser;
     private static string ClassesKey = @"Software\Classes";
     private static string ProgIdQuick = "WitchyBND.A";
@@ -184,6 +189,12 @@ public static class Shell
 
     public static void UnregisterComplexContextMenu()
     {
+        using (RegistryKey key = Root.OpenSubKey(ClassesRegistryKey, true))
+        {
+            if (key != null)
+                key.DeleteSubKeyTree(ComplexMenuFullName, false);
+        }
+
         using (RegistryKey key = Root.OpenSubKey(ClsidRegistryKey, true))
         {
             if (key != null)
@@ -202,18 +213,42 @@ public static class Shell
                 key.DeleteSubKeyTree(ComplexMenuFullName.Split('.').Last(), false);
         }
 
-
-        using (RegistryKey key = Root.OpenSubKey(ClassesRegistryKey, true))
-        {
-            if (key != null)
-                key.DeleteSubKeyTree(ComplexMenuFullName, false);
-        }
-
         // Tell explorer the file association has been changed
         SHChangeNotify(0x08000000, 0x0000, IntPtr.Zero, IntPtr.Zero);
     }
 
+    public static void RestartExplorer()
+    {
+        try
+        {
+            var ptr = FindWindow("Shell_TrayWnd", null);
+            // Console.WriteLine("INIT PTR: {0}", ptr.ToInt32());
+            PostMessage(ptr, WM_USER + 436, (IntPtr)0, (IntPtr)0);
+            do
+            {
+                ptr = FindWindow("Shell_TrayWnd", null);
+                // Console.WriteLine("PTR: {0}", ptr.ToInt32());
 
+                if (ptr.ToInt32() == 0)
+                {
+                    // Console.WriteLine("Success. Breaking out of loop.");
+                    break;
+                }
+
+                Thread.Sleep(1000);
+            } while (true);
+        }
+        catch (Exception ex)
+        {
+            PromptPlus.Error.WriteLine("{0} {1}", ex.Message, ex.StackTrace);
+        }
+        // PromptPlus.WriteLine("Restarting the shell.");
+        string explorer = string.Format("{0}\\{1}", Environment.GetEnvironmentVariable("WINDIR"), "explorer.exe");
+        Process process = new Process();
+        process.StartInfo.FileName = explorer;
+        process.StartInfo.UseShellExecute = true;
+        process.Start();
+    }
 
     private static RegistryKey EnsureSubKey(RegistryKey root, string name)
     {
@@ -247,6 +282,12 @@ public static class Shell
             return parentKey.CreateSubKey(Path.GetFileName(joinedName));
         }
     }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    static extern bool PostMessage(IntPtr hWnd, [MarshalAs(UnmanagedType.U4)] uint Msg, IntPtr wParam, IntPtr lParam);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
     [DllImport("shell32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     public static extern void SHChangeNotify(uint wEventId, uint uFlags, IntPtr dwItem1, IntPtr dwItem2);

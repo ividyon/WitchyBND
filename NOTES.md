@@ -1,19 +1,7 @@
-A critical bugfix release.
+Reminder: The context menu for Witchy needs to be unregistered before updating it to a new version, otherwise the Shell DLL file and context menu icon will report being "in use" and not allow replacing them.
+Before applying this update, you have to manually kill the "explorer.exe" process in the Task Manager after unregistering the context menu. This will no longer be required for future releases.
 
-### PSA for v2
-
-WitchyBND v2.0.0.0 introduced a **breaking change** with regulation files and PARAMs. Attempting to repack a PARAM XML with v2.0.0.0+ which was unpacked with an older Witchy version will cause the process to break.
-
-To properly update:
-
-* Repack any edited PARAMs and regulation files with your previous version of the tool.
-* Update your WitchyBND to v2.0.0.0+.
-* Unpack the regulation file, then PARAMs, with the new version. You are now updated.
-
-### Changes in v2.0.0.2
-
-* Fixed a critical issue with binder file root paths that caused them to become corrupted due to a missing slash.
-* Added some failsafes to make the PARAM breaking changes less catastrophic.
-* Fixed an issue where "Pause on Error" was not toggled to TRUE by default.
-* Fixed an issue where the AC6 TentativeParamTypes would be queried even if not interfacing with non-AC6 PARAMs.
-* Fixed an issue where the wrong names appeared in the configuration overview for argument-only settings.
+* Fixed an issue where the Witchy icon would appear overly large in the context menu.
+* Fixed an issue where context menu options would incorrectly appear for folders which do not contain a Witchy XML manifest.
+* Added an Explorer restart to the context menu unregister process.
+* Added documentation on updating Witchy to the README file.

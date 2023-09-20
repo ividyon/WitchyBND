@@ -27,32 +27,44 @@ public class ShellIntegrationMode
 
     public static void CliShellIntegrationMode(CliOptions opt)
     {
-        PromptPlus.Clear();
-        PromptPlus.DoubleDash("WitchyBND shell integration options");
-        var select = PromptPlus.Select<ShellIntegrationChoices>("Select an option")
-            .Run();
-        switch (select.Value)
+        while (true)
         {
-            case ShellIntegrationChoices.Register:
-                RegisterContext();
-                PromptPlus.WriteLine("Successfully registered WitchyBND shell integration.");
-                break;
-            case ShellIntegrationChoices.Unregister:
-                UnregisterContext();
-                PromptPlus.WriteLine("Successfully unregistered WitchyBND shell integration.");
-                break;
-            case ShellIntegrationChoices.UnregisterYabber:
-                UnregisterYabberContext();
-                PromptPlus.WriteLine("Successfully unregistered Yabber context menu.");
-                break;
-            case ShellIntegrationChoices.Return:
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+            PromptPlus.Clear();
+            PromptPlus.DoubleDash("WitchyBND shell integration options");
+            var select = PromptPlus.Select<ShellIntegrationChoices>("Select an option")
+                .Run();
+            switch (select.Value)
+            {
+                case ShellIntegrationChoices.Register:
+                    RegisterContext();
+                    PromptPlus.WriteLine("Successfully registered WitchyBND shell integration.");
+                    break;
+                case ShellIntegrationChoices.Unregister:
+                    UnregisterContext();
+                    PromptPlus.WriteLine("Successfully unregistered WitchyBND shell integration.");
+                    PromptPlus.WriteLine(
+                        @"Explorer needs to be restarted to complete the process.
+Any open folder windows will be closed, and your taskbar will briefly disappear for a few seconds.");
+                    var choice = PromptPlus.Confirm("Proceed with restarting Explorer?").Run();
+                    if (choice.Value.IsYesResponseKey())
+                    {
+                        Shell.RestartExplorer();
+                        PromptPlus.WriteLine("Restarted the Explorer process.");
+                    }
+                    break;
+                case ShellIntegrationChoices.UnregisterYabber:
+                    UnregisterYabberContext();
+                    PromptPlus.WriteLine("Successfully unregistered Yabber context menu.");
+                    break;
+                case ShellIntegrationChoices.Return:
+                    return;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
 
-        PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);
-        PromptPlus.ReadKey();
+            PromptPlus.WriteLine(Constants.PressAnyKey);
+            PromptPlus.ReadKey();
+        }
     }
 
     public static void UnregisterYabberContext()
@@ -65,7 +77,6 @@ public class ShellIntegrationMode
 
     public static void UnregisterContext()
     {
-        // Shell.UnregisterSimpleContextMenu();
         Shell.UnregisterComplexContextMenu();
         SendTo.DeleteSendToShortcuts();
     }

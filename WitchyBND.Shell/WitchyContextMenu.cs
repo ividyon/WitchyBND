@@ -25,7 +25,10 @@ namespace WitchyBND.Shell
     [ProgId("WitchyBND.Shell.WitchyContextMenu")]
     public class WitchyContextMenu : SharpContextMenu
     {
-        public static readonly string WitchyPath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? ".", "WitchyBND.exe");
+        public static readonly string WitchyPath =
+            Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? ".",
+                "WitchyBND.exe");
+
         protected override bool CanShowMenu()
         {
             return true;
@@ -34,7 +37,6 @@ namespace WitchyBND.Shell
         protected override ContextMenuStrip CreateMenu()
         {
             var count = SelectedItemPaths.Count();
-            bool plural = count > 1;
             bool tooMany = count > 15;
 
             var menu = new ContextMenuStrip();
@@ -42,9 +44,12 @@ namespace WitchyBND.Shell
             ToolStripMenuItem witchyShortcut = new ToolStripMenuItem
             {
                 Text = "WitchyBND",
-                Image = Image.FromFile(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "Assets", "context.png"), true),
+                Image = Image.FromFile(
+                    Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),
+                        "Assets", "context.png"), true),
             };
 
+            var show = false;
             if (!tooMany)
             {
                 if (SelectedItemPaths.Count() == 1 && Directory.Exists(SelectedItemPaths.First()))
@@ -52,21 +57,30 @@ namespace WitchyBND.Shell
                     if (Directory.GetFiles(SelectedItemPaths.First(), "_witchy*.xml", SearchOption.TopDirectoryOnly)
                             .Length > 0)
                     {
-                        witchyShortcut.Click += ProcessMenuItemOnClick;
-                        menu.Items.Add(witchyShortcut);
+                        show = true;
                     }
                 }
                 else
                 {
-                    witchyShortcut.Click += ProcessMenuItemOnClick;
-                    menu.Items.Add(witchyShortcut);
+                    show = true;
                 }
             }
+            else
+            {
+                show = true;
+            }
+
+            if (!show) return menu;
+
+            witchyShortcut.Click += ProcessMenuItemOnClick;
+            menu.Items.Add(witchyShortcut);
 
             ToolStripMenuItem witchyMenu = new ToolStripMenuItem
             {
                 Text = "WitchyBND...",
-                Image = Image.FromFile(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "Assets", "context.png"), true),
+                Image = Image.FromFile(
+                    Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),
+                        "Assets", "context.png"), true),
             };
             if (tooMany)
             {
@@ -129,6 +143,7 @@ namespace WitchyBND.Shell
             }
 
             menu.Items.Add(witchyMenu);
+
             return menu;
         }
 
@@ -136,9 +151,11 @@ namespace WitchyBND.Shell
         {
             Process.Start(WitchyPath, string.Join(" ", SelectedItemPaths.Select(p => $"\"{p}\"")));
         }
+
         private void ProcessToMenuItemOnClick(object sender, EventArgs e)
         {
-            Process.Start(WitchyPath, $"--location prompt {string.Join(" ", SelectedItemPaths.Select(p => $"\"{p}\""))}");
+            Process.Start(WitchyPath,
+                $"--location prompt {string.Join(" ", SelectedItemPaths.Select(p => $"\"{p}\""))}");
         }
 
         private void ProcessDcxMenuItemOnClick(object sender, EventArgs e)
@@ -148,7 +165,8 @@ namespace WitchyBND.Shell
 
         private void ProcessDcxToMenuItemOnClick(object sender, EventArgs e)
         {
-            Process.Start(WitchyPath, $"--location prompt --dcx {string.Join(" ", SelectedItemPaths.Select(p => $"\"{p}\""))}");
+            Process.Start(WitchyPath,
+                $"--location prompt --dcx {string.Join(" ", SelectedItemPaths.Select(p => $"\"{p}\""))}");
         }
 
         private void ProcessRecursiveMenuItemOnClick(object sender, EventArgs e)
@@ -158,7 +176,8 @@ namespace WitchyBND.Shell
 
         private void ProcessRecursiveToMenuItemOnClick(object sender, EventArgs e)
         {
-            Process.Start(WitchyPath, $"--location prompt --recursive {string.Join(" ", SelectedItemPaths.Select(p => $"\"{p}\""))}");
+            Process.Start(WitchyPath,
+                $"--location prompt --recursive {string.Join(" ", SelectedItemPaths.Select(p => $"\"{p}\""))}");
         }
 
         // private void AllFilesMenuItemOnClick(object sender, EventArgs e)
