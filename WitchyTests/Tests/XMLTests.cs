@@ -346,4 +346,46 @@ public class XMLTests : TestBase
             }
         }
     }
+
+    [Test]
+    public void DBSUB()
+    {
+        IEnumerable<string> paths = GetSamples("DBSUB");
+
+        var parser = new WDBSUB();
+
+        foreach (string path in paths.Select(GetCopiedPath))
+        {
+            Assert.That(parser.Exists(path));
+            Assert.That(parser.Is(path));
+
+            byte[] backup = { };
+            for (int i = 0; i < 2; i++)
+            {
+                if (i == 0)
+                {
+                    backup = File.ReadAllBytes(path);
+                    Configuration.Args.Location = null;
+                }
+                else
+                {
+                    File.WriteAllBytes(path, backup);
+                    Configuration.Args.Location = Path.Combine(Path.GetDirectoryName(path), "Target");
+                    Directory.CreateDirectory(Configuration.Args.Location);
+                }
+                parser.Unpack(path);
+                string? destPath = parser.GetUnpackDestPath(path);
+
+                File.Delete(path);
+
+                Assert.That(File.Exists(destPath));
+                Assert.That(parser.ExistsUnpacked(destPath));
+                Assert.That(parser.IsUnpacked(destPath));
+                parser.Repack(destPath);
+
+                var xml = WFileParser.LoadXml(destPath);
+                Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml)));
+            }
+        }
+    }
 }
