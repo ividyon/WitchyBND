@@ -150,6 +150,7 @@ public static class ParseMode
             new Parsers.WMTD(),
             new Parsers.WPARAM(),
             new Parsers.WMQB(),
+            new Parsers.WDBSUB(),
             //MSBE
             //TAE
         };
