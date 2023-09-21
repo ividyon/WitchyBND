@@ -17,9 +17,6 @@
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
         <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="8.0.0-preview.2.23128.3" />
         <PackageReference Include="PromptPlus" Version="4.0.5" />
-        <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.4.355802">
-            <PrivateAssets>all</PrivateAssets>
-        </PackageReference>
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\SoulsFormats\SoulsFormats.csproj" />

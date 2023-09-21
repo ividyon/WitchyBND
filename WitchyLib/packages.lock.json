@@ -8,12 +8,6 @@
         "resolved": "4.7.0",
         "contentHash": "pTj+D3uJWyN3My70i2Hqo+OXixq3Os2D1nJ2x92FFo6sk8fYS1m1WLNTs0Dc1uPaViH0YvEEwvzddQ7y4rhXmA=="
       },
-      "Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers": {
-        "type": "Direct",
-        "requested": "[0.4.355802, )",
-        "resolved": "0.4.355802",
-        "contentHash": "lIUaPPvd4EUoEjnXFBP33RguvcENDkpF8f7vg5kitB0fGqAEerq1h9u+AI/87QWcel0NStAuADBj+NXXX1XlQQ=="
-      },
       "Microsoft.Extensions.FileSystemGlobbing": {
         "type": "Direct",
         "requested": "[8.0.0-preview.2.23128.3, )",
@@ -135,8 +129,8 @@
       "witchyformats": {
         "type": "Project",
         "dependencies": {
-          "SoulsFormats": "[2.0.0, )",
-          "StudioUtils": "[2.0.0, )"
+          "SoulsFormats": "[2.0.1, )",
+          "StudioUtils": "[2.0.1, )"
         }
       }
     }

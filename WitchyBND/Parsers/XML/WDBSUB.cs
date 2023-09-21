@@ -1,6 +1,8 @@
 ﻿using SoulsFormats;
 using System;
+using System.IO;
 using System.Xml;
+using System.Xml.Linq;
 using WitchyFormats;
 using WitchyLib;
 
@@ -8,11 +10,20 @@ namespace WitchyBND.Parsers
 {
     public class WDBSUB : WXMLParser
     {
-        public override string Name => nameof(DBSUB).ToLower();
+        public override string Name => nameof(DBSUB);
 
         public override bool Is(string path)
         {
             return DBSUB.Is(path);
+        }
+
+        public override bool IsUnpacked(string path)
+        {
+            if (Path.GetExtension(path) != ".xml")
+                return false;
+
+            var doc = XDocument.Load(path);
+            return doc.Root != null && doc.Root.Name == Name;
         }
 
         public override void Unpack(string srcPath)
