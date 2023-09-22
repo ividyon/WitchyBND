@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using SoulsFormats;
 using SoulsFormats.AC4;
 
 namespace WitchyBND.Parsers;
@@ -7,8 +8,9 @@ public class WZERO3 : WFolderParser
 {
 
     public override string Name => "Zero3";
-    public override bool Is(string path)
+    public override bool Is(string path, byte[]? _, out ISoulsFile? file)
     {
+        file = null;
         return Zero3.Is(path);
     }
 
@@ -17,7 +19,7 @@ public class WZERO3 : WFolderParser
         return false;
     }
 
-    public override void Unpack(string srcPath)
+    public override void Unpack(string srcPath, ISoulsFile? _)
     {
         var z3 = Zero3.Read(srcPath);
         var targetDir = GetUnpackDestDir(srcPath);

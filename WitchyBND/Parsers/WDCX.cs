@@ -14,10 +14,12 @@ namespace WitchyBND.Parsers;
 /// </summary>
 public class WDCX : WSingleFileParser
 {
-
     public override string Name => "DCX";
-    public override bool Is(string path)
+
+    public override WFileParserVerb Verb => WFileParserVerb.None;
+    public override bool Is(string path, byte[] _, out ISoulsFile? file)
     {
+        file = null;
         return Configuration.Dcx && DCX.Is(path);
     }
 
@@ -61,11 +63,11 @@ public class WDCX : WSingleFileParser
         return File.Exists(xmlPath);
     }
 
-    public override void Unpack(string srcPath)
+    public override void Unpack(string srcPath, ISoulsFile _)
     {
         string outPath = GetUnpackDestPath(srcPath);
 
-        byte[] bytes = DCX.Decompress(srcPath, out DCX.Type compression);
+        byte[] bytes = DCX.Decompress(srcPath, out DCX.Type comp);
         File.WriteAllBytes(outPath, bytes);
 
         XmlWriterSettings xws = new XmlWriterSettings();
@@ -78,7 +80,7 @@ public class WDCX : WSingleFileParser
         if (!string.IsNullOrEmpty(Configuration.Args.Location))
             xw.WriteElementString("sourcePath", Path.GetDirectoryName(srcPath));
 
-        xw.WriteElementString("compression", compression.ToString());
+        xw.WriteElementString("compression", comp.ToString());
         xw.WriteEndElement();
         xw.Close();
     }

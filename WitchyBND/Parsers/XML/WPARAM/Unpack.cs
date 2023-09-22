@@ -4,14 +4,16 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using PPlus;
+using SoulsFormats;
 using WitchyFormats;
 using WitchyLib;
+using PARAMDEF = WitchyFormats.PARAMDEF;
 
 namespace WitchyBND.Parsers;
 
 public partial class WPARAM
 {
-    public override void Unpack(string srcPath)
+    public override void Unpack(string srcPath, ISoulsFile? file)
     {
         if (Game == null)
             Game = WBUtil.DetermineParamdexGame(Path.GetDirectoryName(srcPath), Configuration.Args.Passive);
@@ -21,7 +23,7 @@ public partial class WPARAM
 
         var game = Game.Value;
 
-        var param = FsParam.Read(srcPath);
+        var param = (file as FsParam)!;
         string paramTypeToParamdef = param.ParamType;
         string paramName = Path.GetFileNameWithoutExtension(srcPath);
 
@@ -39,22 +41,28 @@ public partial class WPARAM
 
         if (!ParamdefStorage[game].ContainsKey(paramTypeToParamdef))
         {
-            Program.RegisterError( new WitchyError($"Param type {paramTypeToParamdef} not found in {game.ToString()} paramdefs.", srcPath));
+            Program.RegisterError(
+                new WitchyError($"Param type {paramTypeToParamdef} not found in {game.ToString()} paramdefs.",
+                    srcPath));
             // Don't hard-fail this because it can happen, just proceed to the next file.
             return;
         }
 
         PARAMDEF paramdef = ParamdefStorage[game][paramTypeToParamdef];
 
-        try
+        if (param.AppliedParamdef == null)
         {
-            param.ApplyParamdef(paramdef);
-        }
-        catch (Exception)
-        {
-            Program.RegisterError( new WitchyError($"Could not carefully apply paramdef {paramTypeToParamdef}.", srcPath));
-            // Nothing happened yet, so can just proceed to the next file.
-            return;
+            try
+            {
+                param.ApplyParamdef(paramdef);
+            }
+            catch (Exception)
+            {
+                Program.RegisterError(new WitchyError($"Could not carefully apply paramdef {paramTypeToParamdef}.",
+                    srcPath));
+                // Nothing happened yet, so can just proceed to the next file.
+                return;
+            }
         }
 
         // Begin writing the XML
@@ -172,7 +180,8 @@ public partial class WPARAM
             xw.WriteAttributeString("unkc0", field.UnkC0);
 
             // Store common "default" values
-            if (Configuration.ParamDefaultValues && defaultValues.TryGetValue(fieldName, out string value) && value != null)
+            if (Configuration.ParamDefaultValues && defaultValues.TryGetValue(fieldName, out string value) &&
+                value != null)
             {
                 xw.WriteAttributeString("defaultValue", value);
             }

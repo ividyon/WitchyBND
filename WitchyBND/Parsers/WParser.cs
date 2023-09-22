@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Enumeration;
+using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
@@ -11,19 +13,23 @@ namespace WitchyBND.Parsers;
 
 public enum WFileParserVerb
 {
-    Unpack = 0,
-    Serialize = 1,
+    None = 0,
+    Unpack = 1,
+    Serialize = 2,
 }
 
 public abstract class WFileParser
 {
     public virtual WFileParserVerb Verb => WFileParserVerb.Unpack;
+    public virtual bool IncludeInList => true;
     public abstract string Name { get; }
-    public abstract bool Is(string path);
+
+    public virtual string XmlTag => Name.ToLower();
+    public abstract bool Is(string path, byte[]? data, out ISoulsFile? file);
     public abstract bool Exists(string path);
     public abstract bool ExistsUnpacked(string path);
     public abstract bool IsUnpacked(string path);
-    public abstract void Unpack(string srcPath);
+    public abstract void Unpack(string srcPath, ISoulsFile? file);
     public abstract void Repack(string srcPath);
 
     public static void AddLocationToXml(string path)
@@ -49,6 +55,34 @@ public abstract class WFileParser
         XDocument doc = XDocument.Load(path);
         if (doc.Root == null) throw new XmlException("XML has no root");
         return doc.Root;
+    }
+    private static bool IsRead<TFormat>(string path, out ISoulsFile? file) where TFormat : SoulsFile<TFormat>, new()
+    {
+        if (SoulsFile<TFormat>.IsRead(path, out TFormat format))
+        {
+            file = format;
+            return true;
+        }
+
+        file = null;
+        return false;
+    }
+
+    private static bool IsRead<TFormat>(byte[] data, out ISoulsFile? file) where TFormat : SoulsFile<TFormat>, new()
+    {
+        if (SoulsFile<TFormat>.IsRead(data, out TFormat format))
+        {
+            file = format;
+            return true;
+        }
+
+        file = null;
+        return false;
+    }
+
+    public static bool IsRead<TFormat>(string path, byte[]? data, out ISoulsFile? file) where TFormat : SoulsFile<TFormat>, new()
+    {
+        return data != null ? IsRead<TFormat>(data, out file) : IsRead<TFormat>(path, out file);
     }
 }
 
@@ -116,18 +150,18 @@ public abstract class WFolderParser : WFileParser
         if (!File.Exists(xmlPath)) return false;
 
         var doc = XDocument.Load(xmlPath);
-        return doc.Root != null && doc.Root.Name == Name.ToLower();
+        return doc.Root != null && doc.Root.Name == XmlTag;
     }
 
-    public virtual string GetBinderXmlFilename(string name = null)
+    public virtual string GetBinderXmlFilename(string? name = null)
     {
-        name ??= Name.ToLower();
+        name ??= XmlTag.ToLower();
         return $"_witchy-{name}.xml";
     }
 
-    public virtual string GetBinderXmlPath(string dir, string name = null)
+    public virtual string GetBinderXmlPath(string dir, string? name = null)
     {
-        name ??= Name.ToLower();
+        name ??= XmlTag.ToLower();
         dir = string.IsNullOrEmpty(dir) ? dir : $"{dir}\\";
 
         if (File.Exists($"{dir}{GetBinderXmlFilename(name)}"))
@@ -250,6 +284,53 @@ public abstract class WBinderParser : WFolderParser
     }
 }
 
+public class UnsortedFileFormat
+{
+    public string SearchPattern { get; }
+    public Binder.FileFlags FileFlags { get; }
+
+    public DCX.Type Compression { get; }
+
+    public UnsortedFileFormat(string pattern, Binder.FileFlags flags, DCX.Type compression = DCX.Type.Zlib)
+    {
+        SearchPattern = pattern;
+        FileFlags = flags;
+        Compression = compression;
+    }
+}
+public abstract class WUnsortedBinderParser : WBinderParser
+{
+    public abstract string Extension { get; }
+    public abstract UnsortedFileFormat[] PackedFormats { get; }
+
+    public virtual bool EndsInExtension(string path)
+    {
+        return path.EndsWith($".{Extension}") || path.EndsWith($".{Extension}.dcx");
+    }
+
+    protected virtual void ReadUnsortedBinderFiles(IBinder bnd, string srcDirPath, string root)
+    {
+        string searchPattern = string.Join(';', PackedFormats.Select(f => f.SearchPattern));
+        var i = 0;
+        foreach (string filePath in Directory.GetFiles(srcDirPath, searchPattern, SearchOption.AllDirectories))
+        {
+            string filename = Path.GetFileName(filePath);
+            UnsortedFileFormat format = PackedFormats.FirstOrDefault(a =>
+                FileSystemName.MatchesWin32Expression(a.SearchPattern.AsSpan(), filename));
+            if (format == null)
+                throw new InvalidDataException(
+                    $"File {filename} passed pattern checks, but was not found among formats.");
+            string name = !string.IsNullOrEmpty(root) ? Path.Combine(root, Path.GetRelativePath(srcDirPath, filePath)) : filePath;
+            byte[] bytes = File.ReadAllBytes(filePath);
+            bnd.Files.Add(new BinderFile(format.FileFlags, i, name, bytes)
+            {
+                CompressionType = format.Compression
+            });
+            i++;
+        }
+    }
+}
+
 public abstract class WXMLParser : WSingleFileParser
 {
     public override WFileParserVerb Verb => WFileParserVerb.Serialize;
@@ -277,6 +358,6 @@ public abstract class WXMLParser : WSingleFileParser
             return false;
 
         var doc = XDocument.Load(path);
-        return doc.Root != null && doc.Root.Name == Name.ToLower();
+        return doc.Root != null && doc.Root.Name == XmlTag;
     }
 }

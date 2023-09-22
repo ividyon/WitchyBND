@@ -8,22 +8,23 @@
         <Title>WitchyBND</Title>
         <PublishDir>..\bin\publish</PublishDir>
         <PlatformTarget>x64</PlatformTarget>
-        <PublishSingleFile>True</PublishSingleFile>
-        <SelfContained>true</SelfContained>
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-        <DebugType>embedded</DebugType>
-        <PublishTrimmed>True</PublishTrimmed>
-        <TrimMode>partial</TrimMode>
-        <PublishReadyToRun>true</PublishReadyToRun>
-        <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-        <DeleteExistingFiles>true</DeleteExistingFiles>
-        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
         <OutputPath>..\bin\Debug\</OutputPath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
         <OutputPath>..\bin\Release\</OutputPath>
+        <DebugType>embedded</DebugType>
+        <PublishSingleFile>True</PublishSingleFile>
+        <SelfContained>true</SelfContained>
+        <PublishTrimmed>True</PublishTrimmed>
+        <TrimMode>partial</TrimMode>
+        <PublishReadyToRun>true</PublishReadyToRun>
+        <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+        <DeleteExistingFiles>true</DeleteExistingFiles>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     </PropertyGroup>
     <PropertyGroup>
         <ApplicationIcon>Assets/icon.ico</ApplicationIcon>
@@ -60,7 +61,7 @@
         <Content Include="Assets\Paramdex\**">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
-        <None Remove="Assets\context.png"/>
+        <None Remove="Assets\context.png" />
         <Content Include="Assets\context.png">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>

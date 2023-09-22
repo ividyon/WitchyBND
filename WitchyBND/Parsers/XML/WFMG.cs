@@ -12,12 +12,13 @@ public class WFMG : WXMLParser
 
     public override string Name => "FMG";
 
-    public override bool Is(string path)
+    public override bool Is(string path, byte[]? _, out ISoulsFile? file)
     {
+        file = null;
         return Path.GetExtension(path) == ".fmg";
     }
 
-    public override void Unpack(string srcPath)
+    public override void Unpack(string srcPath, ISoulsFile? _)
     {
         FMG fmg = FMG.Read(srcPath);
         XmlWriterSettings xws = new XmlWriterSettings();

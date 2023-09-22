@@ -1,8 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Xml.Linq;
-using WitchyFormats;
+using SoulsFormats;
 using WitchyLib;
+using MTD = WitchyFormats.MTD;
 
 namespace WitchyBND.Parsers;
 
@@ -10,9 +11,9 @@ public class WMTD : WXMLParser
 {
 
     public override string Name => "MTD";
-    public override bool Is(string path)
+    public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
-        return MTD.Is(path);
+       return IsRead<MTD>(path, data, out file);
     }
 
     public override bool IsUnpacked(string path)
@@ -24,7 +25,7 @@ public class WMTD : WXMLParser
         return doc.Root != null && doc.Root.Name == Name;
     }
 
-    public override void Unpack(string srcPath)
+    public override void Unpack(string srcPath, ISoulsFile? file)
     {
         MTD mtd = MTD.Read(srcPath);
         string targetFile = GetUnpackDestPath(srcPath);

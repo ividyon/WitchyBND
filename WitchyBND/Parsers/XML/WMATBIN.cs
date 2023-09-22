@@ -1,8 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Xml.Linq;
-using WitchyFormats;
+using SoulsFormats;
 using WitchyLib;
+using MATBIN = WitchyFormats.MATBIN;
 
 namespace WitchyBND.Parsers;
 
@@ -10,9 +11,9 @@ public class WMATBIN : WXMLParser
 {
 
     public override string Name => "MATBIN";
-    public override bool Is(string path)
+    public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
-        return MATBIN.Is(path);
+        return IsRead<MATBIN>(path, data, out file);
     }
 
     public override bool IsUnpacked(string path)
@@ -24,9 +25,9 @@ public class WMATBIN : WXMLParser
         return doc.Root != null && doc.Root.Name == Name;
     }
 
-    public override void Unpack(string srcPath)
+    public override void Unpack(string srcPath, ISoulsFile? file)
     {
-        MATBIN matbin = MATBIN.Read(srcPath);
+        var matbin = (file as MATBIN)!;
         string targetFile = GetUnpackDestPath(srcPath);
 
         if (File.Exists(targetFile)) WBUtil.Backup(targetFile);

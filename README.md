@@ -2,7 +2,7 @@
   <img src="https://github.com/ividyon/WitchyBND/blob/main/public/logo.png?raw=true" />
 </p>
 
-# WitchyBND v2.0.1.0
+# WitchyBND v2.1.0.0
 WitchyBND is an unpacking/repacking/serializing software for common file formats used by FromSoftware's proprietary game engine, for games like Demon's Souls, Dark Souls 1-3, Bloodborne, Sekiro, Elden Ring and Armored Core VI. Witchy supports the formats DCX, FFXBND, BND3, BND4, BXF3, BXF4, FFXDLSE, FMG, GPARAM, LUAGNL, LUAINFO, TPF, Zero3, FXR3, MATBIN, MTD, PARAM, and MQB.
 
 A successor to **Yabber**, the FromSoftware file format unpacker and serializer by TKGP, featuring a comprehensive rewrite, added features and comfort, and bundled contributions by the community.
@@ -26,16 +26,16 @@ You have to first unregister the context menu in the configuration screen, and r
 # How to use
 Information on using Yabber (and therefore Witchy) is spread widely across the community. Visit the [Souls Modding Wiki](http://soulsmodding.wikidot.com/) or [?ServerName? Discord](http://discord.gg/servername) to get started.
 
-## Shell context menu
+## Right-click context menu integration
 The most comfortable integration of WitchyBND is found in the context menu. Witchy does not come with an installer, so you need to briefly launch it and register the context menu with Windows yourself.
 
 * Launch WitchyBND.exe in the Witchy folder.
-* Navigate the configuration screen to the **"Configure shell integration"** option, and confirm.
-* Navigate to the **"Register WitchyBND shell integration"** option, and confirm.
+* Navigate the configuration screen to the **"Configure Windows integration"** option, and confirm.
+* Navigate to the **"Register WitchyBND context menu"** option, and confirm.
 
 From now on, **WitchyBND** menu options should appear when you right-click files and folders in Explorer.
 
-To remove the context menu options, simply use the **"Unregister WitchyBND shell integration"** option. You may need to restart Explorer afterwards.
+To remove the context menu options, simply use the **"Unregister WitchyBND context menu"** option. You may need to restart Explorer afterwards.
 
 ## Basic workflow
 * Unpack the game files using a tool like [UXM Selective Unpacker](https://www.nexusmods.com/eldenring/mods/1651).

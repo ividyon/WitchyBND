@@ -250,6 +250,25 @@ public static class Shell
         process.Start();
     }
 
+    public static void AddToPathVariable()
+    {
+        RemoveFromPathVariable();
+        var name = "PATH";
+        var scope = EnvironmentVariableTarget.User;
+        var oldValue = Environment.GetEnvironmentVariable(name, scope);
+        var newValue  = oldValue + @$";{WBUtil.GetExeLocation()}\\";
+        Environment.SetEnvironmentVariable(name, newValue, scope);
+    }
+
+    public static void RemoveFromPathVariable()
+    {
+        var name = "PATH";
+        var scope = EnvironmentVariableTarget.User;
+        var oldValue = Environment.GetEnvironmentVariable(name, scope);
+        var newValue = oldValue.Replace(@$";{WBUtil.GetExeLocation()}\\", "");
+        Environment.SetEnvironmentVariable(name, newValue, scope);
+    }
+
     private static RegistryKey EnsureSubKey(RegistryKey root, string name)
     {
         RegistryKey key = root.OpenSubKey(name, true);

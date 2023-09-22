@@ -18,14 +18,14 @@ public class WTPF : WFolderParser
     static List<TPF.TPFPlatform> supportedPlatforms =
         new() { TPF.TPFPlatform.PC, TPF.TPFPlatform.PS3, TPF.TPFPlatform.PS4 };
 
-    public override bool Is(string path)
+    public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
-        return TPF.Is(path);
+        return IsRead<TPF>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath)
+    public override void Unpack(string srcPath, ISoulsFile? file)
     {
-        var tpf = TPF.Read(srcPath);
+        var tpf = (file as TPF)!;
         var destDir = GetUnpackDestDir(srcPath);
         var sourceName = Path.GetFileName(srcPath);
         if (!supportedPlatforms.Contains(tpf.Platform))
@@ -72,7 +72,7 @@ public class WTPF : WFolderParser
         }
 
         var filename = new XElement("filename", sourceName);
-        var xml = new XElement(Name.ToLower(),
+        var xml = new XElement(XmlTag,
             filename,
             new XElement("compression", tpf.Compression.ToString()),
             new XElement("encoding", $"0x{tpf.Encoding:X2}"),
@@ -143,7 +143,9 @@ public class WTPF : WFolderParser
         catch (Exception e) when (e is not NoOodleFoundException)
         {
             if (platform == TPF.TPFPlatform.PC) throw;
-            Program.RegisterError(new WitchyError("WitchyBND only officially supports repacking PC TPFs at the moment. Repacking console TPFs is not supported.", srcPath));
+            Program.RegisterError(new WitchyError(
+                "WitchyBND only officially supports repacking PC TPFs at the moment. Repacking console TPFs is not supported.",
+                srcPath));
         }
     }
 }

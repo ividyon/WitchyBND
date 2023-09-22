@@ -18,7 +18,7 @@ public static class ConfigMode
         ToggleParamDefaultValues,
         ConfigureDelay,
         TogglePauseOnError,
-        Context,
+        Windows,
         Formats,
         Help,
         Exit
@@ -67,7 +67,7 @@ Disabling vastly increases XML output size."
             {
                 Type = ConfigMenuItemType.ConfigureDelay, Label = $"Configure end delay ({Configuration.EndDelay}ms)"
             },
-            new ConfigMenuItem { Type = ConfigMenuItemType.Context, Label = "Configure shell integration" },
+            new ConfigMenuItem { Type = ConfigMenuItemType.Windows, Label = "Configure Windows integration" },
             new ConfigMenuItem { Type = ConfigMenuItemType.Formats, Label = "View available formats" },
             new ConfigMenuItem { Type = ConfigMenuItemType.Help, Label = "View help screen" },
             new ConfigMenuItem { Type = ConfigMenuItemType.Exit, Label = "Exit" },
@@ -101,6 +101,8 @@ Press any key to continue to the configuration screen...");
                 .TextSelector(a => a.Label)
                 .ChangeDescription(a => a.Description)
                 .Run();
+
+            if (select.IsAborted) return;
 
             switch (select.Value.Type)
             {
@@ -160,14 +162,14 @@ Press any key to continue to the configuration screen...");
                     }
                     PromptPlus.Clear();
                     break;
-                case ConfigMenuItemType.Context:
-                    ShellIntegrationMode.CliShellIntegrationMode(opt);
+                case ConfigMenuItemType.Windows:
+                    IntegrationMode.CliShellIntegrationMode(opt);
                     PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);
                     PromptPlus.Clear();
                     break;
                 case ConfigMenuItemType.Formats:
                     PromptPlus.WriteLine(
-                        $"WitchyBND supports the following formats:\n{string.Join(", ", ParseMode.Parsers.Select(p => p.Name))}");
+                        $"WitchyBND supports the following formats:\n{string.Join(", ", ParseMode.Parsers.Where(p => p.IncludeInList).Select(p => p.Name))}");
                     PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);
                     PromptPlus.ReadKey();
                     PromptPlus.Clear();
@@ -180,8 +182,7 @@ Press any key to continue to the configuration screen...");
                     break;
                 case ConfigMenuItemType.Exit:
                     PromptPlus.Clear();
-                    Environment.Exit(0);
-                    break;
+                    return;
                 default:
                     throw new IndexOutOfRangeException();
             }

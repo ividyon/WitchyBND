@@ -12,19 +12,19 @@ public class WBND4 : WBinderParser
 {
     public override string Name => "BND4";
 
-    public override bool Is(string path)
+    public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
-        return File.Exists(path) && BND4.Is(path);
+        return IsRead<BND4>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath)
+    public override void Unpack(string srcPath, ISoulsFile? file)
     {
-        var bnd = BND4.Read(srcPath);
-        Unpack(srcPath, bnd, null);
+        Unpack(srcPath, file, null);
     }
 
-    public void Unpack(string srcPath, BND4 bnd, WBUtil.GameType? game)
+    public void Unpack(string srcPath, ISoulsFile? file, WBUtil.GameType? game)
     {
+        BND4 bnd = (file as BND4)!;
         string srcName = Path.GetFileName(srcPath);
         string destDir = GetUnpackDestDir(srcPath);
         Directory.CreateDirectory(destDir);
@@ -39,7 +39,7 @@ public class WBND4 : WBinderParser
         XElement files = WriteBinderFiles(bnd, destDir, root);
 
         var xml =
-            new XElement(Name.ToLower(),
+            new XElement(XmlTag,
                 filename,
                 new XElement("compression", bnd.Compression.ToString()),
                 new XElement("version", bnd.Version),

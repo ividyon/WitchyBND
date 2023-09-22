@@ -16,14 +16,14 @@ namespace WitchyBND.Parsers;
 public class WGPARAM : WXMLParser
 {
     public override string Name => "GPARAM";
-    public override bool Is(string path)
+    public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
-        return GPARAM.Is(path);
+      return IsRead<GPARAM>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath)
+    public override void Unpack(string srcPath, ISoulsFile? file)
     {
-      GPARAM gparam = GPARAM.Read(srcPath);
+      GPARAM gparam = (file as GPARAM)!;
       string destPath = GetUnpackDestPath(srcPath);
       if (File.Exists(destPath))
         WBUtil.Backup(destPath);
@@ -32,7 +32,7 @@ public class WGPARAM : WXMLParser
         Indent = true
       }))
       {
-        xw.WriteStartElement(Name.ToLower());
+        xw.WriteStartElement(XmlTag);
         xw.WriteElementString("filename", Path.GetFileName(srcPath));
         if (!string.IsNullOrEmpty(Configuration.Args.Location))
           xw.WriteElementString("sourcePath", Path.GetDirectoryName(srcPath));
