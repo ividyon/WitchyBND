@@ -10,6 +10,12 @@
         <PlatformTarget>x64</PlatformTarget>
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
         <Nullable>enable</Nullable>
+        <PublishTrimmed>True</PublishTrimmed>
+        <PublishReadyToRun>true</PublishReadyToRun>
+        <TrimMode>partial</TrimMode>
+        <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+        <DeleteExistingFiles>true</DeleteExistingFiles>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
         <OutputPath>..\bin\Debug\</OutputPath>
@@ -19,12 +25,6 @@
         <DebugType>embedded</DebugType>
         <PublishSingleFile>True</PublishSingleFile>
         <SelfContained>true</SelfContained>
-        <PublishTrimmed>True</PublishTrimmed>
-        <TrimMode>partial</TrimMode>
-        <PublishReadyToRun>true</PublishReadyToRun>
-        <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-        <DeleteExistingFiles>true</DeleteExistingFiles>
-        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     </PropertyGroup>
     <PropertyGroup>
         <ApplicationIcon>Assets/icon.ico</ApplicationIcon>
