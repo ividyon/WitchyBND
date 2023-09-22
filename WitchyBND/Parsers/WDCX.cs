@@ -15,8 +15,6 @@ namespace WitchyBND.Parsers;
 public class WDCX : WSingleFileParser
 {
     public override string Name => "DCX";
-
-    public override WFileParserVerb Verb => WFileParserVerb.None;
     public override bool Is(string path, byte[] _, out ISoulsFile? file)
     {
         file = null;

@@ -41,7 +41,7 @@ public static class ParseMode
             DCX.Type compression = DCX.Type.None;
             if (File.Exists(path) && DCX.Is(path) && !WPARAMBND4.FilenameIsPARAMBND4(path))
             {
-                PromptPlus.WriteLine($"Unpacking DCX: {fileName.PromptPlusEscape()}...");
+                PromptPlus.WriteLine($"Decompressing DCX: {fileName.PromptPlusEscape()}...");
                 data = DCX.Decompress(path, out DCX.Type compressionVal);
                 compression = compressionVal;
             }
