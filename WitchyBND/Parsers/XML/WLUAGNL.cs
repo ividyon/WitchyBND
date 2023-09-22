@@ -13,12 +13,13 @@ public class WLUAGNL : WXMLParser
 
     public override string Name => "LUAGNL";
 
-    public override bool Is(string path)
+    public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
+        file = null;
         return Path.GetExtension(path) == ".luagnl";
     }
 
-    public override void Unpack(string srcPath)
+    public override void Unpack(string srcPath, ISoulsFile? _)
     {
         LUAGNL gnl = LUAGNL.Read(srcPath);
         XmlWriterSettings xws = new XmlWriterSettings();

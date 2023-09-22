@@ -2,6 +2,7 @@
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
+using SoulsFormats;
 using WitchyFormats;
 using WitchyLib;
 
@@ -11,14 +12,14 @@ public class WFXR3 : WXMLParser
 {
     public override string Name => "FXR3";
 
-    public override bool Is(string path)
+    public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
-        return Fxr3.Is(path);
+        return IsRead<Fxr3>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath)
+    public override void Unpack(string srcPath, ISoulsFile? file)
     {
-        var fxr = Fxr3.Read(srcPath);
+        var fxr = (file as Fxr3)!;
 
         XDocument xDoc = new XDocument();
 

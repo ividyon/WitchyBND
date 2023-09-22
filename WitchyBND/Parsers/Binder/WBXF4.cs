@@ -12,12 +12,13 @@ public class WBXF4 : WBinderParser
 {
     public override string Name => "BXF4";
 
-    public override bool Is(string path)
+    public override bool Is(string path, byte[]? _, out ISoulsFile? file)
     {
-        return File.Exists(path) && (BXF4.IsBHD(path) || BXF4.IsBDT(path));
+        file = null;
+        return BXF4.IsBHD(path) || BXF4.IsBDT(path);
     }
 
-    public override void Unpack(string srcPath)
+    public override void Unpack(string srcPath, ISoulsFile? _)
     {
         string bdtPath;
         string bdtName;
@@ -60,7 +61,7 @@ public class WBXF4 : WBinderParser
         XElement bdtFilename = new XElement("bdt_filename", bdtName);
 
         var xml =
-            new XElement(Name.ToLower(),
+            new XElement(XmlTag,
                 new XElement("bhd_filename", bhdName),
                 bdtFilename,
                 new XElement("version", bxf.Version),

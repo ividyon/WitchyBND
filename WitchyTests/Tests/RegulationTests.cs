@@ -21,7 +21,7 @@ public class RegulationTests : TestBase
         foreach (string path in paths.Select(GetCopiedPath))
         {
             Assert.That(parser.Exists(path));
-            Assert.That(parser.Is(path));
+            Assert.That(parser.Is(path, null, out var outFile));
 
             byte[] backup = {};
             for (int i = 0; i < 2; i++)
@@ -37,7 +37,7 @@ public class RegulationTests : TestBase
                     Configuration.Args.Location = Path.Combine(Path.GetDirectoryName(path), "Target");
                     Directory.CreateDirectory(Configuration.Args.Location);
                 }
-                parser.Unpack(path);
+                parser.Unpack(path, outFile);
                 string? destPath = parser.GetUnpackDestDir(path);
 
 
@@ -66,7 +66,7 @@ public class RegulationTests : TestBase
     }
 
     [Test]
-    [Category("SkipOnGitHubAction")]
+    // [Category("SkipOnGitHubAction")]
     public void PARAMBND4()
     {
         IEnumerable<string> paths = GetSamples("PARAMBND4");
@@ -76,7 +76,7 @@ public class RegulationTests : TestBase
         foreach (string path in paths.Select(GetCopiedPath))
         {
             Assert.That(parser.Exists(path));
-            Assert.That(parser.Is(path));
+            Assert.That(parser.Is(path, null, out var outFile));
             byte[] backup = {};
             for (int i = 0; i < 2; i++)
             {
@@ -91,7 +91,7 @@ public class RegulationTests : TestBase
                     Configuration.Args.Location = Path.Combine(Path.GetDirectoryName(path), "Target");
                     Directory.CreateDirectory(Configuration.Args.Location);
                 }
-                parser.Unpack(path);
+                parser.Unpack(path, outFile);
                 string? destPath = parser.GetUnpackDestDir(path);
 
                 var xml = WFileParser.LoadXml(parser.GetBinderXmlPath(destPath, "bnd4"));

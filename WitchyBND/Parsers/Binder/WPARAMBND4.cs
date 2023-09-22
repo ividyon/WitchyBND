@@ -15,52 +15,60 @@ public class WPARAMBND4 : WBinderParser
 
     public override string Name => "PARAM BND4";
 
-    private bool IsDS2Regulation(string path)
+    public override bool IncludeInList => false;
+
+    private static bool FilenameIsDS2Regulation(string path)
     {
         // Currently there is no DS2 Paramdex, only DS2S.
         return false;
         // var filename = Path.GetFileName(path);
         // return filename.Contains("enc_regulation") && (filename.EndsWith(".bnd.dcx") || filename.EndsWith(".bnd"));
     }
-    private bool IsDS2SRegulation(string path)
+    private static bool FilenameIsDS2SRegulation(string path)
     {
         var filename = Path.GetFileName(path);
         return filename.Contains("enc_regulation") && (filename.EndsWith(".bnd.dcx") || filename.EndsWith(".bnd"));
     }
 
-    private bool IsDS3Regulation(string path)
+    private static bool FilenameIsDS3Regulation(string path)
     {
         var filename = Path.GetFileName(path);
         return filename.StartsWith("Data0") && filename.EndsWith(".bdt");
     }
 
-    private bool IsModernRegulation(string path)
+    private static bool FilenameIsModernRegulation(string path)
     {
         string filename = Path.GetFileName(path);
         return filename.Contains("regulation") && filename.EndsWith(".bin");
     }
 
-    private BND4 GetRegulationWithGameType(string path, out WBUtil.GameType? game)
+    public static bool FilenameIsPARAMBND4(string path)
     {
-        if (IsDS2Regulation(path))
+        return FilenameIsDS2Regulation(path) || FilenameIsDS2SRegulation(path) || FilenameIsDS3Regulation(path) ||
+               FilenameIsModernRegulation(path);
+    }
+
+    private BND4? GetRegulationWithGameType(string path, out WBUtil.GameType? game)
+    {
+        if (FilenameIsDS2Regulation(path))
         {
             game = WBUtil.GameType.DS2;
             return WBUtil.DecryptDS2Regulation(path);
         }
 
-        if (IsDS2SRegulation(path))
+        if (FilenameIsDS2SRegulation(path))
         {
             game = WBUtil.GameType.DS2S;
             return WBUtil.DecryptDS2Regulation(path);
         }
 
-        if (IsDS3Regulation(path))
+        if (FilenameIsDS3Regulation(path))
         {
             game = WBUtil.GameType.DS3;
             return SFUtil.DecryptDS3Regulation(path);
         }
 
-        if (IsModernRegulation(path))
+        if (FilenameIsModernRegulation(path))
         {
             var binder = WBUtil.DecryptRegulationBin(path, out WBUtil.GameType myGame);
             game = myGame;
@@ -71,9 +79,10 @@ public class WPARAMBND4 : WBinderParser
         return null;
     }
 
-    public override bool Is(string path)
+    public override bool Is(string path, byte[]? _, out ISoulsFile? file)
     {
-        return IsDS2Regulation(path) || IsDS2SRegulation(path) || IsDS3Regulation(path) || IsModernRegulation(path);
+        file = null;
+        return FilenameIsPARAMBND4(path);
     }
 
     public override bool IsUnpacked(string path)
@@ -87,7 +96,7 @@ public class WPARAMBND4 : WBinderParser
         return doc.Root != null && doc.Root.Name == "bnd4" && doc.Root.Element("game") != null;
     }
 
-    public override void Unpack(string srcPath)
+    public override void Unpack(string srcPath, ISoulsFile? _)
     {
         var bnd = GetRegulationWithGameType(srcPath, out WBUtil.GameType? game);
         switch (game)

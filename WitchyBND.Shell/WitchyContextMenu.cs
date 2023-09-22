@@ -72,6 +72,9 @@ namespace WitchyBND.Shell
 
             if (!show) return menu;
 
+            bool bnd = SelectedItemPaths.Any(p => p.Contains(".matbinbnd") || p.Contains(".mtdbnd") || p.Contains(".ffxbnd"));
+            bool dcx = SelectedItemPaths.Any(p => p.Contains(".dcx"));
+
             witchyShortcut.Click += ProcessMenuItemOnClick;
             menu.Items.Add(witchyShortcut);
 
@@ -100,6 +103,16 @@ namespace WitchyBND.Shell
                 processMenuItem.Click += ProcessMenuItemOnClick;
                 witchyMenu.DropDownItems.Add(processMenuItem);
 
+                if (bnd)
+                {
+                    ToolStripMenuItem processBndMenuItem = new ToolStripMenuItem
+                    {
+                        Text = "Process here (Standard BND)"
+                    };
+                    processBndMenuItem.Click += ProcessBndMenuItemOnClick;
+                    witchyMenu.DropDownItems.Add(processBndMenuItem);
+                }
+
                 ToolStripMenuItem processRecursiveMenuItem = new ToolStripMenuItem
                 {
                     Text = "Process here (Recursive)"
@@ -107,7 +120,7 @@ namespace WitchyBND.Shell
                 processRecursiveMenuItem.Click += ProcessRecursiveMenuItemOnClick;
                 witchyMenu.DropDownItems.Add(processRecursiveMenuItem);
 
-                if (SelectedItemPaths.Any(p => p.EndsWith(".dcx")))
+                if (dcx)
                 {
                     ToolStripMenuItem processDcxMenuItem = new ToolStripMenuItem
                     {
@@ -124,6 +137,16 @@ namespace WitchyBND.Shell
                 processToMenuItem.Click += ProcessToMenuItemOnClick;
                 witchyMenu.DropDownItems.Add(processToMenuItem);
 
+                if (bnd)
+                {
+                    ToolStripMenuItem processBndToMenuItem = new ToolStripMenuItem
+                    {
+                        Text = "Process to... (Standard BND)"
+                    };
+                    processBndToMenuItem.Click += ProcessBndToMenuItemOnClick;
+                    witchyMenu.DropDownItems.Add(processBndToMenuItem);
+                }
+
                 ToolStripMenuItem processRecursiveToMenuItem = new ToolStripMenuItem
                 {
                     Text = "Process to... (Recursive)"
@@ -131,7 +154,7 @@ namespace WitchyBND.Shell
                 processRecursiveToMenuItem.Click += ProcessRecursiveToMenuItemOnClick;
                 witchyMenu.DropDownItems.Add(processRecursiveToMenuItem);
 
-                if (SelectedItemPaths.Any(p => p.EndsWith(".dcx")))
+                if (dcx)
                 {
                     ToolStripMenuItem processDcxToMenuItem = new ToolStripMenuItem
                     {
@@ -142,9 +165,21 @@ namespace WitchyBND.Shell
                 }
             }
 
+            ToolStripMenuItem configMenuItem = new ToolStripMenuItem
+            {
+                Text = "Configure WitchyBND",
+            };
+            configMenuItem.Click += ConfigMenuItemOnClick;
+            witchyMenu.DropDownItems.Add(configMenuItem);
+
             menu.Items.Add(witchyMenu);
 
             return menu;
+        }
+
+        private void ConfigMenuItemOnClick(object sender, EventArgs e)
+        {
+            Process.Start(WitchyPath);
         }
 
         private void ProcessMenuItemOnClick(object sender, EventArgs e)
@@ -167,6 +202,17 @@ namespace WitchyBND.Shell
         {
             Process.Start(WitchyPath,
                 $"--location prompt --dcx {string.Join(" ", SelectedItemPaths.Select(p => $"\"{p}\""))}");
+        }
+
+        private void ProcessBndMenuItemOnClick(object sender, EventArgs e)
+        {
+            Process.Start(WitchyPath, $"--bnd {string.Join(" ", SelectedItemPaths.Select(p => $"\"{p}\""))}");
+        }
+
+        private void ProcessBndToMenuItemOnClick(object sender, EventArgs e)
+        {
+            Process.Start(WitchyPath,
+                $"--location prompt --bnd {string.Join(" ", SelectedItemPaths.Select(p => $"\"{p}\""))}");
         }
 
         private void ProcessRecursiveMenuItemOnClick(object sender, EventArgs e)

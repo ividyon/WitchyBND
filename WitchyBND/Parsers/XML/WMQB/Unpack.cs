@@ -1,24 +1,25 @@
 ﻿using System.IO;
 using System.Numerics;
 using System.Xml;
-using WitchyFormats;
+using SoulsFormats;
 using WitchyLib;
+using MQB = WitchyFormats.MQB;
 
 namespace WitchyBND.Parsers;
 
 public partial class WMQB
 {
 
-    public override void Unpack(string srcPath)
+    public override void Unpack(string srcPath, ISoulsFile? file)
     {
-        var mqb = MQB.Read(srcPath);
+        var mqb = file as MQB;
         var targetPath = GetUnpackDestPath(srcPath);
         var filename = Path.GetFileName(srcPath);
-        Directory.CreateDirectory(targetPath);
+        Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
         var xws = new XmlWriterSettings();
         xws.Indent = true;
         var xw = XmlWriter.Create(targetPath, xws);
-        xw.WriteStartElement("MQB");
+        xw.WriteStartElement(XmlTag);
         xw.WriteElementString("Name", mqb.Name);
 
         if (!string.IsNullOrEmpty(Configuration.Args.Location))

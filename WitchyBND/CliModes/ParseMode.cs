@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using PPlus;
+using SoulsFormats;
 using WitchyBND.Parsers;
 using WitchyLib;
 
@@ -37,13 +37,25 @@ public static class ParseMode
             var parsed = false;
             var error = false;
 
+            byte[] data = null;
+            DCX.Type compression = DCX.Type.None;
+            if (File.Exists(path) && DCX.Is(path) && !WPARAMBND4.FilenameIsPARAMBND4(path))
+            {
+                PromptPlus.WriteLine($"Decompressing DCX: {fileName.PromptPlusEscape()}...");
+                data = DCX.Decompress(path, out DCX.Type compressionVal);
+                compression = compressionVal;
+            }
+
             foreach (WFileParser parser in Parsers)
             {
                 try
                 {
+                    ISoulsFile? file;
                     if ((Configuration.Args.UnpackOnly || !Configuration.Args.RepackOnly) && parser.Exists(path) &&
-                        parser.Is(path))
+                        parser.Is(path, data, out file))
                     {
+                        if (compression > file?.Compression)
+                            file.Compression = compression;
                         switch (parser.Verb)
                         {
                             case WFileParserVerb.Serialize:
@@ -52,14 +64,15 @@ public static class ParseMode
                                     : $"Serializing {parser.Name}: {fileName.PromptPlusEscape()}...");
                                 break;
                             case WFileParserVerb.Unpack:
-                            default:
                                 PromptPlus.WriteLine(recursive
                                     ? $"Unpacking {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
                                     : $"Unpacking {parser.Name}: {fileName.PromptPlusEscape()}...");
                                 break;
+                            case WFileParserVerb.None:
+                            default:
+                                break;
                         }
-
-                        parser.Unpack(path);
+                        parser.Unpack(path, file);
                         parsed = true;
                         break;
                     }
@@ -75,10 +88,12 @@ public static class ParseMode
                                     : $"Deserializing {parser.Name}: {fileName.PromptPlusEscape()}...");
                                 break;
                             case WFileParserVerb.Unpack:
-                            default:
                                 PromptPlus.WriteLine(recursive
                                     ? $"Repacking {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
                                     : $"Repacking {parser.Name}: {fileName.PromptPlusEscape()}...");
+                                break;
+                            case WFileParserVerb.None:
+                            default:
                                 break;
                         }
 
@@ -130,27 +145,29 @@ public static class ParseMode
     {
         Parsers = new List<WFileParser>
         {
-            new Parsers.WDCX(),
-            new Parsers.WPARAMBND3(),
-            new Parsers.WPARAMBND4(),
-            new Parsers.WFFXBND(),
-            new Parsers.WBND3(),
-            new Parsers.WBND4(),
-            new Parsers.WBXF3(),
-            new Parsers.WBXF4(),
-            new Parsers.WFFXDLSE(),
-            new Parsers.WFMG(),
-            new Parsers.WGPARAM(),
-            new Parsers.WLUAGNL(),
-            new Parsers.WLUAINFO(),
-            new Parsers.WTPF(),
-            new Parsers.WZERO3(),
-            new Parsers.WFXR3(),
-            new Parsers.WMATBIN(),
-            new Parsers.WMTD(),
-            new Parsers.WPARAM(),
-            new Parsers.WMQB(),
-            new Parsers.WDBSUB(),
+            new WDCX(),
+            new WPARAMBND3(),
+            new WPARAMBND4(),
+            new WMATBINBND(),
+            new WMTDBND(),
+            new WFFXBNDModern(),
+            new WBND3(),
+            new WBND4(),
+            new WBXF3(),
+            new WBXF4(),
+            new WFFXDLSE(),
+            new WFMG(),
+            new WGPARAM(),
+            new WLUAGNL(),
+            new WLUAINFO(),
+            new WTPF(),
+            new WZERO3(),
+            new WFXR3(),
+            new WMATBIN(),
+            new WMTD(),
+            new WPARAM(),
+            new WMQB(),
+            new WDBSUB(),
             //MSBE
             //TAE
         };

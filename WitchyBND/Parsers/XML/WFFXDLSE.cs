@@ -9,14 +9,14 @@ namespace WitchyBND.Parsers;
 public class WFFXDLSE : WXMLParser
 {
     public override string Name => "FFXDLSE";
-    public override bool Is(string path)
+    public override bool Is(string path, byte[]? data, out ISoulsFile file)
     {
-        return FFXDLSE.Is(path);
+        return IsRead<FFXDLSE>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath)
+    public override void Unpack(string srcPath, ISoulsFile? file)
     {
-        FFXDLSE ffx = FFXDLSE.Read(srcPath);
+        var ffx = (file as FFXDLSE)!;
         var xmlPath = GetUnpackDestPath(srcPath);
         using (var sw = new StreamWriter(xmlPath))
             ffx.XmlSerialize(sw);

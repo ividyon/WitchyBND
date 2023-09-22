@@ -15,6 +15,8 @@ public class WPARAMBND3 : WBinderParser
 
     public override string Name => "PARAM BND3";
 
+    public override bool IncludeInList => false;
+
     private static bool IsPTDEParamBND(BND3 bnd)
     {
         return bnd.Files.FirstOrDefault(f => f.Name.Contains("default_AIStandardInfoBank.param"), null) != null;
@@ -40,11 +42,14 @@ public class WPARAMBND3 : WBinderParser
         return bnd.Files.FirstOrDefault(f => f.Name.EndsWith("AC45_Allsound.mgs"), null) != null;
     }
 
-    public override bool Is(string path)
+    public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
-        if (!BND3.Is(path)) return false;
-        BND3 bnd = BND3.Read(path);
-        return BND3.Is(path) && (IsDSRParamBND(bnd) || IsPTDEParamBND(bnd) || IsAC4Regulation(bnd) || IsACFARegulation(bnd) || IsACFABoot(bnd));
+        if (!IsRead<BND3>(path, data, out file))
+        {
+            return false;
+        }
+        BND3 bnd = (file as BND3)!;
+        return IsDSRParamBND(bnd) || IsPTDEParamBND(bnd) || IsAC4Regulation(bnd) || IsACFARegulation(bnd) || IsACFABoot(bnd);
     }
 
     public override bool IsUnpacked(string path)
@@ -58,9 +63,9 @@ public class WPARAMBND3 : WBinderParser
         return doc.Root != null && doc.Root.Name == "bnd3" && doc.Root.Element("game") != null;
     }
 
-    public override void Unpack(string srcPath)
+    public override void Unpack(string srcPath, ISoulsFile? file)
     {
-        BND3 bnd = BND3.Read(srcPath);
+        BND3 bnd = (file as BND3)!;
         WBUtil.GameType game;
         if (IsPTDEParamBND(bnd))
             game = WBUtil.GameType.DS1;
@@ -73,7 +78,7 @@ public class WPARAMBND3 : WBinderParser
         else
             throw new InvalidDataException($"Could not determine param type for {Path.GetFileName(srcPath)}.");
 
-        ParseMode.Parsers.OfType<WBND3>().First().Unpack(srcPath, bnd, game);
+        ParseMode.Parsers.OfType<WBND3>().First().Unpack(srcPath, file, game);
     }
 
     public override void Repack(string srcPath)

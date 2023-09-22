@@ -50,9 +50,28 @@ public partial class WPARAM : WXMLParser
 
     public override string Name => "PARAM";
 
-    public override bool Is(string path)
+    public override bool Is(string path, byte[]? _, out ISoulsFile? file)
     {
-        return Path.GetExtension(path) == ".param";
+        if (Path.GetExtension(path) != ".param")
+        {
+            file = null;
+            return false;
+        }
+
+        FsParam? param;
+        try
+        {
+            param = FsParam.Read(path);
+        }
+        catch
+        {
+            Program.RegisterError($"{path} is not a valid PARAM file.");
+            file = null;
+            return false;
+        }
+
+        file = param;
+        return true;
     }
 
     public static void UnpackParamdex()

@@ -12,14 +12,14 @@ public class WLUAINFO : WXMLParser
 
     public override string Name => "LUAINFO";
 
-    public override bool Is(string path)
+    public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
-        return LUAINFO.Is(path);
+        return IsRead<LUAINFO>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath)
+    public override void Unpack(string srcPath, ISoulsFile? file)
     {
-        LUAINFO info = LUAINFO.Read(srcPath);
+        var info = (file as LUAINFO)!;
         XmlWriterSettings xws = new XmlWriterSettings();
         xws.Indent = true;
         XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath), xws);

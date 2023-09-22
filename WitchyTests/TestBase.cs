@@ -33,11 +33,6 @@ public class TestBase
     public void Init()
     {
         Configuration.Args.Location = null;
-    }
-
-    [TearDown]
-    public void Cleanup()
-    {
         if (Directory.Exists("./Results"))
             Directory.Delete("./Results", true);
     }

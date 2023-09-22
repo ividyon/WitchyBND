@@ -75,14 +75,19 @@ public static class Configuration
         _values = config.Get<WitchyConfigValues>();
     }
 
+    private static string GetConfigLocation(string path)
+    {
+        return WBUtil.GetExeLocation(path);
+    }
+
     static Configuration()
     {
         _values = new WitchyConfigValues();
         Args = new WitchyArgValues();
         IConfigurationRoot config = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json", true)
-            .AddJsonFile("appsettings.user.json", true)
-            .AddJsonFile("appsettings.override.json", true)
+            .AddJsonFile(GetConfigLocation("appsettings.json"), true)
+            .AddJsonFile(GetConfigLocation("appsettings.user.json"), true)
+            .AddJsonFile(GetConfigLocation("appsettings.override.json"), true)
             .Build();;
         _values = config.Get<WitchyConfigValues>();
     }
@@ -94,6 +99,6 @@ public static class Configuration
         // .Net Core in turn will read my overrides from appsettings.MyOverrides.json file
         const string overrideFileName = "appsettings.user.json";
         var newConfig = JsonSerializer.Serialize(configuration, new JsonSerializerOptions { WriteIndented = true });
-        File.WriteAllText(overrideFileName, newConfig);
+        File.WriteAllText(GetConfigLocation(overrideFileName), newConfig);
     }
 }

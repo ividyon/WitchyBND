@@ -94,8 +94,12 @@ public static class WBUtil
         return processedPaths.Select(path => Path.GetFullPath(path)).ToList();
     }
 
-    public static string GetExeLocation()
+    public static string GetExeLocation(string path = null)
     {
+        if (path != null)
+        {
+            return Path.Combine(ExeLocation, path);
+        }
         return ExeLocation;
     }
 
@@ -679,6 +683,16 @@ public static class WBUtil
             file.Write(bhdPath, bdtPath);
             Kernel32.FreeLibrary(handle);
         }
+    }
+
+    /// <summary>
+    /// Returns whether the file appears to be a file of this type and reads it if so.
+    /// </summary>
+    public static bool IsRead<TFormat>(this SoulsFile<TFormat> soulsFile, string path, out ISoulsFile file) where TFormat : SoulsFile<TFormat>, new()
+    {
+        bool cond = SoulsFile<TFormat>.IsRead(path, out TFormat format);
+        file = format;
+        return cond;
     }
 
     static WBUtil()

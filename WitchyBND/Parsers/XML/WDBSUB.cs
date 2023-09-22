@@ -1,8 +1,6 @@
 ﻿using SoulsFormats;
 using System;
-using System.IO;
 using System.Xml;
-using System.Xml.Linq;
 using WitchyFormats;
 using WitchyLib;
 
@@ -11,29 +9,21 @@ namespace WitchyBND.Parsers
     public class WDBSUB : WXMLParser
     {
         public override string Name => nameof(DBSUB);
+        public override string XmlTag => nameof(DBSUB);
 
-        public override bool Is(string path)
+        public override bool Is(string path, byte[]? data, out ISoulsFile? file)
         {
-            return DBSUB.Is(path);
+            return IsRead<DBSUB>(path, data, out file);
         }
 
-        public override bool IsUnpacked(string path)
+        public override void Unpack(string srcPath, ISoulsFile? file)
         {
-            if (Path.GetExtension(path) != ".xml")
-                return false;
-
-            var doc = XDocument.Load(path);
-            return doc.Root != null && doc.Root.Name == Name;
-        }
-
-        public override void Unpack(string srcPath)
-        {
-            DBSUB dbs = DBSUB.Read(srcPath);
+            var dbs = (file as DBSUB)!;
             XmlWriterSettings xws = new XmlWriterSettings();
             xws.Indent = true;
             xws.NewLineHandling = NewLineHandling.None; // Prevent \n from being turned into \r\n automatically
             XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath), xws);
-            xw.WriteStartElement(Name);
+            xw.WriteStartElement(XmlTag);
             xw.WriteElementString(nameof(dbs.Compression), dbs.Compression.ToString());
             xw.WriteElementString(nameof(dbs.EventID), dbs.EventID.ToString());
             xw.WriteElementString(nameof(dbs.Unicode), dbs.Unicode.ToString());
@@ -77,16 +67,16 @@ namespace WitchyBND.Parsers
             XmlDocument xml = new XmlDocument();
             xml.Load(srcPath);
 
-            Enum.TryParse(xml.SelectSingleNode($"{Name}/{nameof(dbs.Compression)}")?.InnerText ?? "None", out DCX.Type compression);
+            Enum.TryParse(xml.SelectSingleNode($"{XmlTag}/{nameof(dbs.Compression)}")?.InnerText ?? "None", out DCX.Type compression);
             dbs.Compression = compression;
 
-            uint.TryParse(xml.SelectSingleNode($"{Name}/{nameof(dbs.EventID)}")?.InnerText ?? "0", out uint eventID);
+            uint.TryParse(xml.SelectSingleNode($"{XmlTag}/{nameof(dbs.EventID)}")?.InnerText ?? "0", out uint eventID);
             dbs.EventID = eventID;
 
-            bool.TryParse(xml.SelectSingleNode($"{Name}/{nameof(dbs.Unicode)}")?.InnerText ?? "false", out bool unicode);
+            bool.TryParse(xml.SelectSingleNode($"{XmlTag}/{nameof(dbs.Unicode)}")?.InnerText ?? "false", out bool unicode);
             dbs.Unicode = unicode;
 
-            XmlNode subsNode = xml.SelectSingleNode($"{Name}/{nameof(dbs.SubtitleEntries)}");
+            XmlNode subsNode = xml.SelectSingleNode($"{XmlTag}/{nameof(dbs.SubtitleEntries)}");
             if (subsNode != null)
             {
                 foreach (XmlNode subNode in subsNode.SelectNodes(nameof(DBSUB.SubtitleEntry)))
@@ -106,7 +96,7 @@ namespace WitchyBND.Parsers
                 }
             }
 
-            XmlNode vidsNode = xml.SelectSingleNode($"{Name}/{nameof(dbs.VideoEntries)}");
+            XmlNode vidsNode = xml.SelectSingleNode($"{XmlTag}/{nameof(dbs.VideoEntries)}");
             if (vidsNode != null)
             {
                 foreach (XmlNode vidNode in vidsNode.SelectNodes(nameof(DBSUB.VideoEntry)))
