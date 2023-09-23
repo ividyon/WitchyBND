@@ -68,7 +68,7 @@ Special thanks to Nordgaren, The12thAvenger, philiquaz, george_kingbore, katalas
 # Changelog
 ## WitchyBND
 
-### 2.1.0.1
+### 2.1.0.2
 
 * Fixed an issue where BXF binders (bdt/bhd) would not unpack or repack.
 

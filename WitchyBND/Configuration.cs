@@ -9,6 +9,8 @@ namespace WitchyBND;
 
 public static class Configuration
 {
+    public static bool IsTest { get; set; }
+
     public class WitchyConfigValues
     {
         public bool Bnd { get; set; }
@@ -16,8 +18,9 @@ public static class Configuration
         public bool ParamDefaultValues { get; set; }
         public bool Recursive { get; set; }
         public ushort EndDelay { get; set; }
-
         public bool PauseOnError { get; set; }
+
+        public bool Expert { get; set; }
     }
 
     public class WitchyArgValues
@@ -68,6 +71,12 @@ public static class Configuration
     {
         get => _values.EndDelay;
         set => _values.EndDelay = value;
+    }
+
+    public static bool Expert
+    {
+        get => _values.Expert;
+        set => _values.Expert = value;
     }
 
     public static void ReplaceConfig(IConfigurationRoot config)

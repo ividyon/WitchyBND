@@ -15,13 +15,27 @@ public partial class WPARAM
 {
     public override void Unpack(string srcPath, ISoulsFile? file)
     {
-        if (Game == null)
-            Game = WBUtil.DetermineParamdexGame(Path.GetDirectoryName(srcPath), Configuration.Args.Passive);
+        Unpack(srcPath, file, false);
+    }
 
-        if (Game == null)
+    public void Unpack(string srcPath, ISoulsFile? file, bool dry)
+    {
+        if (dry && file == null)
+        {
+            Is(srcPath, null, out file);
+        }
+
+        string dirPath = Path.GetDirectoryName(srcPath);
+
+        if (!Games.ContainsKey(dirPath))
+            Games[dirPath] = WBUtil.DetermineParamdexGame(dirPath, Configuration.Args.Passive);
+
+        if (!Games.ContainsKey(dirPath) || Games[dirPath] == null)
             throw new InvalidDataException("Could not locate game type of PARAM.");
 
-        var game = Game.Value;
+        var gameInfo = Games[dirPath]!.Value;
+        var game = gameInfo.Item1;
+        var regVer = gameInfo.Item2;
 
         var param = (file as FsParam)!;
         string paramTypeToParamdef = param.ParamType;
@@ -54,16 +68,27 @@ public partial class WPARAM
         {
             try
             {
-                param.ApplyParamdef(paramdef);
+                if (regVer == 0)
+                    param.ApplyParamdef(paramdef);
+                else
+                    param.ApplyParamdef(paramdef, regVer);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                Program.RegisterError(new WitchyError($"Could not carefully apply paramdef {paramTypeToParamdef}.",
-                    srcPath));
-                // Nothing happened yet, so can just proceed to the next file.
-                return;
+                if (regVer == 0)
+                    Program.RegisterError(new WitchyError(@$"Could not carefully apply paramdef {paramTypeToParamdef}.
+The param may be out of date, or an incorrect regulation version may have been supplied.",
+            srcPath));
+                else
+                    Program.RegisterError(new WitchyError(@$"Could not carefully apply paramdef {paramTypeToParamdef}.
+The param may be out of date.",
+                        srcPath));
+            // Nothing happened yet, so can just proceed to the next file.
+            return;
             }
         }
+
+        if (dry) return;
 
         // Begin writing the XML
         var xws = new XmlWriterSettings();

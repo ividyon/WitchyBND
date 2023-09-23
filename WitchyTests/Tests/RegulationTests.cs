@@ -1,6 +1,7 @@
 ﻿using System.Xml;
 using System.Xml.Linq;
 using WitchyBND;
+using WitchyBND.CliModes;
 using WitchyBND.Parsers;
 using WitchyLib;
 using static System.Enum;
@@ -72,9 +73,14 @@ public class RegulationTests : TestBase
         IEnumerable<string> paths = GetSamples("PARAMBND4");
 
         var parser = new WPARAMBND4();
+        var paramParser = new WPARAM();
 
         foreach (string path in paths.Select(GetCopiedPath))
         {
+            string fullPath = Path.GetDirectoryName(Path.GetFullPath(path))!.TrimEnd(Path.DirectorySeparatorChar);
+            string gameName = fullPath.Split(Path.DirectorySeparatorChar).Last();
+            var dirGame = Parse<WBUtil.GameType>(gameName);
+
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var outFile));
             byte[] backup = {};
@@ -99,12 +105,13 @@ public class RegulationTests : TestBase
                 if (gameElement == null) throw new XmlException("XML has no Game element");
                 TryParse(xml.Element("game")!.Value, out WBUtil.GameType game);
 
-                string fullPath = Path.GetDirectoryName(Path.GetFullPath(path))!.TrimEnd(Path.DirectorySeparatorChar);
-                string gameName = fullPath.Split(Path.DirectorySeparatorChar).Last();
-                var dirGame = Parse<WBUtil.GameType>(gameName);
-
                 Assert.That(game, Is.EqualTo(dirGame),
                     $"XML game {game.ToString()} was not directory game {dirGame.ToString()}");
+
+                // foreach (var paramPath in Directory.GetFiles(destPath, "*.param"))
+                // {
+                //     paramParser.Unpack(paramPath, null, true);
+                // }
 
                 File.Delete(path);
 

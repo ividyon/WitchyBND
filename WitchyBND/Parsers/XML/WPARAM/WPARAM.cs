@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Xml;
 using PPlus;
+using PPlus.Controls;
 using SoulsFormats;
 using WitchyFormats;
 using WitchyLib;
@@ -16,14 +17,53 @@ namespace WitchyBND.Parsers;
 
 public partial class WPARAM : WXMLParser
 {
-    public WBUtil.GameType? Game;
+    public Dictionary<string, (WBUtil.GameType, ulong)?> Games = new();
+    private static bool WarnedAboutParams { get; set; }
 
+    public static bool WarnAboutParams()
+    {
+        if (Configuration.Expert || WarnedAboutParams || Configuration.Args.Passive) return true;
+
+        PromptPlus.WriteLine("");
+        List<string> lines = new()
+        {
+            "[RED]Editing PARAMs using WitchyBND is highly discouraged.[/]",
+            @"For PARAM editing, DSMapStudio is the recommended application. It can be downloaded from GitHub.
+If DSMapStudio does not yet support this game or regulation version, an experimental build may be available at ?ServerName? Discord.",
+            "Editing, merging and upgrading of new PARAM entries should all be done in DSMapStudio.",
+            "Merging outdated PARAMs (from a previous regulation) with WitchyBND is guaranteed to cause issues.",
+            "WitchyBND is not capable of upgrading outdated PARAMs to a newer regulation version under ANY circumstances!",
+        };
+
+        foreach (string line in lines)
+        {
+            PromptPlus.WriteLine(line);
+            var cursor = PromptPlus.GetCursorPosition();
+            PromptPlus.WriteLine("");
+            PromptPlus.WaitTimer("Please read carefully, then press any key...", TimeSpan.FromSeconds(1));
+            PromptPlus.ClearLine();
+            PromptPlus.SetCursorPosition(cursor.Left, cursor.Top);
+            PromptPlus.WriteLine("");
+            PromptPlus.KeyPress("Please read carefully, then press any key...").Run();
+            PromptPlus.ClearLine();
+            PromptPlus.SetCursorPosition(cursor.Left, cursor.Top);
+        }
+
+        PromptPlus.WriteLine("");
+        var confirm = PromptPlus.Confirm(@"Do you still wish to proceed?").Run();
+
+        if (confirm.Value.IsNoResponseKey() || confirm.IsAborted)
+            return false;
+
+        WarnedAboutParams = true;
+        return true;
+    }
     private class WPARAMRow
     {
         public int ID { get; set; }
         public string Name { get; set; }
         public string ParamdexName { get; set; }
-        public Dictionary<string, string> Fields { get; set; } = new Dictionary<string, string>();
+        public Dictionary<string, string> Fields { get; } = new ();
     }
 
     /// <summary>
@@ -46,7 +86,7 @@ public partial class WPARAM : WXMLParser
     private static Dictionary<WBUtil.GameType, Dictionary<string, Dictionary<int, string>>>
         NameStorage { get; } = new();
 
-    private static Dictionary<string, string> _ac6TentativeParamTypes;
+    private static Dictionary<string, string>? _ac6TentativeParamTypes;
 
     public override string Name => "PARAM";
 
@@ -76,7 +116,7 @@ public partial class WPARAM : WXMLParser
 
     public static void UnpackParamdex()
     {
-        var paramdexPath = $@"{WBUtil.GetExeLocation()}\Assets\Paramdex";
+        var paramdexPath = WBUtil.GetParamdexPath();
         var zipPath = $@"{WBUtil.GetExeLocation()}\Assets\Paramdex.zip";
         if (File.Exists(zipPath))
         {
@@ -105,7 +145,7 @@ public partial class WPARAM : WXMLParser
 
         UnpackParamdex();
 
-        var paramdexPath = $@"{WBUtil.GetExeLocation()}\Assets\Paramdex";
+        var paramdexPath = WBUtil.GetParamdexPath();
         if (!Directory.Exists(paramdexPath))
             throw new DirectoryNotFoundException("Could not locate Assets\\Paramdex folder.");
 
@@ -128,7 +168,7 @@ public partial class WPARAM : WXMLParser
         // Reading XML paramdefs
         foreach (string path in Directory.GetFiles(paramdefPath, "*.xml"))
         {
-            PARAMDEF paramdef = PARAMDEF.XmlDeserialize(path);
+            PARAMDEF paramdef = PARAMDEF.XmlDeserialize(path, true);
 
             var dupes = paramdef.Fields.GroupBy(x => x.InternalName).Where(x => x.Count() > 1)
                 .ToDictionary(x => x.Key, x => x.ToList());
@@ -165,12 +205,12 @@ public partial class WPARAM : WXMLParser
             return;
 
         var gameName = game.ToString();
-        var namePath = $@"{WBUtil.GetExeLocation()}\Assets\Paramdex\{gameName}\Names\{paramName}.txt";
+        var namePath = Path.Combine(WBUtil.GetParamdexPath($@"{gameName}\Names\{paramName}.txt"));
 
         if (!File.Exists(namePath))
         {
             // Write something to the storage so the population process isn't repeated.
-            NameStorage[game][paramName] = new Dictionary<int, string>()
+            NameStorage[game][paramName] = new Dictionary<int, string>
             {
                 { -9000, string.Empty }
             };

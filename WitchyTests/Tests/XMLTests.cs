@@ -1,5 +1,6 @@
 ﻿using Pose;
 using WitchyBND;
+using WitchyBND.CliModes;
 using WitchyBND.Parsers;
 using WitchyLib;
 using Is = Pose.Is;
@@ -350,13 +351,12 @@ public class XMLTests : TestBase
     {
         IEnumerable<string> paths = GetSamples("PARAM");
 
-        var parser = new WPARAM();
+        var parser = ParseMode.Parsers.OfType<WPARAM>().First();
 
         foreach (string path in paths.Select(GetCopiedPath))
         {
             string fullPath = Path.GetDirectoryName(Path.GetFullPath(path)).TrimEnd(Path.DirectorySeparatorChar);
             string gameName = fullPath.Split(Path.DirectorySeparatorChar).Last();
-            parser.Game = Enum.Parse<WBUtil.GameType>(gameName);
 
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var file));
@@ -375,8 +375,9 @@ public class XMLTests : TestBase
                     Configuration.Args.Location = Path.Combine(Path.GetDirectoryName(path), "Target");
                     Directory.CreateDirectory(Configuration.Args.Location);
                 }
+                string destPath = parser.GetUnpackDestPath(path);
+                parser.Games[Path.GetDirectoryName(destPath)] = (Enum.Parse<WBUtil.GameType>(gameName), 0);
                 parser.Unpack(path, file);
-                string? destPath = parser.GetUnpackDestPath(path);
 
                 File.Delete(path);
 

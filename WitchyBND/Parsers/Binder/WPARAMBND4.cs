@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -14,7 +15,6 @@ public class WPARAMBND4 : WBinderParser
 {
 
     public override string Name => "PARAM BND4";
-
     public override bool IncludeInList => false;
 
     private static bool FilenameIsDS2Regulation(string path)
@@ -116,6 +116,8 @@ public class WPARAMBND4 : WBinderParser
 
     public override void Repack(string srcPath)
     {
+        if (!WPARAM.WarnAboutParams()) return;
+
         var bndParser = ParseMode.Parsers.OfType<WBND4>().First();
         var doc = XDocument.Load(GetBinderXmlPath(srcPath, "bnd4"));
         if (doc.Root == null) throw new XmlException("XML has no root");
@@ -123,9 +125,52 @@ public class WPARAMBND4 : WBinderParser
 
         var gameElement = xml.Element("game");
         if (gameElement == null) throw new XmlException("XML has no Game element");
-        Enum.TryParse(xml.Element("game")!.Value, out WBUtil.GameType game);
+        Enum.TryParse(gameElement.Value, out WBUtil.GameType game);
+
+        var versionElement = xml.Element("version");
+        if (versionElement == null) throw new XmlException("XML has no Version element");
+        var regVer = Convert.ToUInt64(versionElement.Value);
+
+        ulong? latestVer = WBUtil.GetLatestKnownRegulationVersion(game);
+        if (latestVer < regVer)
+        {
+            throw new Exception(@"Regulation version exceeds latest known Paramdex regulation version.
+
+WitchyBND cannot be used to upgrade PARAMs to newer regulation versions.
+The appropriate tool for this action is DSMapStudio. Using WitchyBND for this purpose will lead to data corruption. Please download the newest DSMapStudio and use it for PARAM editing.
+
+If DSMapStudio does not yet support the Param Upgrade process for the newest patch, please patiently wait for it to be updated.");
+        }
 
         var destPath = bndParser.GetRepackDestPath(srcPath, xml);
+
+        // Sanity check PARAMs
+        XElement? filesElement = xml.Element("files");
+        if (filesElement == null) throw new XmlException("XML has no Files element");
+        var files = filesElement.Elements("file").Where(f => f.Element("path") != null && f.Element("path")!.Value.EndsWith(".param")).ToList();
+        if (files.Any())
+        {
+            var paramParser = ParseMode.Parsers.OfType<WPARAM>().First();
+
+            var filePaths = files.Select(file => {
+                var path = file.Element("path");
+                if (path == null) throw new XmlException($"File element {files.ToList().IndexOf(file)} has no path.");
+                return path.Value;
+            });
+
+            foreach (string filePath in filePaths)
+            {
+                try
+                {
+                    paramParser.Unpack(Path.Combine(srcPath, filePath), null, true);
+                }
+                catch
+                {
+                    Program.RegisterError($"The regulation binder is malformed: {Path.GetFileNameWithoutExtension(filePath)} has thrown an exception during read.");
+                    throw;
+                }
+            }
+        }
 
         switch (game)
         {

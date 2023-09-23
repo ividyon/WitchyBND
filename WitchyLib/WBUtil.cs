@@ -11,6 +11,7 @@ using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using PPlus;
+using PPlus.Controls;
 using SoulsFormats;
 using PARAMDEF = WitchyFormats.PARAMDEF;
 
@@ -19,6 +20,7 @@ namespace WitchyLib;
 public static class WBUtil
 {
     public static string ExeLocation;
+    public static readonly Dictionary<GameType, ulong?> LatestKnownRegulationVersions;
 
     public static string FirstCharToUpper(this string input) =>
         input switch
@@ -131,28 +133,70 @@ public static class WBUtil
         AC6
     }
 
-    public static GameType DetermineParamdexGame(string path, bool passive)
+    public static string GetParamdexPath()
     {
-        GameType? gameNullable = null;
+        return $@"{GetExeLocation()}\Assets\Paramdex";
+    }
+    public static string GetParamdexPath(string path = null)
+    {
+        return path == null ? GetParamdexPath() : Path.Combine(GetParamdexPath(), path);
+    }
+
+    public static string GetParamdexPath(GameType game, string path = null)
+    {
+        return path == null ? Path.Combine(GetParamdexPath(), game.ToString()) : Path.Combine(GetParamdexPath(), game.ToString(), path);
+    }
+
+    public static ulong? GetLatestKnownRegulationVersion(GameType game)
+    {
+        if (LatestKnownRegulationVersions.ContainsKey(game)) return LatestKnownRegulationVersions[game];
+
+        string latestVerPath = GetParamdexPath(game, $@"Upgrader\version.txt");
+        if (File.Exists(latestVerPath))
+            LatestKnownRegulationVersions[game] = ulong.Parse(File.ReadAllText(latestVerPath));
+        else
+            LatestKnownRegulationVersions[game] = null;
+
+        return LatestKnownRegulationVersions[game];
+    }
+
+    public static string? TraverseFindFile(string filename, string initPath, int levels = 999)
+    {
+        string filePath = $@"{initPath}\{filename}";
+        for (int i = 0; i < levels; i++)
+        {
+            if (File.Exists(filePath)) return filePath;
+            string dirName = Path.GetDirectoryName(Path.GetDirectoryName(filePath));
+            if (dirName == null) return null;
+            filePath = $@"{dirName}\{filename}";
+        }
+        return null;
+    }
+    public static (GameType, ulong)? DetermineParamdexGame(string path, bool passive)
+    {
+        ulong regVer = 0;
+        GameType? game = null;
 
         // Determine what kind of PARAM we're dealing with here
-        var witchyXmlPath = $@"{path}\_witchy-bnd4.xml";
-        if (File.Exists(witchyXmlPath))
+        string witchyXmlPath = TraverseFindFile("_witchy-bnd4.xml", path);
+        if (witchyXmlPath != null)
         {
             XmlDocument xml = new XmlDocument();
             xml.Load(witchyXmlPath);
 
-            string filename = xml.SelectSingleNode("bnd4/filename").InnerText;
-            if (filename == "regulation.bin" && xml.SelectSingleNode("bnd4/game")?.InnerText != null)
+
+            if (xml.SelectSingleNode("bnd4/game")?.InnerText != null)
             {
                 Enum.TryParse(xml.SelectSingleNode("bnd4/game")!.InnerText, out GameType regGame);
-                gameNullable = regGame;
+                game = regGame;
             }
+
+            regVer = Convert.ToUInt64(xml.SelectSingleNode("bnd4/version")?.InnerText ?? "0");
         }
 
-        if (gameNullable != null)
+        if (game != null)
         {
-            PromptPlus.Error.WriteLine($"Determined game for Paramdex: {gameNullable.Value.ToString()}".PromptPlusEscape());
+            PromptPlus.WriteLine($"Determined game for Paramdex: {game.Value.ToString()}".PromptPlusEscape());
         }
         else
         {
@@ -166,7 +210,7 @@ public static class WBUtil
                     throw new Exception("Could not determine PARAM type.");
                 }
 
-                gameNullable = select.Value;
+                game = select.Value;
             }
             else
             {
@@ -174,7 +218,38 @@ public static class WBUtil
             }
         }
 
-        return gameNullable.Value;
+        if (regVer == 0)
+        {
+            PromptPlus.Error.WriteLine("Could not determine regulation version.");
+            if (!passive)
+            {
+                PromptPlus.WriteLine(@"Please input the regulation version to use for reading the PARAM.
+Format examples:
+    ""10210005"" for Armored Core VI 1.02.1
+    ""11001000"" for Elden Ring 1.10.1
+Enter 0, or leave blank, to use the latest available paramdef.");
+                var input = PromptPlus.Input("Input regulation version")
+                    .AddValidators(PromptValidators.IsTypeULong())
+                    .ValidateOnDemand()
+                    .Run();
+                if (input.IsAborted)
+                {
+                    PromptPlus.Error.WriteLine("Defaulting to latest paramdef.");
+                }
+                else
+                {
+                    regVer = Convert.ToUInt64(input.Value);
+                }
+            }
+            else
+            {
+                PromptPlus.Error.WriteLine("Defaulting to latest paramdef.");
+            }
+        }
+
+        if (game == null)
+            return null;
+        return (game.Value, regVer);
     }
 
     /// <summary>
@@ -698,5 +773,6 @@ public static class WBUtil
     static WBUtil()
     {
         ExeLocation = Path.GetDirectoryName(AppContext.BaseDirectory);
+        LatestKnownRegulationVersions = new();
     }
 }

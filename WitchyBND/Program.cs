@@ -396,7 +396,12 @@ internal static class Program
 
     public static void RegisterException(Exception e, string source = null)
     {
-        RegisterError(new WitchyError($@"Unhandled exception: Please inform the author by providing the following text:
+        if (e is IntendedException)
+            RegisterError(new WitchyError($@"Unsupported user action:
+{e.ToString().PromptPlusEscape()}
+", source, WitchyErrorType.Exception, 1));
+        else
+            RegisterError(new WitchyError($@"Unhandled exception: Please inform the author by providing the following text:
 {e.ToString().PromptPlusEscape()}
 ", source, WitchyErrorType.Exception, 1));
     }
@@ -416,6 +421,8 @@ internal static class Program
             else
                 PromptPlus.Error.WriteLine(error.Message.PromptPlusEscape());
         }
+        if (Configuration.IsTest)
+            throw new Exception(error.Message);
     }
 
     static Program()

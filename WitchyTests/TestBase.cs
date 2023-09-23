@@ -19,6 +19,7 @@ public class TestBase
             .AddJsonFile(Path.Combine(TestContext.CurrentContext.TestDirectory, "appsettings.json"))
             .Build());
         Configuration.Args.Passive = true;
+        Configuration.IsTest = true;
         WBUtil.ExeLocation = TestContext.CurrentContext.TestDirectory;
         Environment.SetEnvironmentVariable("PromptPlusOverUnitTest", "true");
         PromptPlus.Setup();
