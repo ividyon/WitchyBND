@@ -24,7 +24,7 @@ public class WBXF4 : WBinderParser
         string bdtName;
         string bhdPath;
         string bhdName;
-        string srcDirPath = new DirectoryInfo(srcPath).FullName;
+        string srcDirPath = Path.GetDirectoryName(srcPath);
         string nameWithoutExt = Path.GetFileNameWithoutExtension(srcPath);
         string destDir = GetUnpackDestDir(srcPath);
 
