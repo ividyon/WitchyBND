@@ -68,6 +68,10 @@ Special thanks to Nordgaren, The12thAvenger, philiquaz, george_kingbore, katalas
 # Changelog
 ## WitchyBND
 
+### 2.1.0.1
+
+* Fixed an issue where BXF binders (bdt/bhd) would not unpack or repack.
+
 ### 2.1.0.0
 
 * Added specialized BND handling for the following binders: MATBINBND and MTDBND. Unpacking and repacking them will not require manipulating an XML file list.
