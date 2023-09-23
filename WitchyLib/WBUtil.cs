@@ -153,7 +153,7 @@ public static class WBUtil
 
         string latestVerPath = GetParamdexPath(game, $@"Upgrader\version.txt");
         if (File.Exists(latestVerPath))
-            LatestKnownRegulationVersions[game] = ulong.Parse(File.ReadAllText(latestVerPath));
+            LatestKnownRegulationVersions[game] = ulong.Parse(File.ReadAllText(latestVerPath).Replace("_", "").Replace("L", ""));
         else
             LatestKnownRegulationVersions[game] = null;
 

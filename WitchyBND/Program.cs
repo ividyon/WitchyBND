@@ -396,14 +396,19 @@ internal static class Program
 
     public static void RegisterException(Exception e, string source = null)
     {
-        if (e is IntendedException)
-            RegisterError(new WitchyError($@"Unsupported user action:
+        switch (e)
+        {
+            case UnsupportedActionException:
+                RegisterError(new WitchyError($@"Unsupported user action:
 {e.ToString().PromptPlusEscape()}
 ", source, WitchyErrorType.Exception, 1));
-        else
-            RegisterError(new WitchyError($@"Unhandled exception: Please inform the author by providing the following text:
+                break;
+            default:
+                RegisterError(new WitchyError($@"Unhandled exception:
 {e.ToString().PromptPlusEscape()}
 ", source, WitchyErrorType.Exception, 1));
+                break;
+        }
     }
 
     public static void RegisterError(string message, bool write = true)

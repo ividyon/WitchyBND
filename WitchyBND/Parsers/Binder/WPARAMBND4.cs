@@ -134,12 +134,7 @@ public class WPARAMBND4 : WBinderParser
         ulong? latestVer = WBUtil.GetLatestKnownRegulationVersion(game);
         if (latestVer < regVer)
         {
-            throw new Exception(@"Regulation version exceeds latest known Paramdex regulation version.
-
-WitchyBND cannot be used to upgrade PARAMs to newer regulation versions.
-The appropriate tool for this action is DSMapStudio. Using WitchyBND for this purpose will lead to data corruption. Please download the newest DSMapStudio and use it for PARAM editing.
-
-If DSMapStudio does not yet support the Param Upgrade process for the newest patch, please patiently wait for it to be updated.");
+            throw new RegulationOutOfBoundsException(@"Regulation version exceeds latest known Paramdex regulation version.");
         }
 
         var destPath = bndParser.GetRepackDestPath(srcPath, xml);
@@ -164,10 +159,9 @@ If DSMapStudio does not yet support the Param Upgrade process for the newest pat
                 {
                     paramParser.Unpack(Path.Combine(srcPath, filePath), null, true);
                 }
-                catch
+                catch (Exception e)
                 {
-                    Program.RegisterError($"The regulation binder is malformed: {Path.GetFileNameWithoutExtension(filePath)} has thrown an exception during read.");
-                    throw;
+                    throw new MalformedBinderException($"The regulation binder is malformed: {Path.GetFileNameWithoutExtension(filePath)} has thrown an exception during read.", e);
                 }
             }
         }

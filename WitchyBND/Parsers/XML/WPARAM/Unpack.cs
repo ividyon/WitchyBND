@@ -81,7 +81,7 @@ The param may be out of date, or an incorrect regulation version may have been s
             srcPath));
                 else
                     Program.RegisterError(new WitchyError(@$"Could not carefully apply paramdef {paramTypeToParamdef}.
-The param may be out of date.",
+The param may be out of date for the regulation version.",
                         srcPath));
             // Nothing happened yet, so can just proceed to the next file.
             return;

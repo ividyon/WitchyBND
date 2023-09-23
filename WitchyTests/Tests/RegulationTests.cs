@@ -24,7 +24,7 @@ public class RegulationTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var outFile));
 
-            byte[] backup = {};
+            byte[] backup = { };
             for (int i = 0; i < 2; i++)
             {
                 if (i == 0)
@@ -38,6 +38,7 @@ public class RegulationTests : TestBase
                     Configuration.Args.Location = Path.Combine(Path.GetDirectoryName(path), "Target");
                     Directory.CreateDirectory(Configuration.Args.Location);
                 }
+
                 parser.Unpack(path, outFile);
                 string? destPath = parser.GetUnpackDestDir(path);
 
@@ -70,10 +71,9 @@ public class RegulationTests : TestBase
     // [Category("SkipOnGitHubAction")]
     public void PARAMBND4()
     {
-        IEnumerable<string> paths = GetSamples("PARAMBND4");
+        IEnumerable<string> paths = GetSamples("PARAMBND4\\Correct");
 
         var parser = new WPARAMBND4();
-        var paramParser = new WPARAM();
 
         foreach (string path in paths.Select(GetCopiedPath))
         {
@@ -83,7 +83,7 @@ public class RegulationTests : TestBase
 
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var outFile));
-            byte[] backup = {};
+            byte[] backup = { };
             for (int i = 0; i < 2; i++)
             {
                 if (i == 0)
@@ -97,6 +97,7 @@ public class RegulationTests : TestBase
                     Configuration.Args.Location = Path.Combine(Path.GetDirectoryName(path), "Target");
                     Directory.CreateDirectory(Configuration.Args.Location);
                 }
+
                 parser.Unpack(path, outFile);
                 string? destPath = parser.GetUnpackDestDir(path);
 
@@ -108,11 +109,6 @@ public class RegulationTests : TestBase
                 Assert.That(game, Is.EqualTo(dirGame),
                     $"XML game {game.ToString()} was not directory game {dirGame.ToString()}");
 
-                // foreach (var paramPath in Directory.GetFiles(destPath, "*.param"))
-                // {
-                //     paramParser.Unpack(paramPath, null, true);
-                // }
-
                 File.Delete(path);
 
                 Assert.That(Directory.Exists(destPath));
@@ -122,6 +118,54 @@ public class RegulationTests : TestBase
 
                 Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)), Is.True);
             }
+        }
+    }
+
+    [Test]
+    // [Category("SkipOnGitHubAction")]
+    public void PARAMBND4TooHigh()
+    {
+        IEnumerable<string> paths = GetSamples("PARAMBND4\\TooHigh");
+
+        var parser = new WPARAMBND4();
+
+        foreach (string path in paths.Select(GetCopiedPath))
+        {
+            Assert.That(parser.Exists(path));
+            Assert.That(parser.Is(path, null, out var outFile));
+            parser.Unpack(path, outFile);
+            string? destPath = parser.GetUnpackDestDir(path);
+
+            File.Delete(path);
+
+            Assert.That(Directory.Exists(destPath));
+            Assert.That(parser.ExistsUnpacked(destPath));
+            Assert.That(parser.IsUnpacked(destPath));
+            Assert.Throws<RegulationOutOfBoundsException>(() => { parser.Repack(destPath); });
+        }
+    }
+
+    [Test]
+    // [Category("SkipOnGitHubAction")]
+    public void PARAMBND4OutdatedParam()
+    {
+        IEnumerable<string> paths = GetSamples("PARAMBND4\\OutdatedParam");
+
+        var parser = new WPARAMBND4();
+
+        foreach (string path in paths.Select(GetCopiedPath))
+        {
+            Assert.That(parser.Exists(path));
+            Assert.That(parser.Is(path, null, out var outFile));
+            parser.Unpack(path, outFile);
+            string? destPath = parser.GetUnpackDestDir(path);
+
+            File.Delete(path);
+
+            Assert.That(Directory.Exists(destPath));
+            Assert.That(parser.ExistsUnpacked(destPath));
+            Assert.That(parser.IsUnpacked(destPath));
+            Assert.Throws<MalformedBinderException>(() => parser.Repack(destPath));
         }
     }
 }
