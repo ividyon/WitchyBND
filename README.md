@@ -68,10 +68,13 @@ Special thanks to Nordgaren, The12thAvenger, philiquaz, george_kingbore, katalas
 # Changelog
 ## WitchyBND
 
+### 2.1.1.1
+
+* Updated Paramdex to the latest values from DSMapStudio.
+
 ### 2.1.1.0
 
 * Added an informative warning to repacking PARAMBND, such as regulation.bin.
-  * **DSMapStudio is the recommended tool for editing PARAMs**.
 * Repacking PARAMBND4 will now perform a dry PARAM unpack attempt on all constituent PARAM files, to catch user errors attempting to pack outdated PARAMs into new regulation versions.
 * Repacking PARAMBND4 will now fail if the regulation version exceeds the latest known regulation version in Paramdex.
 * Paramdex detection is now stored per path during an application run, to allow unpacking PARAMs from different locations in the same program call.
