@@ -72,6 +72,7 @@ public static class ParseMode
                             default:
                                 break;
                         }
+
                         parser.Unpack(path, file);
                         parsed = true;
                         break;
@@ -102,8 +103,15 @@ public static class ParseMode
                         break;
                     }
                 }
-                catch (DllNotFoundException e) when (e.Message.Contains("oo2core_6_win64.dll") ||
-                                                     e.Message.Contains("oo2core_8_win64.dll"))
+                catch (NoOodleFoundException)
+                {
+                    Program.RegisterError(new WitchyError(
+                        "ERROR: Oodle DLL not found. Please copy oo2core_6_win64.dll or oo2core_8_win64.dll from the game directory to WitchyBND's directory.",
+                        WitchyErrorType.NoOodle));
+                    error = true;
+                }
+                catch (Exception e) when (e.Message.Contains("oo2core_6_win64.dll") ||
+                                                     e.Message.Contains("oo2core_8_win64.dll") || e is NoOodleFoundException)
                 {
                     Program.RegisterError(new WitchyError(
                         "ERROR: Oodle DLL not found. Please copy oo2core_6_win64.dll or oo2core_8_win64.dll from the game directory to WitchyBND's directory.",

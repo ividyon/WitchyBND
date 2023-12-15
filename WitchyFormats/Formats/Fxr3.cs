@@ -866,13 +866,13 @@ namespace WitchyFormats
                             isInt = true;
                     }
                 }
-                // Needs confirmation: First transition's first value seems to always be a float.
+                // CCCode: "16842748 is 1000000001111111111111100 in binary, the LSB is the only thing changing between those two values, so if Unk10 & 1 == 0 it's a float and if it's 1 it's an int"
                 else if (context is FFXTransition transition)
                 {
-                    if (transition.TargetStateIndex == -1)
-                        isInt = index != 0;
+                    if (index == 0)
+                        isInt = (transition.Unk10 & 3) > 0;
                     else
-                        isInt = index != 1;
+                        isInt = (transition.Unk38 & 3) > 0;
                 }
                 else
                 {
