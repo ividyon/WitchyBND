@@ -1,5 +1,4 @@
-﻿#nullable enable
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
@@ -14,7 +13,6 @@ namespace WitchyFormats
     /// Initial work by TKGP, Meowmaritus and NamelessHoodie.
     /// Currently maintained by ivi.
     /// </summary>
-    [XmlType(TypeName="fxr3")]
     public class Fxr3 : SoulsFile<Fxr3>
     {
         public FXRVersion Version { get; set; }
@@ -373,15 +371,13 @@ namespace WitchyFormats
 
             [XmlAttribute] public int TargetStateIndex { get; set; }
 
-            public int Unk10 { get; set; }
+            public short Unk10 { get; set; }
 
-            public int Unk38 { get; set; }
-
-            public int Unk40 { get; set; }
+            public short Unk38 { get; set; }
 
             public FFXField Field1 { get; set; }
 
-            public FFXField Field2 { get; set; }
+            public FFXField? Field2 { get; set; }
 
             public FFXTransition()
             {
@@ -395,7 +391,9 @@ namespace WitchyFormats
                 br.AssertInt32(0);
                 TargetStateIndex = br.ReadInt32();
                 br.AssertInt32(0);
-                Unk10 = br.AssertInt32(16842748, 16842749, 16842750, 16842751);
+                Unk10 = br.AssertInt16(-4, -3, -2, -1);
+                br.AssertByte(0);
+                br.AssertByte(1);
                 br.AssertInt32(0);
                 br.AssertInt32(1);
                 br.AssertInt32(0);
@@ -405,9 +403,11 @@ namespace WitchyFormats
                 br.AssertInt32(0);
                 br.AssertInt32(0);
                 br.AssertInt32(0);
-                Unk38 = br.AssertInt32(16842748, 16842749, 16842750, 16842751);
+                Unk38 = br.AssertInt16(-4, -3, -2, -1);
+                br.AssertByte(0);
+                br.AssertByte(1);
                 br.AssertInt32(0);
-                Unk40 = br.AssertInt32(0, 1);
+                bool hasField2 = br.AssertInt32(0, 1) == 1;
                 br.AssertInt32(0);
                 int fieldOffset2 = br.ReadInt32();
                 br.AssertInt32(0);
@@ -416,7 +416,10 @@ namespace WitchyFormats
                 br.AssertInt32(0);
                 br.AssertInt32(0);
                 Field1 = FFXField.ReadAt(br, fieldOffset1, this, 0);
-                Field2 = FFXField.ReadAt(br, fieldOffset2, this, 1);
+                if (hasField2)
+                    Field2 = FFXField.ReadAt(br, fieldOffset2, this, 1);
+                else
+                    Field2 = null;
             }
 
             internal FFXTransition(FFXTransition transition)
@@ -425,7 +428,6 @@ namespace WitchyFormats
                 TargetStateIndex = transition.TargetStateIndex;
                 Unk10 = transition.Unk10;
                 Unk38 = transition.Unk38;
-                Unk40 = transition.Unk40;
                 Field1 = transition.Field1;
                 Field2 = transition.Field2;
             }
@@ -439,7 +441,9 @@ namespace WitchyFormats
                 bw.WriteInt32(0);
                 bw.WriteInt32(TargetStateIndex);
                 bw.WriteInt32(0);
-                bw.WriteInt32(Unk10);
+                bw.WriteInt16(Unk10);
+                bw.WriteByte(0);
+                bw.WriteByte(1);
                 bw.WriteInt32(0);
                 bw.WriteInt32(1);
                 bw.WriteInt32(0);
@@ -449,9 +453,11 @@ namespace WitchyFormats
                 bw.WriteInt32(0);
                 bw.WriteInt32(0);
                 bw.WriteInt32(0);
-                bw.WriteInt32(Unk38);
+                bw.WriteInt16(Unk38);
+                bw.WriteByte(0);
+                bw.WriteByte(1);
                 bw.WriteInt32(0);
-                bw.WriteInt32(Unk40);
+                bw.WriteInt32(Field2 != null ? 1 : 0);
                 bw.WriteInt32(0);
                 bw.ReserveInt32(string.Format("TransitionFieldOffset2[{0}]", count));
                 bw.WriteInt32(0);
@@ -466,8 +472,15 @@ namespace WitchyFormats
             {
                 bw.FillInt32(string.Format("TransitionFieldOffset1[{0}]", index), (int)bw.Position);
                 Field1.Write(bw);
-                bw.FillInt32(string.Format("TransitionFieldOffset2[{0}]", index), (int)bw.Position);
-                Field2.Write(bw);
+                if (Field2 != null)
+                {
+                    bw.FillInt32(string.Format("TransitionFieldOffset2[{0}]", index), (int)bw.Position);
+                    Field2.Write(bw);
+                }
+                else
+                {
+                    bw.FillInt32(string.Format("TransitionFieldOffset2[{0}]", index), 0);
+                }
                 fieldCount += 2;
             }
         }
@@ -695,6 +708,7 @@ namespace WitchyFormats
                 br.AssertInt32(0);
                 int propertyCount2 = br.ReadInt32();
                 int fieldOffset = br.ReadInt32();
+                // Console.WriteLine($"fieldOffset: {fieldOffset}");
                 br.AssertInt32(0);
                 int section10Offset = br.ReadInt32();
                 br.AssertInt32(0);
@@ -860,19 +874,19 @@ namespace WitchyFormats
                         if (index > 0 && index <= (int)property.PropertyType + 1)
                             isInt = true;
                     }
-                    else if (property.InterpolationType != PropertyInterpolationType.StaticValue)
+                    else if (property.InterpolationType != PropertyInterpolationType.Constant)
                     {
                         if (index == 0)
                             isInt = true;
                     }
                 }
-                // CCCode: "16842748 is 1000000001111111111111100 in binary, the LSB is the only thing changing between those two values, so if Unk10 & 1 == 0 it's a float and if it's 1 it's an int"
+                // Needs confirmation: First transition's first value seems to always be a float.
                 else if (context is FFXTransition transition)
                 {
-                    if (index == 0)
-                        isInt = (transition.Unk10 & 3) > 0;
+                    if (transition.TargetStateIndex == -1)
+                        isInt = index != 0;
                     else
-                        isInt = (transition.Unk38 & 3) > 0;
+                        isInt = index != 1;
                 }
                 else
                 {
@@ -976,7 +990,7 @@ namespace WitchyFormats
         {
             Zero = 0,
             One = 1,
-            StaticValue = 2,
+            Constant = 2,
             Stepped = 3,
             Linear = 4,
             Curve1 = 5,

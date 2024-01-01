@@ -61,6 +61,7 @@ For all intents and purposes, Witchy should be treated as a new version of Yabbe
 * *Avocado* - YabberAvocado additions
 * *NatsuDragneelTheFireDragon* - MQB support
 * *Vawser* - preliminary Armored Core VI paramdefs
+* *CCCode* - FXR research
 * *ivi* - WitchyBND maintainer
 
 Special thanks to Nordgaren, The12thAvenger, philiquaz, george_kingbore, katalash, TKGP, thefifthmatt and many more for various assistance during development.
