@@ -13,15 +13,16 @@ namespace WitchyFormats
     /// Initial work by TKGP, Meowmaritus and NamelessHoodie.
     /// Currently maintained by ivi.
     /// </summary>
+    [XmlType(TypeName="fxr3")]
     public class Fxr3 : SoulsFile<Fxr3>
     {
         public FXRVersion Version { get; set; }
 
         public int Id { get; set; }
 
-        public FFXStateMachine RootStateMachine { get; set; }
+        public StateMap RootStateMap { get; set; }
 
-        public FFXContainer RootContainer { get; set; }
+        public Container RootContainer { get; set; }
 
         public List<int> References { get; set; }
 
@@ -34,8 +35,8 @@ namespace WitchyFormats
         public Fxr3()
         {
             Version = FXRVersion.DarkSouls3;
-            RootStateMachine = new FFXStateMachine();
-            RootContainer = new FFXContainer();
+            RootStateMap = new StateMap();
+            RootContainer = new Container();
             References = new List<int>();
             UnkExternalValues = new List<int>();
             UnkBloodEnabler = new List<int>();
@@ -46,8 +47,8 @@ namespace WitchyFormats
         {
             Id = fxr.Id;
             Version = fxr.Version;
-            RootStateMachine = new FFXStateMachine(fxr.RootStateMachine);
-            RootContainer = new FFXContainer(fxr.RootContainer);
+            RootStateMap = new StateMap(fxr.RootStateMap);
+            RootContainer = new Container(fxr.RootContainer);
             References = new List<int>(fxr.References);
             UnkExternalValues = new List<int>(fxr.UnkExternalValues);
             UnkBloodEnabler = new List<int>(fxr.UnkBloodEnabler);
@@ -72,7 +73,7 @@ namespace WitchyFormats
             Version = br.ReadEnum16<FXRVersion>();
             br.AssertInt32(1);
             Id = br.ReadInt32();
-            int stateMachineOffset = br.ReadInt32();
+            int stateMapOffset = br.ReadInt32();
             br.AssertInt32(1); // Section 1 count
             br.ReadInt32(); // Section 2 offset
             br.ReadInt32(); // Section 2 count
@@ -123,11 +124,11 @@ namespace WitchyFormats
                 UnkEmpty = new List<int>();
             }
 
-            br.Position = stateMachineOffset;
-            RootStateMachine = new FFXStateMachine(br);
+            br.Position = stateMapOffset;
+            RootStateMap = new StateMap(br);
 
             br.Position = containerOffset;
-            RootContainer = new FFXContainer(br);
+            RootContainer = new Container(br);
         }
 
         protected override void Write(BinaryWriterEx bw)
@@ -137,20 +138,20 @@ namespace WitchyFormats
             bw.WriteUInt16((ushort)Version);
             bw.WriteInt32(1);
             bw.WriteInt32(Id);
-            bw.ReserveInt32("StateMachineOffset");
+            bw.ReserveInt32("StateMapOffset");
             bw.WriteInt32(1);
-            bw.ReserveInt32("FFXStateOffset");
-            bw.WriteInt32(RootStateMachine.States.Count);
-            bw.ReserveInt32("FFXTransitionOffset");
-            bw.ReserveInt32("FFXTransitionCount");
+            bw.ReserveInt32("StateOffset");
+            bw.WriteInt32(RootStateMap.States.Count);
+            bw.ReserveInt32("TransitionOffset");
+            bw.ReserveInt32("TransitionCount");
             bw.ReserveInt32("ContainerOffset");
             bw.ReserveInt32("ContainerCount");
             bw.ReserveInt32("EffectOffset");
             bw.ReserveInt32("EffectCount");
             bw.ReserveInt32("ActionOffset");
             bw.ReserveInt32("ActionCount");
-            bw.ReserveInt32("FFXPropertyOffset");
-            bw.ReserveInt32("FFXPropertyCount");
+            bw.ReserveInt32("PropertyOffset");
+            bw.ReserveInt32("PropertyCount");
             bw.ReserveInt32("Section8Offset");
             bw.ReserveInt32("Section8Count");
             bw.ReserveInt32("Section9Offset");
@@ -176,21 +177,21 @@ namespace WitchyFormats
                 // bw.WriteInt32(0);
             }
 
-            bw.FillInt32("StateMachineOffset", (int)bw.Position);
-            RootStateMachine.Write(bw);
+            bw.FillInt32("StateMapOffset", (int)bw.Position);
+            RootStateMap.Write(bw);
             bw.Pad(16);
-            bw.FillInt32("FFXStateOffset", (int)bw.Position);
-            RootStateMachine.WriteStates(bw);
+            bw.FillInt32("StateOffset", (int)bw.Position);
+            RootStateMap.WriteStates(bw);
             bw.Pad(16);
-            bw.FillInt32("FFXTransitionOffset", (int)bw.Position);
-            List<FFXState> states = RootStateMachine.States;
-            List<FFXTransition> transitions = new List<FFXTransition>();
+            bw.FillInt32("TransitionOffset", (int)bw.Position);
+            List<State> states = RootStateMap.States;
+            List<Transition> transitions = new List<Transition>();
             for (int index = 0; index < states.Count; ++index)
                 states[index].WriteTransitions(bw, index, transitions);
-            bw.FillInt32("FFXTransitionCount", transitions.Count);
+            bw.FillInt32("TransitionCount", transitions.Count);
             bw.Pad(16);
             bw.FillInt32("ContainerOffset", (int)bw.Position);
-            List<FFXContainer> Containers = new List<FFXContainer>();
+            List<Container> Containers = new List<Container>();
             RootContainer.Write(bw, Containers);
             RootContainer.WriteContainers(bw, Containers);
             bw.FillInt32("ContainerCount", Containers.Count);
@@ -203,16 +204,16 @@ namespace WitchyFormats
             bw.Pad(16);
             bw.FillInt32("ActionOffset", (int)bw.Position);
             EffectCount = 0;
-            List<FFXAction> actions = new List<FFXAction>();
+            List<Action> actions = new List<Action>();
             for (int index = 0; index < Containers.Count; ++index)
                 Containers[index].WriteActions(bw, index, ref EffectCount, actions);
             bw.FillInt32("ActionCount", actions.Count);
             bw.Pad(16);
-            bw.FillInt32("FFXPropertyOffset", (int)bw.Position);
-            List<FFXProperty> properties = new List<FFXProperty>();
+            bw.FillInt32("PropertyOffset", (int)bw.Position);
+            List<Property> properties = new List<Property>();
             for (int index = 0; index < actions.Count; ++index)
                 actions[index].WriteProperties(bw, index, properties);
-            bw.FillInt32("FFXPropertyCount", properties.Count);
+            bw.FillInt32("PropertyCount", properties.Count);
             bw.Pad(16);
             bw.FillInt32("Section8Offset", (int)bw.Position);
             List<PropertyModifier> modifiers = new List<PropertyModifier>();
@@ -221,7 +222,7 @@ namespace WitchyFormats
             bw.FillInt32("Section8Count", modifiers.Count);
             bw.Pad(16);
             bw.FillInt32("Section9Offset", (int)bw.Position);
-            List<FFXProperty> conditionalProperties = new List<FFXProperty>();
+            List<Property> conditionalProperties = new List<Property>();
             for (int index = 0; index < modifiers.Count; ++index)
                 modifiers[index].WriteProperties(bw, index, conditionalProperties);
             bw.FillInt32("Section9Count", conditionalProperties.Count);
@@ -282,28 +283,28 @@ namespace WitchyFormats
             Sekiro = 5,
         }
 
-        public class FFXStateMachine
+        public class StateMap
         {
-            public List<FFXState> States { get; set; }
+            public List<State> States { get; set; }
 
-            public FFXStateMachine() => States = new List<FFXState>();
+            public StateMap() => States = new List<State>();
 
-            internal FFXStateMachine(BinaryReaderEx br)
+            internal StateMap(BinaryReaderEx br)
             {
                 br.AssertInt32(0);
                 int capacity = br.ReadInt32();
                 int num = br.ReadInt32();
                 br.AssertInt32(0);
                 br.StepIn(num);
-                States = new List<FFXState>(capacity);
+                States = new List<State>(capacity);
                 for (int index = 0; index < capacity; ++index)
-                    States.Add(new FFXState(br));
+                    States.Add(new State(br));
                 br.StepOut();
             }
 
-            internal FFXStateMachine(FFXStateMachine stateMachine)
+            internal StateMap(StateMap stateMap)
             {
-                States = stateMachine.States.Select(state => new FFXState(state)).ToList();
+                States = stateMap.States.Select(state => new State(state)).ToList();
             }
 
             internal void Write(BinaryWriterEx bw)
@@ -322,28 +323,28 @@ namespace WitchyFormats
             }
         }
 
-        public class FFXState
+        public class State
         {
-            public List<FFXTransition> Transitions { get; set; }
+            public List<Transition> Transitions { get; set; }
 
-            public FFXState() => Transitions = new List<FFXTransition>();
+            public State() => Transitions = new List<Transition>();
 
-            internal FFXState(BinaryReaderEx br)
+            internal State(BinaryReaderEx br)
             {
                 br.AssertInt32(0);
                 int capacity = br.ReadInt32();
                 int num = br.ReadInt32();
                 br.AssertInt32(0);
                 br.StepIn(num);
-                Transitions = new List<FFXTransition>(capacity);
+                Transitions = new List<Transition>(capacity);
                 for (int index = 0; index < capacity; ++index)
-                    Transitions.Add(new FFXTransition(br));
+                    Transitions.Add(new Transition(br));
                 br.StepOut();
             }
 
-            internal FFXState(FFXState state)
+            internal State(State state)
             {
-                Transitions = state.Transitions.Select(transition => new FFXTransition(transition)).ToList();
+                Transitions = state.Transitions.Select(transition => new Transition(transition)).ToList();
             }
 
             internal void Write(BinaryWriterEx bw, int index)
@@ -357,45 +358,64 @@ namespace WitchyFormats
             internal void WriteTransitions(
                 BinaryWriterEx bw,
                 int index,
-                List<FFXTransition> ffxTransitions)
+                List<Transition> transitions)
             {
                 bw.FillInt32(string.Format("StateTransitionsOffset[{0}]", index), (int)bw.Position);
-                foreach (FFXTransition ffxTransition in Transitions)
-                    ffxTransition.Write(bw, ffxTransitions);
+                foreach (Transition transition in Transitions)
+                    transition.Write(bw, transitions);
             }
         }
 
-        public class FFXTransition
+        public class Transition
         {
-            public short Unk00 { get; set; }
-
             [XmlAttribute] public int TargetStateIndex { get; set; }
 
-            public short Unk10 { get; set; }
+            public enum TransitionOperatorType
+            {
+                Equal = 0,
+                NotEqual = 1,
+                LessThan = 2,
+                LessThanOrEqual = 3,
+            }
 
-            public short Unk38 { get; set; }
+            public TransitionOperatorType Operator { get; set; }
 
-            public FFXField Field1 { get; set; }
+            public byte UnkOperatorModifier { get; set; }
 
-            public FFXField? Field2 { get; set; }
+            public enum TransitionFieldType
+            {
+                Literal = -4,
+                External = -3,
+                UnkMinus2 = -2,
+                Age = -1
+            }
 
-            public FFXTransition()
+            public TransitionFieldType LeftOperandType { get; set; }
+            public Field? LeftOperand { get; set; }
+
+            public TransitionFieldType RightOperandType { get; set; }
+            public Field? RightOperand { get; set; }
+
+            public Transition()
             {
             }
 
-            internal FFXTransition(BinaryReaderEx br)
+            internal Transition(BinaryReaderEx br)
             {
-                Unk00 = br.AssertInt16(8, 10, 11);
-                int num2 = br.AssertByte(0);
-                int num3 = br.AssertByte(1);
-                br.AssertInt32(0);
-                TargetStateIndex = br.ReadInt32();
-                br.AssertInt32(0);
-                Unk10 = br.AssertInt16(-4, -3, -2, -1);
+                var op = br.ReadInt16();
+                Operator = (TransitionOperatorType)(op & 0b0011);
+                UnkOperatorModifier = (byte)(op >> 2 & 0b0011);
                 br.AssertByte(0);
                 br.AssertByte(1);
                 br.AssertInt32(0);
-                br.AssertInt32(1);
+                TargetStateIndex = br.ReadInt32();
+                br.AssertInt32(0);
+                var field1Source = br.AssertInt16(-4, -3, -2, -1);
+                LeftOperandType = (TransitionFieldType)field1Source;
+                br.AssertByte(0);
+                br.AssertByte(1);
+                br.AssertInt32(0);
+                bool hasField1 = br.AssertInt32(0, 1) == 1; // Has Field1 or not
                 br.AssertInt32(0);
                 int fieldOffset1 = br.ReadInt32();
                 br.AssertInt32(0);
@@ -403,11 +423,12 @@ namespace WitchyFormats
                 br.AssertInt32(0);
                 br.AssertInt32(0);
                 br.AssertInt32(0);
-                Unk38 = br.AssertInt16(-4, -3, -2, -1);
+                var field2Source = br.AssertInt16(-4, -3, -2, -1);
+                RightOperandType = (TransitionFieldType)field2Source;
                 br.AssertByte(0);
                 br.AssertByte(1);
                 br.AssertInt32(0);
-                bool hasField2 = br.AssertInt32(0, 1) == 1;
+                bool hasField2 = br.AssertInt32(0, 1) == 1; // Has Field2 or not
                 br.AssertInt32(0);
                 int fieldOffset2 = br.ReadInt32();
                 br.AssertInt32(0);
@@ -415,37 +436,36 @@ namespace WitchyFormats
                 br.AssertInt32(0);
                 br.AssertInt32(0);
                 br.AssertInt32(0);
-                Field1 = FFXField.ReadAt(br, fieldOffset1, this, 0);
-                if (hasField2)
-                    Field2 = FFXField.ReadAt(br, fieldOffset2, this, 1);
-                else
-                    Field2 = null;
+                LeftOperand = hasField1 ? Field.ReadAt(br, fieldOffset1, this, 0) : null;
+                RightOperand = hasField2 ? Field.ReadAt(br, fieldOffset2, this, 1) : null;
             }
 
-            internal FFXTransition(FFXTransition transition)
+            internal Transition(Transition transition)
             {
-                Unk00 = transition.Unk00;
+                Operator = transition.Operator;
+                UnkOperatorModifier = transition.UnkOperatorModifier;
                 TargetStateIndex = transition.TargetStateIndex;
-                Unk10 = transition.Unk10;
-                Unk38 = transition.Unk38;
-                Field1 = transition.Field1;
-                Field2 = transition.Field2;
+                LeftOperandType = transition.LeftOperandType;
+                RightOperandType = transition.RightOperandType;
+                LeftOperand = transition.LeftOperand;
+                RightOperand = transition.RightOperand;
             }
 
-            internal void Write(BinaryWriterEx bw, List<FFXTransition> ffxTransitions)
+            internal void Write(BinaryWriterEx bw, List<Transition> transitions)
             {
-                int count = ffxTransitions.Count;
-                bw.WriteInt16(Unk00);
+                int count = transitions.Count;
+                short op = (short)((byte)Operator | ((UnkOperatorModifier << 2) & 0b1100));
+                bw.WriteInt16(op);
                 bw.WriteByte(0);
                 bw.WriteByte(1);
                 bw.WriteInt32(0);
                 bw.WriteInt32(TargetStateIndex);
                 bw.WriteInt32(0);
-                bw.WriteInt16(Unk10);
+                bw.WriteInt16((short)LeftOperandType);
                 bw.WriteByte(0);
                 bw.WriteByte(1);
                 bw.WriteInt32(0);
-                bw.WriteInt32(1);
+                bw.WriteInt32(LeftOperand != null ? 1 : 0);
                 bw.WriteInt32(0);
                 bw.ReserveInt32(string.Format("TransitionFieldOffset1[{0}]", count));
                 bw.WriteInt32(0);
@@ -453,11 +473,11 @@ namespace WitchyFormats
                 bw.WriteInt32(0);
                 bw.WriteInt32(0);
                 bw.WriteInt32(0);
-                bw.WriteInt16(Unk38);
+                bw.WriteInt16((short)RightOperandType);
                 bw.WriteByte(0);
                 bw.WriteByte(1);
                 bw.WriteInt32(0);
-                bw.WriteInt32(Field2 != null ? 1 : 0);
+                bw.WriteInt32(RightOperand != null ? 1 : 0);
                 bw.WriteInt32(0);
                 bw.ReserveInt32(string.Format("TransitionFieldOffset2[{0}]", count));
                 bw.WriteInt32(0);
@@ -465,42 +485,45 @@ namespace WitchyFormats
                 bw.WriteInt32(0);
                 bw.WriteInt32(0);
                 bw.WriteInt32(0);
-                ffxTransitions.Add(this);
+                transitions.Add(this);
             }
 
             internal void WriteFields(BinaryWriterEx bw, int index, ref int fieldCount)
             {
-                bw.FillInt32(string.Format("TransitionFieldOffset1[{0}]", index), (int)bw.Position);
-                Field1.Write(bw);
-                if (Field2 != null)
+                int fieldPos1 = LeftOperand != null ? (int)bw.Position : 0;
+                bw.FillInt32(string.Format("TransitionFieldOffset1[{0}]", index), fieldPos1);
+                if (LeftOperand != null)
                 {
-                    bw.FillInt32(string.Format("TransitionFieldOffset2[{0}]", index), (int)bw.Position);
-                    Field2.Write(bw);
+                    LeftOperand.Write(bw);
+                    fieldCount++;
                 }
-                else
+
+                int fieldPos2 = RightOperand != null ? (int)bw.Position : 0;
+                bw.FillInt32(string.Format("TransitionFieldOffset2[{0}]", index), fieldPos2);
+                if (RightOperand != null)
                 {
-                    bw.FillInt32(string.Format("TransitionFieldOffset2[{0}]", index), 0);
+                    RightOperand.Write(bw);
+                    fieldCount++;
                 }
-                fieldCount += 2;
             }
         }
 
-        public class FFXContainer
+        public class Container
         {
             [XmlAttribute] public short Id { get; set; }
 
-            public List<FFXAction> Actions { get; set; }
-            public List<FFXEffect> Effects { get; set; }
-            public List<FFXContainer> Containers { get; set; }
+            public List<Action> Actions { get; set; }
+            public List<Effect> Effects { get; set; }
+            public List<Container> Containers { get; set; }
 
-            public FFXContainer()
+            public Container()
             {
-                Containers = new List<FFXContainer>();
-                Effects = new List<FFXEffect>();
-                Actions = new List<FFXAction>();
+                Containers = new List<Container>();
+                Effects = new List<Effect>();
+                Actions = new List<Action>();
             }
 
-            internal FFXContainer(BinaryReaderEx br)
+            internal Container(BinaryReaderEx br)
             {
                 Id = br.ReadInt16();
                 int num1 = br.AssertByte(0);
@@ -517,31 +540,31 @@ namespace WitchyFormats
                 int ContainerOffset = br.ReadInt32();
                 br.AssertInt32(0);
                 br.StepIn(ContainerOffset);
-                Containers = new List<FFXContainer>(ContainerCount);
+                Containers = new List<Container>(ContainerCount);
                 for (int index = 0; index < ContainerCount; ++index)
-                    Containers.Add(new FFXContainer(br));
+                    Containers.Add(new Container(br));
                 br.StepOut();
                 br.StepIn(EffectOffset);
-                Effects = new List<FFXEffect>(EffectCount);
+                Effects = new List<Effect>(EffectCount);
                 for (int index = 0; index < EffectCount; ++index)
-                    Effects.Add(new FFXEffect(br));
+                    Effects.Add(new Effect(br));
                 br.StepOut();
                 br.StepIn(ActionOffset);
-                Actions = new List<FFXAction>(ActionCount);
+                Actions = new List<Action>(ActionCount);
                 for (int index = 0; index < ActionCount; ++index)
-                    Actions.Add(new FFXAction(br));
+                    Actions.Add(new Action(br));
                 br.StepOut();
             }
 
-            internal FFXContainer(FFXContainer container)
+            internal Container(Container container)
             {
                 Id = container.Id;
-                Containers = container.Containers.Select(container => new FFXContainer(container)).ToList();
-                Effects = container.Effects.Select(effect => new FFXEffect(effect)).ToList();
-                Actions = container.Actions.Select(action => new FFXAction(action)).ToList();
+                Containers = container.Containers.Select(container => new Container(container)).ToList();
+                Effects = container.Effects.Select(effect => new Effect(effect)).ToList();
+                Actions = container.Actions.Select(action => new Action(action)).ToList();
             }
 
-            internal void Write(BinaryWriterEx bw, List<FFXContainer> containers)
+            internal void Write(BinaryWriterEx bw, List<Container> containers)
             {
                 int count = containers.Count;
                 bw.WriteInt16(Id);
@@ -561,7 +584,7 @@ namespace WitchyFormats
                 containers.Add(this);
             }
 
-            internal void WriteContainers(BinaryWriterEx bw, List<FFXContainer> containers)
+            internal void WriteContainers(BinaryWriterEx bw, List<Container> containers)
             {
                 int num = containers.IndexOf(this);
                 if (Containers.Count == 0)
@@ -571,9 +594,9 @@ namespace WitchyFormats
                 else
                 {
                     bw.FillInt32(string.Format("ContainerChildContainersOffset[{0}]", num), (int)bw.Position);
-                    foreach (FFXContainer container in Containers)
+                    foreach (Container container in Containers)
                         container.Write(bw, containers);
-                    foreach (FFXContainer container in Containers)
+                    foreach (Container container in Containers)
                         container.WriteContainers(bw, containers);
                 }
             }
@@ -597,10 +620,10 @@ namespace WitchyFormats
                 BinaryWriterEx bw,
                 int index,
                 ref int effectCount,
-                List<FFXAction> actions)
+                List<Action> actions)
             {
                 bw.FillInt32(string.Format("ContainerActionsOffset[{0}]", index), (int)bw.Position);
-                foreach (FFXAction action in Actions)
+                foreach (Action action in Actions)
                     action.Write(bw, actions);
                 for (int index1 = 0; index1 < Effects.Count; ++index1)
                     Effects[index1].WriteActions(bw, effectCount + index1, actions);
@@ -608,15 +631,15 @@ namespace WitchyFormats
             }
         }
 
-        public class FFXEffect
+        public class Effect
         {
             [XmlAttribute] public short Id { get; set; }
 
-            public List<FFXAction> Actions { get; set; }
+            public List<Action> Actions { get; set; }
 
-            public FFXEffect() => Actions = new List<FFXAction>();
+            public Effect() => Actions = new List<Action>();
 
-            internal FFXEffect(BinaryReaderEx br)
+            internal Effect(BinaryReaderEx br)
             {
                 Id = br.ReadInt16();
                 int num1 = br.AssertByte(0);
@@ -629,16 +652,16 @@ namespace WitchyFormats
                 int num3 = br.ReadInt32();
                 br.AssertInt32(0);
                 br.StepIn(num3);
-                Actions = new List<FFXAction>(capacity);
+                Actions = new List<Action>(capacity);
                 for (int index = 0; index < capacity; ++index)
-                    Actions.Add(new FFXAction(br));
+                    Actions.Add(new Action(br));
                 br.StepOut();
             }
 
-            internal FFXEffect(FFXEffect effect)
+            internal Effect(Effect effect)
             {
                 Id = effect.Id;
-                Actions = effect.Actions.Select(action => new FFXAction(action)).ToList();
+                Actions = effect.Actions.Select(action => new Action(action)).ToList();
             }
 
             internal void Write(BinaryWriterEx bw, int index)
@@ -658,15 +681,15 @@ namespace WitchyFormats
             internal void WriteActions(
                 BinaryWriterEx bw,
                 int index,
-                List<FFXAction> actions)
+                List<Action> actions)
             {
                 bw.FillInt32(string.Format("EffectActionsOffset[{0}]", index), (int)bw.Position);
-                foreach (FFXAction action in Actions)
+                foreach (Action action in Actions)
                     action.Write(bw, actions);
             }
         }
 
-        public class FFXAction
+        public class Action
         {
             [XmlAttribute] public short Id { get; set; }
 
@@ -678,24 +701,24 @@ namespace WitchyFormats
 
             public List<Section10> Section10s { get; set; }
 
-            public List<FFXField> Fields1 { get; set; }
+            public List<Field> Fields1 { get; set; }
 
-            public List<FFXField> Fields2 { get; set; }
+            public List<Field> Fields2 { get; set; }
 
-            public List<FFXProperty> Properties1 { get; set; }
+            public List<Property> Properties1 { get; set; }
 
-            public List<FFXProperty> Properties2 { get; set; }
+            public List<Property> Properties2 { get; set; }
 
-            public FFXAction()
+            public Action()
             {
-                Properties1 = new List<FFXProperty>();
-                Properties2 = new List<FFXProperty>();
+                Properties1 = new List<Property>();
+                Properties2 = new List<Property>();
                 Section10s = new List<Section10>();
-                Fields1 = new List<FFXField>();
-                Fields2 = new List<FFXField>();
+                Fields1 = new List<Field>();
+                Fields2 = new List<Field>();
             }
 
-            internal FFXAction(BinaryReaderEx br)
+            internal Action(BinaryReaderEx br)
             {
                 Id = br.ReadInt16(); // 0
                 Unk02 = br.ReadBoolean(); // 2
@@ -719,13 +742,13 @@ namespace WitchyFormats
 
                 br.StepIn(propertyOffset);
                 {
-                    Properties1 = new List<FFXProperty>(propertyCount1);
+                    Properties1 = new List<Property>(propertyCount1);
                     for (int index = 0; index < propertyCount1; ++index)
-                        Properties1.Add(new FFXProperty(br, false));
+                        Properties1.Add(new Property(br, false));
 
-                    Properties2 = new List<FFXProperty>(propertyCount2);
+                    Properties2 = new List<Property>(propertyCount2);
                     for (int index = 0; index < propertyCount2; ++index)
-                        Properties2.Add(new FFXProperty(br, false));
+                        Properties2.Add(new Property(br, false));
                 }
                 br.StepOut();
 
@@ -739,26 +762,26 @@ namespace WitchyFormats
 
                 br.StepIn(fieldOffset);
                 {
-                    Fields1 = FFXField.ReadMany(br, fieldCount1, this);
-                    Fields2 = FFXField.ReadMany(br, fieldCount2, this);
+                    Fields1 = Field.ReadMany(br, fieldCount1, this);
+                    Fields2 = Field.ReadMany(br, fieldCount2, this);
                 }
                 br.StepOut();
             }
 
-            internal FFXAction(FFXAction action)
+            internal Action(Action action)
             {
                 Id = action.Id;
                 Unk02 = action.Unk02;
                 Unk03 = action.Unk03;
                 Unk04 = action.Unk04;
-                Properties1 = action.Properties1.Select(prop => new FFXProperty(prop)).ToList();
-                Properties2 = action.Properties2.Select(prop => new FFXProperty(prop)).ToList();
+                Properties1 = action.Properties1.Select(prop => new Property(prop)).ToList();
+                Properties2 = action.Properties2.Select(prop => new Property(prop)).ToList();
                 Section10s = action.Section10s.Select(section => new Section10(section)).ToList();
-                Fields1 = action.Fields1.Select(FFXField.Create).ToList();
-                Fields2 = action.Fields2.Select(FFXField.Create).ToList();
+                Fields1 = action.Fields1.Select(Field.Create).ToList();
+                Fields2 = action.Fields2.Select(Field.Create).ToList();
             }
 
-            internal void Write(BinaryWriterEx bw, List<FFXAction> Actions)
+            internal void Write(BinaryWriterEx bw, List<Action> Actions)
             {
                 int count = Actions.Count;
                 bw.WriteInt16(Id);
@@ -782,13 +805,13 @@ namespace WitchyFormats
                 Actions.Add(this);
             }
 
-            internal void WriteProperties(BinaryWriterEx bw, int index, List<FFXProperty> ffxProperties)
+            internal void WriteProperties(BinaryWriterEx bw, int index, List<Property> properties)
             {
                 bw.FillInt32(string.Format("ActionPropertiesOffset[{0}]", index), (int)bw.Position);
-                foreach (FFXProperty property in Properties1)
-                    property.Write(bw, ffxProperties, false);
-                foreach (FFXProperty property in Properties2)
-                    property.Write(bw, ffxProperties, false);
+                foreach (Property property in Properties1)
+                    property.Write(bw, properties, false);
+                foreach (Property property in Properties2)
+                    property.Write(bw, properties, false);
             }
 
             internal void WriteSection10s(BinaryWriterEx bw, int index, List<Section10> section10s)
@@ -807,10 +830,10 @@ namespace WitchyFormats
                 else
                 {
                     bw.FillInt32(string.Format("ActionFieldsOffset[{0}]", index), (int)bw.Position);
-                    foreach (FFXField ffxField in Fields1)
-                        ffxField.Write(bw);
-                    foreach (FFXField ffxField in Fields2)
-                        ffxField.Write(bw);
+                    foreach (Field field in Fields1)
+                        field.Write(bw);
+                    foreach (Field field in Fields2)
+                        field.Write(bw);
                     fieldCount += Fields1.Count + Fields2.Count;
                 }
             }
@@ -822,51 +845,51 @@ namespace WitchyFormats
             Float
         }
 
-        [XmlInclude(typeof(FFXFieldFloat))]
-        [XmlInclude(typeof(FFXFieldInt))]
-        public abstract class FFXField
+        [XmlInclude(typeof(FieldFloat))]
+        [XmlInclude(typeof(FieldInt))]
+        public abstract class Field
         {
-            public static FFXField Create(float value)
+            public static Field Create(float value)
             {
-                return new FFXFieldFloat(value);
+                return new FieldFloat(value);
             }
 
-            public static FFXField Create(int value)
+            public static Field Create(int value)
             {
-                return new FFXFieldInt(value);
+                return new FieldInt(value);
             }
 
-            public static FFXField Create(FFXField field)
+            public static Field Create(Field field)
             {
-                if (field.GetType() == typeof(FFXFieldFloat))
+                if (field.GetType() == typeof(FieldFloat))
                 {
-                    return new FFXFieldFloat(((FFXFieldFloat)field).Value);
+                    return new FieldFloat(((FieldFloat)field).Value);
                 }
 
-                if (field.GetType() == typeof(FFXFieldInt))
+                if (field.GetType() == typeof(FieldInt))
                 {
-                    return new FFXFieldInt(((FFXFieldInt)field).Value);
+                    return new FieldInt(((FieldInt)field).Value);
                 }
 
                 throw new InvalidOperationException("Field passed for creation was neither Float nor Int");
             }
 
-            public static FFXFieldFloat Create(FFXFieldFloat field)
+            public static FieldFloat Create(FieldFloat field)
             {
-                return new FFXFieldFloat(field.Value);
+                return new FieldFloat(field.Value);
             }
 
-            public static FFXFieldInt Create(FFXFieldInt field)
+            public static FieldInt Create(FieldInt field)
             {
-                return new FFXFieldInt(field.Value);
+                return new FieldInt(field.Value);
             }
 
-            public static FFXField Read(BinaryReaderEx br, object? context = null, int? index = null)
+            public static Field Read(BinaryReaderEx br, object? context = null, int? index = null)
             {
-                FFXField? ffxField = null;
+                Field? field = null;
                 bool isInt = false;
                 // First value of interpolated properties is int (stop count), rest are floats.
-                if (context is FFXProperty property)
+                if (context is Property property)
                 {
                     // Unk AC6 InterpolationType
                     if (property.InterpolationType == PropertyInterpolationType.UnkAc6)
@@ -880,13 +903,16 @@ namespace WitchyFormats
                             isInt = true;
                     }
                 }
-                // Needs confirmation: First transition's first value seems to always be a float.
-                else if (context is FFXTransition transition)
+                else if (context is Transition transition)
                 {
-                    if (transition.TargetStateIndex == -1)
-                        isInt = index != 0;
-                    else
-                        isInt = index != 1;
+                    if (index == 0)
+                    {
+                        isInt = transition.LeftOperandType is Transition.TransitionFieldType.External;
+                    }
+                    else if (index == 1)
+                    {
+                        isInt = transition.RightOperandType is Transition.TransitionFieldType.External;
+                    }
                 }
                 else
                 {
@@ -894,85 +920,85 @@ namespace WitchyFormats
                     float single = br.GetSingle(br.Position);
                     if (single >= 9.99999974737875E-05 && single < 1000000.0 ||
                         single <= -9.99999974737875E-05 && single > -1000000.0)
-                        ffxField = new FFXFieldFloat(single);
+                        field = new FieldFloat(single);
                     else
                         isInt = true;
                 }
 
-                if (ffxField == null)
+                if (field == null)
                 {
                     if (isInt)
-                        ffxField = new FFXFieldInt(br.GetInt32(br.Position));
+                        field = new FieldInt(br.GetInt32(br.Position));
                     else
-                        ffxField = new FFXFieldFloat(br.GetSingle(br.Position));
+                        field = new FieldFloat(br.GetSingle(br.Position));
                 }
 
                 br.Position += 4L;
-                return ffxField;
+                return field;
             }
 
-            public static FFXField ReadAt(
+            public static Field ReadAt(
                 BinaryReaderEx br,
                 int offset,
                 object? context = null,
                 int? index = null)
             {
                 br.StepIn(offset);
-                FFXField field = Read(br, context, index);
+                Field field = Read(br, context, index);
                 br.StepOut();
                 return field;
             }
 
-            public static List<FFXField> ReadMany(BinaryReaderEx br, int count, object? context = null)
+            public static List<Field> ReadMany(BinaryReaderEx br, int count, object? context = null)
             {
-                List<FFXField> ffxFieldList = new List<FFXField>();
+                List<Field> fieldList = new List<Field>();
                 for (int index = 0; index < count; ++index)
-                    ffxFieldList.Add(Read(br, context, index));
-                return ffxFieldList;
+                    fieldList.Add(Read(br, context, index));
+                return fieldList;
             }
 
-            public static List<FFXField> ReadManyAt(
+            public static List<Field> ReadManyAt(
                 BinaryReaderEx br,
                 int offset,
                 int count,
                 object? context = null)
             {
                 br.StepIn(offset);
-                List<FFXField> ffxFieldList = ReadMany(br, count, context);
+                List<Field> fieldList = ReadMany(br, count, context);
                 br.StepOut();
-                return ffxFieldList;
+                return fieldList;
             }
 
             public abstract void Write(BinaryWriterEx bw);
 
-            public class FFXFieldFloat : FFXField
+            public class FieldFloat : Field
             {
                 [XmlAttribute] public float Value;
 
                 public override void Write(BinaryWriterEx bw) => bw.WriteSingle(Value);
 
-                public FFXFieldFloat(float value)
+                public FieldFloat(float value)
                 {
                     Value = value;
                 }
 
-                public FFXFieldFloat()
+                public FieldFloat()
                 {
                 }
             }
 
-            public class FFXFieldInt : FFXField
+            public class FieldInt : Field
             {
                 [XmlAttribute] public int Value;
 
                 public override void Write(BinaryWriterEx bw) => bw.WriteInt32(Value);
 
-                public FFXFieldInt(int value)
+                public FieldInt(int value)
                 {
                     Value = value;
                 }
 
-                public FFXFieldInt()
+                public FieldInt()
                 {
                 }
             }
@@ -998,7 +1024,7 @@ namespace WitchyFormats
             UnkAc6 = 7
         }
 
-        public class FFXProperty
+        public class Property
         {
             [XmlAttribute] public PropertyType PropertyType { get; set; }
 
@@ -1006,17 +1032,17 @@ namespace WitchyFormats
 
             [XmlAttribute] public bool IsLoop { get; set; }
 
-            public List<FFXField> Fields { get; set; }
+            public List<Field> Fields { get; set; }
 
             public List<PropertyModifier> Modifiers { get; set; }
 
-            public FFXProperty()
+            public Property()
             {
                 Modifiers = new List<PropertyModifier>();
-                Fields = new List<FFXField>();
+                Fields = new List<Field>();
             }
 
-            internal FFXProperty(BinaryReaderEx br, bool conditional)
+            internal Property(BinaryReaderEx br, bool conditional)
             {
                 var typeEnumA = br.ReadInt16();
                 br.AssertByte(0);
@@ -1042,19 +1068,19 @@ namespace WitchyFormats
                     br.StepOut();
                 }
 
-                Fields = FFXField.ReadManyAt(br, offset, count, this);
+                Fields = Field.ReadManyAt(br, offset, count, this);
             }
 
-            internal FFXProperty(FFXProperty prop)
+            internal Property(Property prop)
             {
                 PropertyType = prop.PropertyType;
                 InterpolationType = prop.InterpolationType;
                 IsLoop = prop.IsLoop;
                 Modifiers = prop.Modifiers.Select(section => new PropertyModifier(section)).ToList();
-                Fields = prop.Fields.Select(FFXField.Create).ToList();
+                Fields = prop.Fields.Select(Field.Create).ToList();
             }
 
-            internal void Write(BinaryWriterEx bw, List<FFXProperty> properties, bool conditional)
+            internal void Write(BinaryWriterEx bw, List<Property> properties, bool conditional)
             {
                 int count = properties.Count;
                 int typeEnumA = (int)PropertyType | (int)InterpolationType << 4 | Convert.ToInt32(IsLoop) << 12;
@@ -1096,7 +1122,7 @@ namespace WitchyFormats
                 else
                 {
                     bw.FillInt32(string.Format(offsetName, index), (int)bw.Position);
-                    foreach (FFXField field in Fields)
+                    foreach (Field field in Fields)
                         field.Write(bw);
                     fieldCount += Fields.Count;
                 }
@@ -1109,14 +1135,14 @@ namespace WitchyFormats
 
             [XmlAttribute] public uint TypeEnumB { get; set; }
 
-            public List<FFXField> Fields { get; set; }
+            public List<Field> Fields { get; set; }
 
-            public List<FFXProperty> Properties { get; set; }
+            public List<Property> Properties { get; set; }
 
             public PropertyModifier()
             {
-                Properties = new List<FFXProperty>();
-                Fields = new List<FFXField>();
+                Properties = new List<Property>();
+                Fields = new List<Field>();
             }
 
             internal PropertyModifier(BinaryReaderEx br)
@@ -1132,19 +1158,19 @@ namespace WitchyFormats
                 int propertyOffset = br.ReadInt32();
                 br.AssertInt32(0);
                 br.StepIn(propertyOffset);
-                Properties = new List<FFXProperty>(propertyCount);
+                Properties = new List<Property>(propertyCount);
                 for (int index = 0; index < propertyCount; ++index)
-                    Properties.Add(new FFXProperty(br, true));
+                    Properties.Add(new Property(br, true));
                 br.StepOut();
-                Fields = FFXField.ReadManyAt(br, fieldOffset, fieldCount, this);
+                Fields = Field.ReadManyAt(br, fieldOffset, fieldCount, this);
             }
 
             internal PropertyModifier(PropertyModifier property)
             {
                 TypeEnumA = property.TypeEnumA;
                 TypeEnumB = property.TypeEnumB;
-                Properties = property.Properties.Select(prop => new FFXProperty(prop)).ToList();
-                Fields = property.Fields.Select(FFXField.Create).ToList();
+                Properties = property.Properties.Select(prop => new Property(prop)).ToList();
+                Fields = property.Fields.Select(Field.Create).ToList();
             }
 
             internal void Write(BinaryWriterEx bw, List<PropertyModifier> modifiers)
@@ -1163,17 +1189,17 @@ namespace WitchyFormats
                 modifiers.Add(this);
             }
 
-            internal void WriteProperties(BinaryWriterEx bw, int index, List<FFXProperty> properties)
+            internal void WriteProperties(BinaryWriterEx bw, int index, List<Property> properties)
             {
                 bw.FillInt32(string.Format("Section8Section9sOffset[{0}]", index), (int)bw.Position);
-                foreach (FFXProperty property in Properties)
+                foreach (Property property in Properties)
                     property.Write(bw, properties, true);
             }
 
             internal void WriteFields(BinaryWriterEx bw, int index, ref int fieldCount)
             {
                 bw.FillInt32(string.Format("Section8FieldsOffset[{0}]", index), (int)bw.Position);
-                foreach (FFXField field in Fields)
+                foreach (Field field in Fields)
                     field.Write(bw);
                 fieldCount += Fields.Count;
             }
@@ -1181,9 +1207,9 @@ namespace WitchyFormats
 
         public class Section10
         {
-            public List<FFXField> Fields { get; set; }
+            public List<Field> Fields { get; set; }
 
-            public Section10() => Fields = new List<FFXField>();
+            public Section10() => Fields = new List<Field>();
 
             internal Section10(BinaryReaderEx br)
             {
@@ -1191,12 +1217,12 @@ namespace WitchyFormats
                 br.AssertInt32(0);
                 int count = br.ReadInt32();
                 br.AssertInt32(0);
-                Fields = FFXField.ReadManyAt(br, offset, count, this);
+                Fields = Field.ReadManyAt(br, offset, count, this);
             }
 
             internal Section10(Section10 section)
             {
-                Fields = section.Fields.Select(FFXField.Create).ToList();
+                Fields = section.Fields.Select(Field.Create).ToList();
             }
 
             internal void Write(BinaryWriterEx bw, List<Section10> section10s)
@@ -1212,7 +1238,7 @@ namespace WitchyFormats
             internal void WriteFields(BinaryWriterEx bw, int index, ref int fieldCount)
             {
                 bw.FillInt32(string.Format("Section10FieldsOffset[{0}]", index), (int)bw.Position);
-                foreach (FFXField field in Fields)
+                foreach (Field field in Fields)
                     field.Write(bw);
                 fieldCount += Fields.Count;
             }
