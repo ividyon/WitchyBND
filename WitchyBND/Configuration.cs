@@ -92,19 +92,14 @@ public static class Configuration
 
     static Configuration()
     {
+        _values = new WitchyConfigValues();
         Args = new WitchyArgValues();
         IConfigurationRoot config = new ConfigurationBuilder()
             .AddJsonFile(GetConfigLocation("appsettings.json"), true)
             .AddJsonFile(GetConfigLocation("appsettings.user.json"), true)
             .AddJsonFile(GetConfigLocation("appsettings.override.json"), true)
-            .Build();
-        WitchyConfigValues? values = config.Get<WitchyConfigValues>();
-        if (values == null)
-        {
-            throw new FileNotFoundException($"Unable to get app settings from appsettings.json.");
-        }
-
-        _values = values;
+            .Build();;
+        _values = config.Get<WitchyConfigValues>();
     }
 
     public static void UpdateConfiguration()
