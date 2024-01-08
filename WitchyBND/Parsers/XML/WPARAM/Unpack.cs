@@ -78,13 +78,13 @@ public partial class WPARAM
                 if (regVer == 0)
                     Program.RegisterError(new WitchyError(@$"Could not carefully apply paramdef {paramTypeToParamdef}.
 The param may be out of date, or an incorrect regulation version may have been supplied.",
-            srcPath));
+                        srcPath));
                 else
                     Program.RegisterError(new WitchyError(@$"Could not carefully apply paramdef {paramTypeToParamdef}.
 The param may be out of date for the regulation version.",
                         srcPath));
-            // Nothing happened yet, so can just proceed to the next file.
-            return;
+                // Nothing happened yet, so can just proceed to the next file.
+                return;
             }
         }
 
@@ -129,7 +129,7 @@ The param may be out of date for the regulation version.",
 
         // Prepare rows
         var rows = new List<WPARAMRow>();
-        var fieldNames = paramdef.Fields.Select(field => field.InternalName);
+        var fieldNames = paramdef.Fields.FilterByGameVersion(gameInfo.Item2).Select(field => field.InternalName);
 
         var fieldCounts = new Dictionary<string, Dictionary<string, int>>();
         var fieldMaxes = new Dictionary<string, (string, int)>();
@@ -189,6 +189,9 @@ The param may be out of date for the regulation version.",
         xw.WriteStartElement("fields");
         foreach (var field in paramdef.Fields)
         {
+            if (!field.FitsGameVersion(gameInfo.Item2))
+                continue;
+
             var fieldName = field.InternalName;
 
             xw.WriteStartElement("field");

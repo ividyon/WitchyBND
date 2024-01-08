@@ -98,6 +98,10 @@ public static class ParseMode
                                 break;
                         }
 
+                        if (!parser.UnpackedFitsVersion(path))
+                        {
+                            throw new FriendlyException(@"Parser version of unpacked file is outdated. Please repack this file using the WitchyBND version it was originally unpacked with, then unpack it using the newest version.");
+                        }
                         parser.Repack(path);
                         parsed = true;
                         break;
@@ -111,7 +115,7 @@ public static class ParseMode
                     error = true;
                 }
                 catch (Exception e) when (e.Message.Contains("oo2core_6_win64.dll") ||
-                                                     e.Message.Contains("oo2core_8_win64.dll") || e is NoOodleFoundException)
+                                          e.Message.Contains("oo2core_8_win64.dll") || e is NoOodleFoundException)
                 {
                     Program.RegisterError(new WitchyError(
                         "ERROR: Oodle DLL not found. Please copy oo2core_6_win64.dll or oo2core_8_win64.dll from the game directory to WitchyBND's directory.",

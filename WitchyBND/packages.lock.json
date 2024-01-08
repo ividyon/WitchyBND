@@ -36,6 +36,18 @@
           "System.Text.Json": "8.0.0-preview.7.23375.6"
         }
       },
+      "Microsoft.NET.ILLink.Analyzers": {
+        "type": "Direct",
+        "requested": "[7.0.100-1.23211.1, )",
+        "resolved": "7.0.100-1.23211.1",
+        "contentHash": "0GvbEgDGcUQA9KuWcQU1WwYHXt1tBzNr1Nls/M57rM7NA/AndFwCaCEoJpJkmxRY7xLlPDBnmGp8h5+FNqUngg=="
+      },
+      "Microsoft.NET.ILLink.Tasks": {
+        "type": "Direct",
+        "requested": "[7.0.100-1.23211.1, )",
+        "resolved": "7.0.100-1.23211.1",
+        "contentHash": "tvG8XZYLjT0o3WicCyKBZysVWo1jC9HdCFmNRmddx3WbAz0UCsd0qKZqpiEo99VLA8Re+FzWK51OcRldQPbt2Q=="
+      },
       "NativeFileDialogSharp": {
         "type": "Direct",
         "requested": "[0.6.0-alpha, )",
@@ -226,8 +238,8 @@
       "witchyformats": {
         "type": "Project",
         "dependencies": {
-          "SoulsFormats": "[2.0.0, )",
-          "StudioUtils": "[2.0.0, )"
+          "SoulsFormats": "[2.1.1.2, )",
+          "StudioUtils": "[2.1.1.2, )"
         }
       },
       "witchylib": {
@@ -237,8 +249,8 @@
           "Microsoft.Extensions.FileSystemGlobbing": "[8.0.0-preview.2.23128.3, )",
           "Newtonsoft.Json": "[13.0.1, )",
           "PromptPlus": "[4.0.5, )",
-          "SoulsFormats": "[2.0.0, )",
-          "WitchyFormats": "[2.0.0, )"
+          "SoulsFormats": "[2.1.1.2, )",
+          "WitchyFormats": "[2.1.1.2, )"
         }
       }
     },

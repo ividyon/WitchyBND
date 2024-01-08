@@ -23,15 +23,27 @@ public abstract class WFileParser
     public virtual WFileParserVerb Verb => WFileParserVerb.Unpack;
     public virtual bool IncludeInList => true;
     public abstract string Name { get; }
-
+    public virtual int Version => 0;
     public virtual string XmlTag => Name.ToLower();
     public abstract bool Is(string path, byte[]? data, out ISoulsFile? file);
     public abstract bool Exists(string path);
     public abstract bool ExistsUnpacked(string path);
     public abstract bool IsUnpacked(string path);
+
+    public virtual int GetUnpackedVersion(string path)
+    {
+        return Version;
+    }
+    public virtual bool UnpackedFitsVersion(string path)
+    {
+        if (Version == 0) return true;
+        if (GetUnpackedVersion(path) < Version)
+            return false;
+        return true;
+    }
+
     public abstract void Unpack(string srcPath, ISoulsFile? file);
     public abstract void Repack(string srcPath);
-
     public static void AddLocationToXml(string path)
     {
         XElement xml = LoadXml(path);
@@ -333,6 +345,7 @@ public abstract class WUnsortedBinderParser : WBinderParser
 
 public abstract class WXMLParser : WSingleFileParser
 {
+    public virtual string VersionAttributeName => "WitchyVersion";
     public override WFileParserVerb Verb => WFileParserVerb.Serialize;
 
     public override string GetUnpackDestPath(string srcPath)

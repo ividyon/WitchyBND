@@ -22,6 +22,12 @@ public static class WBUtil
     public static string ExeLocation;
     public static readonly Dictionary<GameType, ulong?> LatestKnownRegulationVersions;
 
+    public static int WitchyVersionToInt(string version)
+    {
+        // 2010200
+        var split = version.Split(".").Select(s => int.Parse(s)).ToArray();
+        return split[0] * 1000000 + split[1] * 10000 + split[2] * 100 + split[3];
+    }
     public static string FirstCharToUpper(this string input) =>
         input switch
         {

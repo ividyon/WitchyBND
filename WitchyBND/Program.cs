@@ -171,8 +171,8 @@ internal static class Program
         });
         var parserResult = parser.ParseArguments<CliOptions>(args);
         parserResult.WithParsed(opt => {
-                try
-                {
+                // try
+                // {
                     // Override configuration
                     if (opt.Help)
                     {
@@ -215,7 +215,8 @@ internal static class Program
                                 throw new Exception("Cannot supply both \"passive\" and \"location\" options.");
                             PromptPlus.WriteLine("Prompting user for target directory...");
 
-                            NativeFileDialogSharp.DialogResult dialogResult = NativeFileDialogSharp.Dialog.FolderPicker();
+                            NativeFileDialogSharp.DialogResult dialogResult =
+                                NativeFileDialogSharp.Dialog.FolderPicker();
 
                             if (dialogResult.IsOk && !string.IsNullOrWhiteSpace(dialogResult.Path))
                             {
@@ -260,11 +261,11 @@ internal static class Program
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
-                }
-                catch (Exception e)
-                {
-                    RegisterException(e);
-                }
+                // }
+                // catch (Exception e)
+                // {
+                    // RegisterException(e);
+                // }
 
                 int pause = Configuration.EndDelay;
                 if (Configuration.PauseOnError && AccruedErrors.Count > 0)
@@ -314,7 +315,8 @@ internal static class Program
 
                     if (pause > 0)
                     {
-                        PromptPlus.WriteLine($"Closing in {TimeSpan.FromMilliseconds(pause).TotalSeconds} second(s)...");
+                        PromptPlus.WriteLine(
+                            $"Closing in {TimeSpan.FromMilliseconds(pause).TotalSeconds} second(s)...");
                         Thread.Sleep(pause);
                     }
                 }
@@ -347,6 +349,7 @@ internal static class Program
         {
             PromptPlus.WriteLine($"{name.PadLeft(longest)}: {value}");
         }
+
         PromptPlus.WriteLine("-------------");
         PromptPlus.WriteLine("");
     }
@@ -426,6 +429,7 @@ internal static class Program
             else
                 PromptPlus.Error.WriteLine(error.Message.PromptPlusEscape());
         }
+
         if (Configuration.IsTest)
             throw new Exception(error.Message);
     }

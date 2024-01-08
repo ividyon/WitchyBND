@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
@@ -11,10 +12,19 @@ namespace WitchyBND.Parsers;
 public class WFXR3 : WXMLParser
 {
     public override string Name => "FXR3";
+    public override int Version => WBUtil.WitchyVersionToInt("2.1.2.0");
 
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
         return IsRead<Fxr3>(path, data, out file);
+    }
+
+    public override int GetUnpackedVersion(string path)
+    {
+        var doc = XDocument.Load(path);
+        var attr = doc.Root?.Attribute(VersionAttributeName);
+        if (attr == null) return 0;
+        return int.Parse(attr.Value);
     }
 
     public override void Unpack(string srcPath, ISoulsFile? file)
@@ -28,6 +38,8 @@ public class WFXR3 : WXMLParser
             var thing = new XmlSerializer(typeof(Fxr3));
             thing.Serialize(xmlWriter, fxr);
         }
+
+        xDoc.Root?.Add(new XAttribute(VersionAttributeName, Version.ToString()));
 
         var destPath = GetUnpackDestPath(srcPath);
         xDoc.Save(destPath);

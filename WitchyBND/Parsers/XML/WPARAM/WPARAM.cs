@@ -215,7 +215,7 @@ If DSMapStudio does not yet support this game or regulation version, an experime
                 { -9000, string.Empty }
             };
             // Quietly fail, it's just names after all.
-            Program.RegisterNotice($"Could not find names for {gameName} param {paramName} in Paramdex.");
+            // Program.RegisterNotice($"Could not find names for {gameName} param {paramName} in Paramdex.");
             return;
         }
 
