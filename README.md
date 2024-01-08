@@ -69,6 +69,10 @@ Special thanks to Nordgaren, The12thAvenger, philiquaz, TKGP, thefifthmatt and m
 # Changelog
 ## WitchyBND
 
+### 2.2.0.1
+
+* Unchanged release for the sake of running the fixed GitHub -> NexusMods pipeline.
+
 ### 2.2.0.0
 
 * Added versioning for parsers.
