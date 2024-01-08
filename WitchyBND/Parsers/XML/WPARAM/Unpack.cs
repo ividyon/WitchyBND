@@ -187,11 +187,8 @@ The param may be out of date for the regulation version.",
 
         // Field info (def & default values)
         xw.WriteStartElement("fields");
-        foreach (var field in paramdef.Fields)
+        foreach (var field in paramdef.Fields.FilterByGameVersion(gameInfo.Item2))
         {
-            if (!field.FitsGameVersion(gameInfo.Item2))
-                continue;
-
             var fieldName = field.InternalName;
 
             xw.WriteStartElement("field");
