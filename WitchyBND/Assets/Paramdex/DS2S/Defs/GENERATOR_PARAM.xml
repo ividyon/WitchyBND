@@ -16,10 +16,12 @@
     <Field Def="u32 GeneratorRegistParam" >
       <Description>Determines which registration to use.</Description>
     </Field>
-    <Field Def="u16 Unk0C" />
-    <Field Def="u16 Unk10" />
-    <Field Def="u32 ApperanceEventID" >
-      <Description>Used in ESD. 1 through to 7 are used to determine NG+ apperance.</Description>
+    <Field Def="u8 Unk0C" />
+    <Field Def="u8 Unk0D" />
+    <Field Def="u8 Unk0E" />
+    <Field Def="u8 Unk0F" />
+    <Field Def="u32 AppearanceEventID" >
+      <Description>Used in ESD. 1 through to 7 are used to determine NG+ appearance.</Description>
     </Field>
     <Field Def="u32 PreviousHostileEventID1" >
       <Description>Used in ESD. Determines if Previous Hostile state is active.</Description>
@@ -38,9 +40,17 @@
     <Field Def="u32 LocationEventID5" />
     <Field Def="u32 Unk40" />
     <Field Def="u32 Unk44" />
-    <Field Def="u16 Unk48" />
-    <Field Def="u16 Map Object Bonfire ID" />
-    <Field Def="f32 Leash Distance" />
+    <Field Def="u8 Unk48_0:1" />
+    <Field Def="u8 Unk48_1:1" />
+    <Field Def="u8 Unk48_2:1" />
+    <Field Def="u8 Unk48_3:1" />
+    <Field Def="u8 Unk48_4:1" />
+    <Field Def="u8 Unk48_5:1" />
+    <Field Def="u8 Unk48_6:1" />
+    <Field Def="u8 Unk48_7:1" />
+    <Field Def="u8 Unk49" />
+    <Field Def="u16 MapObjectBonfireID" />
+    <Field Def="f32 LeashDistance" />
     <Field Def="u32 LocationEventID6" />
     <Field Def="u32 LocationEventID7" />
     <Field Def="u32 AIThinkID" >
@@ -65,7 +75,10 @@
     <Field Def="u32 Unk78" />
     <Field Def="u32 Unk7C" />
     <Field Def="f32 Unk80" />
-    <Field Def="u32 Unk84" />
+    <Field Def="u8 Unk84" />
+    <Field Def="u8 ModelMask" />
+    <Field Def="u8 Unk86" />
+    <Field Def="u8 Unk87" />
     <Field Def="u32 ItemLotID1" >
       <Description>Adds itemlot to drop when this enemy is killed.</Description>
     </Field>

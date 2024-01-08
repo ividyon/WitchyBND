@@ -653,7 +653,7 @@
 5441 White Dragon Sheath Invincible SFX Display 1
 5442 White Dragon Sheath @ Invincible SFX Display 2
 5443 White Dragon Sheath Invincible SFX Display 3
-5444 Kagerou Ryu HP Recovery
+5444 Moonlight Butterfly landed HP recovery
 5445 MP Infinity for NPC
 5446 NPC stamina recovery is fast
 5447 Hellkite HP Recovery
@@ -802,10 +802,10 @@
 7413 NG+ Scaling - Izalith
 7414 NG+ Scaling - Duke's Archives / Deep Izalith / DLC
 7415 NG+ Scaling - Kiln of the First Flame / DLC
-7500 Multi doping_White alone
-7501 Multi doping_White two people
-7510 [DLC] SA Multi Doping _ White Alone _ c4100 Only
-7511 [DLC] SA multi doping _ White 2 people _ c4100 only
+7500 Multiplayer boss scaling (1 summon)
+7501 Multiplayer boss scaling (2 summons)
+7510 Multiplayer Artorias poise scaling (1 summon)
+7511 Multiplayer Artorias poise scaling (2 summons)
 7600 NPC doping (actual damage 0.5 times)
 7601 For NPC doping (actual damage 1.5 times)
 7602 For NPC doping (actual damage twice)
@@ -830,18 +830,18 @@
 81101 Fascination disabled
 81111 all valid
 90000 All disabled
-90001 Poison & Bleeding & Plague Ineffective
+90001 Poison & Bleeding & Toxic disabled
 90010 Poison & Bleeding & Curse disabled
-90011 Poison & bleeding disabled
-90100 Poison & Plague & Curse Ineffective
-90101 Poison & plague invalid
+90011 Poison & Toxic disabled
+90100 Poison & Toxic & Curse disabled
+90101 Poison & Bleed disabled
 90110 Poison & Curse disabled
-90111 Poison ineffective
-91000 Bleeding & plague & curse disabled
-91001 Bleeding & plague invalid
+90111 Poison disabled
+91000 Bleeding & Toxic & curse disabled
+91001 Bleeding & Toxic disabled
 91010 Bleeding & Curse disabled
 91011 Bleeding disabled
-91100 Plague & Curse Invalid
-91101 Plague invalid
+91100 Toxic & Curse disabled
+91101 Toxic disabled
 91110 Curse disabled
 91111 all valid

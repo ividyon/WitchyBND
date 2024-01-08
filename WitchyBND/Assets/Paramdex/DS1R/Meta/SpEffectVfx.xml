@@ -17,8 +17,8 @@
     <soulParamIdForWepEnchant />
     <playCategory />
     <playPriority />
-    <existEffectForLarge IsBool="" />
-    <existEffectForSoul IsBool="" Wiki="Offsets FFX ID for &quot;large&quot; enemies" />
+    <existEffectForLarge IsBool="" Wiki="Offsets FFX ID according to target's NpcParam sfxSize." />
+    <existEffectForSoul IsBool="" />
     <effectInvisibleAtCamouflage IsBool="" />
     <useCamouflage IsBool="" />
     <invisibleAtFriendCamouflage IsBool="" />
@@ -28,4 +28,5 @@
     <isInvisibleWeapon IsBool="" Wiki="Makes right weapon invisible (hidden weapon sorcery)" />
     <isSilence IsBool="" Wiki="Makes effect owner produce no sound (Hush sorcery, Slumbering Dragoncrest Ring)" />
   </Field>
+  <Self Row0Dummy="" />
 </PARAMMETA>
