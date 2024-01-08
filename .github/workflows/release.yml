@@ -31,7 +31,7 @@ jobs:
       - name: Setup cache
         uses: actions/cache@v3
         with:
-          path: ~/.nuget/packages
+          path: ${{ github.workspace }}/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
@@ -76,6 +76,9 @@ jobs:
     needs: build
     runs-on: windows-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Download artifact
         uses: actions/download-artifact@v3
         with:
@@ -88,9 +91,6 @@ jobs:
           bodyFile: "./NOTES.md"
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup mod uploader
-        run: dotnet tool install -g Digitalroot.ModUploader
-
   nexus:
     needs: build
     runs-on: windows-latest
@@ -99,6 +99,17 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: 'WitchyBND-SHA${{ github.sha }}'
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Setup mod uploader
+        run: dotnet tool install -g Digitalroot.ModUploader
+
+      - name: Check mod uploader
+        run: drmu nx check
 
       - name: Upload to Elden Ring Nexus
         continue-on-error: true
