@@ -1,3 +1,3 @@
-* Updated Paramdex to the latest values from DSMapStudio.
-  * Please remember that **DSMapStudio is the recommended tool for editing PARAMs**.
-  * Do **not** try to "upgrade" your PARAMs to a newer regulation version with WitchyBND. Use DSMapStudio.
+* Updated the FXR parser to use the latest class from Rainbow Stone development.
+  * This is a BREAKING CHANGE for FXR XMLs from previous builds. Please serialize those XMLs using the old build, then unserialize the FXR using the new build to continue work uninterrupted.
+* Fixed an issue with the DBSUB parser where it would throw false positives on unrelated files.

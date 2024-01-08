@@ -43,6 +43,7 @@ public static class Configuration
         get => _values.Bnd;
         set => _values.Bnd = value;
     }
+
     public static bool Dcx
     {
         get => _values.Dcx;
@@ -91,14 +92,19 @@ public static class Configuration
 
     static Configuration()
     {
-        _values = new WitchyConfigValues();
         Args = new WitchyArgValues();
         IConfigurationRoot config = new ConfigurationBuilder()
-            .AddJsonFile(GetConfigLocation("appsettings.json"), true)
+            .AddJsonFile(GetConfigLocation("appsettings.json"), false)
             .AddJsonFile(GetConfigLocation("appsettings.user.json"), true)
             .AddJsonFile(GetConfigLocation("appsettings.override.json"), true)
-            .Build();;
-        _values = config.Get<WitchyConfigValues>();
+            .Build();
+        WitchyConfigValues? values = config.Get<WitchyConfigValues>();
+        if (values == null)
+        {
+            throw new FileNotFoundException($"Unable to get app settings from appsettings.json.");
+        }
+
+        _values = values;
     }
 
     public static void UpdateConfiguration()

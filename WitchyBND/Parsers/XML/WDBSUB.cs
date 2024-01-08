@@ -1,5 +1,6 @@
 ﻿using SoulsFormats;
 using System;
+using System.IO;
 using System.Xml;
 using WitchyFormats;
 using WitchyLib;
@@ -13,7 +14,8 @@ namespace WitchyBND.Parsers
 
         public override bool Is(string path, byte[]? data, out ISoulsFile? file)
         {
-            return IsRead<DBSUB>(path, data, out file);
+            var filename = Path.GetFileName(path);
+            return IsRead<DBSUB>(path, data, out file) && Path.GetExtension(filename) == "bin" && (filename.StartsWith("chapter_") || filename.EndsWith("_b0") || filename.EndsWith("_d0"));
         }
 
         public override void Unpack(string srcPath, ISoulsFile? file)
