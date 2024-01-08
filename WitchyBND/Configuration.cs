@@ -94,7 +94,7 @@ public static class Configuration
     {
         Args = new WitchyArgValues();
         IConfigurationRoot config = new ConfigurationBuilder()
-            .AddJsonFile(GetConfigLocation("appsettings.json"), false)
+            .AddJsonFile(GetConfigLocation("appsettings.json"), true)
             .AddJsonFile(GetConfigLocation("appsettings.user.json"), true)
             .AddJsonFile(GetConfigLocation("appsettings.override.json"), true)
             .Build();

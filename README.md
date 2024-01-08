@@ -54,9 +54,9 @@ For all intents and purposes, Witchy should be treated as a new version of Yabbe
 
 # Contributors
 * *TKGP* - SoulsFormats and Yabber
-* *katalash* - GPARAM support
+* *katalash* - GPARAM support, FsParam
 * *Nordgaren* - Yabber+ additions, Armored Core VI additions
-* *DSMapStudio team* - FsParam, Paramdex
+* *DSMapStudio team* - Paramdex
 * *Meowmaritus, NamelessHoodie* - initial FXR serialization
 * *Avocado* - YabberAvocado additions
 * *NatsuDragneelTheFireDragon* - MQB support
@@ -64,7 +64,7 @@ For all intents and purposes, Witchy should be treated as a new version of Yabbe
 * *CCCode* - FXR research
 * *ivi* - WitchyBND maintainer
 
-Special thanks to Nordgaren, The12thAvenger, philiquaz, george_kingbore, katalash, TKGP, thefifthmatt and many more for various assistance during development.
+Special thanks to Nordgaren, The12thAvenger, philiquaz, TKGP, thefifthmatt and many more for various assistance during development.
 
 # Changelog
 ## WitchyBND

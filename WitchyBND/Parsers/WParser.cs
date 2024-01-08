@@ -221,6 +221,9 @@ public abstract class WBinderParser : WFolderParser
 
             if (Binder.HasIDs(bnd.Format))
                 fileElement.Add(new XElement("id", file.ID.ToString()));
+            // Edge case for PC save files
+            else if (bnd.Format == Binder.Format.Names1 && bnd.Files.Any(f => f.Name.StartsWith("USER_DATA")))
+                fileElement.Add(new XElement("id", file.ID.ToString()));
 
             fileElement.Add(new XElement("path", path));
 
@@ -265,7 +268,7 @@ public abstract class WBinderParser : WFolderParser
                 throw new FriendlyException("File node missing path tag.");
 
             string strFlags = file.Element("flags")?.Value ?? "Flag1";
-            string strId = file.Element("id")?.Value ?? "-1";
+            string strId = file.Element("id")?.Value ?? "-1"; // Edge case for PC save files
             string path = file.Element("path")!.Value;
             string suffix = file.Element("suffix")?.Value ?? "";
             string strCompression = file.Element("compression_type")?.Value ?? DCX.Type.Zlib.ToString();
