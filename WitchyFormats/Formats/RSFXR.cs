@@ -534,6 +534,13 @@ public class RSFXR : SoulsFile<RSFXR>
         {
             [XmlText] public OperatorType Type;
             [XmlAttribute("Unk")] public byte UnkModifier;
+
+            public ConditionOperator(ConditionOperator op)
+            {
+                Type = op.Type;
+                UnkModifier = op.UnkModifier;
+            }
+            public ConditionOperator() {}
         }
 
         public ConditionOperand LeftOperand { get; set; }
@@ -645,7 +652,6 @@ public class RSFXR : SoulsFile<RSFXR>
                         break;
                 }
             }
-            if ((int)operatorType > 2) throw new Exception("Mistake in operator logic"); // Sanity check
             int count = transitions.Count;
             short op = (short)((byte)operatorType | ((Operator.UnkModifier << 2) & 0b1100));
             bw.WriteInt16(op);
