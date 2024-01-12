@@ -12,11 +12,11 @@ namespace WitchyBND.Parsers;
 public class WFXR3 : WXMLParser
 {
     public override string Name => "FXR3";
-    public override int Version => WBUtil.WitchyVersionToInt("2.2.0.0");
+    public override int Version => WBUtil.WitchyVersionToInt("2.2.1.0");
 
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
-        return IsRead<Fxr3>(path, data, out file);
+        return IsRead<RSFXR>(path, data, out file);
     }
 
     public override int GetUnpackedVersion(string path)
@@ -29,13 +29,13 @@ public class WFXR3 : WXMLParser
 
     public override void Unpack(string srcPath, ISoulsFile? file)
     {
-        var fxr = (file as Fxr3)!;
+        var fxr = (file as RSFXR)!;
 
         XDocument xDoc = new XDocument();
 
         using (var xmlWriter = xDoc.CreateWriter())
         {
-            var thing = new XmlSerializer(typeof(Fxr3));
+            var thing = new XmlSerializer(typeof(RSFXR));
             thing.Serialize(xmlWriter, fxr);
         }
 
@@ -51,10 +51,10 @@ public class WFXR3 : WXMLParser
 
         XElement xml = LoadXml(srcPath);
 
-        XmlSerializer serializer = new XmlSerializer(typeof(Fxr3));
+        XmlSerializer serializer = new XmlSerializer(typeof(RSFXR));
         XmlReader xmlReader = xml.CreateReader();
 
-        var fxr = (Fxr3)serializer.Deserialize(xmlReader);
+        var fxr = (RSFXR)serializer.Deserialize(xmlReader);
         if (fxr == null)
             throw new Exception();
 

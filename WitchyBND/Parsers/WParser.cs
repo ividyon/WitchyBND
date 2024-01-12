@@ -374,6 +374,6 @@ public abstract class WXMLParser : WSingleFileParser
             return false;
 
         var doc = XDocument.Load(path);
-        return doc.Root != null && doc.Root.Name == XmlTag;
+        return doc.Root != null && doc.Root.Name.ToString().ToLower() == XmlTag.ToLower();
     }
 }

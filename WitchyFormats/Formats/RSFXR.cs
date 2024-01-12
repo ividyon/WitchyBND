@@ -9,50 +9,55 @@ using SoulsFormats;
 namespace WitchyFormats;
 
 /// <summary>
+/// Rainbow Stone FXR format parser class.
+///
 /// An SFX definition file used in DS3 and Sekiro. Extension: .fxr
 /// Initial work by TKGP, Meowmaritus and NamelessHoodie.
-/// Currently maintained by ivi.
+///
+/// Maintained by ivi for the Rainbow Stone FXR tool.
 /// </summary>
-[XmlType(TypeName="fxr3")]
-public class Fxr3 : SoulsFile<Fxr3>
+[XmlType(TypeName = "FXR3")]
+public class RSFXR : SoulsFile<RSFXR>
 {
     public FXRVersion Version { get; set; }
 
     public int Id { get; set; }
 
+    [XmlElement("StateMap")]
     public StateMap RootStateMap { get; set; }
 
+    [XmlElement("Container")]
     public Container RootContainer { get; set; }
 
-    public List<int> References { get; set; }
+    public HashSet<int> ReferenceList { get; set; }
 
-    public List<int> UnkExternalValues { get; set; }
+    public HashSet<int> ExternalValueList { get; set; }
 
     public List<int> UnkBloodEnabler { get; set; }
 
-    public List<int> UnkEmpty { get; set; }
+    // public List<int> UnkEmpty { get; set; }
 
-    public Fxr3()
+    public RSFXR()
     {
         Version = FXRVersion.DarkSouls3;
         RootStateMap = new StateMap();
         RootContainer = new Container();
-        References = new List<int>();
-        UnkExternalValues = new List<int>();
+        ReferenceList = new HashSet<int>();
+        ExternalValueList = new HashSet<int>();
         UnkBloodEnabler = new List<int>();
-        UnkEmpty = new List<int>();
+        // UnkEmpty = new List<int>();
     }
 
-    public Fxr3(Fxr3 fxr)
+    public RSFXR(RSFXR fxr)
     {
         Id = fxr.Id;
         Version = fxr.Version;
         RootStateMap = new StateMap(fxr.RootStateMap);
         RootContainer = new Container(fxr.RootContainer);
-        References = new List<int>(fxr.References);
-        UnkExternalValues = new List<int>(fxr.UnkExternalValues);
+        ReferenceList = new HashSet<int>(fxr.ReferenceList);
+        ExternalValueList = new HashSet<int>(fxr.ExternalValueList);
         UnkBloodEnabler = new List<int>(fxr.UnkBloodEnabler);
-        UnkEmpty = new List<int>(fxr.UnkEmpty);
+        // UnkEmpty = new List<int>(fxr.UnkEmpty);
     }
 
     protected override bool Is(BinaryReaderEx br)
@@ -100,28 +105,28 @@ public class Fxr3 : SoulsFile<Fxr3>
 
         if (Version == FXRVersion.Sekiro)
         {
-            int section12Offset = br.ReadInt32();
-            int section12Count = br.ReadInt32();
-            int section13Offset = br.ReadInt32();
-            int section13Count = br.ReadInt32();
-            int section14Offset = br.ReadInt32();
-            int section14Count = br.ReadInt32();
-            int section15Offset = br.ReadInt32();
-            int section15Count = br.ReadInt32();
-            // br.ReadInt32(); // Section 15 offset
-            // br.AssertInt32(0); // Section 15 count
+            int referenceOffset = br.ReadInt32();
+            int referenceCount = br.ReadInt32();
+            int externalValueOffset = br.ReadInt32();
+            int externalValueCount = br.ReadInt32();
+            int unkBloodEnablerOffset = br.ReadInt32();
+            int unkBloodEnablerCount = br.ReadInt32();
+            // int section15Offset = br.ReadInt32();
+            // int section15Count = br.ReadInt32();
+            br.ReadInt32(); // Section 15 offset
+            br.AssertInt32(0); // Section 15 count
 
-            References = new List<int>(br.GetInt32s(section12Offset, section12Count));
-            UnkExternalValues = new List<int>(br.GetInt32s(section13Offset, section13Count));
-            UnkBloodEnabler = new List<int>(br.GetInt32s(section14Offset, section14Count));
-            UnkEmpty = new List<int>(br.GetInt32s(section15Offset, section15Count));
+            ReferenceList = new HashSet<int>(br.GetInt32s(referenceOffset, referenceCount));
+            ExternalValueList = new HashSet<int>(br.GetInt32s(externalValueOffset, externalValueCount));
+            UnkBloodEnabler = new List<int>(br.GetInt32s(unkBloodEnablerOffset, unkBloodEnablerCount));
+            // UnkEmpty = new List<int>(br.GetInt32s(section15Offset, section15Count));
         }
         else
         {
-            References = new List<int>();
-            UnkExternalValues = new List<int>();
+            ReferenceList = new HashSet<int>();
+            ExternalValueList = new HashSet<int>();
             UnkBloodEnabler = new List<int>();
-            UnkEmpty = new List<int>();
+            // UnkEmpty = new List<int>();
         }
 
         br.Position = stateMapOffset;
@@ -152,12 +157,12 @@ public class Fxr3 : SoulsFile<Fxr3>
         bw.ReserveInt32("ActionCount");
         bw.ReserveInt32("PropertyOffset");
         bw.ReserveInt32("PropertyCount");
-        bw.ReserveInt32("Section8Offset");
-        bw.ReserveInt32("Section8Count");
-        bw.ReserveInt32("Section9Offset");
-        bw.ReserveInt32("Section9Count");
-        bw.ReserveInt32("Section10Offset");
-        bw.ReserveInt32("Section10Count");
+        bw.ReserveInt32("ModifierOffset");
+        bw.ReserveInt32("ModifierCount");
+        bw.ReserveInt32("ConditionalPropertyOffset");
+        bw.ReserveInt32("ConditionalPropertyCount");
+        bw.ReserveInt32("UnkFieldListOffset");
+        bw.ReserveInt32("UnkFieldListCount");
         bw.ReserveInt32("FieldOffset");
         bw.ReserveInt32("FieldCount");
         bw.WriteInt32(1);
@@ -165,14 +170,15 @@ public class Fxr3 : SoulsFile<Fxr3>
 
         if (Version == FXRVersion.Sekiro)
         {
-            bw.ReserveInt32("Section12Offset");
-            bw.WriteInt32(References.Count);
-            bw.ReserveInt32("Section13Offset");
-            bw.WriteInt32(UnkExternalValues.Count);
-            bw.ReserveInt32("Section14Offset");
+            bw.ReserveInt32("ReferenceOffset");
+            bw.WriteInt32(ReferenceList.Count);
+            bw.ReserveInt32("ExternalValueOffset");
+            bw.WriteInt32(ExternalValueList.Count);
+            bw.ReserveInt32("UnkBloodEnablerOffset");
             bw.WriteInt32(UnkBloodEnabler.Count);
-            bw.ReserveInt32("Section15Offset");
-            bw.WriteInt32(UnkEmpty.Count);
+            bw.ReserveInt32("UnkEmptyOffset");
+            bw.WriteInt32(0); // UnkEmpty always 0
+            // bw.WriteInt32(UnkEmpty.Count);
             // bw.WriteInt32(0);
             // bw.WriteInt32(0);
         }
@@ -185,7 +191,7 @@ public class Fxr3 : SoulsFile<Fxr3>
         bw.Pad(16);
         bw.FillInt32("TransitionOffset", (int)bw.Position);
         List<State> states = RootStateMap.States;
-        List<Transition> transitions = new List<Transition>();
+        List<StateCondition> transitions = new List<StateCondition>();
         for (int index = 0; index < states.Count; ++index)
             states[index].WriteTransitions(bw, index, transitions);
         bw.FillInt32("TransitionCount", transitions.Count);
@@ -215,23 +221,23 @@ public class Fxr3 : SoulsFile<Fxr3>
             actions[index].WriteProperties(bw, index, properties);
         bw.FillInt32("PropertyCount", properties.Count);
         bw.Pad(16);
-        bw.FillInt32("Section8Offset", (int)bw.Position);
+        bw.FillInt32("ModifierOffset", (int)bw.Position);
         List<PropertyModifier> modifiers = new List<PropertyModifier>();
         for (int index = 0; index < properties.Count; ++index)
             properties[index].WriteModifiers(bw, index, modifiers);
-        bw.FillInt32("Section8Count", modifiers.Count);
+        bw.FillInt32("ModifierCount", modifiers.Count);
         bw.Pad(16);
-        bw.FillInt32("Section9Offset", (int)bw.Position);
+        bw.FillInt32("ConditionalPropertyOffset", (int)bw.Position);
         List<Property> conditionalProperties = new List<Property>();
         for (int index = 0; index < modifiers.Count; ++index)
             modifiers[index].WriteProperties(bw, index, conditionalProperties);
-        bw.FillInt32("Section9Count", conditionalProperties.Count);
+        bw.FillInt32("ConditionalPropertyCount", conditionalProperties.Count);
         bw.Pad(16);
-        bw.FillInt32("Section10Offset", (int)bw.Position);
-        List<Section10> section10s = new List<Section10>();
+        bw.FillInt32("UnkFieldListOffset", (int)bw.Position);
+        List<UnkFieldList> fieldLists = new List<UnkFieldList>();
         for (int index = 0; index < actions.Count; ++index)
-            actions[index].WriteSection10s(bw, index, section10s);
-        bw.FillInt32("Section10Count", section10s.Count);
+            actions[index].WriteUnkFieldLists(bw, index, fieldLists);
+        bw.FillInt32("UnkFieldListCount", fieldLists.Count);
         bw.Pad(16);
         bw.FillInt32("FieldOffset", (int)bw.Position);
         int fieldCount = 0;
@@ -245,36 +251,36 @@ public class Fxr3 : SoulsFile<Fxr3>
             modifiers[index].WriteFields(bw, index, ref fieldCount);
         for (int index = 0; index < conditionalProperties.Count; ++index)
             conditionalProperties[index].WriteFields(bw, index, ref fieldCount, true);
-        for (int index = 0; index < section10s.Count; ++index)
-            section10s[index].WriteFields(bw, index, ref fieldCount);
+        for (int index = 0; index < fieldLists.Count; ++index)
+            fieldLists[index].WriteFields(bw, index, ref fieldCount);
         bw.FillInt32("FieldCount", fieldCount);
         bw.Pad(16);
 
         if (Version != FXRVersion.Sekiro)
             return;
 
-        bw.FillInt32("Section12Offset", (int)bw.Position);
-        bw.WriteInt32s(References);
+        bw.FillInt32("ReferenceOffset", (int)bw.Position);
+        bw.WriteInt32s(ReferenceList);
         bw.Pad(16);
 
-        bw.FillInt32("Section13Offset", (int)bw.Position);
-        bw.WriteInt32s(UnkExternalValues);
+        bw.FillInt32("ExternalValueOffset", (int)bw.Position);
+        bw.WriteInt32s(ExternalValueList);
         bw.Pad(16);
 
-        bw.FillInt32("Section14Offset", (int)bw.Position);
+        bw.FillInt32("UnkBloodEnablerOffset", (int)bw.Position);
         bw.WriteInt32s(UnkBloodEnabler);
         bw.Pad(16);
 
-        if (UnkEmpty.Count > 0)
-        {
-            bw.FillInt32("Section15Offset", (int)bw.Position);
-            bw.WriteInt32s(UnkEmpty);
-            bw.Pad(16);
-        }
-        else
-        {
-            bw.FillInt32("Section15Offset", 0);
-        }
+        // if (UnkEmpty.Count > 0)
+        // {
+        //     bw.FillInt32("UnkEmptyOffset", (int)bw.Position);
+        //     bw.WriteInt32s(UnkEmpty);
+        //     bw.Pad(16);
+        // }
+        // else
+        // {
+            bw.FillInt32("UnkEmptyOffset", 0);
+        // }
     }
 
     public enum FXRVersion : ushort
@@ -285,7 +291,7 @@ public class Fxr3 : SoulsFile<Fxr3>
 
     public class StateMap
     {
-        public List<State> States { get; set; }
+        [XmlElement(nameof(State))] public List<State> States { get; set; }
 
         public StateMap() => States = new List<State>();
 
@@ -311,13 +317,13 @@ public class Fxr3 : SoulsFile<Fxr3>
         {
             bw.WriteInt32(0);
             bw.WriteInt32(States.Count);
-            bw.ReserveInt32("Section1StatesOffset");
+            bw.ReserveInt32("StateMapStatesOffset");
             bw.WriteInt32(0);
         }
 
         internal void WriteStates(BinaryWriterEx bw)
         {
-            bw.FillInt32("Section1StatesOffset", (int)bw.Position);
+            bw.FillInt32("StateMapStatesOffset", (int)bw.Position);
             for (int index = 0; index < States.Count; ++index)
                 States[index].Write(bw, index);
         }
@@ -325,9 +331,9 @@ public class Fxr3 : SoulsFile<Fxr3>
 
     public class State
     {
-        public List<Transition> Transitions { get; set; }
+        [XmlElement("StayCondition")] public List<StateCondition> Conditions { get; set; }
 
-        public State() => Transitions = new List<Transition>();
+        public State() => Conditions = new List<StateCondition>();
 
         internal State(BinaryReaderEx br)
         {
@@ -336,21 +342,21 @@ public class Fxr3 : SoulsFile<Fxr3>
             int num = br.ReadInt32();
             br.AssertInt32(0);
             br.StepIn(num);
-            Transitions = new List<Transition>(capacity);
+            Conditions = new List<StateCondition>(capacity);
             for (int index = 0; index < capacity; ++index)
-                Transitions.Add(new Transition(br));
+                Conditions.Add(new StateCondition(br));
             br.StepOut();
         }
 
         internal State(State state)
         {
-            Transitions = state.Transitions.Select(transition => new Transition(transition)).ToList();
+            Conditions = state.Conditions.Select(transition => new StateCondition(transition)).ToList();
         }
 
         internal void Write(BinaryWriterEx bw, int index)
         {
             bw.WriteInt32(0);
-            bw.WriteInt32(Transitions.Count);
+            bw.WriteInt32(Conditions.Count);
             bw.ReserveInt32(string.Format("StateTransitionsOffset[{0}]", index));
             bw.WriteInt32(0);
         }
@@ -358,60 +364,202 @@ public class Fxr3 : SoulsFile<Fxr3>
         internal void WriteTransitions(
             BinaryWriterEx bw,
             int index,
-            List<Transition> transitions)
+            List<StateCondition> transitions)
         {
             bw.FillInt32(string.Format("StateTransitionsOffset[{0}]", index), (int)bw.Position);
-            foreach (Transition transition in Transitions)
+            foreach (StateCondition transition in Conditions)
                 transition.Write(bw, transitions);
         }
     }
 
-    public class Transition
+    public class StateCondition
     {
-        [XmlAttribute] public int TargetStateIndex { get; set; }
-
-        public enum TransitionOperatorType
+        public enum OperatorType
         {
-            Equal = 0,
-            NotEqual = 1,
-            LessThan = 2,
-            LessThanOrEqual = 3,
+            NotEqual = 0,
+            Equal = 1,
+            GreaterThanOrEqual = 2,
+            GreaterThan = 3,
+            LessThanOrEqual = 4, // Not present in format
+            LessThan = 5 // Not present in format
         }
 
-        public TransitionOperatorType Operator { get; set; }
-
-        public byte UnkOperatorModifier { get; set; }
-
-        public enum TransitionOperandType
+        public enum OperandType
         {
             Literal = -4,
             External = -3,
             UnkMinus2 = -2,
-            Age = -1
+            StateTime = -1
         }
 
-        public TransitionOperandType LeftOperandType { get; set; }
-        public Field? LeftOperand { get; set; }
+        [XmlInclude(typeof(ConditionOperandLiteral)),
+         XmlInclude(typeof(ConditionOperandExternal)),
+         XmlInclude(typeof(ConditionOperandStateTime)),
+         XmlInclude(typeof(ConditionOperandUnkMinus2))]
+        public abstract class ConditionOperand
+        {
+            [XmlIgnore] public abstract OperandType Type { get; }
 
-        public TransitionOperandType RightOperandType { get; set; }
-        public Field? RightOperand { get; set; }
+            [XmlIgnore]
+            public object Value
+            {
+                get
+                {
+                    switch (this)
+                    {
+                        case ConditionOperandExternal intOp:
+                            return intOp.Value;
+                        case ConditionOperandLiteral floatOp:
+                            return floatOp.Value;
+                        default:
+                            return Value;
+                    }
+                }
+            }
 
-        public Transition()
+            public Field? ToField()
+            {
+                switch (this)
+                {
+                    case ConditionOperandExternal intOp:
+                        return new Field.FieldInt(intOp.Value);
+                    case ConditionOperandLiteral floatOp:
+                        return new Field.FieldFloat(floatOp.Value);
+                    default:
+                        return null;
+                }
+            }
+
+            public static ConditionOperand Create(OperandType type, object? value)
+            {
+                switch (type)
+                {
+                    case OperandType.Literal:
+                        return new ConditionOperandLiteral()
+                        {
+                            Value = Convert.ToSingle(value)
+                        };
+                    case OperandType.External:
+                        return new ConditionOperandExternal()
+                        {
+                            Value = Convert.ToInt32(value)
+                        };
+                    case OperandType.StateTime:
+                        return new ConditionOperandStateTime();
+                    case OperandType.UnkMinus2:
+                        return new ConditionOperandUnkMinus2();
+                }
+
+                throw new ArgumentException("Invalid operand type");
+            }
+
+            public static ConditionOperand Create(OperandType type, Field? field)
+            {
+                if (type == OperandType.External && field is Field.FieldInt fieldInt)
+                {
+                    return new ConditionOperandExternal
+                    {
+                        Value = fieldInt.Value
+                    };
+                }
+
+                if (type == OperandType.Literal && field is Field.FieldFloat fieldFloat)
+                {
+                    return new ConditionOperandLiteral
+                    {
+                        Value = fieldFloat.Value
+                    };
+                }
+
+                if (type is OperandType.StateTime && field is null)
+                    return new ConditionOperandStateTime();
+
+                if (type is OperandType.UnkMinus2 && field is null)
+                    return new ConditionOperandUnkMinus2();
+
+                throw new ArgumentException("Field does not match operand type");
+            }
+
+            public static ConditionOperand Create(ConditionOperand operand)
+            {
+                switch (operand)
+                {
+                    case ConditionOperandLiteral litOp:
+                        return new ConditionOperandLiteral
+                        {
+                            Value = litOp.Value
+                        };
+                    case ConditionOperandExternal extOp:
+                        return new ConditionOperandExternal
+                        {
+                            Value = extOp.Value
+                        };
+                    case ConditionOperandStateTime:
+                        return new ConditionOperandStateTime();
+                    case ConditionOperandUnkMinus2:
+                        return new ConditionOperandUnkMinus2();
+                }
+
+                throw new ArgumentException("Unknown operand type");
+            }
+        }
+
+        [XmlType("External")]
+        public class ConditionOperandExternal : ConditionOperand
+        {
+            public override OperandType Type => OperandType.External;
+            [XmlAttribute] public new int Value;
+        }
+
+        [XmlType("Literal")]
+        public class ConditionOperandLiteral : ConditionOperand
+        {
+            public override OperandType Type => OperandType.Literal;
+            [XmlAttribute] public new float Value;
+        }
+
+        [XmlType("StateTime")]
+        public class ConditionOperandStateTime : ConditionOperand
+        {
+            public override OperandType Type => OperandType.StateTime;
+        }
+
+        [XmlType("UnkMinus2")]
+        public class ConditionOperandUnkMinus2 : ConditionOperand
+        {
+            public override OperandType Type => OperandType.UnkMinus2;
+        }
+
+        public class ConditionOperator
+        {
+            [XmlText] public OperatorType Type;
+            [XmlAttribute("Unk")] public byte UnkModifier;
+        }
+
+        public ConditionOperand LeftOperand { get; set; }
+
+        [XmlElement("Op")] public ConditionOperator Operator { get; set; }
+
+        public ConditionOperand RightOperand { get; set; }
+
+        [XmlAttribute] public int ElseMoveToStateIndex { get; set; }
+
+        public StateCondition()
         {
         }
 
-        internal Transition(BinaryReaderEx br)
+        internal StateCondition(BinaryReaderEx br)
         {
             var op = br.ReadInt16();
-            Operator = (TransitionOperatorType)(op & 0b0011);
-            UnkOperatorModifier = (byte)(op >> 2 & 0b0011);
+            var opType = (OperatorType)(op & 0b0011);
+            var unkOperatorModifier = (byte)(op >> 2 & 0b0011);
             br.AssertByte(0);
             br.AssertByte(1);
             br.AssertInt32(0);
-            TargetStateIndex = br.ReadInt32();
+            ElseMoveToStateIndex = br.ReadInt32();
             br.AssertInt32(0);
             var field1Source = br.AssertInt16(-4, -3, -2, -1);
-            LeftOperandType = (TransitionOperandType)field1Source;
+            var leftOperandType = (OperandType)field1Source;
             br.AssertByte(0);
             br.AssertByte(1);
             br.AssertInt32(0);
@@ -424,7 +572,7 @@ public class Fxr3 : SoulsFile<Fxr3>
             br.AssertInt32(0);
             br.AssertInt32(0);
             var field2Source = br.AssertInt16(-4, -3, -2, -1);
-            RightOperandType = (TransitionOperandType)field2Source;
+            var rightOperandType = (OperandType)field2Source;
             br.AssertByte(0);
             br.AssertByte(1);
             br.AssertInt32(0);
@@ -436,36 +584,81 @@ public class Fxr3 : SoulsFile<Fxr3>
             br.AssertInt32(0);
             br.AssertInt32(0);
             br.AssertInt32(0);
-            LeftOperand = hasField1 ? Field.ReadAt(br, fieldOffset1, this, 0) : null;
-            RightOperand = hasField2 ? Field.ReadAt(br, fieldOffset2, this, 1) : null;
+            Operator = new ConditionOperator()
+            {
+                Type = opType,
+                UnkModifier = unkOperatorModifier
+            };
+            LeftOperand = ConditionOperand.Create(leftOperandType,
+                hasField1 ? Field.ReadAt(br, fieldOffset1, leftOperandType, 0) : null);
+            RightOperand = ConditionOperand.Create(rightOperandType,
+                hasField2 ? Field.ReadAt(br, fieldOffset2, rightOperandType, 0) : null);
+
+            if (LeftOperand.Type == OperandType.Literal && RightOperand.Type != OperandType.Literal)
+            {
+                // Switcheroo
+                var formerlyRight = RightOperand;
+                var formerlyLeft = LeftOperand;
+                LeftOperand = formerlyRight;
+                RightOperand = formerlyLeft;
+                switch (Operator.Type)
+                {
+                    case OperatorType.GreaterThan:
+                        Operator.Type = OperatorType.LessThan;
+                        break;
+                    case OperatorType.GreaterThanOrEqual:
+                        Operator.Type = OperatorType.LessThanOrEqual;
+                        break;
+                }
+            }
         }
 
-        internal Transition(Transition transition)
+        internal StateCondition(StateCondition stateCondition)
         {
-            Operator = transition.Operator;
-            UnkOperatorModifier = transition.UnkOperatorModifier;
-            TargetStateIndex = transition.TargetStateIndex;
-            LeftOperandType = transition.LeftOperandType;
-            RightOperandType = transition.RightOperandType;
-            LeftOperand = transition.LeftOperand;
-            RightOperand = transition.RightOperand;
+            Operator = new ConditionOperator()
+            {
+                Type = stateCondition.Operator.Type,
+                UnkModifier = stateCondition.Operator.UnkModifier,
+            };
+            ElseMoveToStateIndex = stateCondition.ElseMoveToStateIndex;
+            LeftOperand = ConditionOperand.Create(stateCondition.LeftOperand);
+            RightOperand = ConditionOperand.Create(stateCondition.RightOperand);
         }
 
-        internal void Write(BinaryWriterEx bw, List<Transition> transitions)
+        internal void Write(BinaryWriterEx bw, List<StateCondition> transitions)
         {
+            var leftOperand = LeftOperand;
+            var rightOperand = RightOperand;
+            var operatorType = Operator.Type;
+            // Handle invalid operator type
+            if (operatorType >= OperatorType.LessThanOrEqual)
+            {
+                leftOperand = RightOperand;
+                rightOperand = LeftOperand;
+                switch (Operator.Type)
+                {
+                    case OperatorType.LessThanOrEqual:
+                        operatorType = OperatorType.GreaterThanOrEqual;
+                        break;
+                    case OperatorType.LessThan:
+                        operatorType = OperatorType.GreaterThan;
+                        break;
+                }
+            }
+            if ((int)operatorType > 2) throw new Exception("Mistake in operator logic"); // Sanity check
             int count = transitions.Count;
-            short op = (short)((byte)Operator | ((UnkOperatorModifier << 2) & 0b1100));
+            short op = (short)((byte)operatorType | ((Operator.UnkModifier << 2) & 0b1100));
             bw.WriteInt16(op);
             bw.WriteByte(0);
             bw.WriteByte(1);
             bw.WriteInt32(0);
-            bw.WriteInt32(TargetStateIndex);
+            bw.WriteInt32(ElseMoveToStateIndex);
             bw.WriteInt32(0);
-            bw.WriteInt16((short)LeftOperandType);
+            bw.WriteInt16((short)leftOperand.Type);
             bw.WriteByte(0);
             bw.WriteByte(1);
             bw.WriteInt32(0);
-            bw.WriteInt32(LeftOperand != null ? 1 : 0);
+            bw.WriteInt32(leftOperand.Value != null ? 1 : 0);
             bw.WriteInt32(0);
             bw.ReserveInt32(string.Format("TransitionFieldOffset1[{0}]", count));
             bw.WriteInt32(0);
@@ -473,11 +666,11 @@ public class Fxr3 : SoulsFile<Fxr3>
             bw.WriteInt32(0);
             bw.WriteInt32(0);
             bw.WriteInt32(0);
-            bw.WriteInt16((short)RightOperandType);
+            bw.WriteInt16((short)rightOperand.Type);
             bw.WriteByte(0);
             bw.WriteByte(1);
             bw.WriteInt32(0);
-            bw.WriteInt32(RightOperand != null ? 1 : 0);
+            bw.WriteInt32(rightOperand.Value != null ? 1 : 0);
             bw.WriteInt32(0);
             bw.ReserveInt32(string.Format("TransitionFieldOffset2[{0}]", count));
             bw.WriteInt32(0);
@@ -490,19 +683,27 @@ public class Fxr3 : SoulsFile<Fxr3>
 
         internal void WriteFields(BinaryWriterEx bw, int index, ref int fieldCount)
         {
-            int fieldPos1 = LeftOperand != null ? (int)bw.Position : 0;
-            bw.FillInt32(string.Format("TransitionFieldOffset1[{0}]", index), fieldPos1);
-            if (LeftOperand != null)
+            var leftOperand = LeftOperand;
+            var rightOperand = RightOperand;
+            // Handle invalid operators
+            if (Operator.Type >= OperatorType.LessThanOrEqual)
             {
-                LeftOperand.Write(bw);
+                leftOperand = RightOperand;
+                rightOperand = LeftOperand;
+            }
+            int fieldPos1 = leftOperand.Value != null ? (int)bw.Position : 0;
+            bw.FillInt32(string.Format("TransitionFieldOffset1[{0}]", index), fieldPos1);
+            if (leftOperand.Value != null)
+            {
+                leftOperand.ToField()!.Write(bw);
                 fieldCount++;
             }
 
-            int fieldPos2 = RightOperand != null ? (int)bw.Position : 0;
+            int fieldPos2 = rightOperand.Value != null ? (int)bw.Position : 0;
             bw.FillInt32(string.Format("TransitionFieldOffset2[{0}]", index), fieldPos2);
-            if (RightOperand != null)
+            if (rightOperand.Value != null)
             {
-                RightOperand.Write(bw);
+                rightOperand.ToField()!.Write(bw);
                 fieldCount++;
             }
         }
@@ -699,10 +900,14 @@ public class Fxr3 : SoulsFile<Fxr3>
 
         public int Unk04 { get; set; }
 
-        public List<Section10> Section10s { get; set; }
+        public List<UnkFieldList> UnkFieldLists { get; set; }
 
+        [XmlArrayItem(Type = typeof(Field.FieldInt), ElementName = "Int"),
+        XmlArrayItem(Type = typeof(Field.FieldFloat), ElementName = "Float")]
         public List<Field> Fields1 { get; set; }
 
+        [XmlArrayItem(Type = typeof(Field.FieldInt), ElementName = "Int"),
+         XmlArrayItem(Type = typeof(Field.FieldFloat), ElementName = "Float")]
         public List<Field> Fields2 { get; set; }
 
         public List<Property> Properties1 { get; set; }
@@ -713,7 +918,7 @@ public class Fxr3 : SoulsFile<Fxr3>
         {
             Properties1 = new List<Property>();
             Properties2 = new List<Property>();
-            Section10s = new List<Section10>();
+            UnkFieldLists = new List<UnkFieldList>();
             Fields1 = new List<Field>();
             Fields2 = new List<Field>();
         }
@@ -725,7 +930,7 @@ public class Fxr3 : SoulsFile<Fxr3>
             Unk03 = br.ReadBoolean(); // 3
             Unk04 = br.ReadInt32(); // 4
             int fieldCount1 = br.ReadInt32(); // 8
-            int section10Count = br.ReadInt32(); // 12
+            int unkFieldListCount = br.ReadInt32(); // 12
             int propertyCount1 = br.ReadInt32(); // 16
             int fieldCount2 = br.ReadInt32(); // 20
             br.AssertInt32(0);
@@ -733,7 +938,7 @@ public class Fxr3 : SoulsFile<Fxr3>
             int fieldOffset = br.ReadInt32();
             // Console.WriteLine($"fieldOffset: {fieldOffset}");
             br.AssertInt32(0);
-            int section10Offset = br.ReadInt32();
+            int unkFieldListOffset = br.ReadInt32();
             br.AssertInt32(0);
             int propertyOffset = br.ReadInt32();
             br.AssertInt32(0);
@@ -752,11 +957,11 @@ public class Fxr3 : SoulsFile<Fxr3>
             }
             br.StepOut();
 
-            br.StepIn(section10Offset);
+            br.StepIn(unkFieldListOffset);
             {
-                Section10s = new List<Section10>(section10Count);
-                for (int index = 0; index < section10Count; ++index)
-                    Section10s.Add(new Section10(br));
+                UnkFieldLists = new List<UnkFieldList>(unkFieldListCount);
+                for (int index = 0; index < unkFieldListCount; ++index)
+                    UnkFieldLists.Add(new UnkFieldList(br));
             }
             br.StepOut();
 
@@ -776,7 +981,7 @@ public class Fxr3 : SoulsFile<Fxr3>
             Unk04 = action.Unk04;
             Properties1 = action.Properties1.Select(prop => new Property(prop)).ToList();
             Properties2 = action.Properties2.Select(prop => new Property(prop)).ToList();
-            Section10s = action.Section10s.Select(section => new Section10(section)).ToList();
+            UnkFieldLists = action.UnkFieldLists.Select(section => new UnkFieldList(section)).ToList();
             Fields1 = action.Fields1.Select(Field.Create).ToList();
             Fields2 = action.Fields2.Select(Field.Create).ToList();
         }
@@ -789,14 +994,14 @@ public class Fxr3 : SoulsFile<Fxr3>
             bw.WriteBoolean(Unk03);
             bw.WriteInt32(Unk04);
             bw.WriteInt32(Fields1.Count);
-            bw.WriteInt32(Section10s.Count);
+            bw.WriteInt32(UnkFieldLists.Count);
             bw.WriteInt32(Properties1.Count);
             bw.WriteInt32(Fields2.Count);
             bw.WriteInt32(0);
             bw.WriteInt32(Properties2.Count);
             bw.ReserveInt32($"ActionFieldsOffset[{count}]");
             bw.WriteInt32(0);
-            bw.ReserveInt32(string.Format("ActionSection10sOffset[{0}]", count));
+            bw.ReserveInt32(string.Format("ActionUnkFieldListsOffset[{0}]", count));
             bw.WriteInt32(0);
             bw.ReserveInt32(string.Format("ActionPropertiesOffset[{0}]", count));
             bw.WriteInt32(0);
@@ -814,11 +1019,11 @@ public class Fxr3 : SoulsFile<Fxr3>
                 property.Write(bw, properties, false);
         }
 
-        internal void WriteSection10s(BinaryWriterEx bw, int index, List<Section10> section10s)
+        internal void WriteUnkFieldLists(BinaryWriterEx bw, int index, List<UnkFieldList> unkFieldLists)
         {
-            bw.FillInt32(string.Format("ActionSection10sOffset[{0}]", index), (int)bw.Position);
-            foreach (Section10 section10 in Section10s)
-                section10.Write(bw, section10s);
+            bw.FillInt32(string.Format("ActionUnkFieldListsOffset[{0}]", index), (int)bw.Position);
+            foreach (UnkFieldList unkFieldList in UnkFieldLists)
+                unkFieldList.Write(bw, unkFieldLists);
         }
 
         internal void WriteFields(BinaryWriterEx bw, int index, ref int fieldCount)
@@ -849,8 +1054,7 @@ public class Fxr3 : SoulsFile<Fxr3>
     [XmlInclude(typeof(FieldInt))]
     public abstract class Field
     {
-        [XmlIgnore]
-        public virtual FieldType Type { get; }
+        [XmlIgnore] public virtual FieldType Type { get; }
 
         public static Field Create(FieldType type)
         {
@@ -864,6 +1068,7 @@ public class Fxr3 : SoulsFile<Fxr3>
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }
+
         public static Field Create(float value)
         {
             return new FieldFloat(value);
@@ -918,16 +1123,9 @@ public class Fxr3 : SoulsFile<Fxr3>
                         isInt = true;
                 }
             }
-            else if (context is Transition transition)
+            else if (context is StateCondition.OperandType)
             {
-                if (index == 0)
-                {
-                    isInt = transition.LeftOperandType is Transition.TransitionOperandType.External;
-                }
-                else if (index == 1)
-                {
-                    isInt = transition.RightOperandType is Transition.TransitionOperandType.External;
-                }
+                isInt = context is StateCondition.OperandType.External;
             }
             else
             {
@@ -986,6 +1184,7 @@ public class Fxr3 : SoulsFile<Fxr3>
 
         public abstract void Write(BinaryWriterEx bw);
 
+        [XmlType("Float")]
         public class FieldFloat : Field
         {
             public override FieldType Type => FieldType.Float;
@@ -1003,6 +1202,7 @@ public class Fxr3 : SoulsFile<Fxr3>
             }
         }
 
+        [XmlType("Int")]
         public class FieldInt : Field
         {
             public override FieldType Type => FieldType.Int;
@@ -1049,6 +1249,8 @@ public class Fxr3 : SoulsFile<Fxr3>
 
         [XmlAttribute] public bool IsLoop { get; set; }
 
+        [XmlArrayItem(Type = typeof(Field.FieldInt), ElementName = "Int"),
+         XmlArrayItem(Type = typeof(Field.FieldFloat), ElementName = "Float")]
         public List<Field> Fields { get; set; }
 
         public List<PropertyModifier> Modifiers { get; set; }
@@ -1108,12 +1310,12 @@ public class Fxr3 : SoulsFile<Fxr3>
             bw.WriteInt32(typeEnumB);
             bw.WriteInt32(Fields.Count);
             bw.WriteInt32(0);
-            var offsetName = (conditional ? "Section9" : "Property") + "FieldsOffset[{0}]";
+            var offsetName = (conditional ? "ConditionalProperty" : "Property") + "FieldsOffset[{0}]";
             bw.ReserveInt32(string.Format(offsetName, count));
             bw.WriteInt32(0);
             if (!conditional)
             {
-                bw.ReserveInt32(string.Format("PropertySection8sOffset[{0}]", count));
+                bw.ReserveInt32(string.Format("PropertyModifiersOffset[{0}]", count));
                 bw.WriteInt32(0);
                 bw.WriteInt32(Modifiers.Count);
                 bw.WriteInt32(0);
@@ -1124,14 +1326,14 @@ public class Fxr3 : SoulsFile<Fxr3>
 
         internal void WriteModifiers(BinaryWriterEx bw, int index, List<PropertyModifier> modifiers)
         {
-            bw.FillInt32(string.Format("PropertySection8sOffset[{0}]", index), (int)bw.Position);
+            bw.FillInt32(string.Format("PropertyModifiersOffset[{0}]", index), (int)bw.Position);
             foreach (PropertyModifier modifier in Modifiers)
                 modifier.Write(bw, modifiers);
         }
 
         internal void WriteFields(BinaryWriterEx bw, int index, ref int fieldCount, bool conditional)
         {
-            var offsetName = (conditional ? "Section9" : "Property") + "FieldsOffset[{0}]";
+            var offsetName = (conditional ? "ConditionalProperty" : "Property") + "FieldsOffset[{0}]";
             if (Fields.Count == 0)
             {
                 bw.FillInt32(string.Format(offsetName, index), 0);
@@ -1152,6 +1354,8 @@ public class Fxr3 : SoulsFile<Fxr3>
 
         [XmlAttribute] public uint TypeEnumB { get; set; }
 
+        [XmlArrayItem(Type = typeof(Field.FieldInt), ElementName = "Int"),
+         XmlArrayItem(Type = typeof(Field.FieldFloat), ElementName = "Float")]
         public List<Field> Fields { get; set; }
 
         public List<Property> Properties { get; set; }
@@ -1199,36 +1403,38 @@ public class Fxr3 : SoulsFile<Fxr3>
             bw.WriteUInt32(TypeEnumB);
             bw.WriteInt32(Fields.Count);
             bw.WriteInt32(Properties.Count);
-            bw.ReserveInt32(string.Format("Section8FieldsOffset[{0}]", count));
+            bw.ReserveInt32(string.Format("ModifierFieldsOffset[{0}]", count));
             bw.WriteInt32(0);
-            bw.ReserveInt32(string.Format("Section8Section9sOffset[{0}]", count));
+            bw.ReserveInt32(string.Format("ModifierConditionalPropertysOffset[{0}]", count));
             bw.WriteInt32(0);
             modifiers.Add(this);
         }
 
         internal void WriteProperties(BinaryWriterEx bw, int index, List<Property> properties)
         {
-            bw.FillInt32(string.Format("Section8Section9sOffset[{0}]", index), (int)bw.Position);
+            bw.FillInt32(string.Format("ModifierConditionalPropertysOffset[{0}]", index), (int)bw.Position);
             foreach (Property property in Properties)
                 property.Write(bw, properties, true);
         }
 
         internal void WriteFields(BinaryWriterEx bw, int index, ref int fieldCount)
         {
-            bw.FillInt32(string.Format("Section8FieldsOffset[{0}]", index), (int)bw.Position);
+            bw.FillInt32(string.Format("ModifierFieldsOffset[{0}]", index), (int)bw.Position);
             foreach (Field field in Fields)
                 field.Write(bw);
             fieldCount += Fields.Count;
         }
     }
 
-    public class Section10
+    public class UnkFieldList
     {
+        [XmlArrayItem(Type = typeof(Field.FieldInt), ElementName = "Int"),
+         XmlArrayItem(Type = typeof(Field.FieldFloat), ElementName = "Float")]
         public List<Field> Fields { get; set; }
 
-        public Section10() => Fields = new List<Field>();
+        public UnkFieldList() => Fields = new List<Field>();
 
-        internal Section10(BinaryReaderEx br)
+        internal UnkFieldList(BinaryReaderEx br)
         {
             int offset = br.ReadInt32();
             br.AssertInt32(0);
@@ -1237,24 +1443,24 @@ public class Fxr3 : SoulsFile<Fxr3>
             Fields = Field.ReadManyAt(br, offset, count, this);
         }
 
-        internal Section10(Section10 section)
+        internal UnkFieldList(UnkFieldList fieldList)
         {
-            Fields = section.Fields.Select(Field.Create).ToList();
+            Fields = fieldList.Fields.Select(Field.Create).ToList();
         }
 
-        internal void Write(BinaryWriterEx bw, List<Section10> section10s)
+        internal void Write(BinaryWriterEx bw, List<UnkFieldList> fieldLists)
         {
-            int count = section10s.Count;
-            bw.ReserveInt32(string.Format("Section10FieldsOffset[{0}]", count));
+            int count = fieldLists.Count;
+            bw.ReserveInt32(string.Format("UnkFieldListFieldsOffset[{0}]", count));
             bw.WriteInt32(0);
             bw.WriteInt32(Fields.Count);
             bw.WriteInt32(0);
-            section10s.Add(this);
+            fieldLists.Add(this);
         }
 
         internal void WriteFields(BinaryWriterEx bw, int index, ref int fieldCount)
         {
-            bw.FillInt32(string.Format("Section10FieldsOffset[{0}]", index), (int)bw.Position);
+            bw.FillInt32(string.Format("UnkFieldListFieldsOffset[{0}]", index), (int)bw.Position);
             foreach (Field field in Fields)
                 field.Write(bw);
             fieldCount += Fields.Count;
@@ -1264,21 +1470,21 @@ public class Fxr3 : SoulsFile<Fxr3>
 
 public class FXR3EnhancedSerialization
 {
-    public static Fxr3 XMLToFXR3(XDocument XML)
+    public static RSFXR XMLToFXR3(XDocument XML)
     {
-        XmlSerializer test = new XmlSerializer(typeof(Fxr3));
+        XmlSerializer test = new XmlSerializer(typeof(RSFXR));
         XmlReader xmlReader = XML.CreateReader();
 
-        return (Fxr3)test.Deserialize(xmlReader);
+        return (RSFXR)test.Deserialize(xmlReader);
     }
 
-    public static XDocument FXR3ToXML(Fxr3 fxr)
+    public static XDocument FXR3ToXML(RSFXR fxr)
     {
         XDocument XDoc = new XDocument();
 
         using (var xmlWriter = XDoc.CreateWriter())
         {
-            var thing = new XmlSerializer(typeof(Fxr3));
+            var thing = new XmlSerializer(typeof(RSFXR));
             thing.Serialize(xmlWriter, fxr);
         }
 

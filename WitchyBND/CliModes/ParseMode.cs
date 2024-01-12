@@ -136,6 +136,9 @@ public static class ParseMode
                 }
                 catch (Exception e)
                 {
+#if (DEBUG)
+                    throw;
+#endif
                     Program.RegisterException(e, path);
                     error = true;
                 }
