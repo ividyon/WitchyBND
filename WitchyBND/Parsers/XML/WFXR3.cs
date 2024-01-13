@@ -12,7 +12,7 @@ namespace WitchyBND.Parsers;
 public class WFXR3 : WXMLParser
 {
     public override string Name => "FXR3";
-    public override int Version => WBUtil.WitchyVersionToInt("2.2.1.0");
+    public override int Version => WBUtil.WitchyVersionToInt("2.3.0.0");
 
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
