@@ -1,7 +1,7 @@
-* Added parallel processing. When enabled, Witchy operations will be multi-threaded.
-  * This includes parallel-processing paths entered into Witchy, as well as operations on BND files.
-  * It may not be guaranteed that the order of files in the `<files>` section of the XML manifest is strictly followed when parallelization is enabled. Do not enable if this is a concern for you (but it shouldn't be in most cases).
+* Added parallel processing. When enabled, Witchy operations will be multi-threaded, which should speed them up.
+  * This includes parallel-processing paths entered into Witchy, as well as operations performed on file lists in binders.
   * This is disabled by default and can be enabled in the configuration (by running the EXE standalone).
+  * It may not be guaranteed that the order of files in the `<files>` section of the XML manifest is strictly followed when parallelization is enabled. Do not enable if this is a concern for you (but it shouldn't be in most cases).
 * Added a notice when repacking using DCX_KRAK or DCX_KRAK_MAX compression, which are extremely slow. For development purposes, a compression like DCX_DFLT_11000_44_9_15 is recommended.
   * Did you know? A FFXBND repack which normally takes ~2-10 minutes with default compression, takes less than 1 second with no compression, and only 6 seconds with the above compression type.
 * Updated FXR parser version.
