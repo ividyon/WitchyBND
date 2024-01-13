@@ -9,7 +9,9 @@ concurrency:
 
 on:
   push:
-    branches: [ "main", "feat/**" ]
+    branches:
+      - 'main'
+      - 'feat/*'
     tags-ignore:
       - '**'
   pull_request:
