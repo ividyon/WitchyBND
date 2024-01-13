@@ -3,4 +3,5 @@
   * Replaced all remaining "Section" names by better approximations.
   * Renamed UnkReferences and UnkExternalValues to ReferenceList and ExternalValueList.
   * Changed the XML structure of Fields to just be `<Int Value="0">` and `<Float Value="0">` instead of the verbose `<Field xsi:Type="FFXFieldFloat" Value="0">`.
-* Made IsUnpacked detection for XML files case-insensitive when reading the root element name.
+* Fixed an issue where MTD XMLs would not de-serialize back into MTD due to a certified :forestcat: moment.
+* Made Witchy less case-sensitive about the root tags of serialized XML files.

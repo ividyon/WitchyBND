@@ -52,8 +52,9 @@ namespace WitchyFormats
             if (br.Length < 0x30)
                 return false;
 
+            string xml = br.GetASCII(0x03, 5);
             string magic = br.GetASCII(0x2C, 4);
-            return magic == "MTD ";
+            return xml != "<?xml" && magic == "MTD ";
         }
 
         /// <summary>

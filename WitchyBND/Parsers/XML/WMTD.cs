@@ -11,18 +11,10 @@ public class WMTD : WXMLParser
 {
 
     public override string Name => "MTD";
+
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
-       return IsRead<MTD>(path, data, out file);
-    }
-
-    public override bool IsUnpacked(string path)
-    {
-        if (Path.GetExtension(path) != ".xml")
-            return false;
-
-        var doc = XDocument.Load(path);
-        return doc.Root != null && doc.Root.Name == Name;
+        return IsRead<MTD>(path, data, out file);
     }
 
     public override void Unpack(string srcPath, ISoulsFile? file)
