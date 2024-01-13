@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using PPlus;
 using SoulsFormats;
 using WitchyBND.Parsers;
@@ -24,13 +25,12 @@ public static class ParseMode
 
     public static void ParseFiles(List<string> paths, bool recursive = false)
     {
-        foreach (string path in paths)
-        {
+        void Callback(string path) {
             if (!File.Exists(path) && !Directory.Exists(path))
             {
                 if (!recursive)
                     Program.RegisterNotice($"Path {path} does not exist.");
-                continue;
+                return;
             }
 
             string fileName = Path.GetFileName(path);
@@ -100,8 +100,10 @@ public static class ParseMode
 
                         if (!parser.UnpackedFitsVersion(path))
                         {
-                            throw new FriendlyException(@"Parser version of unpacked file is outdated. Please repack this file using the WitchyBND version it was originally unpacked with, then unpack it using the newest version.");
+                            throw new FriendlyException(
+                                @"Parser version of unpacked file is outdated. Please repack this file using the WitchyBND version it was originally unpacked with, then unpack it using the newest version.");
                         }
+
                         parser.Repack(path);
                         parsed = true;
                         break;
@@ -154,6 +156,11 @@ public static class ParseMode
                     break;
             }
         }
+
+        if (Configuration.Parallel)
+            Parallel.ForEach(paths, Callback);
+        else
+            paths.ForEach(Callback);
     }
 
     static ParseMode()

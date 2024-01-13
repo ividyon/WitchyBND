@@ -332,7 +332,9 @@ internal static class Program
             { "DCX decompression only", Configuration.Dcx.ToString() },
             { "Store PARAM field default values", Configuration.ParamDefaultValues.ToString() },
             { "Recursive binder processing", Configuration.Recursive.ToString() },
+            { "Parallel processing", Configuration.Parallel.ToString() }
         };
+
         if (Configuration.Args.Passive)
             infoTable.Add("Passive", Configuration.Args.Passive.ToString());
         if (!string.IsNullOrEmpty(Configuration.Args.Location))

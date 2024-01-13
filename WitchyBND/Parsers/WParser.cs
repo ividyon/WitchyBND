@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Enumeration;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
@@ -198,9 +199,8 @@ public abstract class WBinderParser : WFolderParser
         var pathCounts = new Dictionary<string, int>();
         var resultingPaths = new List<string>();
 
-        for (int i = 0; i < bnd.Files.Count; i++)
-        {
-            BinderFile file = bnd.Files[i];
+        void Callback(BinderFile file) {
+            var i = bnd.Files.IndexOf(file);
 
             string path;
             if (Binder.HasNames(bnd.Format))
@@ -252,6 +252,11 @@ public abstract class WBinderParser : WFolderParser
             files.Add(fileElement);
         }
 
+        if (Configuration.Parallel)
+            Parallel.ForEach(bnd.Files, Callback);
+        else
+            bnd.Files.ForEach(Callback);
+
         if (Configuration.Recursive)
         {
             ParseMode.ParseFiles(resultingPaths, true);
@@ -262,8 +267,7 @@ public abstract class WBinderParser : WFolderParser
 
     protected static void ReadBinderFiles(IBinder bnd, XElement filesElement, string srcDirPath, string root)
     {
-        foreach (XElement file in filesElement.Elements("file"))
-        {
+        void Callback(XElement file) {
             if (file.Element("path") == null)
                 throw new FriendlyException("File node missing path tag.");
 
@@ -295,6 +299,15 @@ public abstract class WBinderParser : WFolderParser
             {
                 CompressionType = compressionType
             });
+        }
+        if (Configuration.Parallel)
+            Parallel.ForEach(filesElement.Elements("file"), Callback);
+        else
+        {
+            foreach (XElement element in filesElement.Elements("file"))
+            {
+                Callback(element);
+            }
         }
     }
 }

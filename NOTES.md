@@ -1,3 +1,4 @@
+* Added parallel processing. Witchy will now attempt to multi-thread its operations. This can be disabled in the configuration.
 * Updated FXR parser version.
   * Fully cleared up how States work. "Transitions" are now "StayConditions" and their output has been cleaned up greatly.
   * Replaced all remaining "Section" names by better approximations.
