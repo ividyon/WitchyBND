@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -164,6 +165,8 @@ public class WFFXBNDModern : WBinderParser
 
         // Write files
 
+        ConcurrentBag<BinderFile> bag = new();
+
         const string rootPath = @"N:\GR\data\INTERROOT_win64\sfx\";
 
         void effectCallback()
@@ -177,7 +180,7 @@ public class WFFXBNDModern : WBinderParser
                 var bytes = File.ReadAllBytes(filePath);
                 var file = new BinderFile(Binder.FileFlags.Flag1, i, $@"{rootPath}\effect\{fileName}",
                     bytes);
-                bnd.Files.Add(file);
+                bag.Add(file);
             }
 
             if (Configuration.Parallel)
@@ -221,7 +224,7 @@ public class WFFXBNDModern : WBinderParser
 
                 var file = new BinderFile(Binder.FileFlags.Flag1, 100000 + i, $@"{rootPath}\tex\{Path.ChangeExtension(fileName, "tpf")}",
                     bytes);
-                bnd.Files.Add(file);
+                bag.Add(file);
             }
 
             if (Configuration.Parallel)
@@ -241,7 +244,7 @@ public class WFFXBNDModern : WBinderParser
                 var bytes = File.ReadAllBytes(filePath);
                 var file = new BinderFile(Binder.FileFlags.Flag1, 200000 + i, $@"{rootPath}\model\{fileName}",
                     bytes);
-                bnd.Files.Add(file);
+                bag.Add(file);
             }
 
             if (Configuration.Parallel)
@@ -261,7 +264,7 @@ public class WFFXBNDModern : WBinderParser
                 var bytes = File.ReadAllBytes(filePath);
                 var file = new BinderFile(Binder.FileFlags.Flag1, 300000 + i, $@"{rootPath}\hkx\{fileName}",
                     bytes);
-                bnd.Files.Add(file);
+                bag.Add(file);
             }
 
             if (Configuration.Parallel)
@@ -281,7 +284,7 @@ public class WFFXBNDModern : WBinderParser
                 var bytes = File.ReadAllBytes(filePath);
                 var file = new BinderFile(Binder.FileFlags.Flag1, 400000 + i, $@"{rootPath}\ResourceList\{fileName}",
                     bytes);
-                bnd.Files.Add(file);
+                bag.Add(file);
             }
 
             if (Configuration.Parallel)
@@ -291,7 +294,9 @@ public class WFFXBNDModern : WBinderParser
         }
 
         if (Configuration.Parallel)
+        {
             Parallel.Invoke(effectCallback, textureCallback, modelCallback, animCallback, resCallback);
+        }
         else
         {
             effectCallback();
@@ -300,6 +305,8 @@ public class WFFXBNDModern : WBinderParser
             animCallback();
             resCallback();
         }
+
+        bnd.Files = bag.OrderBy(f => f.ID).ToList();
 
         string destPath = GetRepackDestPath(srcPath, xml);
         WBUtil.Backup(destPath);

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using PPlus;
 using SoulsFormats;
@@ -23,7 +24,7 @@ public static class ParseMode
         ParseFiles(paths);
     }
 
-    public static void ParseFiles(List<string> paths, bool recursive = false)
+    public static void ParseFiles(IEnumerable<string> paths, bool recursive = false)
     {
         void Callback(string path) {
             if (!File.Exists(path) && !Directory.Exists(path))
@@ -111,6 +112,9 @@ public static class ParseMode
                 }
                 catch (NoOodleFoundException)
                 {
+                    if (Configuration.IsTest)
+                        throw;
+
                     Program.RegisterError(new WitchyError(
                         "ERROR: Oodle DLL not found. Please copy oo2core_6_win64.dll or oo2core_8_win64.dll from the game directory to WitchyBND's directory.",
                         WitchyErrorType.NoOodle));
@@ -119,6 +123,9 @@ public static class ParseMode
                 catch (Exception e) when (e.Message.Contains("oo2core_6_win64.dll") ||
                                           e.Message.Contains("oo2core_8_win64.dll") || e is NoOodleFoundException)
                 {
+                    if (Configuration.IsTest)
+                        throw;
+
                     Program.RegisterError(new WitchyError(
                         "ERROR: Oodle DLL not found. Please copy oo2core_6_win64.dll or oo2core_8_win64.dll from the game directory to WitchyBND's directory.",
                         WitchyErrorType.NoOodle));
@@ -126,6 +133,9 @@ public static class ParseMode
                 }
                 catch (UnauthorizedAccessException)
                 {
+                    if (Configuration.IsTest)
+                        throw;
+
                     Program.RegisterError(new WitchyError(
                         "WitchyBND had no access to perform this action; perhaps try Administrator Mode?", path,
                         WitchyErrorType.NoAccess));
@@ -133,14 +143,17 @@ public static class ParseMode
                 }
                 catch (FriendlyException e)
                 {
+                    if (Configuration.IsTest)
+                        throw;
+
                     Program.RegisterError(new WitchyError(e.Message, path));
                     error = true;
                 }
                 catch (Exception e)
                 {
-#if (DEBUG)
-                    throw;
-#endif
+                    if (Configuration.IsTest || Configuration.IsDebug)
+                        throw;
+
                     Program.RegisterException(e, path);
                     error = true;
                 }
@@ -149,7 +162,7 @@ public static class ParseMode
             switch (parsed)
             {
                 case true:
-                    Program.ProcessedItems++;
+                    Interlocked.Increment(ref Program.ProcessedItems);
                     break;
                 case false when !error && !recursive:
                     PromptPlus.Error.WriteLine($"Could not find valid parser for {path}.");
@@ -160,7 +173,7 @@ public static class ParseMode
         if (Configuration.Parallel)
             Parallel.ForEach(paths, Callback);
         else
-            paths.ForEach(Callback);
+            paths.ToList().ForEach(Callback);
     }
 
     static ParseMode()

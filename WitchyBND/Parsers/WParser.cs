@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Enumeration;
@@ -210,13 +211,18 @@ public abstract class WBinderParser : WFolderParser
 {
     protected static XElement WriteBinderFiles(IBinder bnd, string destDirPath, string root)
     {
+        var bag = new ConcurrentBag<XElement>();
+
         var files = new XElement("files");
-        var pathCounts = new Dictionary<string, int>();
-        var resultingPaths = new List<string>();
+        var pathCounts = new ConcurrentDictionary<string, int>();
+        var resultingPaths = new ConcurrentStack<string>();
 
-        void Callback(BinderFile file) {
-            var i = bnd.Files.IndexOf(file);
+        void ParallelCallback(BinderFile file, ParallelLoopState state, long i)
+        {
+            Callback(file, i);
+        }
 
+        void Callback(BinderFile file, long i) {
             string path;
             if (Binder.HasNames(bnd.Format))
             {
@@ -261,20 +267,41 @@ public abstract class WBinderParser : WFolderParser
             string destPath =
                 $@"{destDirPath}\{Path.GetDirectoryName(path)}\{Path.GetFileNameWithoutExtension(path)}{suffix}{Path.GetExtension(path)}";
             Directory.CreateDirectory(Path.GetDirectoryName(destPath));
-            resultingPaths.Add(destPath);
+            resultingPaths.Push(destPath);
             File.WriteAllBytes(destPath, bytes);
 
-            files.Add(fileElement);
+            bag.Add(fileElement);
         }
 
         if (Configuration.Parallel)
-            Parallel.ForEach(bnd.Files, Callback);
+            Parallel.ForEach(bnd.Files, ParallelCallback);
         else
-            bnd.Files.ForEach(Callback);
+        {
+            for (var i = 0; i < bnd.Files.Count; i++)
+            {
+                Callback(bnd.Files[i], i);
+            }
+        }
+
+        if (Configuration.Parallel)
+        {
+            if (Binder.HasIDs(bnd.Format))
+            {
+                files.Add(bag.OrderBy(el => el.Element("id")!.Value));
+            }
+            else if (Binder.HasNames(bnd.Format))
+            {
+                files.Add(bag.OrderBy(el => el.Element("path")!.Value));
+            }
+            else
+                files.Add(bag);
+        }
+        else
+            files.Add(bag);
 
         if (Configuration.Recursive)
         {
-            ParseMode.ParseFiles(resultingPaths, true);
+            ParseMode.ParseFiles(resultingPaths.ToList(), true);
         }
 
         return files;
@@ -282,6 +309,8 @@ public abstract class WBinderParser : WFolderParser
 
     protected static void ReadBinderFiles(IBinder bnd, XElement filesElement, string srcDirPath, string root)
     {
+        var bag = new ConcurrentBag<BinderFile>();
+
         void Callback(XElement file) {
             if (file.Element("path") == null)
                 throw new FriendlyException("File node missing path tag.");
@@ -310,7 +339,7 @@ public abstract class WBinderParser : WFolderParser
                 throw new FriendlyException($"File not found: {inPath}");
 
             byte[] bytes = File.ReadAllBytes(inPath);
-            bnd.Files.Add(new BinderFile(flags, id, name, bytes)
+            bag.Add(new BinderFile(flags, id, name, bytes)
             {
                 CompressionType = compressionType
             });
@@ -324,6 +353,8 @@ public abstract class WBinderParser : WFolderParser
                 Callback(element);
             }
         }
+
+        bnd.Files = bag.ToList();
     }
 }
 

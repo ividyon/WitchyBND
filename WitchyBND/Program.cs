@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -113,6 +114,9 @@ public class CliOptions
     [Option('c', "recursive", HelpText = "Attempt to process files contained within binders recursively.")]
     public bool Recursive { get; set; }
 
+    [Option('e', "parallel", HelpText = "Runs operations parallelized")]
+    public bool Parallel { get; set; }
+
     [Option('p', "passive",
         HelpText =
             "Will not prompt the user for any input or cause any delays. Suited for automatic execution in scripts.")]
@@ -152,8 +156,8 @@ public class CliOptions
 
 internal static class Program
 {
-    private static List<WitchyError> AccruedErrors;
-    private static List<WitchyNotice> AccruedNotices;
+    private static ConcurrentStack<WitchyError> AccruedErrors;
+    private static ConcurrentStack<WitchyNotice> AccruedNotices;
     public static int ProcessedItems = 0;
 
     [STAThread]
@@ -203,6 +207,8 @@ internal static class Program
                         Configuration.ParamDefaultValues = opt.ParamDefaultValues.Value;
                     if (opt.Recursive)
                         Configuration.Recursive = opt.Recursive;
+                    if (opt.Parallel)
+                        Configuration.Parallel = opt.Parallel;
 
                     // Arg-only configuration
                     if (opt.RepackOnly)
@@ -269,11 +275,10 @@ internal static class Program
                 }
                 catch (Exception e)
                 {
-#if DEBUG
-                    throw;
-#else
-                        RegisterException(e);
-#endif
+                    if (Configuration.IsTest || Configuration.IsDebug)
+                        throw;
+
+                    RegisterException(e);
                 }
 
                 watch.Stop();
@@ -295,10 +300,7 @@ internal static class Program
                         PromptPlus.SingleDash("Errors during operation");
                         foreach (WitchyError error in AccruedErrors)
                         {
-                            if (error.Source != null)
-                                PromptPlus.Error.WriteLine($"{error.Source}: {error.Message}".PromptPlusEscape());
-                            else
-                                PromptPlus.Error.WriteLine($"{error.Message}".PromptPlusEscape());
+                            PromptPlus.Error.WriteLine($"{error.Source}: {error.Message}".PromptPlusEscape());
                         }
                     }
 
@@ -402,7 +404,7 @@ internal static class Program
 
     public static void RegisterNotice(WitchyNotice notice, bool write = true)
     {
-        AccruedNotices.Add(notice);
+        AccruedNotices.Push(notice);
         if (write)
             PromptPlus.Error.WriteLine($"{notice.Source}: {notice.Message}".PromptPlusEscape());
     }
@@ -431,7 +433,7 @@ internal static class Program
 
     public static void RegisterError(WitchyError error, bool write = true)
     {
-        AccruedErrors.Add(error);
+        AccruedErrors.Push(error);
         if (write)
         {
             if (error.Source != null)
@@ -446,7 +448,7 @@ internal static class Program
 
     static Program()
     {
-        AccruedErrors = new List<WitchyError>();
-        AccruedNotices = new List<WitchyNotice>();
+        AccruedErrors = new();
+        AccruedNotices = new();
     }
 }

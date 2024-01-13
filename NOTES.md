@@ -1,6 +1,8 @@
-* Added parallel processing. Witchy will now attempt to multi-thread its operations.
-  * This can be disabled in the configuration.
+* Added parallel processing. When enabled, Witchy operations will be multi-threaded.
+  * This includes parallel-processing paths entered into Witchy, as well as operations on BND files.
+  * This is disabled by default and can be enabled in the configuration.
 * Added a notice when repacking using DCX_KRAK or DCX_KRAK_MAX compression, which are extremely slow. For development purposes, a compression like DCX_DFLT_11000_44_9_15 is recommended.
+  * Did you know? A FFXBND repack which normally takes ~2-10 minutes with default compression, takes less than 1 second with no compression, and only 6 seconds with the above compression type.
 * Updated FXR parser version.
   * Fully cleared up how States work. "Transitions" are now "StayConditions" and their output has been cleaned up greatly.
   * Replaced all remaining "Section" names by better approximations.

@@ -8,7 +8,10 @@ using static System.Enum;
 
 namespace WitchyTests;
 
-[TestFixture]
+[TestFixture(true, true)]
+[TestFixture(true, false)]
+[TestFixture(false, true)]
+[TestFixture(false, false)]
 public class RegulationTests : TestBase
 {
 
@@ -21,23 +24,9 @@ public class RegulationTests : TestBase
 
         foreach (string path in paths.Select(GetCopiedPath))
         {
+            SetLocation(path);
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var outFile));
-
-            byte[] backup = { };
-            for (int i = 0; i < 2; i++)
-            {
-                if (i == 0)
-                {
-                    backup = File.ReadAllBytes(path);
-                    Configuration.Args.Location = null;
-                }
-                else
-                {
-                    File.WriteAllBytes(path, backup);
-                    Configuration.Args.Location = Path.Combine(Path.GetDirectoryName(path), "Target");
-                    Directory.CreateDirectory(Configuration.Args.Location);
-                }
 
                 parser.Unpack(path, outFile);
                 string? destPath = parser.GetUnpackDestDir(path);
@@ -63,7 +52,6 @@ public class RegulationTests : TestBase
                 parser.Repack(destPath);
 
                 Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)), Is.True);
-            }
         }
     }
 
@@ -77,26 +65,13 @@ public class RegulationTests : TestBase
 
         foreach (string path in paths.Select(GetCopiedPath))
         {
+            SetLocation(path);
             string fullPath = Path.GetDirectoryName(Path.GetFullPath(path))!.TrimEnd(Path.DirectorySeparatorChar);
             string gameName = fullPath.Split(Path.DirectorySeparatorChar).Last();
             var dirGame = Parse<WBUtil.GameType>(gameName);
 
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var outFile));
-            byte[] backup = { };
-            for (int i = 0; i < 2; i++)
-            {
-                if (i == 0)
-                {
-                    backup = File.ReadAllBytes(path);
-                    Configuration.Args.Location = null;
-                }
-                else
-                {
-                    File.WriteAllBytes(path, backup);
-                    Configuration.Args.Location = Path.Combine(Path.GetDirectoryName(path), "Target");
-                    Directory.CreateDirectory(Configuration.Args.Location);
-                }
 
                 parser.Unpack(path, outFile);
                 string? destPath = parser.GetUnpackDestDir(path);
@@ -117,7 +92,6 @@ public class RegulationTests : TestBase
                 parser.Repack(destPath);
 
                 Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)), Is.True);
-            }
         }
     }
 
@@ -131,6 +105,7 @@ public class RegulationTests : TestBase
 
         foreach (string path in paths.Select(GetCopiedPath))
         {
+            SetLocation(path);
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var outFile));
             parser.Unpack(path, outFile);
@@ -155,6 +130,7 @@ public class RegulationTests : TestBase
 
         foreach (string path in paths.Select(GetCopiedPath))
         {
+            SetLocation(path);
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var outFile));
             parser.Unpack(path, outFile);
@@ -167,5 +143,9 @@ public class RegulationTests : TestBase
             Assert.That(parser.IsUnpacked(destPath));
             Assert.Throws<MalformedBinderException>(() => parser.Repack(destPath));
         }
+    }
+
+    public RegulationTests(bool a, bool b) : base(a, b)
+    {
     }
 }
