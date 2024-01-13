@@ -174,10 +174,6 @@ internal static class Program
             // with.AutoVersion = false;
         });
 
-        // Set stopwatch
-        Stopwatch watch = new Stopwatch();
-        watch.Start();
-
         var parserResult = parser.ParseArguments<CliOptions>(args);
         parserResult.WithParsed(opt => {
                 try
@@ -264,7 +260,67 @@ internal static class Program
                     {
                         case CliMode.Parse:
                             DisplayConfiguration();
+
+                            Stopwatch watch = new Stopwatch();
+
+                            watch.Start();
                             ParseMode.CliParseMode(opt);
+                            watch.Stop();
+
+                            int pause = Configuration.EndDelay;
+                            if (Configuration.PauseOnError && AccruedErrors.Count > 0)
+                                pause = -1;
+                            var completedString = ProcessedItems == 1
+                                ? $"Operation completed on 1 item in {watch.Elapsed:hh\\:mm\\:ss}."
+                                : $"Operation completed on {ProcessedItems} items in {watch.Elapsed:hh\\:mm\\:ss}.";
+                            PromptPlus.WriteLine("");
+                            PromptPlus.WriteLine(string.Concat(Enumerable.Repeat("-", completedString.Length)));
+                            PromptPlus.WriteLine(completedString);
+                            if (ProcessedItems > 0)
+                            {
+                                if (AccruedErrors.Count > 0)
+                                {
+                                    PromptPlus.WriteLine("");
+                                    PromptPlus.SingleDash("Errors during operation");
+                                    foreach (WitchyError error in AccruedErrors)
+                                    {
+                                        PromptPlus.Error.WriteLine(
+                                            $"{error.Source}: {error.Message}".PromptPlusEscape());
+                                    }
+                                }
+
+                                if (AccruedNotices.Count > 0)
+                                {
+                                    PromptPlus.WriteLine("");
+                                    PromptPlus.SingleDash("Notices during operation");
+                                    foreach (WitchyNotice notice in AccruedNotices)
+                                    {
+                                        if (notice.Source != null)
+                                            PromptPlus.Error.WriteLine($"{notice.Source}: {notice.Message}"
+                                                .PromptPlusEscape());
+                                        else
+                                            PromptPlus.Error.WriteLine($"{notice.Message}".PromptPlusEscape());
+                                    }
+                                }
+                            }
+
+                            if (!Configuration.Args.Passive)
+                            {
+                                PromptPlus.WriteLine("");
+                                if (pause == -1)
+                                {
+                                    PromptPlus.WriteLine(Constants.PressAnyKey);
+                                    PromptPlus.ReadKey();
+                                    return;
+                                }
+
+                                if (pause > 0)
+                                {
+                                    PromptPlus.WriteLine(
+                                        $"Closing in {TimeSpan.FromMilliseconds(pause).TotalSeconds} second(s)...");
+                                    Thread.Sleep(pause);
+                                }
+                            }
                             break;
                         case CliMode.Config:
                             ConfigMode.CliConfigMode(opt);
@@ -279,61 +335,6 @@ internal static class Program
                         throw;
 
                     RegisterException(e);
-                }
-
-                watch.Stop();
-
-                int pause = Configuration.EndDelay;
-                if (Configuration.PauseOnError && AccruedErrors.Count > 0)
-                    pause = -1;
-                var completedString = ProcessedItems == 1
-                    ? $"Operation completed on 1 item in {watch.Elapsed:hh\\:mm\\:ss}."
-                    : $"Operation completed on {ProcessedItems} items in {watch.Elapsed:hh\\:mm\\:ss}.";
-                PromptPlus.WriteLine("");
-                PromptPlus.WriteLine(string.Concat(Enumerable.Repeat("-", completedString.Length)));
-                PromptPlus.WriteLine(completedString);
-                if (ProcessedItems > 0)
-                {
-                    if (AccruedErrors.Count > 0)
-                    {
-                        PromptPlus.WriteLine("");
-                        PromptPlus.SingleDash("Errors during operation");
-                        foreach (WitchyError error in AccruedErrors)
-                        {
-                            PromptPlus.Error.WriteLine($"{error.Source}: {error.Message}".PromptPlusEscape());
-                        }
-                    }
-
-                    if (AccruedNotices.Count > 0)
-                    {
-                        PromptPlus.WriteLine("");
-                        PromptPlus.SingleDash("Notices during operation");
-                        foreach (WitchyNotice notice in AccruedNotices)
-                        {
-                            if (notice.Source != null)
-                                PromptPlus.Error.WriteLine($"{notice.Source}: {notice.Message}".PromptPlusEscape());
-                            else
-                                PromptPlus.Error.WriteLine($"{notice.Message}".PromptPlusEscape());
-                        }
-                    }
-                }
-
-                if (!Configuration.Args.Passive)
-                {
-                    PromptPlus.WriteLine("");
-                    if (pause == -1)
-                    {
-                        PromptPlus.WriteLine(Constants.PressAnyKey);
-                        PromptPlus.ReadKey();
-                        return;
-                    }
-
-                    if (pause > 0)
-                    {
-                        PromptPlus.WriteLine(
-                            $"Closing in {TimeSpan.FromMilliseconds(pause).TotalSeconds} second(s)...");
-                        Thread.Sleep(pause);
-                    }
                 }
             })
             .WithNotParsed(errors => { DisplayHelp(parserResult, errors); });
