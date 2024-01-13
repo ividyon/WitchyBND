@@ -25,8 +25,15 @@ public abstract class WFileParser
     public virtual WFileParserVerb Verb => WFileParserVerb.Unpack;
     public virtual bool IncludeInList => true;
     public abstract string Name { get; }
+    public virtual string ListName => Name;
+
     public virtual int Version => 0;
     public virtual string XmlTag => Name.ToLower();
+
+    public virtual bool HasPreprocess => false;
+
+    public virtual void Preprocess(string srcPath) {}
+
     public abstract bool Is(string path, byte[]? data, out ISoulsFile? file);
     public abstract bool Exists(string path);
     public abstract bool ExistsUnpacked(string path);
@@ -287,7 +294,7 @@ public abstract class WBinderParser : WFolderParser
         {
             if (Binder.HasIDs(bnd.Format))
             {
-                files.Add(bag.OrderBy(el => el.Element("id")!.Value));
+                files.Add(bag.OrderBy(el => Convert.ToInt32(el.Element("id")!.Value)));
             }
             else if (Binder.HasNames(bnd.Format))
             {

@@ -79,6 +79,38 @@ public class WPARAMBND4 : WBinderParser
         return null;
     }
 
+    public override bool HasPreprocess => true;
+
+    public List<string> PreprocessedPaths = new();
+    public override void Preprocess(string srcPath)
+    {
+        if (!Directory.Exists(srcPath)) return;
+
+        string xmlPath = GetBinderXmlPath(srcPath, "bnd4");
+        if (!File.Exists(xmlPath)) return;
+
+        if (PreprocessedPaths.Contains(srcPath)) return;
+
+        var doc = XDocument.Load(GetBinderXmlPath(srcPath, "bnd4"));
+        if (doc.Root == null || doc.Root.Name != "bnd4") return;
+        XElement xml = doc.Root;
+
+        var gameElement = xml.Element("game");
+        if (gameElement == null) throw new XmlException("XML has no Game element");
+        Enum.TryParse(gameElement.Value, out WBUtil.GameType game);
+
+        var versionElement = xml.Element("version");
+        if (versionElement == null) throw new XmlException("XML has no Version element");
+        var regVer = Convert.ToUInt64(versionElement.Value);
+
+        if (!WPARAM.Games.ContainsKey(srcPath))
+            WPARAM.Games[srcPath] = (game, regVer);
+
+        WPARAM.PopulateParamdex(game);
+
+        PreprocessedPaths.Add(srcPath);
+    }
+
     public override bool Is(string path, byte[]? _, out ISoulsFile? file)
     {
         file = null;
@@ -93,7 +125,7 @@ public class WPARAMBND4 : WBinderParser
         if (!File.Exists(xmlPath)) return false;
 
         var doc = XDocument.Load(xmlPath);
-        return doc.Root != null && doc.Root.Name == "bnd4" && doc.Root.Element("game") != null;
+        return doc.Root != null && doc.Root.Name.ToString().ToLower() == "bnd4" && doc.Root.Element("game") != null;
     }
 
     public override void Unpack(string srcPath, ISoulsFile? _)
@@ -119,7 +151,8 @@ public class WPARAMBND4 : WBinderParser
         if (!WPARAM.WarnAboutParams()) return;
 
         var bndParser = ParseMode.Parsers.OfType<WBND4>().First();
-        var doc = XDocument.Load(GetBinderXmlPath(srcPath, "bnd4"));
+        var xmlPath = GetBinderXmlPath(srcPath, "bnd4");
+        var doc = XDocument.Load(xmlPath);
         if (doc.Root == null) throw new XmlException("XML has no root");
         XElement xml = doc.Root;
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
@@ -184,11 +185,11 @@ public static class WBUtil
         GameType? game = null;
 
         // Determine what kind of PARAM we're dealing with here
-        string witchyXmlPath = TraverseFindFile("_witchy-bnd4.xml", path);
-        if (witchyXmlPath != null)
+        string xmlPath = TraverseFindFile("_witchy-bnd4.xml", path);
+        if (xmlPath != null)
         {
             XmlDocument xml = new XmlDocument();
-            xml.Load(witchyXmlPath);
+            xml.Load(xmlPath);
 
 
             if (xml.SelectSingleNode("bnd4/game")?.InnerText != null)

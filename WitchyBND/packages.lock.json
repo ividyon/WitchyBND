@@ -238,8 +238,8 @@
       "witchyformats": {
         "type": "Project",
         "dependencies": {
-          "SoulsFormats": "[2.3.0, )",
-          "StudioUtils": "[2.3.0, )"
+          "SoulsFormats": "[2.3.0.1, )",
+          "StudioUtils": "[2.3.0.1, )"
         }
       },
       "witchylib": {
@@ -249,8 +249,8 @@
           "Microsoft.Extensions.FileSystemGlobbing": "[8.0.0-preview.2.23128.3, )",
           "Newtonsoft.Json": "[13.0.1, )",
           "PromptPlus": "[4.0.5, )",
-          "SoulsFormats": "[2.3.0, )",
-          "WitchyFormats": "[2.3.0, )"
+          "SoulsFormats": "[2.3.0.1, )",
+          "WitchyFormats": "[2.3.0.1, )"
         }
       }
     },

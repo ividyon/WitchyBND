@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -17,7 +18,7 @@ namespace WitchyBND.Parsers;
 
 public partial class WPARAM : WXMLParser
 {
-    public Dictionary<string, (WBUtil.GameType, ulong)?> Games = new();
+    public static Dictionary<string, (WBUtil.GameType, ulong)?> Games = new();
     private static bool WarnedAboutParams { get; set; }
 
     public static bool WarnAboutParams()
@@ -58,12 +59,13 @@ If DSMapStudio does not yet support this game or regulation version, an experime
         WarnedAboutParams = true;
         return true;
     }
+
     private class WPARAMRow
     {
         public int ID { get; set; }
         public string Name { get; set; }
         public string ParamdexName { get; set; }
-        public Dictionary<string, string> Fields { get; } = new ();
+        public Dictionary<string, string> Fields { get; } = new();
     }
 
     /// <summary>
@@ -80,15 +82,50 @@ If DSMapStudio does not yet support this game or regulation version, an experime
     }
 
     // Dictionary housing paramdefs for batched usage.
-    private static Dictionary<WBUtil.GameType, Dictionary<string, PARAMDEF>> ParamdefStorage { get; } = new();
+    private static ConcurrentDictionary<WBUtil.GameType, ConcurrentDictionary<string, PARAMDEF>> ParamdefStorage
+    {
+        get;
+    } = new();
 
     // Dictionary housing param row names for batched usage.
-    private static Dictionary<WBUtil.GameType, Dictionary<string, Dictionary<int, string>>>
+    private static
+        ConcurrentDictionary<WBUtil.GameType, ConcurrentDictionary<string, ConcurrentDictionary<int, string>>>
         NameStorage { get; } = new();
 
-    private static Dictionary<string, string>? _ac6TentativeParamTypes;
+    private static Dictionary<string, string> _ac6TentativeParamTypes = new();
 
     public override string Name => "PARAM";
+
+    public override bool HasPreprocess => true;
+
+    public List<string> PreprocessedPaths = new();
+
+    public static string GetGamePath(string path)
+    {
+        string dirPath = Path.GetDirectoryName(path)!;
+        string? xmlPath = WBUtil.TraverseFindFile("_witchy-bnd4.xml", path);
+
+        return xmlPath != null ? Path.GetDirectoryName(xmlPath)! : dirPath;
+    }
+    public override void Preprocess(string srcPath)
+    {
+        string gamePath = GetGamePath(srcPath);
+        if (PreprocessedPaths.Contains(gamePath)) return;
+
+        if (!Is(srcPath, null, out ISoulsFile? _)) return;
+
+        (WBUtil.GameType, ulong)? gameInfo;
+        gameInfo = Games.TryGetValue(gamePath, out gameInfo) ? gameInfo : WBUtil.DetermineParamdexGame(gamePath, Configuration.Args.Passive);
+
+        Games[gamePath] = gameInfo;
+
+        if (Games[gamePath] == null)
+            throw new InvalidDataException("Could not locate game type of PARAM.");
+
+        PopulateParamdex(Games[gamePath]!.Value.Item1);
+
+        PreprocessedPaths.Add(gamePath);
+    }
 
     public override bool Is(string path, byte[]? _, out ISoulsFile? file)
     {
@@ -118,24 +155,24 @@ If DSMapStudio does not yet support this game or regulation version, an experime
     {
         var paramdexPath = WBUtil.GetParamdexPath();
         var zipPath = $@"{WBUtil.GetExeLocation()}\Assets\Paramdex.zip";
-        if (File.Exists(zipPath))
-        {
-            PromptPlus.Error.WriteLine("");
-            PromptPlus.Error.WriteLine("Located Paramdex archive; replacing existing Paramdex.");
-            if (Directory.Exists(paramdexPath))
-                Directory.Delete(paramdexPath, true);
-            using (ZipArchive archive = ZipFile.OpenRead(zipPath))
-            {
-                if (!Directory.Exists(paramdexPath))
-                    Directory.CreateDirectory(paramdexPath);
-                PromptPlus.Error.WriteLine("Extracting Paramdex archive. This is a one-time operation.");
-                archive.ExtractToDirectory(paramdexPath, true);
-            }
 
-            File.Delete(zipPath);
-            PromptPlus.Error.WriteLine("Successfully extracted Paramdex archive.");
-            PromptPlus.Error.WriteLine("");
+        if (!File.Exists(zipPath)) return;
+
+        PromptPlus.Error.WriteLine("");
+        PromptPlus.Error.WriteLine("Located Paramdex archive; replacing existing Paramdex.");
+        if (Directory.Exists(paramdexPath))
+            Directory.Delete(paramdexPath, true);
+        using (ZipArchive archive = ZipFile.OpenRead(zipPath))
+        {
+            if (!Directory.Exists(paramdexPath))
+                Directory.CreateDirectory(paramdexPath);
+            PromptPlus.Error.WriteLine("Extracting Paramdex archive. This is a one-time operation.");
+            archive.ExtractToDirectory(paramdexPath, true);
         }
+
+        File.Delete(zipPath);
+        PromptPlus.Error.WriteLine("Successfully extracted Paramdex archive.");
+        PromptPlus.Error.WriteLine("");
     }
 
     public static void PopulateParamdex(WBUtil.GameType game)
@@ -143,19 +180,9 @@ If DSMapStudio does not yet support this game or regulation version, an experime
         if (ParamdefStorage[game].Count > 0)
             return;
 
-        UnpackParamdex();
-
         var paramdexPath = WBUtil.GetParamdexPath();
         if (!Directory.Exists(paramdexPath))
             throw new DirectoryNotFoundException("Could not locate Assets\\Paramdex folder.");
-
-        // Populate tentative types
-        if (game == WBUtil.GameType.AC6)
-        {
-            var lines = File.ReadAllLines($@"{paramdexPath}\AC6\Defs\TentativeParamType.csv").ToList();
-            lines.RemoveAt(0);
-            _ac6TentativeParamTypes = lines.ToDictionary(a => a.Split(",")[0], b => b.Split(",")[1]);
-        }
 
         var gameName = game.ToString();
         var paramdefPath = $@"{paramdexPath}\{gameName}\Defs";
@@ -210,16 +237,14 @@ If DSMapStudio does not yet support this game or regulation version, an experime
         if (!File.Exists(namePath))
         {
             // Write something to the storage so the population process isn't repeated.
-            NameStorage[game][paramName] = new Dictionary<int, string>
-            {
-                { -9000, string.Empty }
-            };
+            NameStorage[game][paramName] = new ConcurrentDictionary<int, string>();
+            NameStorage[game][paramName].TryAdd(-9000, string.Empty);
             // Quietly fail, it's just names after all.
             // Program.RegisterNotice($"Could not find names for {gameName} param {paramName} in Paramdex.");
             return;
         }
 
-        var nameDict = new Dictionary<int, string>();
+        var nameDict = new ConcurrentDictionary<int, string>();
         var names = File.ReadAllLines(namePath);
         foreach (string name in names)
         {
@@ -341,10 +366,22 @@ If DSMapStudio does not yet support this game or regulation version, an experime
 
     public WPARAM()
     {
+        UnpackParamdex();
+
+        // Populate AC6 tentative types
+        var tentativeTypePath = $@"{WBUtil.GetParamdexPath()}\AC6\Defs\TentativeParamType.csv";
+
+        if (File.Exists(tentativeTypePath))
+        {
+            var lines = File.ReadAllLines($@"{WBUtil.GetParamdexPath()}\AC6\Defs\TentativeParamType.csv").ToList();
+            lines.RemoveAt(0);
+            _ac6TentativeParamTypes = lines.ToDictionary(a => a.Split(",")[0], b => b.Split(",")[1]);
+        }
+
         foreach (WBUtil.GameType game in (WBUtil.GameType[])Enum.GetValues(typeof(WBUtil.GameType)))
         {
-            ParamdefStorage[game] = new Dictionary<string, PARAMDEF>();
-            NameStorage[game] = new Dictionary<string, Dictionary<int, string>>();
+            ParamdefStorage[game] = new();
+            NameStorage[game] = new();
         }
     }
 }

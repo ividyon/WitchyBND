@@ -253,12 +253,13 @@ public class XMLTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var file));
 
-            string destPath = parser.GetUnpackDestPath(path);
-            parser.Games[Path.GetDirectoryName(destPath)] = (Enum.Parse<WBUtil.GameType>(gameName), 0);
+            WPARAM.Games[WPARAM.GetGamePath(path)] = (Enum.Parse<WBUtil.GameType>(gameName), 0);
+            parser.Preprocess(path);
             parser.Unpack(path, file);
 
             File.Delete(path);
 
+            string destPath = parser.GetUnpackDestPath(path);
             Assert.That(File.Exists(destPath));
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));

@@ -28,30 +28,30 @@ public class RegulationTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var outFile));
 
-                parser.Unpack(path, outFile);
-                string? destPath = parser.GetUnpackDestDir(path);
+            parser.Unpack(path, outFile);
+            string? destPath = parser.GetUnpackDestDir(path);
 
 
-                var xml = WFileParser.LoadXml(parser.GetBinderXmlPath(destPath, "bnd3"));
-                XElement? gameElement = xml.Element("game");
-                if (gameElement == null) throw new XmlException("XML has no Game element");
-                TryParse(xml.Element("game")!.Value, out WBUtil.GameType game);
+            var xml = WFileParser.LoadXml(parser.GetBinderXmlPath(destPath, "bnd3"));
+            XElement? gameElement = xml.Element("game");
+            if (gameElement == null) throw new XmlException("XML has no Game element");
+            TryParse(xml.Element("game")!.Value, out WBUtil.GameType game);
 
-                string fullPath = Path.GetDirectoryName(Path.GetFullPath(path))!.TrimEnd(Path.DirectorySeparatorChar);
-                string gameName = fullPath.Split(Path.DirectorySeparatorChar).Last();
-                var dirGame = Parse<WBUtil.GameType>(gameName);
+            string fullPath = Path.GetDirectoryName(Path.GetFullPath(path))!.TrimEnd(Path.DirectorySeparatorChar);
+            string gameName = fullPath.Split(Path.DirectorySeparatorChar).Last();
+            var dirGame = Parse<WBUtil.GameType>(gameName);
 
-                Assert.That(game, Is.EqualTo(dirGame),
-                    $"XML game {game.ToString()} was not directory game {dirGame.ToString()}");
+            Assert.That(game, Is.EqualTo(dirGame),
+                $"XML game {game.ToString()} was not directory game {dirGame.ToString()}");
 
-                File.Delete(path);
+            File.Delete(path);
 
-                Assert.That(Directory.Exists(destPath));
-                Assert.That(parser.ExistsUnpacked(destPath));
-                Assert.That(parser.IsUnpacked(destPath));
-                parser.Repack(destPath);
+            Assert.That(Directory.Exists(destPath));
+            Assert.That(parser.ExistsUnpacked(destPath));
+            Assert.That(parser.IsUnpacked(destPath));
+            parser.Repack(destPath);
 
-                Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)), Is.True);
+            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)), Is.True);
         }
     }
 
@@ -73,25 +73,26 @@ public class RegulationTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var outFile));
 
-                parser.Unpack(path, outFile);
-                string? destPath = parser.GetUnpackDestDir(path);
+            parser.Unpack(path, outFile);
+            string? destPath = parser.GetUnpackDestDir(path);
 
-                var xml = WFileParser.LoadXml(parser.GetBinderXmlPath(destPath, "bnd4"));
-                XElement? gameElement = xml.Element("game");
-                if (gameElement == null) throw new XmlException("XML has no Game element");
-                TryParse(xml.Element("game")!.Value, out WBUtil.GameType game);
+            var xml = WFileParser.LoadXml(parser.GetBinderXmlPath(destPath, "bnd4"));
+            XElement? gameElement = xml.Element("game");
+            if (gameElement == null) throw new XmlException("XML has no Game element");
+            TryParse(xml.Element("game")!.Value, out WBUtil.GameType game);
 
-                Assert.That(game, Is.EqualTo(dirGame),
-                    $"XML game {game.ToString()} was not directory game {dirGame.ToString()}");
+            Assert.That(game, Is.EqualTo(dirGame),
+                $"XML game {game.ToString()} was not directory game {dirGame.ToString()}");
 
-                File.Delete(path);
+            File.Delete(path);
 
-                Assert.That(Directory.Exists(destPath));
-                Assert.That(parser.ExistsUnpacked(destPath));
-                Assert.That(parser.IsUnpacked(destPath));
-                parser.Repack(destPath);
+            Assert.That(Directory.Exists(destPath));
+            Assert.That(parser.ExistsUnpacked(destPath));
+            Assert.That(parser.IsUnpacked(destPath));
+            parser.Preprocess(destPath);
+            parser.Repack(destPath);
 
-                Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)), Is.True);
+            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)), Is.True);
         }
     }
 

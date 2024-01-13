@@ -170,10 +170,20 @@ public static class ParseMode
             }
         }
 
+        IEnumerable<string> pathsList = paths.ToList();
+
+        foreach (WFileParser parser in Parsers.Where(p => p.HasPreprocess))
+        {
+            foreach (string path in pathsList)
+            {
+                parser.Preprocess(path);
+            }
+        }
+
         if (Configuration.Parallel)
-            Parallel.ForEach(paths, Callback);
+            Parallel.ForEach(pathsList, Callback);
         else
-            paths.ToList().ForEach(Callback);
+            pathsList.ToList().ForEach(Callback);
     }
 
     static ParseMode()

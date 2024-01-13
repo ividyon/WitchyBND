@@ -25,15 +25,8 @@ public partial class WPARAM
             Is(srcPath, null, out file);
         }
 
-        string dirPath = Path.GetDirectoryName(srcPath);
-
-        if (!Games.ContainsKey(dirPath))
-            Games[dirPath] = WBUtil.DetermineParamdexGame(dirPath, Configuration.Args.Passive);
-
-        if (!Games.ContainsKey(dirPath) || Games[dirPath] == null)
-            throw new InvalidDataException("Could not locate game type of PARAM.");
-
-        var gameInfo = Games[dirPath]!.Value;
+        string gamePath = GetGamePath(srcPath);
+        var gameInfo = Games[gamePath]!.Value;
         var game = gameInfo.Item1;
         var regVer = gameInfo.Item2;
 
@@ -43,8 +36,6 @@ public partial class WPARAM
 
         // Fixed cell style for now.
         CellStyle cellStyle = CellStyle.Attribute;
-
-        PopulateParamdex(game);
 
         // Temporary solution to handle AC6 paramdefs without paramtype.
         if (game == WBUtil.GameType.AC6 && string.IsNullOrWhiteSpace(paramTypeToParamdef) &&
