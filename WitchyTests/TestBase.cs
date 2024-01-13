@@ -41,8 +41,8 @@ public class TestBase
     public void Init()
     {
         Configuration.Args.Location = null;
-        if (Directory.Exists("./Results"))
-            Directory.Delete("./Results", true);
+        if (Directory.Exists(Path.Combine(TestContext.CurrentContext.TestDirectory, "Results")))
+            Directory.Delete(Path.Combine(TestContext.CurrentContext.TestDirectory, "Results"), true);
     }
 
     protected void SetLocation(string path)
@@ -73,7 +73,7 @@ public class TestBase
     {
         var newPath = path.Replace("Samples", "Results");
         Directory.CreateDirectory(Path.GetDirectoryName(newPath)!);
-        File.Copy(path, newPath);
+        File.Copy(path, newPath, true);
         return newPath;
     }
 
