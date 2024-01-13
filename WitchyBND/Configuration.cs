@@ -11,6 +11,17 @@ public static class Configuration
 {
     public static bool IsTest { get; set; }
 
+    public static bool IsDebug
+    {
+        get
+        {
+#if (DEBUG)
+            return true;
+#endif
+            return false;
+        }
+    }
+
     public class WitchyConfigValues
     {
         public bool Bnd { get; set; }
@@ -20,6 +31,7 @@ public static class Configuration
         public ushort EndDelay { get; set; }
         public bool PauseOnError { get; set; }
 
+        public bool Parallel { get; set; }
         public bool Expert { get; set; }
     }
 
@@ -31,7 +43,7 @@ public static class Configuration
 
         public bool Passive { get; set; }
 
-        public string Location { get; set; }
+        public string? Location { get; set; }
     }
 
     private static WitchyConfigValues _values;
@@ -80,6 +92,12 @@ public static class Configuration
         set => _values.Expert = value;
     }
 
+    public static bool Parallel
+    {
+        get => _values.Parallel;
+        set => _values.Parallel = value;
+    }
+
     public static void ReplaceConfig(IConfigurationRoot config)
     {
         _values = config.Get<WitchyConfigValues>();
@@ -98,7 +116,8 @@ public static class Configuration
             .AddJsonFile(GetConfigLocation("appsettings.json"), true)
             .AddJsonFile(GetConfigLocation("appsettings.user.json"), true)
             .AddJsonFile(GetConfigLocation("appsettings.override.json"), true)
-            .Build();;
+            .Build();
+        ;
         _values = config.Get<WitchyConfigValues>();
     }
 

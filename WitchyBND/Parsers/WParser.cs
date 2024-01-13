@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Enumeration;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
@@ -114,7 +116,22 @@ public abstract class WSingleFileParser : WFileParser
 
 public abstract class WFolderParser : WFileParser
 {
+    private static bool WarnedAboutKrak { get; set; }
+
     public override WFileParserVerb Verb => WFileParserVerb.Unpack;
+
+
+    public static void WarnAboutKrak()
+    {
+        if (WarnedAboutKrak) return;
+
+        Program.RegisterNotice(@"DCX compression is set to DCX_KRAK or DCX_KRAK_MAX.
+Kraken compression is extremely slow - taking up almost 100% of repacking time - and recommended only for for the final repack before releasing something to the public.
+During development, you may wish to switch to a faster compression such as: DCX_DFLT_11000_44_9_15
+Simply replace the compression level in the Witchy XML to this value.");
+
+        WarnedAboutKrak = true;
+    }
 
     public virtual string GetUnpackDestDir(string srcPath)
     {
@@ -194,14 +211,18 @@ public abstract class WBinderParser : WFolderParser
 {
     protected static XElement WriteBinderFiles(IBinder bnd, string destDirPath, string root)
     {
+        var bag = new ConcurrentBag<XElement>();
+
         var files = new XElement("files");
-        var pathCounts = new Dictionary<string, int>();
-        var resultingPaths = new List<string>();
+        var pathCounts = new ConcurrentDictionary<string, int>();
+        var resultingPaths = new ConcurrentStack<string>();
 
-        for (int i = 0; i < bnd.Files.Count; i++)
+        void ParallelCallback(BinderFile file, ParallelLoopState state, long i)
         {
-            BinderFile file = bnd.Files[i];
+            Callback(file, i);
+        }
 
+        void Callback(BinderFile file, long i) {
             string path;
             if (Binder.HasNames(bnd.Format))
             {
@@ -246,15 +267,41 @@ public abstract class WBinderParser : WFolderParser
             string destPath =
                 $@"{destDirPath}\{Path.GetDirectoryName(path)}\{Path.GetFileNameWithoutExtension(path)}{suffix}{Path.GetExtension(path)}";
             Directory.CreateDirectory(Path.GetDirectoryName(destPath));
-            resultingPaths.Add(destPath);
+            resultingPaths.Push(destPath);
             File.WriteAllBytes(destPath, bytes);
 
-            files.Add(fileElement);
+            bag.Add(fileElement);
         }
+
+        if (Configuration.Parallel)
+            Parallel.ForEach(bnd.Files, ParallelCallback);
+        else
+        {
+            for (var i = 0; i < bnd.Files.Count; i++)
+            {
+                Callback(bnd.Files[i], i);
+            }
+        }
+
+        if (Configuration.Parallel)
+        {
+            if (Binder.HasIDs(bnd.Format))
+            {
+                files.Add(bag.OrderBy(el => el.Element("id")!.Value));
+            }
+            else if (Binder.HasNames(bnd.Format))
+            {
+                files.Add(bag.OrderBy(el => el.Element("path")!.Value));
+            }
+            else
+                files.Add(bag);
+        }
+        else
+            files.Add(bag);
 
         if (Configuration.Recursive)
         {
-            ParseMode.ParseFiles(resultingPaths, true);
+            ParseMode.ParseFiles(resultingPaths.ToList(), true);
         }
 
         return files;
@@ -262,8 +309,9 @@ public abstract class WBinderParser : WFolderParser
 
     protected static void ReadBinderFiles(IBinder bnd, XElement filesElement, string srcDirPath, string root)
     {
-        foreach (XElement file in filesElement.Elements("file"))
-        {
+        var bag = new ConcurrentBag<BinderFile>();
+
+        void Callback(XElement file) {
             if (file.Element("path") == null)
                 throw new FriendlyException("File node missing path tag.");
 
@@ -291,11 +339,22 @@ public abstract class WBinderParser : WFolderParser
                 throw new FriendlyException($"File not found: {inPath}");
 
             byte[] bytes = File.ReadAllBytes(inPath);
-            bnd.Files.Add(new BinderFile(flags, id, name, bytes)
+            bag.Add(new BinderFile(flags, id, name, bytes)
             {
                 CompressionType = compressionType
             });
         }
+        if (Configuration.Parallel)
+            Parallel.ForEach(filesElement.Elements("file"), Callback);
+        else
+        {
+            foreach (XElement element in filesElement.Elements("file"))
+            {
+                Callback(element);
+            }
+        }
+
+        bnd.Files = bag.ToList();
     }
 }
 

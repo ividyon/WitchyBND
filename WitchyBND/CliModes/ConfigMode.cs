@@ -16,6 +16,7 @@ public static class ConfigMode
         ToggleDcx,
         ToggleRecursive,
         ToggleParamDefaultValues,
+        ToggleParallel,
         ConfigureDelay,
         TogglePauseOnError,
         Windows,
@@ -51,6 +52,11 @@ public static class ConfigMode
             {
                 Type = ConfigMenuItemType.ToggleRecursive, Label = Configuration.Recursive ? "Toggle \"Recursive binder processing\" (Enabled)" : "Toggle \"Recursive binder processing\" (Disabled)",
                 Description = "Enable to recursively attempt to process any file inside unpacked binders. Very performance-intensive."
+            },
+            new ConfigMenuItem
+            {
+                Type = ConfigMenuItemType.ToggleParallel, Label = Configuration.Parallel ? "Toggle \"Parallel processing\" (Enabled)" : "Toggle \"Parallel processing\" (Disabled)",
+                Description = "Enable to perform WitchyBND operations in a parallelized, multi-threaded manner."
             },
             new ConfigMenuItem
             {
@@ -124,6 +130,14 @@ Press any key to continue to the configuration screen...");
                     break;
                 case ConfigMenuItemType.ToggleRecursive:
                     Configuration.Recursive = !Configuration.Recursive;
+                    Configuration.UpdateConfiguration();
+                    PromptPlus.WriteLine("Successfully updated the configuration.");
+                    PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);
+                    PromptPlus.ReadKey();
+                    PromptPlus.Clear();
+                    break;
+                case ConfigMenuItemType.ToggleParallel:
+                    Configuration.Parallel = !Configuration.Parallel;
                     Configuration.UpdateConfiguration();
                     PromptPlus.WriteLine("Successfully updated the configuration.");
                     PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);

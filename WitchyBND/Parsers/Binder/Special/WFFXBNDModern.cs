@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using PPlus;
 using SoulsFormats;
 using WitchyLib;
 
@@ -65,7 +68,7 @@ public class WFFXBNDModern : WBinderParser
         var resDir = $@"{destDir}\resource";
         Directory.CreateDirectory(resDir);
 
-        foreach (BinderFile bndFile in bnd.Files)
+        void Callback(BinderFile bndFile)
         {
             byte[] bytes = bndFile.Bytes;
             string fileTargetDir;
@@ -97,6 +100,11 @@ public class WFFXBNDModern : WBinderParser
             }
             File.WriteAllBytes($@"{fileTargetDir}/{fileTargetName}", bytes);
         }
+
+        if (Configuration.Parallel)
+            Parallel.ForEach(bnd.Files, Callback);
+        else
+            bnd.Files.ForEach(Callback);
     }
 
     public override void Repack(string srcPath)
@@ -105,8 +113,11 @@ public class WFFXBNDModern : WBinderParser
 
         XElement xml = LoadXml(GetBinderXmlPath(srcPath));
 
-        Enum.TryParse(xml.Element("compression")?.Value ?? "None", out DCX.Type compression);
+        DCX.Type compression = Enum.Parse<DCX.Type>(xml.Element("compression")?.Value ?? "None");
         bnd.Compression = compression;
+
+        if (compression is DCX.Type.DCX_KRAK or DCX.Type.DCX_KRAK_MAX)
+            WarnAboutKrak();
 
         bnd.Version = xml.Element("version")!.Value;
         bnd.Format = (Binder.Format)Enum.Parse(typeof(Binder.Format), xml.Element("format")!.Value);
@@ -124,11 +135,11 @@ public class WFFXBNDModern : WBinderParser
         var animDir = $@"{srcPath}\animation";
         var resDir = $@"{srcPath}\resource";
 
-        var effectPaths = Directory.GetFiles(effectDir, "*.fxr").OrderBy(Path.GetFileName).ToList();
-        var texturePaths = Directory.GetFiles(textureDir, "*.dds").OrderBy(Path.GetFileName).ToList();
-        var modelPaths = Directory.GetFiles(modelDir, "*.flver").OrderBy(Path.GetFileName).ToList();
-        var animPaths = Directory.GetFiles(animDir, "*.anibnd").OrderBy(Path.GetFileName).ToList();
-        var resPaths = Directory.GetFiles(resDir, "*.ffxreslist").OrderBy(Path.GetFileName).ToList();
+        List<string> effectPaths = Directory.GetFiles(effectDir, "*.fxr").OrderBy(Path.GetFileName).ToList();
+        List<string> texturePaths = Directory.GetFiles(textureDir, "*.dds").OrderBy(Path.GetFileName).ToList();
+        List<string> modelPaths = Directory.GetFiles(modelDir, "*.flver").OrderBy(Path.GetFileName).ToList();
+        List<string> animPaths = Directory.GetFiles(animDir, "*.anibnd").OrderBy(Path.GetFileName).ToList();
+        List<string> resPaths = Directory.GetFiles(resDir, "*.ffxreslist").OrderBy(Path.GetFileName).ToList();
 
         // Sanity check fxr and reslist
         // Every FXR must have a matching reslist with the exact same name and vice versa
@@ -139,8 +150,8 @@ public class WFFXBNDModern : WBinderParser
             var resNames = new SortedSet<string>(resPaths.Select(p => Path.GetFileNameWithoutExtension(p)));
             if (!effectNames.SetEquals(resNames))
             {
-                var diff1 = effectNames.Except(resNames).ToArray();
-                var diff2 = effectNames.Except(resNames).ToArray();
+                string[] diff1 = effectNames.Except(resNames).ToArray();
+                string[] diff2 = effectNames.Except(resNames).ToArray();
                 if (diff1.Any())
                 {
                     throw new Exception($"Following FXRs are missing reslists: {string.Join(", ", diff1)}");
@@ -154,81 +165,148 @@ public class WFFXBNDModern : WBinderParser
 
         // Write files
 
-        var rootPath = @"N:\GR\data\INTERROOT_win64\sfx\";
+        ConcurrentBag<BinderFile> bag = new();
 
-        for (int i = 0; i < effectPaths.Count; i++)
+        const string rootPath = @"N:\GR\data\INTERROOT_win64\sfx\";
+
+        void effectCallback()
         {
-            var filePath = effectPaths[i];
-            var fileName = Path.GetFileName(filePath);
-            var bytes = File.ReadAllBytes(filePath);
-            var file = new BinderFile(Binder.FileFlags.Flag1, i, $@"{rootPath}\effect\{fileName}",
-                bytes);
-            bnd.Files.Add(file);
-        }
-
-        for (int i = 0; i < texturePaths.Count; i++)
-        {
-            var filePath = texturePaths[i];
-            var fileName = Path.GetFileName(filePath);
-            var bytes = File.ReadAllBytes(filePath);
-            var tpf = new TPF();
-
-            tpf.Compression = DCX.Type.None;
-            tpf.Encoding = 0x01;
-            tpf.Flag2 = 0x03;
-            tpf.Platform = TPF.TPFPlatform.PC;
-
-            var tex = new TPF.Texture();
-            tex.Name = Path.GetFileNameWithoutExtension(fileName).Trim();
-            tex.Format = 0;
-            if (fileName.EndsWith("_m"))
+            void inEffectCallback(string path)
             {
-                tex.Format = 103;
+                var i = effectPaths!.IndexOf(path);
+
+                var filePath = effectPaths[i];
+                var fileName = Path.GetFileName(filePath);
+                var bytes = File.ReadAllBytes(filePath);
+                var file = new BinderFile(Binder.FileFlags.Flag1, i, $@"{rootPath}\effect\{fileName}",
+                    bytes);
+                bag.Add(file);
             }
-            else if (fileName.EndsWith("_n"))
+
+            if (Configuration.Parallel)
+                Parallel.ForEach(effectPaths, inEffectCallback);
+            else
+                effectPaths.ForEach(inEffectCallback);
+        }
+
+        void textureCallback()
+        {
+            void inTextureCallback(string path)
             {
-                tex.Format = 106;
+                var i = texturePaths!.IndexOf(path);
+
+                var filePath = texturePaths[i];
+                var fileName = Path.GetFileName(filePath);
+                var bytes = File.ReadAllBytes(filePath);
+                var tpf = new TPF();
+
+                tpf.Compression = DCX.Type.None;
+                tpf.Encoding = 0x01;
+                tpf.Flag2 = 0x03;
+                tpf.Platform = TPF.TPFPlatform.PC;
+
+                var tex = new TPF.Texture();
+                tex.Name = Path.GetFileNameWithoutExtension(fileName).Trim();
+                tex.Format = 0;
+                if (fileName.EndsWith("_m"))
+                {
+                    tex.Format = 103;
+                }
+                else if (fileName.EndsWith("_n"))
+                {
+                    tex.Format = 106;
+                }
+                tex.Bytes = bytes;
+
+                tpf.Textures.Add(tex);
+
+                bytes = tpf.Write();
+
+                var file = new BinderFile(Binder.FileFlags.Flag1, 100000 + i, $@"{rootPath}\tex\{Path.ChangeExtension(fileName, "tpf")}",
+                    bytes);
+                bag.Add(file);
             }
-            tex.Bytes = bytes;
 
-            tpf.Textures.Add(tex);
-
-            bytes = tpf.Write();
-
-            var file = new BinderFile(Binder.FileFlags.Flag1, 100000 + i, $@"{rootPath}\tex\{Path.ChangeExtension(fileName, "tpf")}",
-                bytes);
-            bnd.Files.Add(file);
+            if (Configuration.Parallel)
+                Parallel.ForEach(texturePaths, inTextureCallback);
+            else
+                texturePaths.ForEach(inTextureCallback);
         }
 
-        for (int i = 0; i < modelPaths.Count; i++)
+        void modelCallback()
         {
-            var filePath = modelPaths[i];
-            var fileName = Path.GetFileName(filePath);
-            var bytes = File.ReadAllBytes(filePath);
-            var file = new BinderFile(Binder.FileFlags.Flag1, 200000 + i, $@"{rootPath}\model\{fileName}",
-                bytes);
-            bnd.Files.Add(file);
+            void inModelCallback(string path)
+            {
+                var i = modelPaths!.IndexOf(path);
+
+                var filePath = modelPaths[i];
+                var fileName = Path.GetFileName(filePath);
+                var bytes = File.ReadAllBytes(filePath);
+                var file = new BinderFile(Binder.FileFlags.Flag1, 200000 + i, $@"{rootPath}\model\{fileName}",
+                    bytes);
+                bag.Add(file);
+            }
+
+            if (Configuration.Parallel)
+                Parallel.ForEach(modelPaths, inModelCallback);
+            else
+                modelPaths.ForEach(inModelCallback);
         }
 
-        for (int i = 0; i < animPaths.Count; i++)
+        void animCallback()
         {
-            var filePath = animPaths[i];
-            var fileName = Path.GetFileName(filePath);
-            var bytes = File.ReadAllBytes(filePath);
-            var file = new BinderFile(Binder.FileFlags.Flag1, 300000 + i, $@"{rootPath}\hkx\{fileName}",
-                bytes);
-            bnd.Files.Add(file);
+            void inAnimCallback(string path)
+            {
+                var i = animPaths!.IndexOf(path);
+
+                var filePath = animPaths[i];
+                var fileName = Path.GetFileName(filePath);
+                var bytes = File.ReadAllBytes(filePath);
+                var file = new BinderFile(Binder.FileFlags.Flag1, 300000 + i, $@"{rootPath}\hkx\{fileName}",
+                    bytes);
+                bag.Add(file);
+            }
+
+            if (Configuration.Parallel)
+                Parallel.ForEach(animPaths, inAnimCallback);
+            else
+                animPaths.ForEach(inAnimCallback);
         }
 
-        for (int i = 0; i < resPaths.Count; i++)
+        void resCallback()
         {
-            var filePath = resPaths[i];
-            var fileName = Path.GetFileName(filePath);
-            var bytes = File.ReadAllBytes(filePath);
-            var file = new BinderFile(Binder.FileFlags.Flag1, 400000 + i, $@"{rootPath}\ResourceList\{fileName}",
-                bytes);
-            bnd.Files.Add(file);
+            void inResCallback(string path)
+            {
+                var i = resPaths!.IndexOf(path);
+
+                var filePath = resPaths[i];
+                var fileName = Path.GetFileName(filePath);
+                var bytes = File.ReadAllBytes(filePath);
+                var file = new BinderFile(Binder.FileFlags.Flag1, 400000 + i, $@"{rootPath}\ResourceList\{fileName}",
+                    bytes);
+                bag.Add(file);
+            }
+
+            if (Configuration.Parallel)
+                Parallel.ForEach(resPaths, inResCallback);
+            else
+                resPaths.ForEach(inResCallback);
         }
+
+        if (Configuration.Parallel)
+        {
+            Parallel.Invoke(effectCallback, textureCallback, modelCallback, animCallback, resCallback);
+        }
+        else
+        {
+            effectCallback();
+            textureCallback();
+            modelCallback();
+            animCallback();
+            resCallback();
+        }
+
+        bnd.Files = bag.OrderBy(f => f.ID).ToList();
 
         string destPath = GetRepackDestPath(srcPath, xml);
         WBUtil.Backup(destPath);

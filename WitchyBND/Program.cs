@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -87,7 +88,7 @@ public class WitchyError
 public class WitchyNotice
 {
     public string Message { get; set; }
-    public string Source { get; set; } = null;
+    public string Source { get; set; } = "Notice";
 
     public WitchyNotice(string message)
     {
@@ -112,6 +113,9 @@ public class CliOptions
 
     [Option('c', "recursive", HelpText = "Attempt to process files contained within binders recursively.")]
     public bool Recursive { get; set; }
+
+    [Option('e', "parallel", HelpText = "Runs operations parallelized")]
+    public bool Parallel { get; set; }
 
     [Option('p', "passive",
         HelpText =
@@ -152,8 +156,8 @@ public class CliOptions
 
 internal static class Program
 {
-    private static List<WitchyError> AccruedErrors;
-    private static List<WitchyNotice> AccruedNotices;
+    private static ConcurrentStack<WitchyError> AccruedErrors;
+    private static ConcurrentStack<WitchyNotice> AccruedNotices;
     public static int ProcessedItems = 0;
 
     [STAThread]
@@ -169,10 +173,11 @@ internal static class Program
             // with.AutoHelp = false;
             // with.AutoVersion = false;
         });
+
         var parserResult = parser.ParseArguments<CliOptions>(args);
         parserResult.WithParsed(opt => {
-                // try
-                // {
+                try
+                {
                     // Override configuration
                     if (opt.Help)
                     {
@@ -198,6 +203,8 @@ internal static class Program
                         Configuration.ParamDefaultValues = opt.ParamDefaultValues.Value;
                     if (opt.Recursive)
                         Configuration.Recursive = opt.Recursive;
+                    if (opt.Parallel)
+                        Configuration.Parallel = opt.Parallel;
 
                     // Arg-only configuration
                     if (opt.RepackOnly)
@@ -253,7 +260,67 @@ internal static class Program
                     {
                         case CliMode.Parse:
                             DisplayConfiguration();
+
+                            Stopwatch watch = new Stopwatch();
+
+                            watch.Start();
                             ParseMode.CliParseMode(opt);
+                            watch.Stop();
+
+                            int pause = Configuration.EndDelay;
+                            if (Configuration.PauseOnError && AccruedErrors.Count > 0)
+                                pause = -1;
+                            var completedString = ProcessedItems == 1
+                                ? $"Operation completed on 1 item in {watch.Elapsed:hh\\:mm\\:ss}."
+                                : $"Operation completed on {ProcessedItems} items in {watch.Elapsed:hh\\:mm\\:ss}.";
+                            PromptPlus.WriteLine("");
+                            PromptPlus.WriteLine(string.Concat(Enumerable.Repeat("-", completedString.Length)));
+                            PromptPlus.WriteLine(completedString);
+                            if (ProcessedItems > 0)
+                            {
+                                if (AccruedErrors.Count > 0)
+                                {
+                                    PromptPlus.WriteLine("");
+                                    PromptPlus.SingleDash("Errors during operation");
+                                    foreach (WitchyError error in AccruedErrors)
+                                    {
+                                        PromptPlus.Error.WriteLine(
+                                            $"{error.Source}: {error.Message}".PromptPlusEscape());
+                                    }
+                                }
+
+                                if (AccruedNotices.Count > 0)
+                                {
+                                    PromptPlus.WriteLine("");
+                                    PromptPlus.SingleDash("Notices during operation");
+                                    foreach (WitchyNotice notice in AccruedNotices)
+                                    {
+                                        if (notice.Source != null)
+                                            PromptPlus.Error.WriteLine($"{notice.Source}: {notice.Message}"
+                                                .PromptPlusEscape());
+                                        else
+                                            PromptPlus.Error.WriteLine($"{notice.Message}".PromptPlusEscape());
+                                    }
+                                }
+                            }
+
+                            if (!Configuration.Args.Passive)
+                            {
+                                PromptPlus.WriteLine("");
+                                if (pause == -1)
+                                {
+                                    PromptPlus.WriteLine(Constants.PressAnyKey);
+                                    PromptPlus.ReadKey();
+                                    return;
+                                }
+
+                                if (pause > 0)
+                                {
+                                    PromptPlus.WriteLine(
+                                        $"Closing in {TimeSpan.FromMilliseconds(pause).TotalSeconds} second(s)...");
+                                    Thread.Sleep(pause);
+                                }
+                            }
                             break;
                         case CliMode.Config:
                             ConfigMode.CliConfigMode(opt);
@@ -261,64 +328,13 @@ internal static class Program
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
-                // }
-                // catch (Exception e)
-                // {
-                    // RegisterException(e);
-                // }
-
-                int pause = Configuration.EndDelay;
-                if (Configuration.PauseOnError && AccruedErrors.Count > 0)
-                    pause = -1;
-                var completedString = ProcessedItems == 1
-                    ? "Operation completed on 1 item."
-                    : $"Operation completed on {ProcessedItems} items.";
-                PromptPlus.WriteLine("");
-                PromptPlus.WriteLine(string.Concat(Enumerable.Repeat("-", completedString.Length)));
-                PromptPlus.WriteLine(completedString);
-                if (ProcessedItems > 0)
-                    if (AccruedErrors.Count > 0)
-                    {
-                        PromptPlus.WriteLine("");
-                        PromptPlus.SingleDash("Errors during operation");
-                        foreach (WitchyError error in AccruedErrors)
-                        {
-                            if (error.Source != null)
-                                PromptPlus.Error.WriteLine($"{error.Source}: {error.Message}".PromptPlusEscape());
-                            else
-                                PromptPlus.Error.WriteLine($"{error.Message}".PromptPlusEscape());
-                        }
-                    }
-
-                if (AccruedNotices.Count > 0)
-                {
-                    PromptPlus.WriteLine("");
-                    PromptPlus.SingleDash("Notices during operation");
-                    foreach (WitchyNotice notice in AccruedNotices)
-                    {
-                        if (notice.Source != null)
-                            PromptPlus.Error.WriteLine($"{notice.Source}: {notice.Message}".PromptPlusEscape());
-                        else
-                            PromptPlus.Error.WriteLine($"{notice.Message}".PromptPlusEscape());
-                    }
                 }
-
-                if (!Configuration.Args.Passive)
+                catch (Exception e)
                 {
-                    PromptPlus.WriteLine("");
-                    if (pause == -1)
-                    {
-                        PromptPlus.WriteLine(Constants.PressAnyKey);
-                        PromptPlus.ReadKey();
-                        return;
-                    }
+                    if (Configuration.IsTest || Configuration.IsDebug)
+                        throw;
 
-                    if (pause > 0)
-                    {
-                        PromptPlus.WriteLine(
-                            $"Closing in {TimeSpan.FromMilliseconds(pause).TotalSeconds} second(s)...");
-                        Thread.Sleep(pause);
-                    }
+                    RegisterException(e);
                 }
             })
             .WithNotParsed(errors => { DisplayHelp(parserResult, errors); });
@@ -332,7 +348,9 @@ internal static class Program
             { "DCX decompression only", Configuration.Dcx.ToString() },
             { "Store PARAM field default values", Configuration.ParamDefaultValues.ToString() },
             { "Recursive binder processing", Configuration.Recursive.ToString() },
+            { "Parallel processing", Configuration.Parallel.ToString() }
         };
+
         if (Configuration.Args.Passive)
             infoTable.Add("Passive", Configuration.Args.Passive.ToString());
         if (!string.IsNullOrEmpty(Configuration.Args.Location))
@@ -387,14 +405,9 @@ internal static class Program
 
     public static void RegisterNotice(WitchyNotice notice, bool write = true)
     {
-        AccruedNotices.Add(notice);
+        AccruedNotices.Push(notice);
         if (write)
-        {
-            if (notice.Source != null)
-                PromptPlus.Error.WriteLine($"{notice.Source}: {notice.Message}".PromptPlusEscape());
-            else
-                PromptPlus.Error.WriteLine(notice.Message.PromptPlusEscape());
-        }
+            PromptPlus.Error.WriteLine($"{notice.Source}: {notice.Message}".PromptPlusEscape());
     }
 
     public static void RegisterException(Exception e, string source = null)
@@ -421,7 +434,7 @@ internal static class Program
 
     public static void RegisterError(WitchyError error, bool write = true)
     {
-        AccruedErrors.Add(error);
+        AccruedErrors.Push(error);
         if (write)
         {
             if (error.Source != null)
@@ -436,7 +449,7 @@ internal static class Program
 
     static Program()
     {
-        AccruedErrors = new List<WitchyError>();
-        AccruedNotices = new List<WitchyNotice>();
+        AccruedErrors = new();
+        AccruedNotices = new();
     }
 }

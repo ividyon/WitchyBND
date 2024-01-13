@@ -3,10 +3,12 @@ using WitchyBND.Parsers;
 
 namespace WitchyTests;
 
-[TestFixture]
+[TestFixture(true, true)]
+[TestFixture(true, false)]
+[TestFixture(false, true)]
+[TestFixture(false, false)]
 public class BinderTests : TestBase
 {
-    [Test]
     public void DCX()
     {
         Configuration.Dcx = true;
@@ -17,42 +19,28 @@ public class BinderTests : TestBase
 
         foreach (string path in paths.Select(GetCopiedPath))
         {
+            SetLocation(path);
             // Unpack
 
             Assert.IsTrue(parser.Exists(path));
             Assert.IsTrue(parser.Is(path, null, out var outFile));
 
-            byte[] backup = {};
-            for (int i = 0; i < 2; i++)
-            {
-                if (i == 0)
-                {
-                    backup = File.ReadAllBytes(path);
-                    Configuration.Args.Location = null;
-                }
-                else
-                {
-                    File.WriteAllBytes(path, backup);
-                    Configuration.Args.Location = Path.Combine(Path.GetDirectoryName(path), "Target");
-                    Directory.CreateDirectory(Configuration.Args.Location);
-                }
-                parser.Unpack(path, outFile);
-                var destPath = parser.GetUnpackDestPath(path);
+            parser.Unpack(path, outFile);
+            var destPath = parser.GetUnpackDestPath(path);
 
-                Assert.IsTrue(File.Exists(destPath));
+            Assert.IsTrue(File.Exists(destPath));
 
-                File.Delete(path);
+            File.Delete(path);
 
-                // Repack
+            // Repack
 
-                Assert.IsTrue(parser.ExistsUnpacked(destPath));
-                Assert.IsTrue(parser.IsUnpacked(destPath));
+            Assert.IsTrue(parser.ExistsUnpacked(destPath));
+            Assert.IsTrue(parser.IsUnpacked(destPath));
 
-                parser.Repack(destPath);
+            parser.Repack(destPath);
 
-                var xml = WFileParser.LoadXml(parser.GetXmlPath(destPath, true));
-                Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml)));
-            }
+            var xml = WFileParser.LoadXml(parser.GetXmlPath(destPath, true));
+            Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml)));
         }
     }
 
@@ -64,40 +52,25 @@ public class BinderTests : TestBase
 
         foreach (string path in paths.Select(GetCopiedPath))
         {
+            SetLocation(path);
             // Unpack
             Assert.IsTrue(parser.Exists(path));
             Assert.IsTrue(parser.Is(path, null, out var outFile));
 
-            byte[] backup = {};
-            for (int i = 0; i < 2; i++)
-            {
-                if (i == 0)
-                {
-                    backup = File.ReadAllBytes(path);
-                    Configuration.Args.Location = null;
-                }
-                else
-                {
-                    File.WriteAllBytes(path, backup);
-                    Configuration.Args.Location = Path.Combine(Path.GetDirectoryName(path), "Target");
-                    Directory.CreateDirectory(Configuration.Args.Location);
-                }
+            parser.Unpack(path, outFile);
+            var destPath = parser.GetUnpackDestDir(path);
 
-                parser.Unpack(path, outFile);
-                var destPath = parser.GetUnpackDestDir(path);
+            Assert.IsTrue(Directory.Exists(destPath));
+            File.Delete(path);
 
-                Assert.IsTrue(Directory.Exists(destPath));
-                File.Delete(path);
+            // Repack
+            Assert.IsTrue(parser.ExistsUnpacked(destPath));
+            Assert.IsTrue(parser.IsUnpacked(destPath));
 
-                // Repack
-                Assert.IsTrue(parser.ExistsUnpacked(destPath));
-                Assert.IsTrue(parser.IsUnpacked(destPath));
+            parser.Repack(destPath);
 
-                parser.Repack(destPath);
-
-                var xml = WFileParser.LoadXml(parser.GetBinderXmlPath(destPath));
-                Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml)));
-            }
+            var xml = WFileParser.LoadXml(parser.GetBinderXmlPath(destPath));
+            Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml)));
         }
     }
 
@@ -110,37 +83,22 @@ public class BinderTests : TestBase
 
         foreach (string path in paths.Select(GetCopiedPath))
         {
-
+            SetLocation(path);
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var outFile));
 
-            byte[] backup = {};
-            for (int i = 0; i < 2; i++)
-            {
-                if (i == 0)
-                {
-                    backup = File.ReadAllBytes(path);
-                    Configuration.Args.Location = null;
-                }
-                else
-                {
-                    File.WriteAllBytes(path, backup);
-                    Configuration.Args.Location = Path.Combine(Path.GetDirectoryName(path), "Target");
-                    Directory.CreateDirectory(Configuration.Args.Location);
-                }
-                parser.Unpack(path, outFile);
-                string? destPath = parser.GetUnpackDestDir(path);
+            parser.Unpack(path, outFile);
+            string? destPath = parser.GetUnpackDestDir(path);
 
-                File.Delete(path);
+            File.Delete(path);
 
-                Assert.That(Directory.Exists(destPath));
-                Assert.That(parser.ExistsUnpacked(destPath));
-                Assert.That(parser.IsUnpacked(destPath));
-                parser.Repack(destPath);
+            Assert.That(Directory.Exists(destPath));
+            Assert.That(parser.ExistsUnpacked(destPath));
+            Assert.That(parser.IsUnpacked(destPath));
+            parser.Repack(destPath);
 
-                var xml = WFileParser.LoadXml(parser.GetBinderXmlPath(destPath));
-                Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml)));
-            }
+            var xml = WFileParser.LoadXml(parser.GetBinderXmlPath(destPath));
+            Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml)));
         }
     }
 
@@ -154,6 +112,7 @@ public class BinderTests : TestBase
         foreach (string oldPath in paths)
         {
             var path = oldPath.Replace("Samples", "Results");
+            SetLocation(path);
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
             File.Copy(oldPath, path);
             File.Copy(oldPath.Replace(".tpfbhd", ".tpfbdt"), path.Replace(".tpfbhd", ".tpfbdt"));
@@ -166,37 +125,23 @@ public class BinderTests : TestBase
                     Directory.Delete(parser.GetUnpackDestDir(path), true);
                     path = path.Replace(".tpfbhd", ".tpfbdt");
                 }
+
                 Assert.That(parser.Exists(path));
                 Assert.That(parser.Is(path, null, out var outFile));
-                byte[] backup = { };
-                for (int i = 0; i < 2; i++)
-                {
-                    if (i == 0)
-                    {
-                        backup = File.ReadAllBytes(path);
-                        Configuration.Args.Location = null;
-                    }
-                    else
-                    {
-                        File.WriteAllBytes(path, backup);
-                        Configuration.Args.Location = Path.Combine(Path.GetDirectoryName(path), "Target");
-                        Directory.CreateDirectory(Configuration.Args.Location);
-                    }
 
-                    parser.Unpack(path, outFile);
-                    string? destPath = parser.GetUnpackDestDir(path);
+                parser.Unpack(path, outFile);
+                string? destPath = parser.GetUnpackDestDir(path);
 
-                    File.Delete(path);
+                File.Delete(path);
 
-                    Assert.That(Directory.Exists(destPath));
-                    Assert.That(parser.ExistsUnpacked(destPath));
-                    Assert.That(parser.IsUnpacked(destPath));
-                    parser.Repack(destPath);
+                Assert.That(Directory.Exists(destPath));
+                Assert.That(parser.ExistsUnpacked(destPath));
+                Assert.That(parser.IsUnpacked(destPath));
+                parser.Repack(destPath);
 
-                    var xml = WFileParser.LoadXml(parser.GetBinderXmlPath(destPath));
-                    Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml, "bhd_filename")));
-                    Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml, "bdt_filename")));
-                }
+                var xml = WFileParser.LoadXml(parser.GetBinderXmlPath(destPath));
+                Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml, "bhd_filename")));
+                Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml, "bdt_filename")));
             }
         }
     }
@@ -218,42 +163,29 @@ public class BinderTests : TestBase
 
             for (int j = 0; j < 2; j++)
             {
+                SetLocation(path);
                 if (j == 1)
                 {
                     Directory.Delete(parser.GetUnpackDestDir(path), true);
                     path = path.Replace(".tpfbhd", ".tpfbdt");
                 }
+
                 Assert.That(parser.Exists(path));
                 Assert.That(parser.Is(path, null, out var outFile));
-                byte[] backup = { };
-                for (int i = 0; i < 2; i++)
-                {
-                    if (i == 0)
-                    {
-                        backup = File.ReadAllBytes(path);
-                        Configuration.Args.Location = null;
-                    }
-                    else
-                    {
-                        File.WriteAllBytes(path, backup);
-                        Configuration.Args.Location = Path.Combine(Path.GetDirectoryName(path), "Target");
-                        Directory.CreateDirectory(Configuration.Args.Location);
-                    }
 
-                    parser.Unpack(path, outFile);
-                    string? destPath = parser.GetUnpackDestDir(path);
+                parser.Unpack(path, outFile);
+                string? destPath = parser.GetUnpackDestDir(path);
 
-                    File.Delete(path);
+                File.Delete(path);
 
-                    Assert.That(Directory.Exists(destPath));
-                    Assert.That(parser.ExistsUnpacked(destPath));
-                    Assert.That(parser.IsUnpacked(destPath));
-                    parser.Repack(destPath);
+                Assert.That(Directory.Exists(destPath));
+                Assert.That(parser.ExistsUnpacked(destPath));
+                Assert.That(parser.IsUnpacked(destPath));
+                parser.Repack(destPath);
 
-                    var xml = WFileParser.LoadXml(parser.GetBinderXmlPath(destPath));
-                    Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml, "bhd_filename")));
-                    Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml, "bdt_filename")));
-                }
+                var xml = WFileParser.LoadXml(parser.GetBinderXmlPath(destPath));
+                Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml, "bhd_filename")));
+                Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml, "bdt_filename")));
             }
         }
     }
@@ -267,37 +199,26 @@ public class BinderTests : TestBase
 
         foreach (string path in paths.Select(GetCopiedPath))
         {
-
+            SetLocation(path);
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var outFile));
 
-            byte[] backup = {};
-            for (int i = 0; i < 2; i++)
-            {
-                if (i == 0)
-                {
-                    backup = File.ReadAllBytes(path);
-                    Configuration.Args.Location = null;
-                }
-                else
-                {
-                    File.WriteAllBytes(path, backup);
-                    Configuration.Args.Location = Path.Combine(Path.GetDirectoryName(path), "Target");
-                    Directory.CreateDirectory(Configuration.Args.Location);
-                }
-                parser.Unpack(path, outFile);
-                string? destPath = parser.GetUnpackDestDir(path);
+            parser.Unpack(path, outFile);
+            string? destPath = parser.GetUnpackDestDir(path);
 
-                File.Delete(path);
+            File.Delete(path);
 
-                Assert.That(Directory.Exists(destPath));
-                Assert.That(parser.ExistsUnpacked(destPath));
-                Assert.That(parser.IsUnpacked(destPath));
-                parser.Repack(destPath);
+            Assert.That(Directory.Exists(destPath));
+            Assert.That(parser.ExistsUnpacked(destPath));
+            Assert.That(parser.IsUnpacked(destPath));
+            parser.Repack(destPath);
 
-                var xml = WFileParser.LoadXml(parser.GetBinderXmlPath(destPath));
-                Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml)));
-            }
+            var xml = WFileParser.LoadXml(parser.GetBinderXmlPath(destPath));
+            Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml)));
         }
+    }
+
+    public BinderTests(bool a, bool b) : base(a, b)
+    {
     }
 }
