@@ -9,7 +9,6 @@ namespace WitchyBND.Parsers;
 
 public class WMTD : WXMLParser
 {
-
     public override string Name => "MTD";
 
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)
