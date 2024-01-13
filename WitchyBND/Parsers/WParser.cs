@@ -115,7 +115,22 @@ public abstract class WSingleFileParser : WFileParser
 
 public abstract class WFolderParser : WFileParser
 {
+    private static bool WarnedAboutKrak { get; set; }
+
     public override WFileParserVerb Verb => WFileParserVerb.Unpack;
+
+
+    public static void WarnAboutKrak()
+    {
+        if (WarnedAboutKrak) return;
+
+        Program.RegisterNotice(@"DCX compression is set to DCX_KRAK or DCX_KRAK_MAX.
+Kraken compression is extremely slow - taking up almost 100% of repacking time - and recommended only for for the final repack before releasing something to the public.
+During development, you may wish to switch to a faster compression such as: DCX_DFLT_11000_44_9_15
+Simply replace the compression level in the Witchy XML to this value.");
+
+        WarnedAboutKrak = true;
+    }
 
     public virtual string GetUnpackDestDir(string srcPath)
     {

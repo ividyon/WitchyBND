@@ -15,6 +15,10 @@ public class BinderTests : TestBase
 
         var parser = new WDCX();
 
+        void Callback(string path)
+        {
+
+        }
         foreach (string path in paths.Select(GetCopiedPath))
         {
             // Unpack

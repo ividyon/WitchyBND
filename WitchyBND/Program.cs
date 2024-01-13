@@ -87,7 +87,7 @@ public class WitchyError
 public class WitchyNotice
 {
     public string Message { get; set; }
-    public string Source { get; set; } = null;
+    public string Source { get; set; } = "Notice";
 
     public WitchyNotice(string message)
     {
@@ -169,10 +169,15 @@ internal static class Program
             // with.AutoHelp = false;
             // with.AutoVersion = false;
         });
+
+        // Set stopwatch
+        Stopwatch watch = new Stopwatch();
+        watch.Start();
+
         var parserResult = parser.ParseArguments<CliOptions>(args);
         parserResult.WithParsed(opt => {
-                // try
-                // {
+                try
+                {
                     // Override configuration
                     if (opt.Help)
                     {
@@ -261,22 +266,29 @@ internal static class Program
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
-                // }
-                // catch (Exception e)
-                // {
-                    // RegisterException(e);
-                // }
+                }
+                catch (Exception e)
+                {
+#if DEBUG
+                    throw;
+#else
+                        RegisterException(e);
+#endif
+                }
+
+                watch.Stop();
 
                 int pause = Configuration.EndDelay;
                 if (Configuration.PauseOnError && AccruedErrors.Count > 0)
                     pause = -1;
                 var completedString = ProcessedItems == 1
-                    ? "Operation completed on 1 item."
-                    : $"Operation completed on {ProcessedItems} items.";
+                    ? $"Operation completed on 1 item in {watch.Elapsed:hh\\:mm\\:ss}."
+                    : $"Operation completed on {ProcessedItems} items in {watch.Elapsed:hh\\:mm\\:ss}.";
                 PromptPlus.WriteLine("");
                 PromptPlus.WriteLine(string.Concat(Enumerable.Repeat("-", completedString.Length)));
                 PromptPlus.WriteLine(completedString);
                 if (ProcessedItems > 0)
+                {
                     if (AccruedErrors.Count > 0)
                     {
                         PromptPlus.WriteLine("");
@@ -290,16 +302,17 @@ internal static class Program
                         }
                     }
 
-                if (AccruedNotices.Count > 0)
-                {
-                    PromptPlus.WriteLine("");
-                    PromptPlus.SingleDash("Notices during operation");
-                    foreach (WitchyNotice notice in AccruedNotices)
+                    if (AccruedNotices.Count > 0)
                     {
-                        if (notice.Source != null)
-                            PromptPlus.Error.WriteLine($"{notice.Source}: {notice.Message}".PromptPlusEscape());
-                        else
-                            PromptPlus.Error.WriteLine($"{notice.Message}".PromptPlusEscape());
+                        PromptPlus.WriteLine("");
+                        PromptPlus.SingleDash("Notices during operation");
+                        foreach (WitchyNotice notice in AccruedNotices)
+                        {
+                            if (notice.Source != null)
+                                PromptPlus.Error.WriteLine($"{notice.Source}: {notice.Message}".PromptPlusEscape());
+                            else
+                                PromptPlus.Error.WriteLine($"{notice.Message}".PromptPlusEscape());
+                        }
                     }
                 }
 
@@ -391,12 +404,7 @@ internal static class Program
     {
         AccruedNotices.Add(notice);
         if (write)
-        {
-            if (notice.Source != null)
-                PromptPlus.Error.WriteLine($"{notice.Source}: {notice.Message}".PromptPlusEscape());
-            else
-                PromptPlus.Error.WriteLine(notice.Message.PromptPlusEscape());
-        }
+            PromptPlus.Error.WriteLine($"{notice.Source}: {notice.Message}".PromptPlusEscape());
     }
 
     public static void RegisterException(Exception e, string source = null)
