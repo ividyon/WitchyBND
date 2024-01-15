@@ -234,7 +234,7 @@ public static class WBUtil
 Format examples:
     ""10210005"" for Armored Core VI 1.02.1
     ""11001000"" for Elden Ring 1.10.1
-Enter 0, or leave blank, to use the latest available paramdef.");
+Enter 0, or press ESC, to use the latest available paramdef.");
                 var input = PromptPlus.Input("Input regulation version")
                     .AddValidators(PromptValidators.IsTypeULong())
                     .ValidateOnDemand()

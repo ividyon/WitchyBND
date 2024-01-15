@@ -7,7 +7,7 @@ public static class WitchyParam
 {
     public static bool FitsGameVersion(this PARAMDEF.Field field, ulong version)
     {
-        return field.FirstRegulationVersion <= version && (field.RemovedRegulationVersion == 0 ||
+        return version == 0 || field.FirstRegulationVersion <= version && (field.RemovedRegulationVersion == 0 ||
                                                            field.RemovedRegulationVersion > version);
     }
     public static List<PARAMDEF.Field> FilterByGameVersion(this List<PARAMDEF.Field> fields, ulong version)

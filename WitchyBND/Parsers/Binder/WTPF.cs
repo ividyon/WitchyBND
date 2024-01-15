@@ -108,9 +108,6 @@ public class WTPF : WFolderParser
         Enum.TryParse(xml.Element("compression")?.Value ?? "None", out DCX.Type compression);
         tpf.Compression = compression;
 
-        if (compression is DCX.Type.DCX_KRAK or DCX.Type.DCX_KRAK_MAX)
-            WarnAboutKrak();
-
         tpf.Encoding = Convert.ToByte(xml.Element("encoding").Value, 16);
         tpf.Flag2 = Convert.ToByte(xml.Element("flag2").Value, 16);
 
@@ -139,6 +136,8 @@ public class WTPF : WFolderParser
 
         string outPath = GetRepackDestPath(srcPath, xml);
         WBUtil.Backup(outPath);
+
+        WarnAboutKrak(compression, tpf.Textures.Count);
         try
         {
             tpf.TryWriteSoulsFile(outPath);

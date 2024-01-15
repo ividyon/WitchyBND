@@ -116,9 +116,6 @@ public class WFFXBNDModern : WBinderParser
         DCX.Type compression = Enum.Parse<DCX.Type>(xml.Element("compression")?.Value ?? "None");
         bnd.Compression = compression;
 
-        if (compression is DCX.Type.DCX_KRAK or DCX.Type.DCX_KRAK_MAX)
-            WarnAboutKrak();
-
         bnd.Version = xml.Element("version")!.Value;
         bnd.Format = (Binder.Format)Enum.Parse(typeof(Binder.Format), xml.Element("format")!.Value);
         bnd.BigEndian = bool.Parse(xml.Element("bigendian")!.Value);
@@ -310,6 +307,9 @@ public class WFFXBNDModern : WBinderParser
 
         string destPath = GetRepackDestPath(srcPath, xml);
         WBUtil.Backup(destPath);
+
+        WarnAboutKrak(compression, bnd.Files.Count);
+
         bnd.Write(destPath);
     }
 
