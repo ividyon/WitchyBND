@@ -69,6 +69,12 @@ Special thanks to Nordgaren, The12thAvenger, philiquaz, TKGP, thefifthmatt and m
 # Changelog
 ## WitchyBND
 
+### 2.3.0.2
+
+* Fixed an issue where BND4 files could no longer open due to a mistake in the PARAMBND4 preprocess.
+* Fixed an issue with manual input of regulation versions not correctly filtering fields by PARAMDEF regulation version.
+* Restricted the DCX_KRAK warning to only appear if the archive contains more than 10 items.
+
 ### 2.3.0.1
 
 * Fixed crashes with parallelized PARAM (de)serialization by introducing a Preprocess step to parsers.
