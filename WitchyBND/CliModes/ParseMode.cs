@@ -213,6 +213,7 @@ public static class ParseMode
             new WPARAM(),
             new WMQB(),
             new WDBSUB(),
+            new WENFL(),
             //MSBE
             //TAE
         };
