@@ -96,11 +96,11 @@ public class WPARAMBND4 : WBinderParser
         XElement xml = doc.Root;
 
         var gameElement = xml.Element("game");
-        if (gameElement == null) throw new XmlException("XML has no Game element");
+        if (gameElement == null) return;
         Enum.TryParse(gameElement.Value, out WBUtil.GameType game);
 
         var versionElement = xml.Element("version");
-        if (versionElement == null) throw new XmlException("XML has no Version element");
+        if (versionElement == null) return;
         var regVer = Convert.ToUInt64(versionElement.Value);
 
         if (!WPARAM.Games.ContainsKey(srcPath))
