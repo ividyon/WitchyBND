@@ -8,6 +8,7 @@ using System.Xml;
 using System.Xml.Linq;
 using PPlus;
 using SoulsFormats;
+using WitchyBND.CliModes;
 using WitchyLib;
 
 namespace WitchyBND.Parsers;
@@ -28,7 +29,7 @@ public class WFFXBNDModern : WBinderParser
     public override void Unpack(string srcPath, ISoulsFile? file)
     {
         BND4 bnd = (file as BND4)!;
-        var destDir = GetUnpackDestDir(srcPath);
+        var destDir = GetUnpackDestPath(srcPath);
         var srcName = Path.GetFileName(srcPath);
         Directory.CreateDirectory(destDir);
 
@@ -166,6 +167,8 @@ public class WFFXBNDModern : WBinderParser
 
         const string rootPath = @"N:\GR\data\INTERROOT_win64\sfx\";
 
+        WFileParser effectParser = ParseMode.Parsers.OfType<WFXR3>().First();
+
         void effectCallback()
         {
             void inEffectCallback(string path)
@@ -174,6 +177,7 @@ public class WFFXBNDModern : WBinderParser
 
                 var filePath = effectPaths[i];
                 var fileName = Path.GetFileName(filePath);
+                RecursiveRepackFile(filePath, effectParser);
                 var bytes = File.ReadAllBytes(filePath);
                 var file = new BinderFile(Binder.FileFlags.Flag1, i, $@"{rootPath}\effect\{fileName}",
                     bytes);
@@ -313,7 +317,7 @@ public class WFFXBNDModern : WBinderParser
         bnd.Write(destPath);
     }
 
-    public override string GetUnpackDestDir(string srcPath)
+    public override string GetUnpackDestPath(string srcPath)
     {
         string sourceDir = new FileInfo(srcPath).Directory?.FullName;
         string fileName = Path.GetFileName(srcPath);

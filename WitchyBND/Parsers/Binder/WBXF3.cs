@@ -26,7 +26,7 @@ public class WBXF3 : WBinderParser
         string bhdName;
         string srcDirPath = Path.GetDirectoryName(srcPath);
         string nameWithoutExt = Path.GetFileNameWithoutExtension(srcPath);
-        string destDir = GetUnpackDestDir(srcPath);
+        string destDir = GetUnpackDestPath(srcPath);
 
         if (BXF3.IsBHD(srcPath))
         {

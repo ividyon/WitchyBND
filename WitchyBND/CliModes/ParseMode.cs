@@ -26,7 +26,8 @@ public static class ParseMode
 
     public static void ParseFiles(IEnumerable<string> paths, bool recursive = false)
     {
-        void Callback(string path) {
+        void Callback(string path)
+        {
             if (!File.Exists(path) && !Directory.Exists(path))
             {
                 if (!recursive)
@@ -42,132 +43,37 @@ public static class ParseMode
             DCX.Type compression = DCX.Type.None;
             if (File.Exists(path) && DCX.Is(path) && !WPARAMBND4.FilenameIsPARAMBND4(path))
             {
-                PromptPlus.WriteLine($"Decompressing DCX: {fileName.PromptPlusEscape()}...");
+                lock (Program.ConsoleWriterLock)
+                    PromptPlus.WriteLine($"Decompressing DCX: {fileName.PromptPlusEscape()}...");
+
                 data = DCX.Decompress(path, out DCX.Type compressionVal);
                 compression = compressionVal;
             }
 
             foreach (WFileParser parser in Parsers)
             {
-                try
-                {
+                bool toBreak = Catcher.Catch(() => {
                     ISoulsFile? file;
                     if ((Configuration.Args.UnpackOnly || !Configuration.Args.RepackOnly) && parser.Exists(path) &&
                         parser.Is(path, data, out file))
                     {
-                        if (compression > file?.Compression)
-                            file.Compression = compression;
-                        switch (parser.Verb)
-                        {
-                            case WFileParserVerb.Serialize:
-                                PromptPlus.WriteLine(recursive
-                                    ? $"Serializing {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
-                                    : $"Serializing {parser.Name}: {fileName.PromptPlusEscape()}...");
-                                break;
-                            case WFileParserVerb.Unpack:
-                                PromptPlus.WriteLine(recursive
-                                    ? $"Unpacking {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
-                                    : $"Unpacking {parser.Name}: {fileName.PromptPlusEscape()}...");
-                                break;
-                            case WFileParserVerb.None:
-                            default:
-                                break;
-                        }
-
-                        parser.Unpack(path, file);
-                        parsed = true;
-                        break;
+                        return Unpack(path, file, compression, parser, recursive, out parsed);
                     }
 
                     if ((Configuration.Args.RepackOnly || !Configuration.Args.UnpackOnly) &&
                         parser.ExistsUnpacked(path) && parser.IsUnpacked(path))
                     {
-                        switch (parser.Verb)
-                        {
-                            case WFileParserVerb.Serialize:
-                                PromptPlus.WriteLine(recursive
-                                    ? $"Deserializing {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
-                                    : $"Deserializing {parser.Name}: {fileName.PromptPlusEscape()}...");
-                                break;
-                            case WFileParserVerb.Unpack:
-                                PromptPlus.WriteLine(recursive
-                                    ? $"Repacking {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
-                                    : $"Repacking {parser.Name}: {fileName.PromptPlusEscape()}...");
-                                break;
-                            case WFileParserVerb.None:
-                            default:
-                                break;
-                        }
-
-                        if (!parser.UnpackedFitsVersion(path))
-                        {
-                            throw new FriendlyException(
-                                @"Parser version of unpacked file is outdated. Please repack this file using the WitchyBND version it was originally unpacked with, then unpack it using the newest version.");
-                        }
-
-                        parser.Repack(path);
-                        parsed = true;
-                        break;
+                        return Repack(path, parser, recursive, out parsed);
                     }
-                }
-                catch (NoOodleFoundException)
-                {
-                    if (Configuration.IsTest)
-                        throw;
 
-                    Program.RegisterError(new WitchyError(
-                        "ERROR: Oodle DLL not found. Please copy oo2core_6_win64.dll or oo2core_8_win64.dll from the game directory to WitchyBND's directory.",
-                        WitchyErrorType.NoOodle));
-                    error = true;
-                }
-                catch (Exception e) when (e.Message.Contains("oo2core_6_win64.dll") ||
-                                          e.Message.Contains("oo2core_8_win64.dll") || e is NoOodleFoundException)
-                {
-                    if (Configuration.IsTest)
-                        throw;
+                    return false;
+                }, out error, path);
 
-                    Program.RegisterError(new WitchyError(
-                        "ERROR: Oodle DLL not found. Please copy oo2core_6_win64.dll or oo2core_8_win64.dll from the game directory to WitchyBND's directory.",
-                        WitchyErrorType.NoOodle));
-                    error = true;
-                }
-                catch (UnauthorizedAccessException)
-                {
-                    if (Configuration.IsTest)
-                        throw;
-
-                    Program.RegisterError(new WitchyError(
-                        "WitchyBND had no access to perform this action; perhaps try Administrator Mode?", path,
-                        WitchyErrorType.NoAccess));
-                    error = true;
-                }
-                catch (FriendlyException e)
-                {
-                    if (Configuration.IsTest)
-                        throw;
-
-                    Program.RegisterError(new WitchyError(e.Message, path));
-                    error = true;
-                }
-                catch (Exception e)
-                {
-                    if (Configuration.IsTest || Configuration.IsDebug)
-                        throw;
-
-                    Program.RegisterException(e, path);
-                    error = true;
-                }
-            }
-
-            switch (parsed)
-            {
-                case true:
-                    Interlocked.Increment(ref Program.ProcessedItems);
-                    break;
-                case false when !error && !recursive:
-                    PromptPlus.Error.WriteLine($"Could not find valid parser for {path}.");
+                if (toBreak)
                     break;
             }
+
+            PrintParseSuccess(path, parsed, error, recursive);
         }
 
         IEnumerable<string> pathsList = paths.ToList();
@@ -176,7 +82,9 @@ public static class ParseMode
         {
             foreach (string path in pathsList)
             {
-                parser.Preprocess(path);
+                bool toBreak = Catcher.Catch(() => parser.Preprocess(path), out _, path);
+                if (toBreak)
+                    break;
             }
         }
 
@@ -184,6 +92,95 @@ public static class ParseMode
             Parallel.ForEach(pathsList, Callback);
         else
             pathsList.ToList().ForEach(Callback);
+    }
+
+    public static void PrintParseSuccess(string path, bool parsed, bool error, bool recursive)
+    {
+        switch (parsed)
+        {
+            case true:
+                if (Configuration.Parallel)
+                {
+                    string fileName = Path.GetFileName(path);
+                    lock (Program.ConsoleWriterLock)
+                    {
+                        PromptPlus.WriteLine($"Successfully parsed {fileName.PromptPlusEscape()}.");
+                    }
+                }
+
+                Interlocked.Increment(ref Program.ProcessedItems);
+                break;
+            case false when !error && !recursive:
+                lock (Program.ConsoleWriterLock)
+                    PromptPlus.Error.WriteLine($"Could not find valid parser for {path.PromptPlusEscape()}.");
+                break;
+        }
+    }
+
+    public static bool Unpack(string path, ISoulsFile? file, DCX.Type compression, WFileParser? parser, bool recursive,
+        out bool parsed)
+    {
+        string fileName = Path.GetFileName(path);
+
+        if (compression > file?.Compression)
+            file.Compression = compression;
+        lock (Program.ConsoleWriterLock)
+        {
+            switch (parser.Verb)
+            {
+                case WFileParserVerb.Serialize:
+                    PromptPlus.WriteLine(recursive
+                        ? $"Serializing {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
+                        : $"Serializing {parser.Name}: {fileName.PromptPlusEscape()}...");
+                    break;
+                case WFileParserVerb.Unpack:
+                    PromptPlus.WriteLine(recursive
+                        ? $"Unpacking {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
+                        : $"Unpacking {parser.Name}: {fileName.PromptPlusEscape()}...");
+                    break;
+                case WFileParserVerb.None:
+                default:
+                    break;
+            }
+        }
+
+        parser.Unpack(path, file);
+        parsed = true;
+        return true;
+    }
+
+    public static bool Repack(string path, WFileParser parser, bool recursive, out bool parsed)
+    {
+        string fileName = Path.GetFileName(path);
+        lock (Program.ConsoleWriterLock)
+        {
+            switch (parser.Verb)
+            {
+                case WFileParserVerb.Serialize:
+                    PromptPlus.WriteLine(recursive
+                        ? $"Deserializing {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
+                        : $"Deserializing {parser.Name}: {fileName.PromptPlusEscape()}...");
+                    break;
+                case WFileParserVerb.Unpack:
+                    PromptPlus.WriteLine(recursive
+                        ? $"Repacking {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
+                        : $"Repacking {parser.Name}: {fileName.PromptPlusEscape()}...");
+                    break;
+                case WFileParserVerb.None:
+                default:
+                    break;
+            }
+        }
+
+        if (!parser.UnpackedFitsVersion(path))
+        {
+            throw new FriendlyException(
+                @"Parser version of unpacked file is outdated. Please repack this file using the WitchyBND version it was originally unpacked with, then unpack it using the newest version.");
+        }
+
+        parser.Repack(path);
+        parsed = true;
+        return true;
     }
 
     static ParseMode()

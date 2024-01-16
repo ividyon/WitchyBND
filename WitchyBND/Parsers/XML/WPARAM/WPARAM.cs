@@ -107,12 +107,12 @@ If DSMapStudio does not yet support this game or regulation version, an experime
 
         return xmlPath != null ? Path.GetDirectoryName(xmlPath)! : dirPath;
     }
-    public override void Preprocess(string srcPath)
+    public override bool Preprocess(string srcPath)
     {
         string gamePath = GetGamePath(srcPath);
-        if (PreprocessedPaths.Contains(gamePath)) return;
+        if (PreprocessedPaths.Contains(gamePath)) return false;
 
-        if (!Is(srcPath, null, out ISoulsFile? _)) return;
+        if (!Is(srcPath, null, out ISoulsFile? _)) return false;
 
         (WBUtil.GameType, ulong)? gameInfo;
         gameInfo = Games.TryGetValue(gamePath, out gameInfo) ? gameInfo : WBUtil.DetermineParamdexGame(gamePath, Configuration.Args.Passive);
@@ -125,6 +125,7 @@ If DSMapStudio does not yet support this game or regulation version, an experime
         PopulateParamdex(Games[gamePath]!.Value.Item1);
 
         PreprocessedPaths.Add(gamePath);
+        return true;
     }
 
     public override bool Is(string path, byte[]? _, out ISoulsFile? file)
@@ -248,7 +249,7 @@ If DSMapStudio does not yet support this game or regulation version, an experime
         var names = File.ReadAllLines(namePath);
         foreach (string name in names)
         {
-            var splitted = name.Split(' ', 2);
+            var splitted = name.Trim().Split(' ', 2);
             try
             {
                 var result = nameDict.TryAdd(int.Parse(splitted[0]), splitted[1]);

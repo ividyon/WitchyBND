@@ -82,25 +82,25 @@ public class WPARAMBND4 : WBinderParser
     public override bool HasPreprocess => true;
 
     public List<string> PreprocessedPaths = new();
-    public override void Preprocess(string srcPath)
+    public override bool Preprocess(string srcPath)
     {
-        if (!Directory.Exists(srcPath)) return;
+        if (!Directory.Exists(srcPath)) return false;
 
         string xmlPath = GetBinderXmlPath(srcPath, "bnd4");
-        if (!File.Exists(xmlPath)) return;
+        if (!File.Exists(xmlPath)) return false;
 
-        if (PreprocessedPaths.Contains(srcPath)) return;
+        if (PreprocessedPaths.Contains(srcPath)) return false;
 
         var doc = XDocument.Load(GetBinderXmlPath(srcPath, "bnd4"));
-        if (doc.Root == null || doc.Root.Name != "bnd4") return;
+        if (doc.Root == null || doc.Root.Name != "bnd4") return false;
         XElement xml = doc.Root;
 
         var gameElement = xml.Element("game");
-        if (gameElement == null) return;
+        if (gameElement == null) return false;
         Enum.TryParse(gameElement.Value, out WBUtil.GameType game);
 
         var versionElement = xml.Element("version");
-        if (versionElement == null) return;
+        if (versionElement == null) return false;
         var regVer = Convert.ToUInt64(versionElement.Value);
 
         if (!WPARAM.Games.ContainsKey(srcPath))
@@ -109,6 +109,7 @@ public class WPARAMBND4 : WBinderParser
         WPARAM.PopulateParamdex(game);
 
         PreprocessedPaths.Add(srcPath);
+        return true;
     }
 
     public override bool Is(string path, byte[]? _, out ISoulsFile? file)
