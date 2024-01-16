@@ -104,7 +104,10 @@ public static class ParseMode
                     string fileName = Path.GetFileName(path);
                     lock (Program.ConsoleWriterLock)
                     {
-                        PromptPlus.WriteLine($"Successfully parsed {fileName.PromptPlusEscape()}.");
+                        if (recursive)
+                            PromptPlus.WriteLine($"Successfully parsed {fileName.PromptPlusEscape()} (recursive).");
+                        else
+                            PromptPlus.WriteLine($"Successfully parsed {fileName.PromptPlusEscape()}.");
                     }
                 }
 

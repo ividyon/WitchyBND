@@ -194,7 +194,7 @@ public static class WatcherMode
 
     private static void WatchFolder(object sender, FileSystemEventArgs e)
     {
-        if (e.FullPath.EndsWith(".tmp")) return;
+        if (e.FullPath.EndsWith(".tmp") || e.FullPath.EndsWith(".bak")) return;
         var file = _watchedFiles
             .FirstOrDefault(p => p.Value.Parser is WFolderParser && e.FullPath.Contains(p.Value.Path))
             .Value as WatchedFileFolder;
