@@ -91,6 +91,14 @@ public static class WatcherMode
         var filesToRepack = repack.Where(p => p.Value is WSingleFileParser).ToList();
         var filesToUnpack = unpack.Where(p => p.Value.Item1 is WSingleFileParser).ToList();
 
+        var count = foldersToRepack.Count + filesToRepack.Count + filesToUnpack.Count;
+
+        if (count == 0)
+        {
+            PromptPlus.WriteLine($"Could not find valid parsers for any selected files. Aborting.");
+            return;
+        }
+
         foreach ((string path, var (parser, file)) in filesToUnpack)
         {
             var watcher = new FileSystemWatcher();
@@ -149,7 +157,7 @@ public static class WatcherMode
         }
 
         PromptPlus.WriteLine(
-            $"Watching {foldersToRepack.Count + filesToRepack.Count + filesToUnpack.Count} path(s) for changes.");
+            $"Watching {count} path(s) for changes.");
 
         PromptPlus.KeyPress(@"Press any key to stop watching files...
 ").Run();

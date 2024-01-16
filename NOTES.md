@@ -2,7 +2,7 @@
 Read the [notes on updating Witchy](https://github.com/ividyon/WitchyBND?tab=readme-ov-file#updating-witchybnd) to learn how to properly update the context menu. 
 
 * Added **File Watcher** mode.
-  * When selected, Witchy listens to changes to the selected files. When changes happen, the affected files is automatically processed.
+  * When selected, Witchy watches for changes to the selected files (or unpacked BND folders). When changes happen, the affected files is automatically processed.
   * Can be combined with the "Recursive" setting and the "Process to..." path selection for some dramatic results in editing comfort.
 * Expanded the Recursive setting to work when repacking binders, as well.
   * Witchy will check if any of the files to be packed into the binder are unpacked, and will repack them before adding the file to the binder.
