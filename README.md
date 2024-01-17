@@ -3,7 +3,7 @@
 </p>
 
 # WitchyBND
-WitchyBND is an unpacking/repacking/serializing software for common file formats used by FromSoftware's proprietary game engine, for games like Demon's Souls, Dark Souls 1-3, Bloodborne, Sekiro, Elden Ring and Armored Core VI. Witchy supports the formats DCX, FFXBND, BND3, BND4, BXF3, BXF4, FFXDLSE, FMG, GPARAM, LUAGNL, LUAINFO, TPF, Zero3, FXR3, MATBIN, MTD, PARAM, and MQB.
+WitchyBND is an unpacking/repacking/serializing software for common file formats used by FromSoftware's proprietary game engine, for games like Demon's Souls, Dark Souls 1-3, Bloodborne, Sekiro, Elden Ring and Armored Core VI. Witchy supports the formats DCX, FFXBND, BND3, BND4, BXF3, BXF4, FFXDLSE, FMG, GPARAM, LUAGNL, LUAINFO, TPF, Zero3, FXR3, MATBIN, MTD, PARAM, MQB, and ENTRYFILELIST.
 
 A successor to **Yabber**, the FromSoftware file format unpacker and serializer by TKGP, featuring a comprehensive rewrite, added features and comfort, and bundled contributions by the community.
 
@@ -19,9 +19,11 @@ WitchyBND should run out-of-the-box on Windows versions newer than Windows 8.
 
 To update WitchyBND, unpack the new version into the same folder as before, and overwrite all files.
 
-Registering the WitchyBND context menu will put the files `WitchyBND.Shell.dll` and `Assets\context.png` in use, preventing them from being overwritten.
+The context menu unfortunately causes a bit of a fuss on updating. If Windows tells you that some of the files are in use, **you have to first unregister the context menu in the configuration screen**, then exit WitchyBND, to allow overwriting them.
 
-You have to first unregister the context menu in the configuration screen, and restart the Explorer process, then exit WitchyBND, to allow overwriting them.
+After the update, you can re-register the context menu again.
+
+[Read here how to configure the context menu integration.](https://github.com/ividyon/WitchyBND#right-click-context-menu-integration)
 
 # How to use
 Information on using Yabber (and therefore Witchy) is spread widely across the community. Visit the [Souls Modding Wiki](http://soulsmodding.wikidot.com/) or [?ServerName? Discord](http://discord.gg/servername) to get started.
@@ -55,7 +57,7 @@ For all intents and purposes, Witchy should be treated as a new version of Yabbe
 # Contributors
 * *TKGP* - SoulsFormats and Yabber
 * *katalash* - GPARAM support, FsParam
-* *Nordgaren* - Yabber+ additions, Armored Core VI additions
+* *Nordgaren* - Yabber+ additions, Armored Core VI additions, Oodle DLL location
 * *DSMapStudio team* - Paramdex
 * *Meowmaritus, NamelessHoodie* - initial FXR serialization
 * *Avocado* - YabberAvocado additions
@@ -64,10 +66,30 @@ For all intents and purposes, Witchy should be treated as a new version of Yabbe
 * *CCCode* - FXR research
 * *ivi* - WitchyBND maintainer
 
-Special thanks to Nordgaren, The12thAvenger, philiquaz, TKGP, thefifthmatt and many more for various assistance during development.
+Special thanks to Nordgaren, The12thAvenger, philiquaz, TKGP, thefifthmatt, Kirnifr, Rayan and many more for various assistance during development.
 
 # Changelog
 ## WitchyBND
+
+### 2.4.0.0
+
+* Added **File Watcher** mode.
+  * When selected, Witchy watches for changes to the selected files (or unpacked BND folders). When changes happen, the affected files is automatically processed.
+  * Can be combined with the "Recursive" setting and the "Process to..." path selection for some dramatic results in editing comfort.
+* Added an online update check. Witchy will now notify you if there are new versions available.
+* Added an "Offline mode" configuration option which disables any connectivity to the internet, such as the update check.
+  * This is disabled by default (meaning the update check will run).
+* Expanded the Recursive setting to work when repacking binders, as well.
+  * Witchy will check if any of the files to be packed into the binder are unpacked, and will repack them before adding the file to the binder.
+  * Example use case: Repacking a PARTSBND would first repack the TPF inside when using Recursive, thus applying any texture changes.
+* Witchy will now attempt to automatically fetch the Oodle DLL from your detected Steam game folders.
+* Added `entryfilelist` serialization support.
+* Added the "Watch for changes" option to the Witchy context menu, and cleaned up its structure.
+* Slightly optimized the Preprocess step to avoid going through parsers unnecessarily after a match.
+* Enabled parallel processing by default. It can be disabled in the settings by launching the WitchyBND executable.
+* Fixed any known issues with file list ordering during parallel processing.
+* Fixed an issue where text would become jumbled during parallel processing.
+* Fixed an issue with exception handling where the application would not pause on an unhandled exception.
 
 ### 2.3.0.2
 
