@@ -26,7 +26,7 @@ public class WBND4 : WBinderParser
     {
         BND4 bnd = (file as BND4)!;
         string srcName = Path.GetFileName(srcPath);
-        string destDir = GetUnpackDestDir(srcPath);
+        string destDir = GetUnpackDestPath(srcPath);
         Directory.CreateDirectory(destDir);
 
         var root = "";

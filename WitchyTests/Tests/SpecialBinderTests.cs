@@ -25,7 +25,7 @@ public class SpecialBinderTests : TestBase
             Assert.That(parser.Is(path, null, out var file));
 
             parser.Unpack(path, file);
-            string? destPath = parser.GetUnpackDestDir(path);
+            string? destPath = parser.GetUnpackDestPath(path);
 
             File.Delete(path);
 
@@ -61,7 +61,7 @@ public class SpecialBinderTests : TestBase
             var bnd = BND4.Read(path);
 
             parser.Unpack(path, outFile);
-            string? destPath = parser.GetUnpackDestDir(path);
+            string? destPath = parser.GetUnpackDestPath(path);
 
             File.Delete(path);
 
@@ -100,7 +100,7 @@ public class SpecialBinderTests : TestBase
             var bnd = BND4.Read(path);
 
             parser.Unpack(path, outFile);
-            string? destPath = parser.GetUnpackDestDir(path);
+            string? destPath = parser.GetUnpackDestPath(path);
 
             File.Delete(path);
 

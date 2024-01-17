@@ -22,7 +22,7 @@ public class WZERO3 : WFolderParser
     public override void Unpack(string srcPath, ISoulsFile? _)
     {
         var z3 = Zero3.Read(srcPath);
-        var targetDir = GetUnpackDestDir(srcPath);
+        var targetDir = GetUnpackDestPath(srcPath);
         foreach (Zero3.File file in z3.Files)
         {
             string outPath = $@"{targetDir}\{file.Name.Replace('/', '\\')}";

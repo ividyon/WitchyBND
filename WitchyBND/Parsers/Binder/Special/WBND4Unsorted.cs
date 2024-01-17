@@ -20,7 +20,7 @@ public abstract class WBND4Unsorted : WUnsortedBinderParser
     {
         var bnd = (file as BND4)!;
         string srcName = Path.GetFileName(srcPath);
-        string destDir = GetUnpackDestDir(srcPath);
+        string destDir = GetUnpackDestPath(srcPath);
         Directory.CreateDirectory(destDir);
 
         var root = "";
@@ -91,7 +91,7 @@ public abstract class WBND4Unsorted : WUnsortedBinderParser
         bnd.Write(destPath);
     }
 
-    public override string GetUnpackDestDir(string srcPath)
+    public override string GetUnpackDestPath(string srcPath)
     {
         string sourceDir = new FileInfo(srcPath).Directory?.FullName;
         string fileName = Path.GetFileName(srcPath);

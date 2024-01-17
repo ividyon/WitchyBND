@@ -21,7 +21,8 @@ namespace WitchyBND;
 public enum CliMode
 {
     Parse,
-    Config
+    Config,
+    Watch
 }
 
 public enum WitchyErrorType
@@ -29,6 +30,7 @@ public enum WitchyErrorType
     Generic,
     NoOodle,
     NoAccess,
+    InUse,
     Exception
 }
 
@@ -36,7 +38,7 @@ public class WitchyError
 {
     public string Message { get; set; }
     public WitchyErrorType Type { get; set; } = WitchyErrorType.Generic;
-    public string Source { get; set; } = null;
+    public string? Source { get; set; } = null;
     public short ErrorCode { get; set; } = -1;
 
     public WitchyError(string message)
@@ -44,20 +46,20 @@ public class WitchyError
         Message = message;
     }
 
-    public WitchyError(string message, string source)
+    public WitchyError(string message, string? source)
     {
         Message = message;
         Source = source;
     }
 
-    public WitchyError(string message, string source, WitchyErrorType type)
+    public WitchyError(string message, string? source, WitchyErrorType type)
     {
         Message = message;
         Source = source;
         Type = type;
     }
 
-    public WitchyError(string message, string source, WitchyErrorType type, short errorCode)
+    public WitchyError(string message, string? source, WitchyErrorType type, short errorCode)
     {
         Message = message;
         Source = source;
@@ -65,7 +67,7 @@ public class WitchyError
         ErrorCode = errorCode;
     }
 
-    public WitchyError(string message, string source, short errorCode)
+    public WitchyError(string message, string? source, short errorCode)
     {
         Message = message;
         Source = source;
@@ -117,6 +119,9 @@ public class CliOptions
     [Option('e', "parallel", HelpText = "Runs operations parallelized")]
     public bool Parallel { get; set; }
 
+    [Option('m', "mode", HelpText = "Toggle the mode to use. Options are \"Parse\", \"Watch\" and \"Config\".", Default = CliMode.Parse)]
+    public CliMode Mode { get; set; }
+
     [Option('p', "passive",
         HelpText =
             "Will not prompt the user for any input or cause any delays. Suited for automatic execution in scripts.")]
@@ -156,6 +161,7 @@ public class CliOptions
 
 internal static class Program
 {
+    internal static readonly object ConsoleWriterLock = new object();
     private static ConcurrentStack<WitchyError> AccruedErrors;
     private static ConcurrentStack<WitchyNotice> AccruedNotices;
     public static int ProcessedItems = 0;
@@ -251,7 +257,7 @@ internal static class Program
                     }
 
                     // Set CLI mode
-                    CliMode mode = CliMode.Parse;
+                    CliMode mode = opt.Mode;
                     if (!opt.Paths.Any())
                         mode = CliMode.Config;
 
@@ -259,7 +265,7 @@ internal static class Program
                     switch (mode)
                     {
                         case CliMode.Parse:
-                            DisplayConfiguration();
+                            DisplayConfiguration(mode);
 
                             Stopwatch watch = new Stopwatch();
 
@@ -276,51 +282,15 @@ internal static class Program
                             PromptPlus.WriteLine("");
                             PromptPlus.WriteLine(string.Concat(Enumerable.Repeat("-", completedString.Length)));
                             PromptPlus.WriteLine(completedString);
-                            if (ProcessedItems > 0)
-                            {
-                                if (AccruedErrors.Count > 0)
-                                {
-                                    PromptPlus.WriteLine("");
-                                    PromptPlus.SingleDash("Errors during operation");
-                                    foreach (WitchyError error in AccruedErrors)
-                                    {
-                                        PromptPlus.Error.WriteLine(
-                                            $"{error.Source}: {error.Message}".PromptPlusEscape());
-                                    }
-                                }
 
-                                if (AccruedNotices.Count > 0)
-                                {
-                                    PromptPlus.WriteLine("");
-                                    PromptPlus.SingleDash("Notices during operation");
-                                    foreach (WitchyNotice notice in AccruedNotices)
-                                    {
-                                        if (notice.Source != null)
-                                            PromptPlus.Error.WriteLine($"{notice.Source}: {notice.Message}"
-                                                .PromptPlusEscape());
-                                        else
-                                            PromptPlus.Error.WriteLine($"{notice.Message}".PromptPlusEscape());
-                                    }
-                                }
-                            }
-
-                            if (!Configuration.Args.Passive)
-                            {
-                                PromptPlus.WriteLine("");
-                                if (pause == -1)
-                                {
-                                    PromptPlus.WriteLine(Constants.PressAnyKey);
-                                    PromptPlus.ReadKey();
-                                    return;
-                                }
-
-                                if (pause > 0)
-                                {
-                                    PromptPlus.WriteLine(
-                                        $"Closing in {TimeSpan.FromMilliseconds(pause).TotalSeconds} second(s)...");
-                                    Thread.Sleep(pause);
-                                }
-                            }
+                            PrintIssues();
+                            PrintFinale(pause);
+                            break;
+                        case CliMode.Watch:
+                            DisplayConfiguration(mode);
+                            WatcherMode.CliWatcherMode(opt);
+                            PrintIssues();
+                            PrintFinale();
                             break;
                         case CliMode.Config:
                             ConfigMode.CliConfigMode(opt);
@@ -340,10 +310,64 @@ internal static class Program
             .WithNotParsed(errors => { DisplayHelp(parserResult, errors); });
     }
 
-    public static void DisplayConfiguration()
+    public static void PrintIssues()
+    {
+        if (ProcessedItems > 5)
+        {
+            if (AccruedErrors.Count > 0)
+            {
+                PromptPlus.WriteLine("");
+                PromptPlus.SingleDash("Errors during operation");
+                foreach (WitchyError error in AccruedErrors)
+                {
+                    PromptPlus.Error.WriteLine(
+                        $"{error.Source}: {error.Message}".PromptPlusEscape());
+                }
+            }
+
+            if (AccruedNotices.Count > 0)
+            {
+                PromptPlus.WriteLine("");
+                PromptPlus.SingleDash("Notices during operation");
+                foreach (WitchyNotice notice in AccruedNotices)
+                {
+                    if (notice.Source != null)
+                        PromptPlus.Error.WriteLine($"{notice.Source}: {notice.Message}"
+                            .PromptPlusEscape());
+                    else
+                        PromptPlus.Error.WriteLine($"{notice.Message}".PromptPlusEscape());
+                }
+            }
+        }
+    }
+
+    public static void PrintFinale(int? pause = null)
+    {
+        pause ??= Configuration.EndDelay;
+        if (!Configuration.Args.Passive)
+        {
+            PromptPlus.WriteLine("");
+            if (pause == -1)
+            {
+                PromptPlus.WriteLine(Constants.PressAnyKey);
+                PromptPlus.ReadKey();
+                return;
+            }
+
+            if (pause > 0)
+            {
+                PromptPlus.WriteLine(
+                    $"Closing in {TimeSpan.FromMilliseconds(pause.Value).TotalSeconds} second(s)...");
+                Thread.Sleep(pause.Value);
+            }
+        }
+    }
+
+    public static void DisplayConfiguration(CliMode mode)
     {
         var infoTable = new Dictionary<string, string>()
         {
+            { "Selected mode", mode.ToString() },
             { "Specialized BND handling", Configuration.Bnd.ToString() },
             { "DCX decompression only", Configuration.Dcx.ToString() },
             { "Store PARAM field default values", Configuration.ParamDefaultValues.ToString() },
@@ -407,10 +431,13 @@ internal static class Program
     {
         AccruedNotices.Push(notice);
         if (write)
-            PromptPlus.Error.WriteLine($"{notice.Source}: {notice.Message}".PromptPlusEscape());
+        {
+            lock(ConsoleWriterLock)
+                PromptPlus.Error.WriteLine($"{notice.Source}: {notice.Message}".PromptPlusEscape());
+        }
     }
 
-    public static void RegisterException(Exception e, string source = null)
+    public static void RegisterException(Exception e, string? source = null)
     {
         switch (e)
         {
@@ -437,10 +464,13 @@ internal static class Program
         AccruedErrors.Push(error);
         if (write)
         {
-            if (error.Source != null)
-                PromptPlus.Error.WriteLine($"{error.Source}: {error.Message}".PromptPlusEscape());
-            else
-                PromptPlus.Error.WriteLine(error.Message.PromptPlusEscape());
+            lock (ConsoleWriterLock)
+            {
+                if (error.Source != null)
+                    PromptPlus.Error.WriteLine($"{error.Source}: {error.Message}".PromptPlusEscape());
+                else
+                    PromptPlus.Error.WriteLine(error.Message.PromptPlusEscape());
+            }
         }
 
         if (Configuration.IsTest)

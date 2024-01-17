@@ -26,7 +26,7 @@ public class WTPF : WFolderParser
     public override void Unpack(string srcPath, ISoulsFile? file)
     {
         var tpf = (file as TPF)!;
-        var destDir = GetUnpackDestDir(srcPath);
+        var destDir = GetUnpackDestPath(srcPath);
         var sourceName = Path.GetFileName(srcPath);
         if (!supportedPlatforms.Contains(tpf.Platform))
         {

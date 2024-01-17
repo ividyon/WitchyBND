@@ -29,7 +29,7 @@ public class RegulationTests : TestBase
             Assert.That(parser.Is(path, null, out var outFile));
 
             parser.Unpack(path, outFile);
-            string? destPath = parser.GetUnpackDestDir(path);
+            string? destPath = parser.GetUnpackDestPath(path);
 
 
             var xml = WFileParser.LoadXml(parser.GetBinderXmlPath(destPath, "bnd3"));
@@ -74,7 +74,7 @@ public class RegulationTests : TestBase
             Assert.That(parser.Is(path, null, out var outFile));
 
             parser.Unpack(path, outFile);
-            string? destPath = parser.GetUnpackDestDir(path);
+            string? destPath = parser.GetUnpackDestPath(path);
 
             var xml = WFileParser.LoadXml(parser.GetBinderXmlPath(destPath, "bnd4"));
             XElement? gameElement = xml.Element("game");
@@ -110,7 +110,7 @@ public class RegulationTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var outFile));
             parser.Unpack(path, outFile);
-            string? destPath = parser.GetUnpackDestDir(path);
+            string? destPath = parser.GetUnpackDestPath(path);
 
             File.Delete(path);
 
@@ -135,7 +135,7 @@ public class RegulationTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var outFile));
             parser.Unpack(path, outFile);
-            string? destPath = parser.GetUnpackDestDir(path);
+            string? destPath = parser.GetUnpackDestPath(path);
 
             File.Delete(path);
 

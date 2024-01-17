@@ -58,7 +58,7 @@ public class BinderTests : TestBase
             Assert.IsTrue(parser.Is(path, null, out var outFile));
 
             parser.Unpack(path, outFile);
-            var destPath = parser.GetUnpackDestDir(path);
+            var destPath = parser.GetUnpackDestPath(path);
 
             Assert.IsTrue(Directory.Exists(destPath));
             File.Delete(path);
@@ -88,7 +88,7 @@ public class BinderTests : TestBase
             Assert.That(parser.Is(path, null, out var outFile));
 
             parser.Unpack(path, outFile);
-            string? destPath = parser.GetUnpackDestDir(path);
+            string? destPath = parser.GetUnpackDestPath(path);
 
             File.Delete(path);
 
@@ -122,7 +122,7 @@ public class BinderTests : TestBase
             {
                 if (j == 1)
                 {
-                    Directory.Delete(parser.GetUnpackDestDir(path), true);
+                    Directory.Delete(parser.GetUnpackDestPath(path), true);
                     path = path.Replace(".tpfbhd", ".tpfbdt");
                 }
 
@@ -130,7 +130,7 @@ public class BinderTests : TestBase
                 Assert.That(parser.Is(path, null, out var outFile));
 
                 parser.Unpack(path, outFile);
-                string? destPath = parser.GetUnpackDestDir(path);
+                string? destPath = parser.GetUnpackDestPath(path);
 
                 File.Delete(path);
 
@@ -166,7 +166,7 @@ public class BinderTests : TestBase
                 SetLocation(path);
                 if (j == 1)
                 {
-                    Directory.Delete(parser.GetUnpackDestDir(path), true);
+                    Directory.Delete(parser.GetUnpackDestPath(path), true);
                     path = path.Replace(".tpfbhd", ".tpfbdt");
                 }
 
@@ -174,7 +174,7 @@ public class BinderTests : TestBase
                 Assert.That(parser.Is(path, null, out var outFile));
 
                 parser.Unpack(path, outFile);
-                string? destPath = parser.GetUnpackDestDir(path);
+                string? destPath = parser.GetUnpackDestPath(path);
 
                 File.Delete(path);
 
@@ -204,7 +204,7 @@ public class BinderTests : TestBase
             Assert.That(parser.Is(path, null, out var outFile));
 
             parser.Unpack(path, outFile);
-            string? destPath = parser.GetUnpackDestDir(path);
+            string? destPath = parser.GetUnpackDestPath(path);
 
             File.Delete(path);
 
