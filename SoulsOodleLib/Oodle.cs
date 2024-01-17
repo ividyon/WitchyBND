@@ -3,12 +3,12 @@
 public static class Oodle
 {
     private static IntPtr? _handle = null;
-    public static bool GrabOodle(Action<string> writeLineFunction, bool useFolderPicker = true, string? gamePath = null)
+    public static bool GrabOodle(Action<string> writeLineFunction, bool useFolderPicker = true, bool copyToAppFolder = false, string? gamePath = null)
     {
         if (_handle != null) return true;
 
-        var oodlePath = $@"{AppDomain.CurrentDomain.BaseDirectory}\oo2core_8_win64.dll";
-        var oodlePath2 = $@"{AppDomain.CurrentDomain.BaseDirectory}\oo2core_6_win64.dll";
+        var oodlePath = $@"{AppContext.BaseDirectory}\oo2core_8_win64.dll";
+        var oodlePath2 = $@"{AppContext.BaseDirectory}\oo2core_6_win64.dll";
         if (File.Exists(oodlePath))
         {
             _handle = Kernel32.LoadLibrary(oodlePath);
@@ -43,12 +43,16 @@ public static class Oodle
         if (File.Exists(gameOodlePath))
         {
             _handle = Kernel32.LoadLibrary(gameOodlePath);
+            if (copyToAppFolder)
+                File.Copy(gameOodlePath, $@"{AppDomain.CurrentDomain.BaseDirectory}\{Path.GetFileName(gameOodlePath)}", true);
             return true;
         }
 
         if (File.Exists(gameOodlePath2))
         {
             _handle = Kernel32.LoadLibrary(gameOodlePath2);
+            if (copyToAppFolder)
+                File.Copy(gameOodlePath2, $@"{AppDomain.CurrentDomain.BaseDirectory}\{Path.GetFileName(gameOodlePath2)}", true);
             return true;
         }
 

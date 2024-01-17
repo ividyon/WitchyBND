@@ -310,6 +310,8 @@ internal static class Program
                         throw;
 
                     RegisterException(e);
+                    PrintIssues();
+                    PrintFinale(-1);
                 }
             })
             .WithNotParsed(errors => { DisplayHelp(parserResult, errors); });
@@ -354,8 +356,7 @@ internal static class Program
             PromptPlus.WriteLine("");
             if (pause == -1)
             {
-                PromptPlus.WriteLine(Constants.PressAnyKey);
-                PromptPlus.ReadKey();
+                PromptPlus.KeyPress(Constants.PressAnyKey).Run();
                 return;
             }
 

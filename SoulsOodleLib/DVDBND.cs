@@ -92,7 +92,7 @@ sutLq3uRjLMM0IeTkQO6Pv8/R7UNFtdCWwIERzH8IQ==
             return null;
         }
     }
-    public static bool CreateAssets(AssetLocator.Game game, string modPath, List<(string, string)> paths, Action<string> writeLineFunction, bool useFolderPicker)
+    public static bool CreateAssets(AssetLocator.Game game, string modPath, List<(string, string)> paths, Action<string> writeLineFunction, bool useFolderPicker, bool copyToAppFolder)
     {
         var modPaths = paths.Select(a => $@"{modPath}\{a.Item2}").ToList();
 
@@ -113,7 +113,7 @@ sutLq3uRjLMM0IeTkQO6Pv8/R7UNFtdCWwIERzH8IQ==
         var gameHeaderPath = $@"{gamePath}\Data0.bhd";
         var gameDataPath = $@"{gamePath}\Data0.bdt";
 
-        var oodleResult = Oodle.GrabOodle(writeLineFunction, useFolderPicker, gamePath);
+        var oodleResult = Oodle.GrabOodle(writeLineFunction, useFolderPicker, copyToAppFolder, gamePath);
         if (!oodleResult)
         {
             return false;
