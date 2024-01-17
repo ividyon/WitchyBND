@@ -266,6 +266,7 @@ internal static class Program
                     {
                         case CliMode.Parse:
                             DisplayConfiguration(mode);
+                            Update.CheckForUpdates();
 
                             Stopwatch watch = new Stopwatch();
 
@@ -288,11 +289,13 @@ internal static class Program
                             break;
                         case CliMode.Watch:
                             DisplayConfiguration(mode);
+                            Update.CheckForUpdates();
                             WatcherMode.CliWatcherMode(opt);
                             PrintIssues();
                             PrintFinale();
                             break;
                         case CliMode.Config:
+                            Update.CheckForUpdates();
                             ConfigMode.CliConfigMode(opt);
                             break;
                         default:

@@ -30,19 +30,16 @@ public static class Configuration
         public bool Recursive { get; set; }
         public ushort EndDelay { get; set; }
         public bool PauseOnError { get; set; }
-
         public bool Parallel { get; set; }
         public bool Expert { get; set; }
+        public bool Offline { get; set; }
     }
 
     public class WitchyArgValues
     {
         public bool UnpackOnly { get; set; }
-
         public bool RepackOnly { get; set; }
-
         public bool Passive { get; set; }
-
         public string? Location { get; set; }
     }
 
@@ -96,6 +93,12 @@ public static class Configuration
     {
         get => _values.Parallel;
         set => _values.Parallel = value;
+    }
+
+    public static bool Offline
+    {
+        get => _values.Offline;
+        set => _values.Offline = value;
     }
 
     public static void ReplaceConfig(IConfigurationRoot config)

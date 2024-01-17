@@ -4,6 +4,9 @@ Read the [notes on updating Witchy](https://github.com/ividyon/WitchyBND?tab=rea
 * Added **File Watcher** mode.
   * When selected, Witchy watches for changes to the selected files (or unpacked BND folders). When changes happen, the affected files is automatically processed.
   * Can be combined with the "Recursive" setting and the "Process to..." path selection for some dramatic results in editing comfort.
+* Added an online update check. Witchy will now notify you if there are new versions available.
+* Added an "Offline mode" configuration option which disables any connectivity to the internet, such as the update check.
+  * This is disabled by default.
 * Expanded the Recursive setting to work when repacking binders, as well.
   * Witchy will check if any of the files to be packed into the binder are unpacked, and will repack them before adding the file to the binder.
   * Example use case: Repacking a PARTSBND would first repack the TPF inside when using Recursive, thus applying any texture changes.

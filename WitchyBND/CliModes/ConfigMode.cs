@@ -17,6 +17,7 @@ public static class ConfigMode
         ToggleRecursive,
         ToggleParamDefaultValues,
         ToggleParallel,
+        ToggleOfflineMode,
         ConfigureDelay,
         TogglePauseOnError,
         Windows,
@@ -71,6 +72,11 @@ Disabling vastly increases XML output size."
             },
             new ConfigMenuItem
             {
+                Type = ConfigMenuItemType.ToggleOfflineMode, Label = Configuration.Offline ? "Toggle \"Offline Mode\" (Enabled)" : "Toggle \"Offline\" (Disabled)",
+                Description = @"Disables any internet connectivity features, such as the update version check."
+            },
+            new ConfigMenuItem
+            {
                 Type = ConfigMenuItemType.ConfigureDelay, Label = $"Configure end delay ({Configuration.EndDelay}ms)"
             },
             new ConfigMenuItem { Type = ConfigMenuItemType.Windows, Label = "Configure Windows integration" },
@@ -110,55 +116,43 @@ Press any key to continue to the configuration screen...");
 
             if (select.IsAborted) return;
 
+            void UpdateConfig()
+            {
+                Configuration.UpdateConfiguration();
+                PromptPlus.WriteLine("Successfully updated the configuration.");
+                PromptPlus.KeyPress(Constants.PressAnyKeyConfiguration).Run();
+                PromptPlus.Clear();
+            }
+
             switch (select.Value.Type)
             {
                 case ConfigMenuItemType.ToggleBnd:
                     Configuration.Bnd = !Configuration.Bnd;
-                    Configuration.UpdateConfiguration();
-                    PromptPlus.WriteLine("Successfully updated the configuration.");
-                    PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);
-                    PromptPlus.ReadKey();
-                    PromptPlus.Clear();
+                    UpdateConfig();
                     break;
                 case ConfigMenuItemType.ToggleDcx:
                     Configuration.Dcx = !Configuration.Dcx;
-                    Configuration.UpdateConfiguration();
-                    PromptPlus.WriteLine("Successfully updated the configuration.");
-                    PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);
-                    PromptPlus.ReadKey();
-                    PromptPlus.Clear();
+                    UpdateConfig();
                     break;
                 case ConfigMenuItemType.ToggleRecursive:
                     Configuration.Recursive = !Configuration.Recursive;
-                    Configuration.UpdateConfiguration();
-                    PromptPlus.WriteLine("Successfully updated the configuration.");
-                    PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);
-                    PromptPlus.ReadKey();
-                    PromptPlus.Clear();
+                    UpdateConfig();
                     break;
                 case ConfigMenuItemType.ToggleParallel:
                     Configuration.Parallel = !Configuration.Parallel;
-                    Configuration.UpdateConfiguration();
-                    PromptPlus.WriteLine("Successfully updated the configuration.");
-                    PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);
-                    PromptPlus.ReadKey();
-                    PromptPlus.Clear();
+                    UpdateConfig();
                     break;
                 case ConfigMenuItemType.ToggleParamDefaultValues:
                     Configuration.ParamDefaultValues = !Configuration.ParamDefaultValues;
-                    Configuration.UpdateConfiguration();
-                    PromptPlus.WriteLine("Successfully updated the configuration.");
-                    PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);
-                    PromptPlus.ReadKey();
-                    PromptPlus.Clear();
+                    UpdateConfig();
                     break;
                 case ConfigMenuItemType.TogglePauseOnError:
                     Configuration.PauseOnError = !Configuration.PauseOnError;
-                    Configuration.UpdateConfiguration();
-                    PromptPlus.WriteLine("Successfully updated the configuration.");
-                    PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);
-                    PromptPlus.ReadKey();
-                    PromptPlus.Clear();
+                    UpdateConfig();
+                    break;
+                case ConfigMenuItemType.ToggleOfflineMode:
+                    Configuration.PauseOnError = !Configuration.PauseOnError;
+                    UpdateConfig();
                     break;
                 case ConfigMenuItemType.ConfigureDelay:
                     var input = PromptPlus.Input("Input new delay (in milliseconds)")
@@ -170,28 +164,24 @@ Press any key to continue to the configuration screen...");
                     {
                         Configuration.EndDelay = Convert.ToUInt16(input.Value);
                         Configuration.UpdateConfiguration();
-                        PromptPlus.WriteLine("Successfully updated the configuration.");
-                        PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);
-                        PromptPlus.ReadKey();
+                        UpdateConfig();
                     }
-                    PromptPlus.Clear();
+                    else
+                        PromptPlus.Clear();
                     break;
                 case ConfigMenuItemType.Windows:
                     IntegrationMode.CliShellIntegrationMode(opt);
-                    PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);
                     PromptPlus.Clear();
                     break;
                 case ConfigMenuItemType.Formats:
                     PromptPlus.WriteLine(
                         $"WitchyBND supports the following formats:\n{string.Join(", ", ParseMode.Parsers.Where(p => p.IncludeInList).Select(p => p.Name))}");
-                    PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);
-                    PromptPlus.ReadKey();
+                    PromptPlus.KeyPress(Constants.PressAnyKeyConfiguration).Run();
                     PromptPlus.Clear();
                     break;
                 case ConfigMenuItemType.Help:
                     Program.DisplayHelp();
-                    PromptPlus.WriteLine(Constants.PressAnyKeyConfiguration);
-                    PromptPlus.ReadKey();
+                    PromptPlus.KeyPress(Constants.PressAnyKeyConfiguration).Run();
                     PromptPlus.Clear();
                     break;
                 case ConfigMenuItemType.Exit:
