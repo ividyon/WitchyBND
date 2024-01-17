@@ -6,6 +6,12 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+        <DebugType>embedded</DebugType>
+        <PlatformTarget>x64</PlatformTarget>
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    </PropertyGroup>
+
     <ItemGroup>
       <PackageReference Include="BouncyCastle.Cryptography" Version="2.2.0" />
       <PackageReference Include="NativeFileDialogSharp" Version="0.6.0-alpha" />
