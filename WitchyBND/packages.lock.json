@@ -232,6 +232,14 @@
           "System.ValueTuple": "[4.5.0, )"
         }
       },
+      "soulsoodlelib": {
+        "type": "Project",
+        "dependencies": {
+          "BouncyCastle.Cryptography": "[2.2.0, )",
+          "NativeFileDialogSharp": "[0.6.0-alpha, )",
+          "SoulsFormats": "[2.4.0, )"
+        }
+      },
       "studioutils": {
         "type": "Project"
       },

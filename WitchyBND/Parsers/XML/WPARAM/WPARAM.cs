@@ -98,8 +98,6 @@ If DSMapStudio does not yet support this game or regulation version, an experime
 
     public override bool HasPreprocess => true;
 
-    public List<string> PreprocessedPaths = new();
-
     public static string GetGamePath(string path)
     {
         string dirPath = Path.GetDirectoryName(path)!;

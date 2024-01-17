@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WitchyTests", "WitchyTests\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WitchyBND.Shell", "WitchyBND.Shell\WitchyBND.Shell.csproj", "{5D3322F3-CC35-428E-8B28-2AE1F74B0417}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoulsOodleLib", "SoulsOodleLib\SoulsOodleLib.csproj", "{661F39B2-01D3-4150-BA3C-AFFEB0818042}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{5D3322F3-CC35-428E-8B28-2AE1F74B0417}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D3322F3-CC35-428E-8B28-2AE1F74B0417}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D3322F3-CC35-428E-8B28-2AE1F74B0417}.Release|Any CPU.Build.0 = Release|Any CPU
+		{661F39B2-01D3-4150-BA3C-AFFEB0818042}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{661F39B2-01D3-4150-BA3C-AFFEB0818042}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{661F39B2-01D3-4150-BA3C-AFFEB0818042}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{661F39B2-01D3-4150-BA3C-AFFEB0818042}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

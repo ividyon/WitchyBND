@@ -10,6 +10,7 @@ Read the [notes on updating Witchy](https://github.com/ividyon/WitchyBND?tab=rea
 * Expanded the Recursive setting to work when repacking binders, as well.
   * Witchy will check if any of the files to be packed into the binder are unpacked, and will repack them before adding the file to the binder.
   * Example use case: Repacking a PARTSBND would first repack the TPF inside when using Recursive, thus applying any texture changes.
+* Witchy will now attempt to automatically fetch the oo2core DLL from your detected Steam game folders.
 * Added `entryfilelist` serialization support.
 * Cleaned up the context menu and added the File Watcher mode to it.
 * Fixed known issues with file list ordering during parallel processing.

@@ -32,6 +32,8 @@ public abstract class WFileParser
 
     public virtual bool HasPreprocess => false;
 
+    protected readonly HashSet<string> PreprocessedPaths = new();
+
     public virtual bool Preprocess(string srcPath)
     { return false; }
 

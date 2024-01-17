@@ -265,6 +265,7 @@ internal static class Program
                     switch (mode)
                     {
                         case CliMode.Parse:
+                            SoulsOodleLib.Oodle.GrabOodle(_ => {}, false);
                             DisplayConfiguration(mode);
                             Update.CheckForUpdates();
 
@@ -288,6 +289,7 @@ internal static class Program
                             PrintFinale(pause);
                             break;
                         case CliMode.Watch:
+                            SoulsOodleLib.Oodle.GrabOodle(_ => {}, false);
                             DisplayConfiguration(mode);
                             Update.CheckForUpdates();
                             WatcherMode.CliWatcherMode(opt);
@@ -313,7 +315,7 @@ internal static class Program
             .WithNotParsed(errors => { DisplayHelp(parserResult, errors); });
     }
 
-    public static void PrintIssues()
+    private static void PrintIssues()
     {
         if (ProcessedItems > 5)
         {
@@ -344,7 +346,7 @@ internal static class Program
         }
     }
 
-    public static void PrintFinale(int? pause = null)
+    private static void PrintFinale(int? pause = null)
     {
         pause ??= Configuration.EndDelay;
         if (!Configuration.Args.Passive)
@@ -366,7 +368,7 @@ internal static class Program
         }
     }
 
-    public static void DisplayConfiguration(CliMode mode)
+    private static void DisplayConfiguration(CliMode mode)
     {
         var infoTable = new Dictionary<string, string>()
         {

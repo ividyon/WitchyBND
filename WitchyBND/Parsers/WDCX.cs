@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
+using PPlus;
 using SoulsFormats;
 using WitchyLib;
 
@@ -15,6 +17,8 @@ namespace WitchyBND.Parsers;
 public class WDCX : WSingleFileParser
 {
     public override string Name => "DCX";
+    public override bool HasPreprocess => true;
+
     public override bool Is(string path, byte[] _, out ISoulsFile? file)
     {
         file = null;

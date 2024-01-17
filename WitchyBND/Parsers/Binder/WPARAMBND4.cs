@@ -80,16 +80,13 @@ public class WPARAMBND4 : WBinderParser
     }
 
     public override bool HasPreprocess => true;
-
-    public List<string> PreprocessedPaths = new();
     public override bool Preprocess(string srcPath)
     {
+        if (PreprocessedPaths.Contains(srcPath)) return false;
         if (!Directory.Exists(srcPath)) return false;
 
         string xmlPath = GetBinderXmlPath(srcPath, "bnd4");
         if (!File.Exists(xmlPath)) return false;
-
-        if (PreprocessedPaths.Contains(srcPath)) return false;
 
         var doc = XDocument.Load(GetBinderXmlPath(srcPath, "bnd4"));
         if (doc.Root == null || doc.Root.Name != "bnd4") return false;
@@ -107,6 +104,9 @@ public class WPARAMBND4 : WBinderParser
             WPARAM.Games[srcPath] = (game, regVer);
 
         WPARAM.PopulateParamdex(game);
+
+        if (FilenameIsModernRegulation(srcPath))
+            ParseMode.Parsers.OfType<WDCX>().FirstOrDefault()?.Preprocess(srcPath);
 
         PreprocessedPaths.Add(srcPath);
         return true;
