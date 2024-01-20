@@ -412,7 +412,7 @@ public class RSFXR : SoulsFile<RSFXR>
                         case ConditionOperandLiteral floatOp:
                             return floatOp.Value;
                         default:
-                            return Value;
+                            return null;
                     }
                 }
             }

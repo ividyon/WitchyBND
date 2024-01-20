@@ -71,6 +71,10 @@ Special thanks to Nordgaren, The12thAvenger, philiquaz, TKGP, thefifthmatt, Kirn
 # Changelog
 ## WitchyBND
 
+### 2.4.0.1
+
+* Fixed an infinite loop when repacking FXR files.
+
 ### 2.4.0.0
 
 * Added **File Watcher** mode.
