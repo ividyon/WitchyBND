@@ -18,7 +18,7 @@ public abstract class WBinderParser : WFolderParser
 {
     protected static XElement WriteBinderFiles(IBinder bnd, string destDirPath, string root)
     {
-        var bag = new ConcurrentBag<XElement>();
+        var bag = new ConcurrentDictionary<string, XElement>();
 
         var files = new XElement("files");
         var pathCounts = new ConcurrentDictionary<string, int>();
@@ -77,7 +77,7 @@ public abstract class WBinderParser : WFolderParser
             resultingPaths.Push(destPath);
             File.WriteAllBytes(destPath, bytes);
 
-            bag.Add(fileElement);
+            bag.TryAdd(file.Name, fileElement);
         }
 
         if (Configuration.Parallel)
@@ -90,21 +90,11 @@ public abstract class WBinderParser : WFolderParser
             }
         }
 
-        if (Configuration.Parallel)
+        // Spill the bag
+        foreach (BinderFile file in bnd.Files)
         {
-            if (Binder.HasIDs(bnd.Format))
-            {
-                files.Add(bag.OrderBy(el => Convert.ToInt32(el.Element("id")!.Value)));
-            }
-            else if (Binder.HasNames(bnd.Format))
-            {
-                files.Add(bag.OrderBy(el => el.Element("path")!.Value));
-            }
-            else
-                files.Add(bag);
+            files.Add(bag[file.Name]);
         }
-        else
-            files.Add(bag);
 
         if (Configuration.Recursive)
         {
@@ -141,7 +131,8 @@ public abstract class WBinderParser : WFolderParser
 
     protected static void ReadBinderFiles(IBinder bnd, XElement filesElement, string srcDirPath, string root)
     {
-        var bag = new ConcurrentBag<BinderFile>();
+        var bag = new ConcurrentDictionary<string, BinderFile>();
+        var nameList = filesElement.Elements("file").Select(file => Path.Combine(root, file.Element("path")!.Value)).ToList();
 
         void Callback(XElement file) {
             if (file.Element("path") == null)
@@ -174,7 +165,7 @@ public abstract class WBinderParser : WFolderParser
             RecursiveRepackFile(inPath);
 
             byte[] bytes = File.ReadAllBytes(inPath);
-            bag.Add(new BinderFile(flags, id, name, bytes)
+            bag.TryAdd(name, new BinderFile(flags, id, name, bytes)
             {
                 CompressionType = compressionType
             });
@@ -189,7 +180,11 @@ public abstract class WBinderParser : WFolderParser
             }
         }
 
-        bnd.Files = bag.ToList();
+        // Spill the bag
+        foreach (string name in nameList)
+        {
+            bnd.Files.Add(bag[name]);
+        }
     }
 }
 

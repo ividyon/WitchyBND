@@ -1,1 +1,1 @@
-* Fixed an infinite loop when repacking FXR files.
+* Fixed a critical issue that corrupted the order of files in binders, reading to them being unreadable in some cases.

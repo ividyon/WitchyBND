@@ -222,12 +222,10 @@ public static class Shell
         try
         {
             var ptr = FindWindow("Shell_TrayWnd", null);
-            // Console.WriteLine("INIT PTR: {0}", ptr.ToInt32());
             PostMessage(ptr, WM_USER + 436, (IntPtr)0, (IntPtr)0);
             do
             {
                 ptr = FindWindow("Shell_TrayWnd", null);
-                // Console.WriteLine("PTR: {0}", ptr.ToInt32());
 
                 if (ptr.ToInt32() == 0)
                 {
