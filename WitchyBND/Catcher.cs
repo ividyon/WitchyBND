@@ -49,6 +49,7 @@ public static class Catcher
         catch (IOException)
         {
             Program.RegisterError(new WitchyError("WitchyBND could not operate on the file as it was being used by another process.", source, WitchyErrorType.InUse));
+            error = true;
         }
         catch (FriendlyException e)
         {

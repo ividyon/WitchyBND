@@ -40,6 +40,7 @@ public static class ParseMode
             var error = false;
 
             byte[] data = null;
+            bool isDcx = false;
             DCX.Type compression = DCX.Type.None;
             if (File.Exists(path) && DCX.Is(path))
             {
@@ -48,6 +49,7 @@ public static class ParseMode
                     lock (Program.ConsoleWriterLock)
                         PromptPlus.WriteLine($"Decompressing DCX: {fileName.PromptPlusEscape()}...");
 
+                    isDcx = true;
                     data = DCX.Decompress(path, out DCX.Type compressionVal);
                     compression = compressionVal;
                 }
@@ -74,6 +76,13 @@ public static class ParseMode
 
                 if (toBreak)
                     break;
+            }
+
+            // If no other parser present but file is a DCX, at least un-DCX it
+            if (!parsed && isDcx && !Configuration.Args.RepackOnly)
+            {
+                WDCX dcxParser = Parsers.OfType<WDCX>().First();
+                Unpack(path, null, compression, dcxParser, false, out parsed);
             }
 
             PrintParseSuccess(path, parsed, error, recursive);

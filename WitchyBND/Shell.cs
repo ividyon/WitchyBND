@@ -219,33 +219,10 @@ public static class Shell
 
     public static void RestartExplorer()
     {
-        try
-        {
-            var ptr = FindWindow("Shell_TrayWnd", null);
-            PostMessage(ptr, WM_USER + 436, (IntPtr)0, (IntPtr)0);
-            do
-            {
-                ptr = FindWindow("Shell_TrayWnd", null);
-
-                if (ptr.ToInt32() == 0)
-                {
-                    // Console.WriteLine("Success. Breaking out of loop.");
-                    break;
-                }
-
-                Thread.Sleep(1000);
-            } while (true);
-        }
-        catch (Exception ex)
-        {
-            PromptPlus.Error.WriteLine("{0} {1}", ex.Message, ex.StackTrace);
-        }
-        // PromptPlus.WriteLine("Restarting the shell.");
-        string explorer = string.Format("{0}\\{1}", Environment.GetEnvironmentVariable("WINDIR"), "explorer.exe");
-        Process process = new Process();
-        process.StartInfo.FileName = explorer;
-        process.StartInfo.UseShellExecute = true;
-        process.Start();
+        RestartExplorer restartExplorer = new RestartExplorer();
+        restartExplorer.Execute(() => {
+            PromptPlus.WriteLine("Explorer process stopped.");
+        });
     }
 
     public static void AddToPathVariable()

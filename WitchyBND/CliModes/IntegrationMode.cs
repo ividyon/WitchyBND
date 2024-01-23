@@ -53,8 +53,8 @@ public class IntegrationMode
                     PromptPlus.WriteLine("Successfully unregistered WitchyBND context menu.");
                     PromptPlus.WriteLine(
                         @"Explorer needs to be restarted to complete the process.
-Any open folder windows will be closed, and your taskbar will briefly disappear for a few seconds.");
-                    var choice = PromptPlus.Confirm("Proceed with restarting Explorer?").Run();
+Your taskbar will briefly disappear for a few seconds. Witchy will try to restore any open Explorer windows.");
+                    var choice = PromptPlus.Confirm("Proceed with restarting the Explorer process?").Run();
                     if (choice.Value.IsYesResponseKey())
                     {
                         Shell.RestartExplorer();

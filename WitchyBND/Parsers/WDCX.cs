@@ -65,7 +65,7 @@ public class WDCX : WSingleFileParser
         return File.Exists(xmlPath);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile _)
+    public override void Unpack(string srcPath, ISoulsFile? _)
     {
         string outPath = GetUnpackDestPath(srcPath);
 
