@@ -161,17 +161,24 @@ If DSMapStudio does not yet support this game or regulation version, an experime
         PromptPlus.Error.WriteLine("Located Paramdex archive; replacing existing Paramdex.");
         if (Directory.Exists(paramdexPath))
             Directory.Delete(paramdexPath, true);
-        using (ZipArchive archive = ZipFile.OpenRead(zipPath))
+        try
         {
-            if (!Directory.Exists(paramdexPath))
-                Directory.CreateDirectory(paramdexPath);
-            PromptPlus.Error.WriteLine("Extracting Paramdex archive. This is a one-time operation.");
-            archive.ExtractToDirectory(paramdexPath, true);
-        }
+            using (ZipArchive archive = ZipFile.OpenRead(zipPath))
+            {
+                if (!Directory.Exists(paramdexPath))
+                    Directory.CreateDirectory(paramdexPath);
+                PromptPlus.Error.WriteLine("Extracting Paramdex archive. This is a one-time operation.");
+                archive.ExtractToDirectory(paramdexPath, true);
+            }
 
-        File.Delete(zipPath);
-        PromptPlus.Error.WriteLine("Successfully extracted Paramdex archive.");
-        PromptPlus.Error.WriteLine("");
+            File.Delete(zipPath);
+            PromptPlus.Error.WriteLine("Successfully extracted Paramdex archive.");
+            PromptPlus.Error.WriteLine("");
+        }
+        catch (Exception e)
+        {
+            Program.RegisterError(new WitchyError(@"A problem occurred while extracting the Paramdex archive. Please extract it manually in the ""Assets"" directory in the WitchyBND folder. Alternately, try re-downloading WitchyBND, as the download may have been corrupted."));
+        }
     }
 
     public static void PopulateParamdex(WBUtil.GameType game)

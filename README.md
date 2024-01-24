@@ -71,6 +71,16 @@ Special thanks to Nordgaren, The12thAvenger, philiquaz, TKGP, thefifthmatt, Kirn
 # Changelog
 ## WitchyBND
 
+### 2.4.1.0
+
+* Changed the DCX behavior. If Witchy cannot find a valid parser for a DCX-compressed file, it will now decompress the DCX instead of doing nothing.
+* Changed the method Witchy uses to restart the Explorer process, to hopefully fix some unreproducible issues.
+* Added some minor error handling to the Paramdex unzipping process.
+
+### 2.4.0.2
+
+* Fixed a critical issue that corrupted the order of files in binders, reading to them being unreadable in some cases.
+
 ### 2.4.0.1
 
 * Fixed an infinite loop when repacking FXR files.
