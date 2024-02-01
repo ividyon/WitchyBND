@@ -388,7 +388,7 @@ public class RSFXR : SoulsFile<RSFXR>
         {
             Literal = -4,
             External = -3,
-            UnkMinus2 = -2,
+            TimeOfDay = -2,
             StateTime = -1
         }
 
@@ -446,7 +446,7 @@ public class RSFXR : SoulsFile<RSFXR>
                         };
                     case OperandType.StateTime:
                         return new ConditionOperandStateTime();
-                    case OperandType.UnkMinus2:
+                    case OperandType.TimeOfDay:
                         return new ConditionOperandUnkMinus2();
                 }
 
@@ -474,7 +474,7 @@ public class RSFXR : SoulsFile<RSFXR>
                 if (type is OperandType.StateTime && field is null)
                     return new ConditionOperandStateTime();
 
-                if (type is OperandType.UnkMinus2 && field is null)
+                if (type is OperandType.TimeOfDay && field is null)
                     return new ConditionOperandUnkMinus2();
 
                 throw new ArgumentException("Field does not match operand type");
@@ -527,7 +527,7 @@ public class RSFXR : SoulsFile<RSFXR>
         [XmlType("UnkMinus2")]
         public class ConditionOperandUnkMinus2 : ConditionOperand
         {
-            public override OperandType Type => OperandType.UnkMinus2;
+            public override OperandType Type => OperandType.TimeOfDay;
         }
 
         public class ConditionOperator
