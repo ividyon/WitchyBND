@@ -1,3 +1,8 @@
+* Introduced "deferred tools"/"deferred formats".
+  * This includes formats that Witchy does not directly handle, but are handled by simple enough commandline tools that can be rolled into Witchy processing by being called externally. Witchy requires those tools to be installed for this to work.
+  * To process deferred formats with Witchy, you need to download the according tool, unpack it somewhere, and configure the path to the tool in the Witchy configuration menu.
+  * Once configured, Witchy will simply run the tool on supported files when they are processed via Witchy.
+  * For starters, this includes support for HKX (via HKLib.CLI) and LUA/HKS (via DSLuaDecompiler).
 * Restricted the version update check to occur only once every 6 hours, to avoid getting timed out by GitHub when running Witchy a lot.
 * Fixed an issue where "file not found" exceptions would be erroneously filed away as "in use by another process" errors.
 * Fixed an issue where processing errors would erroneously display a "Could not find valid parser" error message.

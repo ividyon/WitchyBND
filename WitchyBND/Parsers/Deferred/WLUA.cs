@@ -16,9 +16,9 @@ public class WLUA : WSingleFileParser
         file = null;
         var extension = Path.GetExtension(path).ToLower();
         var cond = extension is ".lua" or ".hks";
-        if (!cond)
+        if (cond && !Configuration.DeferTools.ContainsKey(DeferFormat.Hkx))
             throw new DeferToolPathException(DeferFormat.Lua);
-        return true;
+        return cond;
     }
     public override bool ExistsUnpacked(string path)
     {

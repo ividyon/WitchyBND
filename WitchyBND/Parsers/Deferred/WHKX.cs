@@ -16,9 +16,9 @@ public class WHKX : WSingleFileParser
         file = null;
         var extension = Path.GetExtension(path).ToLower();
         var cond = extension is ".hkx";
-        if (!cond)
+        if (cond && !Configuration.DeferTools.ContainsKey(DeferFormat.Hkx))
             throw new DeferToolPathException(DeferFormat.Hkx);
-        return true;
+        return cond;
     }
     public override bool ExistsUnpacked(string path)
     {

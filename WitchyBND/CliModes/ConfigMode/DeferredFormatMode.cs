@@ -9,12 +9,6 @@ using WitchyLib;
 namespace WitchyBND.CliModes;
 public static class DeferredFormatMode
 {
-    private enum DeferredFormatChoices
-    {
-        RegisterDeferredTool,
-        UnregisterDeferredTool,
-    }
-
     public static void Run(CliOptions opt)
     {
         using (PromptPlus.EscapeColorTokens())
