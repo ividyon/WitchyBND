@@ -18,147 +18,6 @@ using PARAM = WitchyFormats.FsParam;
 namespace WitchyBND;
 
 [SupportedOSPlatform("windows")]
-public enum CliMode
-{
-    Parse,
-    Config,
-    Watch
-}
-
-public enum WitchyErrorType
-{
-    Generic,
-    NoOodle,
-    NoAccess,
-    InUse,
-    Exception
-}
-
-public class WitchyError
-{
-    public string Message { get; set; }
-    public WitchyErrorType Type { get; set; } = WitchyErrorType.Generic;
-    public string? Source { get; set; } = null;
-    public short ErrorCode { get; set; } = -1;
-
-    public WitchyError(string message)
-    {
-        Message = message;
-    }
-
-    public WitchyError(string message, string? source)
-    {
-        Message = message;
-        Source = source;
-    }
-
-    public WitchyError(string message, string? source, WitchyErrorType type)
-    {
-        Message = message;
-        Source = source;
-        Type = type;
-    }
-
-    public WitchyError(string message, string? source, WitchyErrorType type, short errorCode)
-    {
-        Message = message;
-        Source = source;
-        Type = type;
-        ErrorCode = errorCode;
-    }
-
-    public WitchyError(string message, string? source, short errorCode)
-    {
-        Message = message;
-        Source = source;
-        ErrorCode = errorCode;
-    }
-
-    public WitchyError(string message, WitchyErrorType type)
-    {
-        Message = message;
-        Type = type;
-    }
-
-    public WitchyError(string message, short errorCode)
-    {
-        Message = message;
-        ErrorCode = errorCode;
-    }
-}
-
-public class WitchyNotice
-{
-    public string Message { get; set; }
-    public string Source { get; set; } = "Notice";
-
-    public WitchyNotice(string message)
-    {
-        Message = message;
-    }
-
-    public WitchyNotice(string message, string source)
-    {
-        Message = message;
-        Source = source;
-    }
-}
-
-public class CliOptions
-{
-    // [Option('v', "verbose", Group = "verbosity", Default = false, HelpText = "Set output to verbose messages.")]
-    // public bool Verbose { get; set; }
-    //
-    // [Option('q', "quiet", Group = "verbosity", Default = false,
-    //     HelpText = "Set output to quiet, reporting only errors.")]
-    // public bool Quiet { get; set; }
-
-    [Option('c', "recursive", HelpText = "Attempt to process files contained within binders recursively.")]
-    public bool Recursive { get; set; }
-
-    [Option('e', "parallel", HelpText = "Runs operations parallelized")]
-    public bool Parallel { get; set; }
-
-    [Option('m', "mode", HelpText = "Toggle the mode to use. Options are \"Parse\", \"Watch\" and \"Config\".", Default = CliMode.Parse)]
-    public CliMode Mode { get; set; }
-
-    [Option('p', "passive",
-        HelpText =
-            "Will not prompt the user for any input or cause any delays. Suited for automatic execution in scripts.")]
-    public bool Passive { get; set; }
-
-    [Option('l', "location",
-        HelpText = "Specifies a path to unpack binders to. Enter \"prompt\" to open a folder dialog instead.")]
-    public string Location { get; set; }
-
-    [Option('a', "param-default-values",
-        HelpText =
-            "Whether serialized PARAM will separately store default values for param rows. Provide \"true\" or \"false\".")]
-    public bool? ParamDefaultValues { get; set; }
-
-    [Option('d', "dcx", HelpText = "Simply decompress DCX files instead of unpacking their content.")]
-    public bool Dcx { get; set; }
-
-    [Option('b', "bnd",
-        HelpText = "Perform basic unpacking of BND instead of using special Witchy methods, where present")]
-    public bool Bnd { get; set; }
-
-    [Option('r', "repack", HelpText = "Only perform repack processing, no unpacking.", SetName = "pack")]
-    public bool RepackOnly { get; set; }
-
-    [Option('u', "unpack", HelpText = "Only perform unpack processing, no repacking.", SetName = "pack")]
-    public bool UnpackOnly { get; set; }
-
-    [Option('h', "help", HelpText = "Display this help screen.")]
-    public bool Help { get; set; }
-
-    [Option('v', "version", HelpText = "Display version information.")]
-    public bool Version { get; set; }
-
-    [Value(0, HelpText = "The paths that should be parsed by Witchy.")]
-    public IEnumerable<string> Paths { get; set; }
-}
-
 internal static class Program
 {
     internal static readonly object ConsoleWriterLock = new object();
@@ -215,10 +74,13 @@ internal static class Program
                     // Arg-only configuration
                     if (opt.RepackOnly)
                         Configuration.Args.RepackOnly = opt.RepackOnly;
+
                     if (opt.UnpackOnly)
                         Configuration.Args.UnpackOnly = opt.UnpackOnly;
+
                     if (opt.Passive)
                         Configuration.Args.Passive = opt.Passive;
+
                     if (!string.IsNullOrWhiteSpace(opt.Location))
                     {
                         string location = opt.Location;

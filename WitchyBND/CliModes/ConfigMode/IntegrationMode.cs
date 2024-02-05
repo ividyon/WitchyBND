@@ -5,7 +5,7 @@ using PPlus;
 
 namespace WitchyBND.CliModes;
 
-public class IntegrationMode
+public static class IntegrationMode
 {
     private enum IntegrationChoices
     {
@@ -28,9 +28,6 @@ public class IntegrationMode
         [Display(Name = "Remove WitchyBND from PATH environment variable",
             Description = "Reverts the above.")]
         RemoveFromPath,
-
-        [Display(Name = "Return to configuration menu")]
-        Return
     }
 
     public static void CliShellIntegrationMode(CliOptions opt)
@@ -73,8 +70,6 @@ Your taskbar will briefly disappear for a few seconds. Witchy will try to restor
                     Shell.RemoveFromPathVariable();
                     PromptPlus.WriteLine("Successfully removed WitchyBND from PATH variable.");
                     break;
-                case IntegrationChoices.Return:
-                    return;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

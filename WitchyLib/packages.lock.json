@@ -22,19 +22,25 @@
       },
       "PromptPlus": {
         "type": "Direct",
-        "requested": "[4.0.5, )",
-        "resolved": "4.0.5",
-        "contentHash": "hPrmDJmvmpdNlkr8GJILoLkTcBMywEz4dd3D8Hidc1kAok6siA5snGIVzhRvLzqHfTwwv2Xj/ggmsuzkBJXQpQ==",
+        "requested": "[4.2.0, )",
+        "resolved": "4.2.0",
+        "contentHash": "Won6lYBsdKarWafpfMjd81MlI7WPnW8cDQ7ODY5RBqlOaQ2vrHEOc22BMOEHHwJDm777DNLvcTN4Dy22fBrbBQ==",
         "dependencies": {
+          "EastAsianWidthDotNet": "1.0.1",
           "System.ComponentModel.Annotations": "5.0.0",
           "System.IO": "4.3.0",
-          "System.Text.Json": "7.0.1"
+          "System.Text.Json": "7.0.3"
         }
       },
       "BouncyCastle.Cryptography": {
         "type": "Transitive",
         "resolved": "2.2.0",
         "contentHash": "TEhtnfEnxppBM7u3t8hysLwdaWjGEK+IF6Gy6yI69oLT7nlYdyPlgoLaHAq+HqY+ycq58YtCVetAzXtHjqRytQ=="
+      },
+      "EastAsianWidthDotNet": {
+        "type": "Transitive",
+        "resolved": "1.0.1",
+        "contentHash": "vCn17XpsjpqAQvWCa5oUh81d/AVytUcBG9frXoDa+f66iuAiq9T4kDcqQnyp3dbN9cJ0cJA6ML98glpf315haQ=="
       },
       "Microsoft.NETCore.Platforms": {
         "type": "Transitive",
@@ -94,8 +100,8 @@
       },
       "System.Text.Json": {
         "type": "Transitive",
-        "resolved": "7.0.1",
-        "contentHash": "OtDEmCCiNl8JAduFKZ/r0Sw6XZNHwIicUYy/mXgMDGeOsZLshH37qi3oPRzFYiryVktiMoQLByMGPtRCEMYbeQ==",
+        "resolved": "7.0.3",
+        "contentHash": "AyjhwXN1zTFeIibHimfJn6eAsZ7rTBib79JQpzg8WAuR/HKDu9JGNHTuu3nbbXQ/bgI+U4z6HtZmCHNXB1QXrQ==",
         "dependencies": {
           "System.Text.Encodings.Web": "7.0.0"
         }

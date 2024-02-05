@@ -21,6 +21,7 @@ public class WFFXBNDModern : WBinderParser
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
         file = null;
+        path = path.ToLower();
         return Configuration.Bnd &&
                (path.EndsWith(".ffxbnd") || path.EndsWith(".ffxbnd.dcx")) && !path.Contains("_effect") &&
                !path.Contains("_resource") && IsRead<BND4>(path, data, out file);
@@ -209,11 +210,11 @@ public class WFFXBNDModern : WBinderParser
                 var tex = new TPF.Texture();
                 tex.Name = Path.GetFileNameWithoutExtension(fileName).Trim();
                 tex.Format = 0;
-                if (fileName.EndsWith("_m"))
+                if (fileName.ToLower().EndsWith("_m"))
                 {
                     tex.Format = 103;
                 }
-                else if (fileName.EndsWith("_n"))
+                else if (fileName.ToLower().EndsWith("_n"))
                 {
                     tex.Format = 106;
                 }

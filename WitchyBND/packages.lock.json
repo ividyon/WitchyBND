@@ -68,6 +68,11 @@
         "resolved": "2.2.0",
         "contentHash": "TEhtnfEnxppBM7u3t8hysLwdaWjGEK+IF6Gy6yI69oLT7nlYdyPlgoLaHAq+HqY+ycq58YtCVetAzXtHjqRytQ=="
       },
+      "EastAsianWidthDotNet": {
+        "type": "Transitive",
+        "resolved": "1.0.1",
+        "contentHash": "vCn17XpsjpqAQvWCa5oUh81d/AVytUcBG9frXoDa+f66iuAiq9T4kDcqQnyp3dbN9cJ0cJA6ML98glpf315haQ=="
+      },
       "Microsoft.Extensions.Configuration": {
         "type": "Transitive",
         "resolved": "8.0.0-preview.7.23375.6",
@@ -142,12 +147,13 @@
       },
       "PromptPlus": {
         "type": "Transitive",
-        "resolved": "4.0.5",
-        "contentHash": "hPrmDJmvmpdNlkr8GJILoLkTcBMywEz4dd3D8Hidc1kAok6siA5snGIVzhRvLzqHfTwwv2Xj/ggmsuzkBJXQpQ==",
+        "resolved": "4.2.0",
+        "contentHash": "Won6lYBsdKarWafpfMjd81MlI7WPnW8cDQ7ODY5RBqlOaQ2vrHEOc22BMOEHHwJDm777DNLvcTN4Dy22fBrbBQ==",
         "dependencies": {
+          "EastAsianWidthDotNet": "1.0.1",
           "System.ComponentModel.Annotations": "5.0.0",
           "System.IO": "4.3.0",
-          "System.Text.Json": "7.0.1"
+          "System.Text.Json": "7.0.3"
         }
       },
       "securifybv.PropertyStore": {
@@ -256,7 +262,7 @@
           "Microsoft.CSharp": "[4.7.0, )",
           "Microsoft.Extensions.FileSystemGlobbing": "[8.0.0-preview.2.23128.3, )",
           "Newtonsoft.Json": "[13.0.3, )",
-          "PromptPlus": "[4.0.5, )",
+          "PromptPlus": "[4.2.0, )",
           "SoulsFormats": "[2.4.1, )",
           "WitchyFormats": "[2.4.1, )"
         }

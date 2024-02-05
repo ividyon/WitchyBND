@@ -10,6 +10,7 @@ namespace WitchyBND;
 
 public static class Update
 {
+    internal const int UpdateInterval = 6;
     internal const string UpdateManifestUrl =
         "https://api.github.com/repos/ividyon/WitchyBND/tags";
 
@@ -19,8 +20,14 @@ public static class Update
     public static bool CheckForUpdates()
     {
         if (Configuration.Offline) return false;
+        DateTime? updateTime = Configuration.LastUpdateCheckTime;
+        if (updateTime != null && updateTime - DateTime.UtcNow > TimeSpan.FromHours(UpdateInterval)) return false;
         try
         {
+            // Update last update time
+            Configuration.LastUpdateCheckTime = DateTime.UtcNow;
+            Configuration.UpdateConfiguration();
+
             var client = new HttpClient();
             client.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
             var jsonString = client.GetStringAsync(UpdateManifestUrl);
@@ -42,7 +49,7 @@ Please update at your earliest convenience, as the new version may contain impor
         }
         catch (Exception e)
         {
-            Program.RegisterError($"Failed to check for version update: {e}");
+            Program.RegisterError($"Failed to check for version update: {e.Message}");
             return false;
         }
 

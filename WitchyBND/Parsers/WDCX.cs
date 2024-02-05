@@ -28,7 +28,7 @@ public class WDCX : WSingleFileParser
     public override string GetUnpackDestPath(string srcPath)
     {
         string sourceDir = new FileInfo(srcPath).Directory?.FullName;
-        if (srcPath.EndsWith(".dcx"))
+        if (srcPath.ToLower().EndsWith(".dcx"))
             return $"{sourceDir}\\{Path.GetFileNameWithoutExtension(srcPath)}";
         return $"{srcPath}.undcx";
     }
@@ -38,7 +38,7 @@ public class WDCX : WSingleFileParser
         var path = xml.Element("sourcePath")?.Value;
         if (path != null)
             srcPath = $"{path}\\{Path.GetFileName(srcPath)}";
-        if (srcPath.EndsWith(".undcx"))
+        if (srcPath.ToLower().EndsWith(".undcx"))
             return srcPath.Substring(0, srcPath.Length - 6);
         return srcPath + ".dcx";
     }

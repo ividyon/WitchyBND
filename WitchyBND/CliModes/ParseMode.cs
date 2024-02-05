@@ -125,9 +125,12 @@ public static class ParseMode
 
                 Interlocked.Increment(ref Program.ProcessedItems);
                 break;
-            case false when !error && !recursive:
-                lock (Program.ConsoleWriterLock)
-                    PromptPlus.Error.WriteLine($"Could not find valid parser for {path.PromptPlusEscape()}.");
+            case false:
+                if (!error)
+                {
+                    lock (Program.ConsoleWriterLock)
+                        PromptPlus.Error.WriteLine($"Could not find valid parser for {path.PromptPlusEscape()}.");
+                }
                 break;
         }
     }
@@ -226,6 +229,7 @@ public static class ParseMode
             new WMQB(),
             new WDBSUB(),
             new WENFL(),
+            new WLUA(),
             //MSBE
             //TAE
         };

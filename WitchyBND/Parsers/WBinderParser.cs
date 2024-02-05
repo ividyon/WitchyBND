@@ -209,7 +209,7 @@ public abstract class WUnsortedBinderParser : WBinderParser
 
     public virtual bool EndsInExtension(string path)
     {
-        return path.EndsWith($".{Extension}") || path.EndsWith($".{Extension}.dcx");
+        return path.ToLower().EndsWith($".{Extension.ToLower()}") || path.ToLower().EndsWith($".{Extension.ToLower()}.dcx");
     }
 
     protected virtual void ReadUnsortedBinderFiles(IBinder bnd, string srcDirPath, string root)

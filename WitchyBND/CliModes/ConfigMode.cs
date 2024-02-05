@@ -5,85 +5,48 @@ using System.Linq;
 using System.Reflection;
 using PPlus;
 using PPlus.Controls;
+using WitchyLib;
 
 namespace WitchyBND.CliModes;
 
 public static class ConfigMode
 {
-    private enum ConfigMenuItemType
+    private enum ConfigMenuItem
     {
+        [Display(Name = "Use specialized BND handlers",
+            Description = "Enable to extract certain BND types into a custom, user-friendly structure. Disable for standard handling.")]
         ToggleBnd,
+        [Display(Name = "DCX decompression only",
+        Description = "Enable to exclusively decompress DCX files and leave their contents intact.")]
         ToggleDcx,
+        [Display(Name = "Recursive binder processing",
+            Description = "Enable to recursively attempt to process any file inside unpacked binders. Very performance-intensive.")]
         ToggleRecursive,
-        ToggleParamDefaultValues,
+        [Display(Name = "Parallel processing",
+            Description = "Enable to perform WitchyBND operations in a parallelized, multi-threaded manner.")]
         ToggleParallel,
-        ToggleOfflineMode,
-        ConfigureDelay,
+        [Display(Name = "Store PARAM field default values",
+            Description = @"Enable to separate the default values of PARAM row fields out from the rows.
+Disabling vastly increases XML output size.")]
+        ToggleParamDefaultValues,
+        [Display(Name = "Pause on error",
+            Description = "Enable to pause the program and require a key press (unless in Passive mode) if it finishes with errors.")]
         TogglePauseOnError,
+        [Display(Name = "Offline mode",
+            Description = "Disables any internet connectivity features, such as the update version check.")]
+        ToggleOfflineMode,
+        [Display(Name = "Configure deferred tools")]
+        DeferredFormats,
+        [Display(Name = "Configure end delay")]
+        ConfigureDelay,
+        [Display(Name = "Configure Windows integration")]
         Windows,
+        [Display(Name = "View available formats")]
         Formats,
+        [Display(Name = "View help screen")]
         Help,
+        [Display(Name = "Exit")]
         Exit
-    }
-
-    private class ConfigMenuItem
-    {
-        public ConfigMenuItemType Type { get; set; }
-        public string Label { get; set; }
-        public string Description { get; set; } = "";
-    }
-
-    private static List<ConfigMenuItem> AssembleConfigMenu()
-    {
-        return new()
-        {
-            new ConfigMenuItem
-            {
-                Type = ConfigMenuItemType.ToggleBnd,
-                Label = Configuration.Bnd ? "Toggle \"Use specialized BND handlers\" (Enabled)" : "Toggle \"Use specialized BND handlers\" (Disabled)",
-                Description =
-                    "Enable to extract certain BND types into a custom, user-friendly structure. Disable for standard handling."
-            },
-            new ConfigMenuItem
-            {
-                Type = ConfigMenuItemType.ToggleDcx, Label = Configuration.Dcx ? "Toggle \"DCX decompression only\" (Enabled)" : "Toggle \"DCX decompression only\" (Disabled)",
-                Description = "Enable to exclusively decompress DCX files and leave their contents intact."
-            },
-            new ConfigMenuItem
-            {
-                Type = ConfigMenuItemType.ToggleRecursive, Label = Configuration.Recursive ? "Toggle \"Recursive binder processing\" (Enabled)" : "Toggle \"Recursive binder processing\" (Disabled)",
-                Description = "Enable to recursively attempt to process any file inside unpacked binders. Very performance-intensive."
-            },
-            new ConfigMenuItem
-            {
-                Type = ConfigMenuItemType.ToggleParallel, Label = Configuration.Parallel ? "Toggle \"Parallel processing\" (Enabled)" : "Toggle \"Parallel processing\" (Disabled)",
-                Description = "Enable to perform WitchyBND operations in a parallelized, multi-threaded manner."
-            },
-            new ConfigMenuItem
-            {
-                Type = ConfigMenuItemType.ToggleParamDefaultValues, Label = Configuration.ParamDefaultValues ? "Toggle \"Store PARAM field default values\" (Enabled)" : "Toggle \"Store PARAM field default values\" (Disabled)",
-                Description = @"Enable to separate the default values of PARAM row fields out from the rows.
-Disabling vastly increases XML output size."
-            },
-            new ConfigMenuItem
-            {
-                Type = ConfigMenuItemType.TogglePauseOnError, Label = Configuration.PauseOnError ? "Toggle \"Pause on Error\" (Enabled)" : "Toggle \"Pause on Error\" (Disabled)",
-                Description = @"Enable to pause the program and require a key press (unless in Passive mode) if it finishes with errors."
-            },
-            new ConfigMenuItem
-            {
-                Type = ConfigMenuItemType.ToggleOfflineMode, Label = Configuration.Offline ? "Toggle \"Offline Mode\" (Enabled)" : "Toggle \"Offline\" (Disabled)",
-                Description = @"Disables any internet connectivity features, such as the update version check."
-            },
-            new ConfigMenuItem
-            {
-                Type = ConfigMenuItemType.ConfigureDelay, Label = $"Configure end delay ({Configuration.EndDelay}ms)"
-            },
-            new ConfigMenuItem { Type = ConfigMenuItemType.Windows, Label = "Configure Windows integration" },
-            new ConfigMenuItem { Type = ConfigMenuItemType.Formats, Label = "View available formats" },
-            new ConfigMenuItem { Type = ConfigMenuItemType.Help, Label = "View help screen" },
-            new ConfigMenuItem { Type = ConfigMenuItemType.Exit, Label = "Exit" },
-        };
     }
 
     public static void CliConfigMode(CliOptions opt)
@@ -108,10 +71,44 @@ Press any key to continue to the configuration screen...");
         while (true)
         {
             PromptPlus.DoubleDash("Configuration menu");
+            PromptPlus.WriteLine("This menu is paged; scroll down to find more options.");
             var select = PromptPlus.Select<ConfigMenuItem>("Choose an option")
-                .AddItems(AssembleConfigMenu())
-                .TextSelector(a => a.Label)
-                .ChangeDescription(a => a.Description)
+                .TextSelector(a => {
+                    bool? toggled = null;
+                    var name = a.GetAttribute<DisplayAttribute>().Name;
+                    switch (a)
+                    {
+                        case ConfigMenuItem.ToggleBnd:
+                            toggled = Configuration.Bnd;
+                            break;
+                        case ConfigMenuItem.ToggleDcx:
+                            toggled = Configuration.Dcx;
+                            break;
+                        case ConfigMenuItem.ToggleRecursive:
+                            toggled = Configuration.Recursive;
+                            break;
+                        case ConfigMenuItem.ToggleParallel:
+                            toggled = Configuration.Parallel;
+                            break;
+                        case ConfigMenuItem.ToggleParamDefaultValues:
+                            toggled = Configuration.ParamDefaultValues;
+                            break;
+                        case ConfigMenuItem.TogglePauseOnError:
+                            toggled = Configuration.PauseOnError;
+                            break;
+                        case ConfigMenuItem.ToggleOfflineMode:
+                            toggled = Configuration.Offline;
+                            break;
+                        case ConfigMenuItem.ConfigureDelay:
+                            return $"{name} ({Configuration.EndDelay}ms)";
+                    }
+                    if (toggled != null)
+                    {
+                        return $"Toggle \"{name}\" " + (toggled.Value ? "(Enabled)" : "(Disabled)");
+                    }
+                    return name;
+                })
+                .ChangeDescription(a => a.GetAttribute<DisplayAttribute>().Description)
                 .Run();
 
             if (select.IsAborted) return;
@@ -124,37 +121,41 @@ Press any key to continue to the configuration screen...");
                 PromptPlus.Clear();
             }
 
-            switch (select.Value.Type)
+            switch (select.Value)
             {
-                case ConfigMenuItemType.ToggleBnd:
+                case ConfigMenuItem.ToggleBnd:
                     Configuration.Bnd = !Configuration.Bnd;
                     UpdateConfig();
                     break;
-                case ConfigMenuItemType.ToggleDcx:
+                case ConfigMenuItem.ToggleDcx:
                     Configuration.Dcx = !Configuration.Dcx;
                     UpdateConfig();
                     break;
-                case ConfigMenuItemType.ToggleRecursive:
+                case ConfigMenuItem.ToggleRecursive:
                     Configuration.Recursive = !Configuration.Recursive;
                     UpdateConfig();
                     break;
-                case ConfigMenuItemType.ToggleParallel:
+                case ConfigMenuItem.ToggleParallel:
                     Configuration.Parallel = !Configuration.Parallel;
                     UpdateConfig();
                     break;
-                case ConfigMenuItemType.ToggleParamDefaultValues:
+                case ConfigMenuItem.ToggleParamDefaultValues:
                     Configuration.ParamDefaultValues = !Configuration.ParamDefaultValues;
                     UpdateConfig();
                     break;
-                case ConfigMenuItemType.TogglePauseOnError:
+                case ConfigMenuItem.TogglePauseOnError:
                     Configuration.PauseOnError = !Configuration.PauseOnError;
                     UpdateConfig();
                     break;
-                case ConfigMenuItemType.ToggleOfflineMode:
+                case ConfigMenuItem.ToggleOfflineMode:
                     Configuration.PauseOnError = !Configuration.PauseOnError;
                     UpdateConfig();
                     break;
-                case ConfigMenuItemType.ConfigureDelay:
+                case ConfigMenuItem.DeferredFormats:
+                    DeferredFormatMode.Run(opt);
+                    PromptPlus.Clear();
+                    break;
+                case ConfigMenuItem.ConfigureDelay:
                     var input = PromptPlus.Input("Input new delay (in milliseconds)")
                         .AcceptInput(char.IsNumber)
                         .AddValidators(PromptValidators.IsTypeUInt16("Input is not within valid range"))
@@ -169,22 +170,22 @@ Press any key to continue to the configuration screen...");
                     else
                         PromptPlus.Clear();
                     break;
-                case ConfigMenuItemType.Windows:
+                case ConfigMenuItem.Windows:
                     IntegrationMode.CliShellIntegrationMode(opt);
                     PromptPlus.Clear();
                     break;
-                case ConfigMenuItemType.Formats:
+                case ConfigMenuItem.Formats:
                     PromptPlus.WriteLine(
                         $"WitchyBND supports the following formats:\n{string.Join(", ", ParseMode.Parsers.Where(p => p.IncludeInList).Select(p => p.Name))}");
                     PromptPlus.KeyPress(Constants.PressAnyKeyConfiguration).Run();
                     PromptPlus.Clear();
                     break;
-                case ConfigMenuItemType.Help:
+                case ConfigMenuItem.Help:
                     Program.DisplayHelp();
                     PromptPlus.KeyPress(Constants.PressAnyKeyConfiguration).Run();
                     PromptPlus.Clear();
                     break;
-                case ConfigMenuItemType.Exit:
+                case ConfigMenuItem.Exit:
                     PromptPlus.Clear();
                     return;
                 default:

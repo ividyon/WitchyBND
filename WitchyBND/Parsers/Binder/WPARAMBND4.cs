@@ -26,19 +26,19 @@ public class WPARAMBND4 : WBinderParser
     }
     private static bool FilenameIsDS2SRegulation(string path)
     {
-        var filename = Path.GetFileName(path);
+        var filename = Path.GetFileName(path).ToLower();
         return filename.Contains("enc_regulation") && (filename.EndsWith(".bnd.dcx") || filename.EndsWith(".bnd"));
     }
 
     private static bool FilenameIsDS3Regulation(string path)
     {
-        var filename = Path.GetFileName(path);
-        return filename.StartsWith("Data0") && filename.EndsWith(".bdt");
+        var filename = Path.GetFileName(path).ToLower();
+        return filename.StartsWith("data0") && filename.EndsWith(".bdt");
     }
 
     private static bool FilenameIsModernRegulation(string path)
     {
-        string filename = Path.GetFileName(path);
+        string filename = Path.GetFileName(path).ToLower();
         return filename.Contains("regulation") && filename.EndsWith(".bin");
     }
 
@@ -176,7 +176,7 @@ public class WPARAMBND4 : WBinderParser
         // Sanity check PARAMs
         XElement? filesElement = xml.Element("files");
         if (filesElement == null) throw new XmlException("XML has no Files element");
-        var files = filesElement.Elements("file").Where(f => f.Element("path") != null && f.Element("path")!.Value.EndsWith(".param")).ToList();
+        var files = filesElement.Elements("file").Where(f => f.Element("path") != null && f.Element("path")!.Value.ToLower().EndsWith(".param")).ToList();
         if (files.Any())
         {
             var paramParser = ParseMode.Parsers.OfType<WPARAM>().First();

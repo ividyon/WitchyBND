@@ -14,7 +14,7 @@ namespace WitchyBND.Parsers
 
         public override bool Is(string path, byte[]? data, out ISoulsFile? file)
         {
-            var filename = Path.GetFileName(path);
+            var filename = Path.GetFileName(path).ToLower();
             return IsRead<DBSUB>(path, data, out file) && Path.GetExtension(filename) == ".bin" && (filename.StartsWith("chapter_") || filename.EndsWith("_b0.bin") || filename.EndsWith("_d0.bin"));
         }
 

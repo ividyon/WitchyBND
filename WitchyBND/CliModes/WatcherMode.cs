@@ -101,6 +101,11 @@ public static class WatcherMode
 
         foreach ((string path, var (parser, file)) in filesToUnpack)
         {
+            bool parsed = false;
+            Catcher.Catch(() => ParseMode.Unpack(path, file, file.Compression, parser, false, out parsed),
+                out bool error, path);
+            ParseMode.PrintParseSuccess(path, parsed, error, false);
+
             var watcher = new FileSystemWatcher();
             watcher.Path = Path.GetDirectoryName(Path.GetFullPath(path))!;
             watcher.Filter = Path.GetFileName(path);
@@ -118,6 +123,11 @@ public static class WatcherMode
 
         foreach ((string path, WFileParser parser) in filesToRepack)
         {
+            bool parsed = false;
+            Catcher.Catch(() => ParseMode.Repack(path, parser, false, out parsed),
+                out bool error, path);
+            ParseMode.PrintParseSuccess(path, parsed, error, false);
+
             var watcher = new FileSystemWatcher();
             watcher.Path = Path.GetDirectoryName(Path.GetFullPath(path))!;
             watcher.Filter = Path.GetFileName(path);
@@ -202,7 +212,7 @@ public static class WatcherMode
 
     private static void WatchFolder(object sender, FileSystemEventArgs e)
     {
-        if (e.FullPath.EndsWith(".tmp") || e.FullPath.EndsWith(".bak")) return;
+        if (e.FullPath.ToLower().EndsWith(".tmp") || e.FullPath.ToLower().EndsWith(".bak")) return;
         var file = _watchedFiles
             .FirstOrDefault(p => p.Value.Parser is WFolderParser && e.FullPath.Contains(p.Value.Path))
             .Value as WatchedFileFolder;
