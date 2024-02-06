@@ -146,7 +146,7 @@ public static class WatcherMode
         foreach ((string path, WFileParser parser) in foldersToRepack)
         {
             var folderParser = parser as WFolderParser;
-            XElement xml = WFileParser.LoadXml(folderParser!.GetBinderXmlPath(path));
+            XElement xml = WFileParser.LoadXml(folderParser!.GetFolderXmlPath(path));
             XElement? filesEl = xml.Element("files");
             if (filesEl == null) continue;
             var files = WFolderParser.GetFolderFilePaths(filesEl, path).Select(p => Path.GetFullPath(p)).ToList();

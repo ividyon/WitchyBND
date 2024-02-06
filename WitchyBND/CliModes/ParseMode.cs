@@ -230,8 +230,9 @@ public static class ParseMode
             new WDBSUB(),
             new WENFL(),
             new WLUA(),
+            new WHKX(),
+            new WTAE(),
             //MSBE
-            //TAE
         };
     }
 }

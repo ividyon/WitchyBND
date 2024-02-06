@@ -30,8 +30,8 @@ public class WENFL : WXMLParser
         }
 
         var destPath = GetUnpackDestPath(srcPath);
+        AddLocationToXml(srcPath, xDoc.Root!);
         xDoc.Save(destPath);
-        AddLocationToXml(destPath);
     }
 
     public override void Repack(string srcPath)

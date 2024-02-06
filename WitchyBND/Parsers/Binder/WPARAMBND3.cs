@@ -19,7 +19,7 @@ public class WPARAMBND3 : WBinderParser
 
     private static bool IsPTDEParamBND(BND3 bnd)
     {
-        return bnd.Files.FirstOrDefault(f => f.Name.Contains("default_AIStandardInfoBank.param"), null) != null;
+        return bnd.Files.FirstOrDefault(f => f.Name.ToLower().Contains("default_aistandardinfobank.param"), null) != null;
     }
 
     private static bool IsDSRParamBND(BND3 bnd)
@@ -39,7 +39,7 @@ public class WPARAMBND3 : WBinderParser
 
     private static bool IsACFABoot(BND3 bnd)
     {
-        return bnd.Files.FirstOrDefault(f => f.Name.ToLower().EndsWith("AC45_Allsound.mgs"), null) != null;
+        return bnd.Files.FirstOrDefault(f => f.Name.ToLower().EndsWith("ac45_allsound.mgs"), null) != null;
     }
 
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)
@@ -56,7 +56,7 @@ public class WPARAMBND3 : WBinderParser
     {
         if (!Directory.Exists(path)) return false;
 
-        string xmlPath = Path.Combine(path, GetBinderXmlFilename("bnd3"));
+        string xmlPath = Path.Combine(path, GetFolderXmlFilename("bnd3"));
         if (!File.Exists(xmlPath)) return false;
 
         var doc = XDocument.Load(xmlPath);

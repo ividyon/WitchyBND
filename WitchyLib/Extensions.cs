@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Xml.Linq;
 
 namespace WitchyLib;
 
@@ -75,5 +76,13 @@ public static class AttributeExtensions
         }
 
         return null;
+    }
+}
+
+public static class XmlExtensions {
+
+    public static void AddE(this XElement el, string name, params object[] content)
+    {
+        el.Add(new XElement(name, content));
     }
 }

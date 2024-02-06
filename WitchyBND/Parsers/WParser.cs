@@ -58,10 +58,11 @@ public abstract class WFileParser
 
     public abstract void Unpack(string srcPath, ISoulsFile? file);
     public abstract void Repack(string srcPath);
-    public static void AddLocationToXml(string path)
+    public static void AddLocationToXml(string path, string srcPath)
     {
-        XElement xml = LoadXml(path);
-        AddLocationToXml(path, xml);
+        XDocument xml = XDocument.Load(path);
+        AddLocationToXml(srcPath, xml.Root!);
+        xml.Save(path);
     }
 
     public static XElement RemoveLocationFromXml(XElement xml)
@@ -73,8 +74,8 @@ public abstract class WFileParser
     public static void AddLocationToXml(string path, XElement xml)
     {
         if (!string.IsNullOrEmpty(Configuration.Args.Location))
-            xml.AddFirst("sourcePath", Path.GetDirectoryName(path));
-        xml.AddFirst("filename", Path.GetFileName(path));
+            xml.AddFirst(new XElement("sourcePath", Path.GetDirectoryName(path)));
+        xml.AddFirst(new XElement("filename", Path.GetFileName(path)));
     }
     public static XElement LoadXml(string path)
     {

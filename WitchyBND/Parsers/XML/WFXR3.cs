@@ -42,8 +42,8 @@ public class WFXR3 : WXMLParser
         xDoc.Root?.Add(new XAttribute(VersionAttributeName, Version.ToString()));
 
         var destPath = GetUnpackDestPath(srcPath);
+        AddLocationToXml(srcPath, xDoc.Root!);
         xDoc.Save(destPath);
-        AddLocationToXml(destPath);
     }
 
     public override void Repack(string srcPath)

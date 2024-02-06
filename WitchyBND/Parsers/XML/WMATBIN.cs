@@ -33,7 +33,7 @@ public class WMATBIN : WXMLParser
         if (File.Exists(targetFile)) WBUtil.Backup(targetFile);
 
         WBUtil.XmlSerialize<MATBIN>(matbin, targetFile);
-        AddLocationToXml(targetFile);
+        AddLocationToXml(targetFile, srcPath);
     }
 
     public override void Repack(string srcPath)

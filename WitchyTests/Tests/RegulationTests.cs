@@ -32,7 +32,7 @@ public class RegulationTests : TestBase
             string? destPath = parser.GetUnpackDestPath(path);
 
 
-            var xml = WFileParser.LoadXml(parser.GetBinderXmlPath(destPath, "bnd3"));
+            var xml = WFileParser.LoadXml(parser.GetFolderXmlPath(destPath, "bnd3"));
             XElement? gameElement = xml.Element("game");
             if (gameElement == null) throw new XmlException("XML has no Game element");
             TryParse(xml.Element("game")!.Value, out WBUtil.GameType game);
@@ -76,7 +76,7 @@ public class RegulationTests : TestBase
             parser.Unpack(path, outFile);
             string? destPath = parser.GetUnpackDestPath(path);
 
-            var xml = WFileParser.LoadXml(parser.GetBinderXmlPath(destPath, "bnd4"));
+            var xml = WFileParser.LoadXml(parser.GetFolderXmlPath(destPath, "bnd4"));
             XElement? gameElement = xml.Element("game");
             if (gameElement == null) throw new XmlException("XML has no Game element");
             TryParse(xml.Element("game")!.Value, out WBUtil.GameType game);

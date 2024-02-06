@@ -72,25 +72,25 @@ Simply replace the compression level in the Witchy XML to this value.");
     {
         if (!Directory.Exists(path)) return false;
 
-        string xmlPath = Path.Combine(path, GetBinderXmlFilename());
+        string xmlPath = Path.Combine(path, GetFolderXmlFilename());
         if (!File.Exists(xmlPath)) return false;
 
         var doc = XDocument.Load(xmlPath);
         return doc.Root != null && doc.Root.Name == XmlTag;
     }
 
-    public virtual string GetBinderXmlFilename(string? name = null)
+    public virtual string GetFolderXmlFilename(string? name = null)
     {
         name ??= XmlTag.ToLower();
         return $"_witchy-{name}.xml";
     }
 
-    public virtual string GetBinderXmlPath(string dir, string? name = null)
+    public virtual string GetFolderXmlPath(string dir, string? name = null)
     {
         name ??= XmlTag.ToLower();
         dir = string.IsNullOrEmpty(dir) ? dir : $"{dir}\\";
 
-        if (File.Exists($"{dir}{GetBinderXmlFilename(name)}"))
+        if (File.Exists($"{dir}{GetFolderXmlFilename(name)}"))
         {
             return $"{dir}_witchy-{name}.xml";
         }
@@ -100,7 +100,7 @@ Simply replace the compression level in the Witchy XML to this value.");
             return $"{dir}_yabber-{name}.xml";
         }
 
-        return $"{dir}{GetBinderXmlFilename(name)}";
+        return $"{dir}{GetFolderXmlFilename(name)}";
     }
 
     public static List<string> GetFolderFilePaths(XElement filesElement, string srcDirPath)

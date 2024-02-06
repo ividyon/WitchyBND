@@ -85,10 +85,10 @@ public class WPARAMBND4 : WBinderParser
         if (PreprocessedPaths.Contains(srcPath)) return false;
         if (!Directory.Exists(srcPath)) return false;
 
-        string xmlPath = GetBinderXmlPath(srcPath, "bnd4");
+        string xmlPath = GetFolderXmlPath(srcPath, "bnd4");
         if (!File.Exists(xmlPath)) return false;
 
-        var doc = XDocument.Load(GetBinderXmlPath(srcPath, "bnd4"));
+        var doc = XDocument.Load(GetFolderXmlPath(srcPath, "bnd4"));
         if (doc.Root == null || doc.Root.Name != "bnd4") return false;
         XElement xml = doc.Root;
 
@@ -122,7 +122,7 @@ public class WPARAMBND4 : WBinderParser
     {
         if (!Directory.Exists(path)) return false;
 
-        string xmlPath = Path.Combine(path, GetBinderXmlFilename("bnd4"));
+        string xmlPath = Path.Combine(path, GetFolderXmlFilename("bnd4"));
         if (!File.Exists(xmlPath)) return false;
 
         var doc = XDocument.Load(xmlPath);
@@ -152,7 +152,7 @@ public class WPARAMBND4 : WBinderParser
         if (!WPARAM.WarnAboutParams()) return;
 
         var bndParser = ParseMode.Parsers.OfType<WBND4>().First();
-        var xmlPath = GetBinderXmlPath(srcPath, "bnd4");
+        var xmlPath = GetFolderXmlPath(srcPath, "bnd4");
         var doc = XDocument.Load(xmlPath);
         if (doc.Root == null) throw new XmlException("XML has no root");
         XElement xml = doc.Root;

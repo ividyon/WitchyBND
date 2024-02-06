@@ -15,7 +15,7 @@ public class WFMG : WXMLParser
     public override bool Is(string path, byte[]? _, out ISoulsFile? file)
     {
         file = null;
-        return Path.GetExtension(path) == ".fmg";
+        return Path.GetExtension(path).ToLower() == ".fmg";
     }
 
     public override void Unpack(string srcPath, ISoulsFile? _)

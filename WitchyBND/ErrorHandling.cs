@@ -4,6 +4,7 @@ using System.IO;
 using PPlus;
 using SoulsFormats;
 using WitchyBND.CliModes;
+using WitchyFormats;
 using WitchyLib;
 
 namespace WitchyBND;
@@ -17,6 +18,13 @@ public static class Catcher
         try
         {
             outcome = callback();
+        }
+        catch (GameUnsupportedException e)
+        {
+            if (Configuration.IsTest)
+                throw;
+            Program.RegisterError(new WitchyError($"The parser does not support the game {e.Game}.", source, WitchyErrorType.Generic));
+            error = true;
         }
         catch (DeferToolExecutionException e)
         {
@@ -167,5 +175,18 @@ public class WitchyNotice
     {
         Message = message;
         Source = source;
+    }
+}
+
+public class GameUnsupportedException : Exception
+{
+    public WBUtil.GameType Game;
+
+    public GameUnsupportedException(WBUtil.GameType game, string message) : base(message)
+    {
+        Game = game;
+    }
+    public GameUnsupportedException(WBUtil.GameType game) {
+        Game = game;
     }
 }

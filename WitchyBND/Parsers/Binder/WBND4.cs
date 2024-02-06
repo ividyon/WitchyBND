@@ -62,7 +62,7 @@ public class WBND4 : WBinderParser
         if (!string.IsNullOrEmpty(root))
             files.AddBeforeSelf(new XElement("root", root));
 
-        using var xw = XmlWriter.Create($"{destDir}\\{GetBinderXmlFilename()}", new XmlWriterSettings
+        using var xw = XmlWriter.Create($"{destDir}\\{GetFolderXmlFilename()}", new XmlWriterSettings
         {
             Indent = true
         });
@@ -74,7 +74,7 @@ public class WBND4 : WBinderParser
     {
         var bnd = new BND4();
 
-        XElement xml = LoadXml(GetBinderXmlPath(srcPath));
+        XElement xml = LoadXml(GetFolderXmlPath(srcPath));
 
         string root = xml.Element("root")?.Value ?? "";
 

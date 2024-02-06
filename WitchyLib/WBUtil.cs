@@ -18,6 +18,20 @@ using PARAMDEF = WitchyFormats.PARAMDEF;
 
 namespace WitchyLib;
 
+public enum DsmsGameType
+{
+    Undefined = 0,
+    DemonsSouls = 1,
+    DarkSoulsPTDE = 2,
+    DarkSoulsRemastered = 3,
+    DarkSoulsIISOTFS = 4,
+    DarkSoulsIII = 5,
+    Bloodborne = 6,
+    Sekiro = 7,
+    EldenRing = 8,
+    ArmoredCoreVI = 9
+}
+
 public static class WBUtil
 {
     public static string ExeLocation;
@@ -29,6 +43,7 @@ public static class WBUtil
         var split = version.Split(".").Select(s => int.Parse(s)).ToArray();
         return split[0] * 1000000 + split[1] * 10000 + split[2] * 100 + split[3];
     }
+
     public static string FirstCharToUpper(this string input) =>
         input switch
         {
@@ -109,41 +124,42 @@ public static class WBUtil
         {
             return Path.Combine(ExeLocation, path);
         }
+
         return ExeLocation;
     }
 
     public enum GameType
     {
-        [Display(Name = "Armored Core 4")]
-        AC4,
+        [Display(Name = "Armored Core 4")] AC4,
+
         [Display(Name = "Armored Core For Answer")]
         ACFA,
-        [Display(Name = "Bloodborne")]
-        BB,
-        [Display(Name = "Demon's Souls")]
-        DES,
-        [Display(Name = "Dark Souls")]
-        DS1,
+        [Display(Name = "Bloodborne")] BB,
+        [Display(Name = "Demon's Souls")] DES,
+        [Display(Name = "Dark Souls")] DS1,
+
         [Display(Name = "Dark Souls Remastered")]
         DS1R,
-        [Display(Name = "Dark Souls 2")]
-        DS2,
+        [Display(Name = "Dark Souls 2")] DS2,
+
         [Display(Name = "Dark Souls 2: Scholar of the First Sin")]
         DS2S,
-        [Display(Name = "Dark Souls 3")]
-        DS3,
-        [Display(Name = "Elden Ring")]
-        ER,
-        [Display(Name = "Sekiro")]
-        SDT,
-        [Display(Name = "Armored Core VI")]
-        AC6
+        [Display(Name = "Dark Souls 3")] DS3,
+        [Display(Name = "Elden Ring")] ER,
+        [Display(Name = "Sekiro")] SDT,
+        [Display(Name = "Armored Core VI")] AC6
     }
 
     public static string GetParamdexPath()
     {
         return $@"{GetExeLocation()}\Assets\Paramdex";
     }
+
+    public static string GetParamdexPath(params string[] parts)
+    {
+        return Path.Combine(new[] { GetParamdexPath() }.Union(parts).ToArray());
+    }
+
     public static string GetParamdexPath(string path = null)
     {
         return path == null ? GetParamdexPath() : Path.Combine(GetParamdexPath(), path);
@@ -151,7 +167,9 @@ public static class WBUtil
 
     public static string GetParamdexPath(GameType game, string path = null)
     {
-        return path == null ? Path.Combine(GetParamdexPath(), game.ToString()) : Path.Combine(GetParamdexPath(), game.ToString(), path);
+        return path == null
+            ? Path.Combine(GetParamdexPath(), game.ToString())
+            : Path.Combine(GetParamdexPath(), game.ToString(), path);
     }
 
     public static ulong? GetLatestKnownRegulationVersion(GameType game)
@@ -160,7 +178,8 @@ public static class WBUtil
 
         string latestVerPath = GetParamdexPath(game, $@"Upgrader\version.txt");
         if (File.Exists(latestVerPath))
-            LatestKnownRegulationVersions[game] = ulong.Parse(File.ReadAllText(latestVerPath).Replace("_", "").Replace("L", ""));
+            LatestKnownRegulationVersions[game] =
+                ulong.Parse(File.ReadAllText(latestVerPath).Replace("_", "").Replace("L", ""));
         else
             LatestKnownRegulationVersions[game] = null;
 
@@ -177,28 +196,79 @@ public static class WBUtil
             if (dirName == null) return null;
             filePath = $@"{dirName}\{filename}";
         }
+
         return null;
     }
-    public static (GameType, ulong)? DetermineParamdexGame(string path, bool passive)
+
+    public static GameType? DsmsGameTypeToWitchyGameType(DsmsGameType type)
+    {
+        return type switch
+        {
+            DsmsGameType.DemonsSouls => GameType.DES,
+            DsmsGameType.DarkSoulsPTDE => GameType.DS1,
+            DsmsGameType.DarkSoulsRemastered => GameType.DS1R,
+            DsmsGameType.DarkSoulsIISOTFS => GameType.DS2S,
+            DsmsGameType.DarkSoulsIII => GameType.DS3,
+            DsmsGameType.Bloodborne => GameType.BB,
+            DsmsGameType.Sekiro => GameType.SDT,
+            DsmsGameType.EldenRing => GameType.ER,
+            DsmsGameType.ArmoredCoreVI => GameType.AC6,
+            _ => null
+        };
+    }
+
+    public static (GameType, ulong) DetermineGameType(string path, bool passive, bool forParams)
     {
         ulong regVer = 0;
         GameType? game = null;
 
         // Determine what kind of PARAM we're dealing with here
-        string xmlPath = TraverseFindFile("_witchy-bnd4.xml", path);
-        if (xmlPath != null)
+        if (forParams)
         {
-            XmlDocument xml = new XmlDocument();
-            xml.Load(xmlPath);
-
-
-            if (xml.SelectSingleNode("bnd4/game")?.InnerText != null)
+            string? xmlPath = TraverseFindFile("_witchy-bnd4.xml", path);
+            if (xmlPath != null)
             {
-                Enum.TryParse(xml.SelectSingleNode("bnd4/game")!.InnerText, out GameType regGame);
-                game = regGame;
-            }
+                XDocument xDoc = XDocument.Load(xmlPath);
 
-            regVer = Convert.ToUInt64(xml.SelectSingleNode("bnd4/version")?.InnerText ?? "0");
+
+                if (xDoc.Root?.Element("game")?.Value != null)
+                {
+                    Enum.TryParse(xDoc.Root!.Element("game")!.Value, out GameType regGame);
+                    game = regGame;
+                }
+
+                if (xDoc.Root?.Element("version")?.Value != null)
+                {
+                    regVer = Convert.ToUInt64(xDoc.Root!.Element("version")!.Value ?? "0");
+                }
+            }
+        }
+
+        // Attempt to find game by project.json
+        if (game == null)
+        {
+            string? pJsonPath = TraverseFindFile("project.json", path);
+            if (pJsonPath != null)
+            {
+                XDocument xDoc = XDocument.Load(pJsonPath);
+                var dsmsGameType = Enum.Parse<DsmsGameType>(xDoc.Root!.Element("GameType")!.Value);
+                game = DsmsGameTypeToWitchyGameType(dsmsGameType);
+            }
+        }
+
+        // Attempt to find game by EXE
+        if (game == null)
+        {
+            if (TraverseFindFile("eldenring.exe", path) != null)
+                game = GameType.ER;
+            else if (TraverseFindFile("DarkSoulsIII.exe", path) != null)
+                game = GameType.DS3;
+            else if (TraverseFindFile("DarkSoulsII.exe", path) != null)
+                game = GameType.DS2S;
+            else if (TraverseFindFile("armoredcore6.exe", path) != null)
+                game = GameType.AC6;
+            else if (TraverseFindFile("sekiro.exe", path) != null)
+                game = GameType.SDT;
         }
 
         if (game != null)
@@ -225,7 +295,7 @@ public static class WBUtil
             }
         }
 
-        if (regVer == 0)
+        if (forParams && regVer == 0)
         {
             PromptPlus.Error.WriteLine("Could not determine regulation version.");
             if (!passive)
@@ -254,8 +324,6 @@ Enter 0, or press ESC, to use the latest available paramdef.");
             }
         }
 
-        if (game == null)
-            return null;
         return (game.Value, regVer);
     }
 
@@ -770,11 +838,39 @@ Enter 0, or press ESC, to use the latest available paramdef.");
     /// <summary>
     /// Returns whether the file appears to be a file of this type and reads it if so.
     /// </summary>
-    public static bool IsRead<TFormat>(this SoulsFile<TFormat> soulsFile, string path, out ISoulsFile file) where TFormat : SoulsFile<TFormat>, new()
+    public static bool IsRead<TFormat>(this SoulsFile<TFormat> soulsFile, string path, out ISoulsFile file)
+        where TFormat : SoulsFile<TFormat>, new()
     {
         bool cond = SoulsFile<TFormat>.IsRead(path, out TFormat format);
         file = format;
         return cond;
+    }
+
+    public static bool ObnoxiousWarning(List<string> lines)
+    {
+        PromptPlus.WriteLine("");
+
+        foreach (string line in lines)
+        {
+            PromptPlus.WriteLine(line);
+            var cursor = PromptPlus.GetCursorPosition();
+            PromptPlus.WriteLine("");
+            PromptPlus.WaitTimer("Please read carefully, then press any key...", TimeSpan.FromSeconds(1));
+            PromptPlus.ClearLine();
+            PromptPlus.SetCursorPosition(cursor.Left, cursor.Top);
+            PromptPlus.WriteLine("");
+            PromptPlus.KeyPress("Please read carefully, then press any key...").Run();
+            PromptPlus.ClearLine();
+            PromptPlus.SetCursorPosition(cursor.Left, cursor.Top);
+        }
+
+        PromptPlus.WriteLine("");
+        var confirm = PromptPlus.Confirm(@"Do you still wish to proceed?").Run();
+
+        if (confirm.Value.IsNoResponseKey() || confirm.IsAborted)
+            return false;
+
+        return true;
     }
 
     static WBUtil()

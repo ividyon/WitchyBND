@@ -16,7 +16,7 @@ public class WLUAGNL : WXMLParser
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
         file = null;
-        return Path.GetExtension(path) == ".luagnl";
+        return Path.GetExtension(path).ToLower() == ".luagnl";
     }
 
     public override void Unpack(string srcPath, ISoulsFile? _)

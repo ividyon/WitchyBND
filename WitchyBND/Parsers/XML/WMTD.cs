@@ -24,7 +24,7 @@ public class WMTD : WXMLParser
         if (File.Exists(targetFile)) WBUtil.Backup(targetFile);
 
         WBUtil.XmlSerialize<MTD>(mtd, targetFile);
-        AddLocationToXml(targetFile);
+        AddLocationToXml(targetFile, srcPath);
     }
 
     public override void Repack(string srcPath)

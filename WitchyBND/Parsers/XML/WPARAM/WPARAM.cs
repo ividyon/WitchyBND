@@ -25,7 +25,6 @@ public partial class WPARAM : WXMLParser
     {
         if (Configuration.Expert || WarnedAboutParams || Configuration.Args.Passive) return true;
 
-        PromptPlus.WriteLine("");
         List<string> lines = new()
         {
             "[RED]Editing PARAMs using WitchyBND is highly discouraged.[/]",
@@ -35,29 +34,9 @@ If DSMapStudio does not yet support this game or regulation version, an experime
             "Merging outdated PARAMs (from a previous regulation) with WitchyBND is guaranteed to cause issues.",
             "WitchyBND is not capable of upgrading outdated PARAMs to a newer regulation version under ANY circumstances!",
         };
-
-        foreach (string line in lines)
-        {
-            PromptPlus.WriteLine(line);
-            var cursor = PromptPlus.GetCursorPosition();
-            PromptPlus.WriteLine("");
-            PromptPlus.WaitTimer("Please read carefully, then press any key...", TimeSpan.FromSeconds(1));
-            PromptPlus.ClearLine();
-            PromptPlus.SetCursorPosition(cursor.Left, cursor.Top);
-            PromptPlus.WriteLine("");
-            PromptPlus.KeyPress("Please read carefully, then press any key...").Run();
-            PromptPlus.ClearLine();
-            PromptPlus.SetCursorPosition(cursor.Left, cursor.Top);
-        }
-
-        PromptPlus.WriteLine("");
-        var confirm = PromptPlus.Confirm(@"Do you still wish to proceed?").Run();
-
-        if (confirm.Value.IsNoResponseKey() || confirm.IsAborted)
-            return false;
-
-        WarnedAboutParams = true;
-        return true;
+        var warned = WBUtil.ObnoxiousWarning(lines);
+        WarnedAboutParams = warned;
+        return warned;
     }
 
     private class WPARAMRow
@@ -113,7 +92,7 @@ If DSMapStudio does not yet support this game or regulation version, an experime
         if (!Is(srcPath, null, out ISoulsFile? _)) return false;
 
         (WBUtil.GameType, ulong)? gameInfo;
-        gameInfo = Games.TryGetValue(gamePath, out gameInfo) ? gameInfo : WBUtil.DetermineParamdexGame(gamePath, Configuration.Args.Passive);
+        gameInfo = Games.TryGetValue(gamePath, out gameInfo) ? gameInfo : WBUtil.DetermineGameType(gamePath, Configuration.Args.Passive, true);
 
         Games[gamePath] = gameInfo;
 

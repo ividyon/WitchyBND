@@ -84,7 +84,7 @@ public class WTPF : WFolderParser
         if (!string.IsNullOrEmpty(Configuration.Args.Location))
             filename.AddAfterSelf(new XElement("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath))));
 
-        using var xw = XmlWriter.Create(GetBinderXmlPath(destDir), new XmlWriterSettings
+        using var xw = XmlWriter.Create(GetFolderXmlPath(destDir), new XmlWriterSettings
         {
             Indent = true
         });
@@ -98,7 +98,7 @@ public class WTPF : WFolderParser
         // XmlDocument xml = new XmlDocument();
 
         // xml.Load(GetBinderXmlPath(srcPath));
-        var doc = XDocument.Load(GetBinderXmlPath(srcPath));
+        var doc = XDocument.Load(GetFolderXmlPath(srcPath));
         if (doc.Root == null) throw new XmlException("XML has no root");
         XElement xml = doc.Root;
 

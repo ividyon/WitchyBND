@@ -75,7 +75,7 @@ public class WBXF3 : WBinderParser
         if (!string.IsNullOrEmpty(root))
             files.AddBeforeSelf(new XElement("root", root));
 
-        var xw = XmlWriter.Create($"{destDir}\\{GetBinderXmlFilename()}", new XmlWriterSettings
+        var xw = XmlWriter.Create($"{destDir}\\{GetFolderXmlFilename()}", new XmlWriterSettings
         {
             Indent = true
         });
@@ -87,7 +87,7 @@ public class WBXF3 : WBinderParser
     {
         var bxf = new BXF3();
 
-        XElement xml = LoadXml(GetBinderXmlPath(srcPath));
+        XElement xml = LoadXml(GetFolderXmlPath(srcPath));
 
         string root = xml.Element("root")?.Value ?? "";
 

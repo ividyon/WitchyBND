@@ -51,7 +51,7 @@ public class WFFXBNDModern : WBinderParser
         if (!string.IsNullOrEmpty(Configuration.Args.Location))
             filename.AddAfterSelf(new XElement("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath))));
 
-        using var xw = XmlWriter.Create($"{destDir}\\{GetBinderXmlFilename()}", new XmlWriterSettings
+        using var xw = XmlWriter.Create($"{destDir}\\{GetFolderXmlFilename()}", new XmlWriterSettings
         {
             Indent = true,
         });
@@ -113,7 +113,7 @@ public class WFFXBNDModern : WBinderParser
     {
         var bnd = new BND4();
 
-        XElement xml = LoadXml(GetBinderXmlPath(srcPath));
+        XElement xml = LoadXml(GetFolderXmlPath(srcPath));
 
         DCX.Type compression = Enum.Parse<DCX.Type>(xml.Element("compression")?.Value ?? "None");
         bnd.Compression = compression;
