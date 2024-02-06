@@ -34,6 +34,7 @@ public enum DsmsGameType
 
 public static class WBUtil
 {
+    internal static readonly object ConsoleWriterLock = new object();
     public static string ExeLocation;
     public static readonly Dictionary<GameType, ulong?> LatestKnownRegulationVersions;
 
@@ -250,9 +251,18 @@ public static class WBUtil
             string? pJsonPath = TraverseFindFile("project.json", path);
             if (pJsonPath != null)
             {
-                XDocument xDoc = XDocument.Load(pJsonPath);
-                var dsmsGameType = Enum.Parse<DsmsGameType>(xDoc.Root!.Element("GameType")!.Value);
-                game = DsmsGameTypeToWitchyGameType(dsmsGameType);
+                try
+                {
+                    var json = File.ReadAllLines(pJsonPath);
+                    var type = json.Select(s =>
+                        Regex.Match(s, @"\s*?""GameType"":\s(.*?),")).FirstOrDefault(s => s.Success);
+                    var dsmsGameType = Enum.Parse<DsmsGameType>(type.Groups[1].Value);
+                    game = DsmsGameTypeToWitchyGameType(dsmsGameType);
+                }
+                catch (Exception e)
+                {
+                    PromptPlus.Error.WriteLine($"Could not read DSMS project file at {pJsonPath}.");
+                }
             }
         }
 
@@ -280,6 +290,8 @@ public static class WBUtil
             PromptPlus.Error.WriteLine("Could not determine param game version.");
             if (!passive)
             {
+                lock (ConsoleWriterLock)
+                {
                 var select = PromptPlus.Select<GameType>("Please select the Paramdex of one of the following games")
                     .Run();
                 if (select.IsAborted)
@@ -288,6 +300,7 @@ public static class WBUtil
                 }
 
                 game = select.Value;
+                }
             }
             else
             {
@@ -300,22 +313,25 @@ public static class WBUtil
             PromptPlus.Error.WriteLine("Could not determine regulation version.");
             if (!passive)
             {
-                PromptPlus.WriteLine(@"Please input the regulation version to use for reading the PARAM.
+                lock (ConsoleWriterLock)
+                {
+                    PromptPlus.WriteLine(@"Please input the regulation version to use for reading the PARAM.
 Format examples:
     ""10210005"" for Armored Core VI 1.02.1
     ""11001000"" for Elden Ring 1.10.1
 Enter 0, or press ESC, to use the latest available paramdef.");
-                var input = PromptPlus.Input("Input regulation version")
-                    .AddValidators(PromptValidators.IsTypeULong())
-                    .ValidateOnDemand()
-                    .Run();
-                if (input.IsAborted)
-                {
-                    PromptPlus.Error.WriteLine("Defaulting to latest paramdef.");
-                }
-                else
-                {
-                    regVer = Convert.ToUInt64(input.Value);
+                    var input = PromptPlus.Input("Input regulation version")
+                        .AddValidators(PromptValidators.IsTypeULong())
+                        .ValidateOnDemand()
+                        .Run();
+                    if (input.IsAborted)
+                    {
+                        PromptPlus.Error.WriteLine("Defaulting to latest paramdef.");
+                    }
+                    else
+                    {
+                        regVer = Convert.ToUInt64(input.Value);
+                    }
                 }
             }
             else

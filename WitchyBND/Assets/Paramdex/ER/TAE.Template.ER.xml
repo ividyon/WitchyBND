@@ -184,7 +184,7 @@
       <s16 name="StateInfo"/>
       <s16 name="Offset"/>
       <u8/>
-      <b/>
+      <u8/>
       <s32 assert="0"/>
     </event>
     <event id="5" name="InvokeCommonBehavior">
@@ -561,7 +561,7 @@
       <s32 name="DummyPolyID"/>
       <s32 name="SlotID"/>
       <s16 name="StateInfo"/>
-      <b name="KillSoundOnEventEnd"/>
+      <u8 name="KillSoundOnEventEnd"/>
       <u8/>
       <s32/>
       <s32/>
@@ -1790,9 +1790,6 @@
 
   <bank id="34" name="Characters_ER_Alt_34" basedon="35">
 
-  </bank>
-  <bank id="37" name="Characters_ER_Alt_37" basedon="35">
-  
   </bank>
 
 
