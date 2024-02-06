@@ -18,7 +18,6 @@ namespace WitchyBND.Parsers;
 
 public partial class WPARAM : WXMLParser
 {
-    public static Dictionary<string, (WBUtil.GameType, ulong)?> Games = new();
     private static bool WarnedAboutParams { get; set; }
 
     public static bool WarnAboutParams()
@@ -77,31 +76,18 @@ If DSMapStudio does not yet support this game or regulation version, an experime
 
     public override bool HasPreprocess => true;
 
-    public static string GetGamePath(string path)
-    {
-        string dirPath = Path.GetDirectoryName(path)!;
-        string? xmlPath = WBUtil.TraverseFindFile("_witchy-bnd4.xml", path);
-
-        return xmlPath != null ? Path.GetDirectoryName(xmlPath)! : dirPath;
-    }
     public override bool Preprocess(string srcPath)
     {
-        string gamePath = GetGamePath(srcPath);
-        if (PreprocessedPaths.Contains(gamePath)) return false;
+        var dirName = Path.GetDirectoryName(srcPath)!;
+        if (PreprocessedPaths.Contains(dirName)) return false;
 
         if (!Is(srcPath, null, out ISoulsFile? _)) return false;
 
-        (WBUtil.GameType, ulong)? gameInfo;
-        gameInfo = Games.TryGetValue(gamePath, out gameInfo) ? gameInfo : WBUtil.DetermineGameType(gamePath, Configuration.Args.Passive, true);
+        (WBUtil.GameType, ulong) gameInfo = WBUtil.DetermineGameType(srcPath, Configuration.Args.Passive, true);
 
-        Games[gamePath] = gameInfo;
+        PopulateParamdex(gameInfo.Item1);
 
-        if (Games[gamePath] == null)
-            throw new InvalidDataException("Could not locate game type of PARAM.");
-
-        PopulateParamdex(Games[gamePath]!.Value.Item1);
-
-        PreprocessedPaths.Add(gamePath);
+        PreprocessedPaths.Add(dirName);
         return true;
     }
 

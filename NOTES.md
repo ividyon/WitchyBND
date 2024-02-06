@@ -1,6 +1,7 @@
-* TODO: Fix "determine paramdex" in parallel
+* TODO: Fix "determine paramdex" strings not locking in parallel
+* TODO: non-c0000 TAEs have 3 more digits
 * TODO: Add parallel for TAE
-* TODO: Add parallel for PARAMs
+* TODO: Add parallel for PARAM
 * Added "deferred tool" support for HKX and LUA/HKS decompilation.
   * This includes formats that Witchy does not directly handle, but are handled by simple enough commandline tools that can be rolled into Witchy processing by being called externally. Witchy requires those tools to be installed for this to work.
   * To process deferred formats with Witchy, you need to download the according tool, unpack it somewhere, and configure the path to the tool in the Witchy configuration menu.

@@ -218,19 +218,33 @@ public static class WBUtil
         };
     }
 
+    public static Dictionary<string, (GameType, ulong)> KnownGamePathsForParams = new();
+    public static Dictionary<string, GameType> KnownGamePaths = new();
+
+    public static readonly Dictionary<string, GameType> KnownExecutables = new()
+    {
+        { "eldenring.exe", GameType.ER },
+        { "DarkSoulsIII.exe", GameType.DS3 },
+        { "DarkSoulsII.exe", GameType.DS2S },
+        { "armoredcore.exe", GameType.AC6 },
+        { "sekiro.exe", GameType.SDT },
+    };
     public static (GameType, ulong) DetermineGameType(string path, bool passive, bool forParams)
     {
         ulong regVer = 0;
         GameType? game = null;
+        string? knownPath = null;
 
         // Determine what kind of PARAM we're dealing with here
         if (forParams)
         {
+            var known = KnownGamePathsForParams.Keys.FirstOrDefault(p => path.StartsWith(p));
+            if (known != null) return KnownGamePathsForParams[known];
+
             string? xmlPath = TraverseFindFile("_witchy-bnd4.xml", path);
             if (xmlPath != null)
             {
                 XDocument xDoc = XDocument.Load(xmlPath);
-
 
                 if (xDoc.Root?.Element("game")?.Value != null)
                 {
@@ -242,7 +256,14 @@ public static class WBUtil
                 {
                     regVer = Convert.ToUInt64(xDoc.Root!.Element("version")!.Value ?? "0");
                 }
+
+                knownPath = Path.GetDirectoryName(xmlPath);
             }
+        }
+        else
+        {
+            var known = KnownGamePaths.Keys.FirstOrDefault(p => path.StartsWith(p));
+            if (known != null) return (KnownGamePaths[known], regVer);
         }
 
         // Attempt to find game by project.json
@@ -258,6 +279,7 @@ public static class WBUtil
                         Regex.Match(s, @"\s*?""GameType"":\s(.*?),")).FirstOrDefault(s => s.Success);
                     var dsmsGameType = Enum.Parse<DsmsGameType>(type.Groups[1].Value);
                     game = DsmsGameTypeToWitchyGameType(dsmsGameType);
+                    knownPath = Path.GetDirectoryName(pJsonPath);
                 }
                 catch (Exception e)
                 {
@@ -269,16 +291,15 @@ public static class WBUtil
         // Attempt to find game by EXE
         if (game == null)
         {
-            if (TraverseFindFile("eldenring.exe", path) != null)
-                game = GameType.ER;
-            else if (TraverseFindFile("DarkSoulsIII.exe", path) != null)
-                game = GameType.DS3;
-            else if (TraverseFindFile("DarkSoulsII.exe", path) != null)
-                game = GameType.DS2S;
-            else if (TraverseFindFile("armoredcore6.exe", path) != null)
-                game = GameType.AC6;
-            else if (TraverseFindFile("sekiro.exe", path) != null)
-                game = GameType.SDT;
+            foreach ((string exeName, GameType exeGame) in KnownExecutables)
+            {
+                var traversePath = TraverseFindFile(exeName, path);
+                if (traversePath != null)
+                {
+                    game = exeGame;
+                    knownPath = Path.GetDirectoryName(traversePath)!;
+                }
+            }
         }
 
         if (game != null)
@@ -300,6 +321,7 @@ public static class WBUtil
                 }
 
                 game = select.Value;
+                knownPath = Path.GetDirectoryName(path);
                 }
             }
             else
@@ -339,6 +361,16 @@ Enter 0, or press ESC, to use the latest available paramdef.");
                 PromptPlus.Error.WriteLine("Defaulting to latest paramdef.");
             }
         }
+
+        if (knownPath != null)
+        {
+            KnownGamePaths[knownPath] = game.Value;
+            if (forParams)
+            {
+                KnownGamePathsForParams[knownPath] = (game.Value, regVer);
+            }
+        }
+
 
         return (game.Value, regVer);
     }

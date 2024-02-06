@@ -25,8 +25,7 @@ public partial class WPARAM
             Is(srcPath, null, out file);
         }
 
-        string gamePath = GetGamePath(srcPath);
-        var gameInfo = Games[gamePath]!.Value;
+        var gameInfo = WBUtil.DetermineGameType(srcPath, Configuration.Args.Passive, true);
         var game = gameInfo.Item1;
         var regVer = gameInfo.Item2;
 

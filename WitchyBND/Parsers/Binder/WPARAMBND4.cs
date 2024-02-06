@@ -100,8 +100,12 @@ public class WPARAMBND4 : WBinderParser
         if (versionElement == null) return false;
         var regVer = Convert.ToUInt64(versionElement.Value);
 
-        if (!WPARAM.Games.ContainsKey(srcPath))
-            WPARAM.Games[srcPath] = (game, regVer);
+        var dirName = Path.GetDirectoryName(srcPath)!;
+        if (!WBUtil.KnownGamePathsForParams.Any(p => dirName.StartsWith(p.Key)))
+        {
+            WBUtil.KnownGamePathsForParams[dirName] = (game, regVer);
+            WBUtil.KnownGamePaths[dirName] = game;
+        }
 
         WPARAM.PopulateParamdex(game);
 
