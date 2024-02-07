@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
@@ -93,7 +95,14 @@ public partial class WPARAM
 
             param.ApplyParamdef(paramdef);
 
-            foreach (XmlNode xmlRow in xml.SelectNodes("param/rows/row"))
+            var rowDict = new ConcurrentDictionary<long, FsParam.Row>();
+
+            void ParallelCallback(XmlNode xmlRow, ParallelLoopState state, long i)
+            {
+                Callback(xmlRow, i);
+            }
+
+            void Callback(XmlNode xmlRow, long i)
             {
                 var id = int.Parse(xmlRow.Attributes["id"].InnerText);
                 var name = xmlRow.Attributes["name"]?.InnerText ?? string.Empty;
@@ -143,6 +152,23 @@ public partial class WPARAM
                     column.SetValue(row, ConvertValueFromString(column.Def, StringToCellValue(value, column.Def)));
                 }
 
+                rowDict.TryAdd(i, row);
+            }
+            var rows = xml.SelectNodes("param/rows/row").Cast<XmlNode>().ToList();
+
+            if (Configuration.Parallel)
+            {
+                Parallel.ForEach(rows, ParallelCallback);
+            }
+            else
+            {
+                for (int i = 0; i < rows.Count; i++)
+                {
+                    Callback(rows[i], i);
+                }
+            }
+            foreach (FsParam.Row row in rowDict.OrderBy(p => p.Key).Select(p => p.Value).ToList())
+            {
                 param.AddRow(row);
             }
 

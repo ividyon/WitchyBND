@@ -104,10 +104,17 @@ public static class WBUtil
                 matcher = matcher.AddInclude(rest.Replace(Path.DirectorySeparatorChar.ToString(), "/"));
                 var files = Directory.GetFiles(Path.Combine(Environment.CurrentDirectory, root), "*",
                     SearchOption.AllDirectories);
+                var dirs = Directory.GetDirectories(Path.Combine(Environment.CurrentDirectory, root), "*",
+                    SearchOption.AllDirectories);
                 var match = matcher.Match(Path.Combine(Environment.CurrentDirectory, root), files);
                 if (match.HasMatches)
                 {
                     processedPaths.AddRange(match.Files.Select(m => Path.Combine(root, m.Path)).ToList());
+                }
+                var match2 = matcher.Match(Path.Combine(Environment.CurrentDirectory, root), dirs);
+                if (match2.HasMatches)
+                {
+                    processedPaths.AddRange(match2.Files.Select(m => Path.Combine(root, m.Path)).ToList());
                 }
             }
             else

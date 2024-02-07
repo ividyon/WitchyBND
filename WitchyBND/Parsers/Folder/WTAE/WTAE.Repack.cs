@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using SoulsFormats;
 using WitchyFormats;
@@ -38,10 +40,36 @@ public partial class WTAE
 
         tae.Animations = new();
 
-        var animFiles = Directory.GetFiles(srcPath, "anim-*.xml").Order();
-        foreach (string file in animFiles)
+        var animFiles = Directory.GetFiles(srcPath, "anim-*.xml").Order().ToList();
+        var bag = new ConcurrentBag<TAE.Animation>();
+
+        void Callback(string file)
         {
-            var id = int.Parse(Path.GetFileNameWithoutExtension(file).Replace("anim-", ""));
+            var anim = RepackAnim(file, tae, template);
+            bag.Add(anim);
+        }
+
+        if (Configuration.Parallel)
+        {
+            Parallel.ForEach(animFiles, Callback);
+        }
+        else
+        {
+            animFiles.ForEach(Callback);
+        }
+
+        tae.Animations = bag.OrderBy(a => a.ID).ToList();
+
+        tae.ApplyTemplate(templateDict[game]);
+
+        string outPath = GetRepackDestPath(srcPath, xml);
+        WBUtil.Backup(outPath);
+        tae.Write(outPath);
+    }
+
+    private TAE.Animation RepackAnim(string file, TAE tae, TAE.Template template)
+    {
+            var id = int.Parse(new string(Path.GetFileNameWithoutExtension(file).Where(c => char.IsDigit(c)).ToArray()));
             var animXml = XDocument.Load(file).Root!;
             var animName = animXml.Element("name")!.Value;
             var headerEl = animXml.Element("header")!;
@@ -102,7 +130,7 @@ public partial class WTAE
                             var ev = new TAE.Event(startTime, endTime, evType, unk04, tae.BigEndian, template[tae.EventBank][evType]);
                             ev.Group = group;
 
-                            var paramsEl = groupEl.Element("params");
+                            var paramsEl = evEl.Element("params");
                             if (paramsEl != null)
                             {
                                 foreach (XElement paramEl in paramsEl.Elements("param"))
@@ -126,12 +154,7 @@ public partial class WTAE
                     }
                 }
             }
-            tae.Animations.Add(anim);
-        }
-        tae.ApplyTemplate(templateDict[game]);
 
-        string outPath = GetRepackDestPath(srcPath, xml);
-        WBUtil.Backup(outPath);
-        tae.Write(outPath);
+            return anim;
     }
 }

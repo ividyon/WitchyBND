@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using SoulsFormats;
 using WitchyFormats;
@@ -37,14 +38,29 @@ public partial class WTAE
         root.AddE("flags", string.Join(",", tae.Flags));
         root.AddE("bigendian", tae.BigEndian);
 
-        tae.Animations.ForEach(a => UnpackAnim(destDir, tae, a));
+        var addDigits = tae.Animations.Any() && tae.Animations.Max(a => a.ID) > 999999;
+
+        void Callback(TAE.Animation anim)
+        {
+            UnpackAnim(destDir, tae, anim, addDigits);
+        }
+
+        if (Configuration.Parallel)
+        {
+            Parallel.ForEach(tae.Animations, Callback);
+        }
+        else
+        {
+            tae.Animations.ForEach(Callback);
+        }
+
 
         var destPath = GetFolderXmlPath(destDir);
         AddLocationToXml(srcPath, root);
         xDoc.Save(destPath);
     }
 
-    public void UnpackAnim(string destDir, TAE tae, TAE.Animation anim)
+    public void UnpackAnim(string destDir, TAE tae, TAE.Animation anim, bool addDigits)
     {
         XDocument xDoc = new XDocument();
         XElement root = new XElement("anim");
@@ -103,6 +119,7 @@ public partial class WTAE
             return groupEl;
         }));
 
-        xDoc.Save(Path.Combine(destDir, $"anim-{anim.ID:000000}.xml"));
+        var digits = addDigits ? anim.ID.ToString("000000000") : anim.ID.ToString("000000");
+        xDoc.Save(Path.Combine(destDir, $"anim-{digits}.xml"));
     }
 }

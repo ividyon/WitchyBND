@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml;
 using PPlus;
 using SoulsFormats;
@@ -124,7 +126,16 @@ The param may be out of date for the regulation version.",
         var fieldCounts = new Dictionary<string, Dictionary<string, int>>();
         var fieldMaxes = new Dictionary<string, (string, int)>();
 
-        foreach (FsParam.Row row in param.Rows)
+
+
+        var rowDict = new ConcurrentDictionary<long, WPARAMRow>();
+
+        void ParallelCallback(FsParam.Row row, ParallelLoopState state, long i)
+        {
+            Callback(row, i);
+        }
+
+        void Callback(FsParam.Row row, long i)
         {
             int id = row.ID;
             string name = row.Name;
@@ -167,7 +178,24 @@ The param may be out of date for the regulation version.",
                 prepRow.Fields[fieldName] = value;
             }
 
-            rows.Add(prepRow);
+            rowDict!.TryAdd(i, prepRow);
+        }
+
+        if (Configuration.Parallel)
+        {
+            Parallel.ForEach(param.Rows, ParallelCallback);
+        }
+        else
+        {
+            for (int i = 0; i < param.Rows.Count; i++)
+            {
+                Callback(param.Rows[i], i);
+            }
+        }
+
+        foreach (WPARAMRow row in rowDict.OrderBy(p => p.Key).Select(p => p.Value).ToList())
+        {
+            rows.Add(row);
         }
 
         int threshold = (int)(rows.Count * 0.6);
@@ -207,6 +235,7 @@ The param may be out of date for the regulation version.",
         xw.WriteEndElement();
         // Rows
         xw.WriteStartElement("rows");
+
         foreach (WPARAMRow row in rows)
         {
             xw.WriteStartElement("row");
