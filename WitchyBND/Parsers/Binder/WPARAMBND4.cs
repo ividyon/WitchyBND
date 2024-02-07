@@ -82,36 +82,12 @@ public class WPARAMBND4 : WBinderParser
     public override bool HasPreprocess => true;
     public override bool Preprocess(string srcPath)
     {
-        if (PreprocessedPaths.Contains(srcPath)) return false;
-        if (!Directory.Exists(srcPath)) return false;
+        if (gameService.KnownGamePathsForParams.Any(p => srcPath.StartsWith(p.Key))) return false;
 
-        string xmlPath = GetFolderXmlPath(srcPath, "bnd4");
-        if (!File.Exists(xmlPath)) return false;
+        if (!(Exists(srcPath) && Is(srcPath, null, out ISoulsFile? _)) && !(ExistsUnpacked(srcPath) && IsUnpacked(srcPath))) return false;
 
-        var doc = XDocument.Load(GetFolderXmlPath(srcPath, "bnd4"));
-        if (doc.Root == null || doc.Root.Name != "bnd4") return false;
-        XElement xml = doc.Root;
+        gameService.DetermineGameType(srcPath, true);
 
-        var gameElement = xml.Element("game");
-        if (gameElement == null) return false;
-        Enum.TryParse(gameElement.Value, out WBUtil.GameType game);
-
-        var versionElement = xml.Element("version");
-        if (versionElement == null) return false;
-        var regVer = Convert.ToUInt64(versionElement.Value);
-
-        var dirName = Path.GetDirectoryName(srcPath)!;
-        if (!gameService.KnownGamePathsForParams.Any(p => dirName.StartsWith(p.Key)))
-        {
-            gameService.KnownGamePathsForParams[dirName] = (game, regVer);
-            gameService.KnownGamePaths[dirName] = game;
-            gameService.PopulateParamdex(game);
-        }
-
-        if (FilenameIsModernRegulation(srcPath))
-            ParseMode.Parsers.OfType<WDCX>().FirstOrDefault()?.Preprocess(srcPath);
-
-        PreprocessedPaths.Add(srcPath);
         return true;
     }
 

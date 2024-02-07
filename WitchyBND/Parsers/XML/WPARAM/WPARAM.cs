@@ -69,15 +69,12 @@ If DSMapStudio does not yet support this game or regulation version, an experime
 
     public override bool Preprocess(string srcPath)
     {
-        var dirName = Path.GetDirectoryName(srcPath)!;
-        if (gameService.KnownGamePathsForParams.Any(p => srcPath.Contains(p.Key))) return false;
+        if (gameService.KnownGamePathsForParams.Any(p => srcPath.StartsWith(p.Key))) return false;
 
         if (!Is(srcPath, null, out ISoulsFile? _)) return false;
 
-        var game = gameService.DetermineGameType(srcPath, true);
-        gameService.PopulateParamdex(game.Item1);
+        gameService.DetermineGameType(srcPath, true);
 
-        PreprocessedPaths.Add(dirName);
         return true;
     }
 

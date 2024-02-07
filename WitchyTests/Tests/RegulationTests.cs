@@ -88,9 +88,9 @@ public class RegulationTests : TestBase
             File.Delete(path);
 
             Assert.That(Directory.Exists(destPath));
+            _gameService.DetermineGameType(destPath, true, dirGame);
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
-            _gameService.DetermineGameType(destPath, true, dirGame);
             parser.Preprocess(destPath);
             parser.Repack(destPath);
 
