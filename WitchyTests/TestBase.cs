@@ -13,7 +13,7 @@ namespace WitchyTests;
 [Ignore("Base class")]
 public class TestBase
 {
-
+    protected static IGameService _gameService;
     static IServiceProvider CreateProvider()
     {
         var error = new ErrorService();
@@ -39,6 +39,7 @@ public class TestBase
     static TestBase()
     {
         ServiceProvider.ReplaceProvider(CreateProvider());
+        _gameService = ServiceProvider.GetService<IGameService>();
     }
 
     [OneTimeSetUp]

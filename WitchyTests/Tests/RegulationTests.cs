@@ -59,7 +59,6 @@ public class RegulationTests : TestBase
     // [Category("SkipOnGitHubAction")]
     public void PARAMBND4()
     {
-        var gameService = ServiceProvider.GetService<IGameService>();
         IEnumerable<string> paths = GetSamples("PARAMBND4\\Correct");
 
         var parser = new WPARAMBND4();
@@ -74,7 +73,7 @@ public class RegulationTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var outFile));
 
-            gameService.DetermineGameType(path, true, dirGame);
+            _gameService.DetermineGameType(path, true, dirGame);
             parser.Unpack(path, outFile);
             string? destPath = parser.GetUnpackDestPath(path);
 
@@ -91,6 +90,7 @@ public class RegulationTests : TestBase
             Assert.That(Directory.Exists(destPath));
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
+            _gameService.DetermineGameType(destPath, true, dirGame);
             parser.Preprocess(destPath);
             parser.Repack(destPath);
 
