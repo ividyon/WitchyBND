@@ -1,21 +1,44 @@
 ﻿using System.Globalization;
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using PPlus;
 using WitchyBND;
+using WitchyBND.Services;
 using WitchyLib;
+using ServiceProvider = WitchyBND.Services.ServiceProvider;
 
 namespace WitchyTests;
 
 [Ignore("Base class")]
 public class TestBase
 {
+
+    static IServiceProvider CreateProvider()
+    {
+        var error = new ErrorService();
+        var game = new GameService(error);
+        var update = new UpdateService(error);
+
+        var collection = new ServiceCollection()
+            .AddSingleton<IErrorService>(error)
+            .AddSingleton<IGameService>(game)
+            .AddSingleton<IUpdateService>(update);
+
+        return collection.BuildServiceProvider();
+    }
+
     public bool Location;
     public bool Parallel;
     public TestBase(bool location, bool parallel)
     {
         Location = location;
         Parallel = parallel;
+    }
+
+    static TestBase()
+    {
+        ServiceProvider.ReplaceProvider(CreateProvider());
     }
 
     [OneTimeSetUp]

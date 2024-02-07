@@ -12,7 +12,7 @@ public enum DeferFormat
     [Display(Name = "Lua/HKS")] Lua,
     [Display(Name = "HKX")] Hkx,
     // [Display(Name = "ESD")] Esd,
-    // [Display(Name="FLVER")] Flver
+    // [Display(Name = "FLVER")] Flver
 }
 
 public class DeferFormatConfiguration

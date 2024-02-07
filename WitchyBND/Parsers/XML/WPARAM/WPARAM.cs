@@ -5,20 +5,24 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Xml;
 using PPlus;
-using PPlus.Controls;
 using SoulsFormats;
+using WitchyBND.Errors;
+using WitchyBND.Services;
 using WitchyFormats;
 using WitchyLib;
-using PARAM = WitchyFormats.PARAM;
 using PARAMDEF = WitchyFormats.PARAMDEF;
 
 namespace WitchyBND.Parsers;
 
 public partial class WPARAM : WXMLParser
 {
+
     private static bool WarnedAboutParams { get; set; }
+
+    public WPARAM()
+    {
+    }
 
     public static bool WarnAboutParams()
     {
@@ -41,8 +45,8 @@ If DSMapStudio does not yet support this game or regulation version, an experime
     private class WPARAMRow
     {
         public int ID { get; set; }
-        public string Name { get; set; }
-        public string ParamdexName { get; set; }
+        public string? Name { get; set; }
+        public string? ParamdexName { get; set; }
         public Dictionary<string, string> Fields { get; } = new();
     }
 
@@ -59,19 +63,6 @@ If DSMapStudio does not yet support this game or regulation version, an experime
         Element
     }
 
-    // Dictionary housing paramdefs for batched usage.
-    private static ConcurrentDictionary<WBUtil.GameType, ConcurrentDictionary<string, PARAMDEF>> ParamdefStorage
-    {
-        get;
-    } = new();
-
-    // Dictionary housing param row names for batched usage.
-    private static
-        ConcurrentDictionary<WBUtil.GameType, ConcurrentDictionary<string, ConcurrentDictionary<int, string>>>
-        NameStorage { get; } = new();
-
-    private static Dictionary<string, string> _ac6TentativeParamTypes = new();
-
     public override string Name => "PARAM";
 
     public override bool HasPreprocess => true;
@@ -79,13 +70,12 @@ If DSMapStudio does not yet support this game or regulation version, an experime
     public override bool Preprocess(string srcPath)
     {
         var dirName = Path.GetDirectoryName(srcPath)!;
-        if (PreprocessedPaths.Contains(dirName)) return false;
+        if (gameService.KnownGamePathsForParams.Any(p => srcPath.Contains(p.Key))) return false;
 
         if (!Is(srcPath, null, out ISoulsFile? _)) return false;
 
-        (WBUtil.GameType, ulong) gameInfo = WBUtil.DetermineGameType(srcPath, Configuration.Args.Passive, true);
-
-        PopulateParamdex(gameInfo.Item1);
+        var game = gameService.DetermineGameType(srcPath, true);
+        gameService.PopulateParamdex(game.Item1);
 
         PreprocessedPaths.Add(dirName);
         return true;
@@ -106,136 +96,13 @@ If DSMapStudio does not yet support this game or regulation version, an experime
         }
         catch
         {
-            Program.RegisterError($"{path} is not a valid PARAM file.");
+            errorService.RegisterError($"{path} is not a valid PARAM file.");
             file = null;
             return false;
         }
 
         file = param;
         return true;
-    }
-
-    public static void UnpackParamdex()
-    {
-        var paramdexPath = WBUtil.GetParamdexPath();
-        var zipPath = $@"{WBUtil.GetExeLocation()}\Assets\Paramdex.zip";
-
-        if (!File.Exists(zipPath)) return;
-
-        PromptPlus.Error.WriteLine("");
-        PromptPlus.Error.WriteLine("Located Paramdex archive; replacing existing Paramdex.");
-        if (Directory.Exists(paramdexPath))
-            Directory.Delete(paramdexPath, true);
-        try
-        {
-            using (ZipArchive archive = ZipFile.OpenRead(zipPath))
-            {
-                if (!Directory.Exists(paramdexPath))
-                    Directory.CreateDirectory(paramdexPath);
-                PromptPlus.Error.WriteLine("Extracting Paramdex archive. This is a one-time operation.");
-                archive.ExtractToDirectory(paramdexPath, true);
-            }
-
-            File.Delete(zipPath);
-            PromptPlus.Error.WriteLine("Successfully extracted Paramdex archive.");
-            PromptPlus.Error.WriteLine("");
-        }
-        catch (Exception e)
-        {
-            Program.RegisterError(new WitchyError(@"A problem occurred while extracting the Paramdex archive. Please extract it manually in the ""Assets"" directory in the WitchyBND folder. Alternately, try re-downloading WitchyBND, as the download may have been corrupted."));
-        }
-    }
-
-    public static void PopulateParamdex(WBUtil.GameType game)
-    {
-        if (ParamdefStorage[game].Count > 0)
-            return;
-
-        var paramdexPath = WBUtil.GetParamdexPath();
-        if (!Directory.Exists(paramdexPath))
-            throw new DirectoryNotFoundException("Could not locate Assets\\Paramdex folder.");
-
-        var gameName = game.ToString();
-        var paramdefPath = $@"{paramdexPath}\{gameName}\Defs";
-
-        if (!Directory.Exists(paramdefPath))
-        {
-            throw new Exception($"Paramdef path not found for {gameName}.");
-        }
-
-        // Reading XML paramdefs
-        foreach (string path in Directory.GetFiles(paramdefPath, "*.xml"))
-        {
-            PARAMDEF paramdef = PARAMDEF.XmlDeserialize(path, true);
-
-            var dupes = paramdef.Fields.GroupBy(x => x.InternalName).Where(x => x.Count() > 1)
-                .ToDictionary(x => x.Key, x => x.ToList());
-            foreach (KeyValuePair<string, List<PARAMDEF.Field>> pair in dupes)
-            {
-                for (var i = 0; i < pair.Value.Count; i++)
-                {
-                    int offset = 0;
-                    PARAMDEF.Field fieldDef = pair.Value[i];
-                    var index = paramdef.Fields.IndexOf(fieldDef);
-                    for (int j = 0; j < index; j++)
-                    {
-                        var prevDef = paramdef.Fields[j];
-                        var type = WBUtil.TypeForParamDefType(prevDef.DisplayType, prevDef.ArrayLength > 1);
-                        if (type == typeof(byte[]))
-                        {
-                            offset += prevDef.ArrayLength;
-                        }
-                        else
-                            offset += Marshal.SizeOf(type);
-                    }
-
-                    fieldDef.InternalName += $"_offset{offset}";
-                }
-            }
-
-            ParamdefStorage[game][paramdef.ParamType] = paramdef;
-        }
-    }
-
-    public static void PopulateNames(WBUtil.GameType game, string paramName)
-    {
-        if (NameStorage[game].ContainsKey(paramName) && NameStorage[game][paramName].Count > 0)
-            return;
-
-        var gameName = game.ToString();
-        var namePath = Path.Combine(WBUtil.GetParamdexPath($@"{gameName}\Names\{paramName}.txt"));
-
-        if (!File.Exists(namePath))
-        {
-            // Write something to the storage so the population process isn't repeated.
-            NameStorage[game][paramName] = new ConcurrentDictionary<int, string>();
-            NameStorage[game][paramName].TryAdd(-9000, string.Empty);
-            // Quietly fail, it's just names after all.
-            // Program.RegisterNotice($"Could not find names for {gameName} param {paramName} in Paramdex.");
-            return;
-        }
-
-        var nameDict = new ConcurrentDictionary<int, string>();
-        var names = File.ReadAllLines(namePath);
-        foreach (string name in names)
-        {
-            var splitted = name.Trim().Split(' ', 2);
-            try
-            {
-                var result = nameDict.TryAdd(int.Parse(splitted[0]), splitted[1]);
-                if (result == false)
-                {
-                    Program.RegisterNotice($"Paramdex: Duplicate name for ID {splitted[0]}");
-                }
-            }
-            catch (Exception e)
-            {
-                throw new InvalidDataException($"There was something wrong with the Paramdex names at \"{name}\"",
-                    e);
-            }
-        }
-
-        NameStorage[game][paramName] = nameDict;
     }
 
     public static Byte[] Dummy8Read(string dummy8, int expectedLength)
@@ -279,15 +146,15 @@ If DSMapStudio does not yet support this game or regulation version, an experime
         return value;
     }
 
-    public static object StringToCellValue(string valueString, PARAMDEF.Field pdefField)
+    public static object StringToCellValue(PARAMDEF.Field def, string valueString)
     {
         object value;
-        if (pdefField.DisplayType == PARAMDEF.DefType.dummy8)
+        if (def.DisplayType == PARAMDEF.DefType.dummy8)
         {
             var bytes = valueString.Substring(0, valueString.Length - 1).Substring(1).Split('|')
                 .Select(byteString => Convert.ToByte(byteString));
 
-            if (pdefField.BitSize == -1)
+            if (def.BitSize == -1)
             {
                 value = bytes.ToArray();
                 if (bytes.Count() == 1)
@@ -300,13 +167,13 @@ If DSMapStudio does not yet support this game or regulation version, an experime
         }
         else
         {
-            value = valueString;
+            value = StringToValue(def, valueString);
         }
 
         return value;
     }
 
-    public static object ConvertValueFromString(PARAMDEF.Field def, object value)
+    public static object StringToValue(PARAMDEF.Field def, object value)
     {
         if (value == null)
             throw new NullReferenceException($"Cell value may not be null.");
@@ -332,27 +199,6 @@ If DSMapStudio does not yet support this game or regulation version, an experime
 
             default:
                 throw new NotImplementedException($"Conversion not specified for type {def.DisplayType}");
-        }
-    }
-
-    public WPARAM()
-    {
-        UnpackParamdex();
-
-        // Populate AC6 tentative types
-        var tentativeTypePath = $@"{WBUtil.GetParamdexPath()}\AC6\Defs\TentativeParamType.csv";
-
-        if (File.Exists(tentativeTypePath))
-        {
-            var lines = File.ReadAllLines($@"{WBUtil.GetParamdexPath()}\AC6\Defs\TentativeParamType.csv").ToList();
-            lines.RemoveAt(0);
-            _ac6TentativeParamTypes = lines.ToDictionary(a => a.Split(",")[0], b => b.Split(",")[1]);
-        }
-
-        foreach (WBUtil.GameType game in (WBUtil.GameType[])Enum.GetValues(typeof(WBUtil.GameType)))
-        {
-            ParamdefStorage[game] = new();
-            NameStorage[game] = new();
         }
     }
 }

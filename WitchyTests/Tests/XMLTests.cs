@@ -2,6 +2,7 @@
 using WitchyBND;
 using WitchyBND.CliModes;
 using WitchyBND.Parsers;
+using WitchyBND.Services;
 using WitchyLib;
 using Is = Pose.Is;
 
@@ -240,6 +241,8 @@ public class XMLTests : TestBase
     [Test]
     public void PARAM()
     {
+        var gameService = ServiceProvider.GetService<IGameService>();
+
         IEnumerable<string> paths = GetSamples("PARAM");
 
         var parser = ParseMode.Parsers.OfType<WPARAM>().First();
@@ -253,13 +256,14 @@ public class XMLTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var file));
 
-            WPARAM.Games[WPARAM.GetGamePath(path)] = (Enum.Parse<WBUtil.GameType>(gameName), 0);
-            parser.Preprocess(path);
+            var game = (Enum.Parse<WBUtil.GameType>(gameName), (ulong)0);
+            gameService.DetermineGameType(path, true, game.Item1, game.Item2);
             parser.Unpack(path, file);
 
             File.Delete(path);
 
             string destPath = parser.GetUnpackDestPath(path);
+            gameService.DetermineGameType(destPath, true, game.Item1, game.Item2);
             Assert.That(File.Exists(destPath));
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));

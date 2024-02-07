@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -12,18 +11,27 @@ using CommandLine;
 using CommandLine.Text;
 using PPlus;
 using WitchyBND.CliModes;
+using WitchyBND.Services;
 using WitchyLib;
-using PARAM = WitchyFormats.FsParam;
 
 namespace WitchyBND;
 
 [SupportedOSPlatform("windows")]
 internal static class Program
 {
-    internal static readonly object ConsoleWriterLock = new object();
-    private static ConcurrentStack<WitchyError> AccruedErrors;
-    private static ConcurrentStack<WitchyNotice> AccruedNotices;
+    internal static readonly object ConsoleWriterLock;
     public static int ProcessedItems = 0;
+
+    private static readonly IErrorService errorService;
+    private static readonly IUpdateService updateService;
+
+
+    static Program()
+    {
+        errorService = ServiceProvider.GetService<IErrorService>();
+        updateService = ServiceProvider.GetService<IUpdateService>();
+        ConsoleWriterLock = new();
+    }
 
     [STAThread]
     static void Main(string[] args)
@@ -129,7 +137,7 @@ internal static class Program
                         case CliMode.Parse:
                             SoulsOodleLib.Oodle.GrabOodle(_ => {}, false, true);
                             DisplayConfiguration(mode);
-                            Update.CheckForUpdates();
+                            updateService.CheckForUpdates();
 
                             Stopwatch watch = new Stopwatch();
 
@@ -138,7 +146,7 @@ internal static class Program
                             watch.Stop();
 
                             int pause = Configuration.EndDelay;
-                            if (Configuration.PauseOnError && AccruedErrors.Count > 0)
+                            if (Configuration.PauseOnError && errorService.AccruedErrorCount > 0)
                                 pause = -1;
                             var completedString = ProcessedItems == 1
                                 ? $"Operation completed on 1 item in {watch.Elapsed:hh\\:mm\\:ss}."
@@ -153,13 +161,13 @@ internal static class Program
                         case CliMode.Watch:
                             SoulsOodleLib.Oodle.GrabOodle(_ => {}, false, true);
                             DisplayConfiguration(mode);
-                            Update.CheckForUpdates();
+                            updateService.CheckForUpdates();
                             WatcherMode.CliWatcherMode(opt);
                             PrintIssues();
                             PrintFinale();
                             break;
                         case CliMode.Config:
-                            Update.CheckForUpdates();
+                            updateService.CheckForUpdates();
                             ConfigMode.CliConfigMode(opt);
                             break;
                         default:
@@ -171,7 +179,7 @@ internal static class Program
                     if (Configuration.IsTest || Configuration.IsDebug)
                         throw;
 
-                    RegisterException(e);
+                    errorService.RegisterException(e);
                     PrintIssues();
                     PrintFinale(-1);
                 }
@@ -183,30 +191,7 @@ internal static class Program
     {
         if (ProcessedItems > 5)
         {
-            if (AccruedErrors.Count > 0)
-            {
-                PromptPlus.WriteLine("");
-                PromptPlus.SingleDash("Errors during operation");
-                foreach (WitchyError error in AccruedErrors)
-                {
-                    PromptPlus.Error.WriteLine(
-                        $"{error.Source}: {error.Message}".PromptPlusEscape());
-                }
-            }
-
-            if (AccruedNotices.Count > 0)
-            {
-                PromptPlus.WriteLine("");
-                PromptPlus.SingleDash("Notices during operation");
-                foreach (WitchyNotice notice in AccruedNotices)
-                {
-                    if (notice.Source != null)
-                        PromptPlus.Error.WriteLine($"{notice.Source}: {notice.Message}"
-                            .PromptPlusEscape());
-                    else
-                        PromptPlus.Error.WriteLine($"{notice.Message}".PromptPlusEscape());
-                }
-            }
+            errorService.PrintIssues();
         }
     }
 
@@ -288,66 +273,5 @@ internal static class Program
         }, e => e);
 
         PromptPlus.WriteLine(helpText.ToString().PromptPlusEscape());
-    }
-
-    public static void RegisterNotice(string message, bool write = true)
-    {
-        RegisterNotice(new WitchyNotice(message), write);
-    }
-
-    public static void RegisterNotice(WitchyNotice notice, bool write = true)
-    {
-        AccruedNotices.Push(notice);
-        if (write)
-        {
-            lock(ConsoleWriterLock)
-                PromptPlus.Error.WriteLine($"{notice.Source}: {notice.Message}".PromptPlusEscape());
-        }
-    }
-
-    public static void RegisterException(Exception e, string? source = null)
-    {
-        switch (e)
-        {
-            case UnsupportedActionException:
-                RegisterError(new WitchyError($@"Unsupported user action:
-{e.ToString().PromptPlusEscape()}
-", source, WitchyErrorType.Exception, 1));
-                break;
-            default:
-                RegisterError(new WitchyError($@"Unhandled exception:
-{e.ToString().PromptPlusEscape()}
-", source, WitchyErrorType.Exception, 1));
-                break;
-        }
-    }
-
-    public static void RegisterError(string message, bool write = true)
-    {
-        RegisterError(new WitchyError(message), write);
-    }
-
-    public static void RegisterError(WitchyError error, bool write = true)
-    {
-        AccruedErrors.Push(error);
-        if (write)
-        {
-            lock (ConsoleWriterLock)
-            {
-                if (error.Source != null)
-                    PromptPlus.Error.WriteLine($"{error.Source}: {error.Message}".PromptPlusEscape());
-                else
-                    PromptPlus.Error.WriteLine(error.Message.PromptPlusEscape());
-            }
-        }
-
-        if (Configuration.IsTest)
-            throw new Exception(error.Message);
-    }
-
-    static Program()
-    {
-        AccruedErrors = new();
-        AccruedNotices = new();
     }
 }

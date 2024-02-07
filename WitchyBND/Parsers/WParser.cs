@@ -7,9 +7,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using SoulsFormats;
 using WitchyBND.CliModes;
+using WitchyBND.Services;
 using WitchyLib;
+using ServiceProvider = WitchyBND.Services.ServiceProvider;
 
 namespace WitchyBND.Parsers;
 
@@ -22,6 +25,15 @@ public enum WFileParserVerb
 
 public abstract class WFileParser
 {
+    protected IGameService gameService;
+    protected IErrorService errorService;
+
+    public WFileParser()
+    {
+        gameService = ServiceProvider.GetService<IGameService>();
+        errorService = ServiceProvider.GetService<IErrorService>();
+    }
+
     public virtual WFileParserVerb Verb => WFileParserVerb.Unpack;
     public virtual bool IncludeInList => true;
     public abstract string Name { get; }

@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using SoulsFormats;
+using WitchyBND.Errors;
+using WitchyBND.Services;
 using WitchyFormats;
 using WitchyLib;
 

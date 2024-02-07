@@ -3,6 +3,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using SoulsFormats;
+using WitchyBND.Errors;
+using WitchyBND.Services;
 using WitchyFormats;
 using WitchyLib;
 
@@ -14,7 +16,7 @@ public partial class WTAE
     {
         TAE tae = (file as TAE)!;
 
-        var game = WBUtil.DetermineGameType(srcPath, Configuration.Args.Passive, false).Item1;
+        var game = gameService.DetermineGameType(srcPath, false).Item1;
         if (!templateDict.ContainsKey(game))
         {
             throw new GameUnsupportedException(game);

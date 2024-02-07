@@ -16,9 +16,9 @@ public partial class WTAE : WFolderParser
     private static readonly Dictionary<WBUtil.GameType, TAE.Template> templateDict = new();
     public override bool Preprocess(string srcPath)
     {
-        var game = WBUtil.DetermineGameType(srcPath, Configuration.Args.Passive, false);
-        if (templateDict.Any()) return false;
         if (!(Exists(srcPath) && Is(srcPath, null, out ISoulsFile? _)) && !(ExistsUnpacked(srcPath) && IsUnpacked(srcPath))) return false;
+        var game = gameService.DetermineGameType(srcPath, false);
+        if (templateDict.Any()) return false;
         foreach (var type in Enum.GetValues<WBUtil.GameType>().Except(new [] { WBUtil.GameType.AC6 }))
         {
             var path = WBUtil.GetParamdexPath(type.ToString(), $"TAE.Template.{type}.xml");

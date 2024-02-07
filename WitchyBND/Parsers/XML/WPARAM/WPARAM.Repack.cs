@@ -96,6 +96,7 @@ public partial class WPARAM
             param.ApplyParamdef(paramdef);
 
             var rowDict = new ConcurrentDictionary<long, FsParam.Row>();
+            var colList = param.Columns.ToList();
 
             void ParallelCallback(XmlNode xmlRow, ParallelLoopState state, long i)
             {
@@ -111,7 +112,7 @@ public partial class WPARAM
 
                 var csv = cellStyle == CellStyle.CSV ? WBUtil.DelimitedString.Split(xmlRow.InnerText) : null;
 
-                foreach (FsParam.Column column in param.Columns)
+                foreach (FsParam.Column column in colList)
                 {
                     string fieldName = column.Def.InternalName;
                     string defaultValue = defaultValues[column.Def.InternalName];
@@ -135,7 +136,7 @@ public partial class WPARAM
 
                             break;
                         case CellStyle.CSV:
-                            var fieldIdx = param.Columns.ToList().IndexOf(column);
+                            var fieldIdx = colList.IndexOf(column);
                             if (csv != null && csv.Length > fieldIdx)
                             {
                                 value = csv[fieldIdx];
@@ -149,24 +150,25 @@ public partial class WPARAM
                         throw new Exception($"Row {id} is missing value for cell {fieldName}.");
                     }
 
-                    column.SetValue(row, ConvertValueFromString(column.Def, StringToCellValue(value, column.Def)));
+                    row[column.Def.InternalName]!.Value.SetValue(StringToCellValue(column.Def, value));
                 }
 
                 rowDict.TryAdd(i, row);
             }
             var rows = xml.SelectNodes("param/rows/row").Cast<XmlNode>().ToList();
 
-            if (Configuration.Parallel)
-            {
-                Parallel.ForEach(rows, ParallelCallback);
-            }
-            else
-            {
+            // if (Configuration.Parallel)
+            // {
+                // Parallel.ForEach(rows, ParallelCallback);
+            // }
+            // else
+            // {
                 for (int i = 0; i < rows.Count; i++)
                 {
                     Callback(rows[i], i);
                 }
-            }
+            // }
+
             foreach (FsParam.Row row in rowDict.OrderBy(p => p.Key).Select(p => p.Value).ToList())
             {
                 param.AddRow(row);

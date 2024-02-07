@@ -5,6 +5,8 @@ using System.Xml;
 using System.Xml.Linq;
 using PPlus;
 using SoulsFormats;
+using WitchyBND.Errors;
+using WitchyBND.Services;
 using WitchyFormats.Utils;
 using WitchyLib;
 using TPF = WitchyFormats.TPF;
@@ -30,7 +32,7 @@ public class WTPF : WFolderParser
         var sourceName = Path.GetFileName(srcPath);
         if (!supportedPlatforms.Contains(tpf.Platform))
         {
-            Program.RegisterError(new WitchyError(
+            errorService.RegisterError(new WitchyError(
                 "WitchyBND currently only supports unpacking PC, PS3 and PS4 TPFs. There may be issues with other console TPFs.",
                 srcPath));
         }
@@ -145,7 +147,7 @@ public class WTPF : WFolderParser
         catch (Exception e) when (e is not NoOodleFoundException)
         {
             if (platform == TPF.TPFPlatform.PC) throw;
-            Program.RegisterError(new WitchyError(
+            errorService.RegisterError(new WitchyError(
                 "WitchyBND only officially supports repacking PC TPFs at the moment. Repacking console TPFs is not supported.",
                 srcPath));
         }

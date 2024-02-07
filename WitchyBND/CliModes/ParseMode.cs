@@ -4,17 +4,57 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using PPlus;
 using SoulsFormats;
 using WitchyBND.Parsers;
+using WitchyBND.Services;
 using WitchyLib;
+using ServiceProvider = WitchyBND.Services.ServiceProvider;
 
 namespace WitchyBND.CliModes;
 
 public static class ParseMode
 {
+    private static readonly IErrorService errorService;
     public static List<WFileParser> Parsers;
 
+    static ParseMode()
+    {
+        errorService = ServiceProvider.GetService<IErrorService>();
+
+        Parsers = new List<WFileParser>
+        {
+            new WDCX(),
+            new WPARAMBND3(),
+            new WPARAMBND4(),
+            new WMATBINBND(),
+            new WMTDBND(),
+            new WFFXBNDModern(),
+            new WBND3(),
+            new WBND4(),
+            new WBXF3(),
+            new WBXF4(),
+            new WFFXDLSE(),
+            new WFMG(),
+            new WGPARAM(),
+            new WLUAGNL(),
+            new WLUAINFO(),
+            new WTPF(),
+            new WZERO3(),
+            new WFXR3(),
+            new WMATBIN(),
+            new WMTD(),
+            new WPARAM(),
+            new WMQB(),
+            new WDBSUB(),
+            new WENFL(),
+            new WLUA(),
+            new WHKX(),
+            new WTAE(),
+            //MSBE
+        };
+    }
     internal static void CliParseMode(CliOptions opt)
     {
         var paths = opt.Paths.ToList();
@@ -31,7 +71,7 @@ public static class ParseMode
             if (!File.Exists(path) && !Directory.Exists(path))
             {
                 if (!recursive)
-                    Program.RegisterNotice($"Path {path} does not exist.");
+                    errorService.RegisterNotice($"Path {path} does not exist.");
                 return;
             }
 
@@ -57,7 +97,7 @@ public static class ParseMode
 
             foreach (WFileParser parser in Parsers)
             {
-                bool toBreak = Catcher.Catch(() => {
+                bool toBreak = errorService.Catch(() => {
                     ISoulsFile? file;
                     if ((Configuration.Args.UnpackOnly || !Configuration.Args.RepackOnly) && parser.Exists(path) &&
                         parser.Is(path, data, out file))
@@ -94,7 +134,7 @@ public static class ParseMode
         {
             foreach (string path in pathsList)
             {
-                bool toBreak = Catcher.Catch(() => parser.Preprocess(path), out _, path);
+                bool toBreak = errorService.Catch(() => parser.Preprocess(path), out _, path);
                 if (toBreak)
                     break;
             }
@@ -199,40 +239,5 @@ public static class ParseMode
         parser.Repack(path);
         parsed = true;
         return true;
-    }
-
-    static ParseMode()
-    {
-        Parsers = new List<WFileParser>
-        {
-            new WDCX(),
-            new WPARAMBND3(),
-            new WPARAMBND4(),
-            new WMATBINBND(),
-            new WMTDBND(),
-            new WFFXBNDModern(),
-            new WBND3(),
-            new WBND4(),
-            new WBXF3(),
-            new WBXF4(),
-            new WFFXDLSE(),
-            new WFMG(),
-            new WGPARAM(),
-            new WLUAGNL(),
-            new WLUAINFO(),
-            new WTPF(),
-            new WZERO3(),
-            new WFXR3(),
-            new WMATBIN(),
-            new WMTD(),
-            new WPARAM(),
-            new WMQB(),
-            new WDBSUB(),
-            new WENFL(),
-            new WLUA(),
-            new WHKX(),
-            new WTAE(),
-            //MSBE
-        };
     }
 }

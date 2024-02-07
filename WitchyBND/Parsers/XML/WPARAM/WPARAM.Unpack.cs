@@ -3,10 +3,13 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using PPlus;
 using SoulsFormats;
+using WitchyBND.Errors;
+using WitchyBND.Services;
 using WitchyFormats;
 using WitchyLib;
 using PARAMDEF = WitchyFormats.PARAMDEF;
@@ -27,7 +30,7 @@ public partial class WPARAM
             Is(srcPath, null, out file);
         }
 
-        var gameInfo = WBUtil.DetermineGameType(srcPath, Configuration.Args.Passive, true);
+        var gameInfo = gameService.DetermineGameType(srcPath, true);
         var game = gameInfo.Item1;
         var regVer = gameInfo.Item2;
 
@@ -38,23 +41,22 @@ public partial class WPARAM
         // Fixed cell style for now.
         CellStyle cellStyle = CellStyle.Attribute;
 
-        // Temporary solution to handle AC6 paramdefs without paramtype.
         if (game == WBUtil.GameType.AC6 && string.IsNullOrWhiteSpace(paramTypeToParamdef) &&
-            _ac6TentativeParamTypes.TryGetValue(paramName, out string newParamType))
+            gameService.Ac6TentativeParamTypes.TryGetValue(paramName, out string newParamType))
         {
             paramTypeToParamdef = newParamType;
         }
 
-        if (!ParamdefStorage[game].ContainsKey(paramTypeToParamdef))
+        if (!gameService.ParamdefStorage[game].ContainsKey(paramTypeToParamdef))
         {
-            Program.RegisterError(
-                new WitchyError($"Param type {paramTypeToParamdef} not found in {game.ToString()} paramdefs.",
+            errorService.RegisterError(
+                new WitchyError($"Param type {paramTypeToParamdef} not found in {game} paramdefs.",
                     srcPath));
             // Don't hard-fail this because it can happen, just proceed to the next file.
             return;
         }
 
-        PARAMDEF paramdef = ParamdefStorage[game][paramTypeToParamdef];
+        PARAMDEF paramdef = gameService.ParamdefStorage[game][paramTypeToParamdef];
 
         if (param.AppliedParamdef == null)
         {
@@ -68,11 +70,11 @@ public partial class WPARAM
             catch (Exception e)
             {
                 if (regVer == 0)
-                    Program.RegisterError(new WitchyError(@$"Could not carefully apply paramdef {paramTypeToParamdef}.
+                    errorService.RegisterError(new WitchyError(@$"Could not carefully apply paramdef {paramTypeToParamdef}.
 The param may be out of date, or an incorrect regulation version may have been supplied.",
                         srcPath));
                 else
-                    Program.RegisterError(new WitchyError(@$"Could not carefully apply paramdef {paramTypeToParamdef}.
+                    errorService.RegisterError(new WitchyError(@$"Could not carefully apply paramdef {paramTypeToParamdef}.
 The param may be out of date for the regulation version.",
                         srcPath));
                 // Nothing happened yet, so can just proceed to the next file.
@@ -119,13 +121,14 @@ The param may be out of date for the regulation version.",
             xw.WriteEndElement();
         }
 
+        gameService.PopulateNames(game, paramName);
+
         // Prepare rows
         var rows = new List<WPARAMRow>();
-        var fieldNames = paramdef.Fields.FilterByGameVersion(gameInfo.Item2).Select(field => field.InternalName);
+        var fieldNames = paramdef.Fields.FilterByGameVersion(gameInfo.Item2).Select(field => field.InternalName).ToList();
 
-        var fieldCounts = new Dictionary<string, Dictionary<string, int>>();
-        var fieldMaxes = new Dictionary<string, (string, int)>();
-
+        var fieldCounts = new ConcurrentDictionary<string, ConcurrentDictionary<string, int>>();
+        var fieldMaxes = new ConcurrentDictionary<string, (string, int)>();
 
 
         var rowDict = new ConcurrentDictionary<long, WPARAMRow>();
@@ -142,9 +145,8 @@ The param may be out of date for the regulation version.",
             string paramdexName = null;
             if (string.IsNullOrEmpty(name))
             {
-                PopulateNames(game, paramName);
-                if (NameStorage[game][paramName].ContainsKey(id))
-                    paramdexName = NameStorage[game][paramName][id];
+                if (gameService.NameStorage[game][paramName].ContainsKey(id))
+                    paramdexName = gameService.NameStorage[game][paramName][id];
             }
 
             var prepRow = new WPARAMRow()
@@ -163,22 +165,24 @@ The param may be out of date for the regulation version.",
                 }
 
                 if (!fieldCounts.ContainsKey(fieldName))
-                    fieldCounts[fieldName] = new Dictionary<string, int>();
+                    fieldCounts[fieldName] = new ConcurrentDictionary<string, int>();
 
                 var value = CellValueToString(cell.Value);
 
-                if (!fieldCounts[fieldName].ContainsKey(value))
-                    fieldCounts[fieldName][value] = 0;
-                fieldCounts[fieldName][value]++;
+                fieldCounts[fieldName].TryAdd(value, 0);
+                fieldCounts[fieldName].TryGetValue(value, out int count);
+                fieldCounts[fieldName][value] = count + 1;
 
                 if (!fieldMaxes.ContainsKey(fieldName) ||
-                    fieldCounts[fieldName][value] > fieldMaxes[fieldName].Item2)
-                    fieldMaxes[fieldName] = (value, fieldCounts[fieldName][value]);
+                    count > fieldMaxes[fieldName].Item2)
+                {
+                    fieldMaxes[fieldName] = (value, count);
+                }
 
                 prepRow.Fields[fieldName] = value;
             }
 
-            rowDict!.TryAdd(i, prepRow);
+            rowDict.TryAdd(i, prepRow);
         }
 
         if (Configuration.Parallel)

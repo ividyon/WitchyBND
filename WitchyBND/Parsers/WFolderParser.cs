@@ -16,13 +16,13 @@ public abstract class WFolderParser : WFileParser
     public override WFileParserVerb Verb => WFileParserVerb.Unpack;
 
 
-    public static void WarnAboutKrak(DCX.Type compression, int count)
+    protected void WarnAboutKrak(DCX.Type compression, int count)
     {
         if (WarnedAboutKrak) return;
         if (compression is not DCX.Type.DCX_KRAK and not DCX.Type.DCX_KRAK_MAX) return;
         if (count <= 10) return;
 
-        Program.RegisterNotice(@"DCX compression is set to DCX_KRAK or DCX_KRAK_MAX.
+        errorService.RegisterNotice(@"DCX compression is set to DCX_KRAK or DCX_KRAK_MAX.
 Kraken compression is extremely slow - taking up almost 100% of repacking time - and recommended only for for the final repack before releasing something to the public.
 During development, you may wish to switch to a faster compression such as: DCX_DFLT_11000_44_9_15
 Simply replace the compression level in the Witchy XML to this value.");

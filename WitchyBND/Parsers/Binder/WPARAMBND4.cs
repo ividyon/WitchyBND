@@ -101,13 +101,12 @@ public class WPARAMBND4 : WBinderParser
         var regVer = Convert.ToUInt64(versionElement.Value);
 
         var dirName = Path.GetDirectoryName(srcPath)!;
-        if (!WBUtil.KnownGamePathsForParams.Any(p => dirName.StartsWith(p.Key)))
+        if (!gameService.KnownGamePathsForParams.Any(p => dirName.StartsWith(p.Key)))
         {
-            WBUtil.KnownGamePathsForParams[dirName] = (game, regVer);
-            WBUtil.KnownGamePaths[dirName] = game;
+            gameService.KnownGamePathsForParams[dirName] = (game, regVer);
+            gameService.KnownGamePaths[dirName] = game;
+            gameService.PopulateParamdex(game);
         }
-
-        WPARAM.PopulateParamdex(game);
 
         if (FilenameIsModernRegulation(srcPath))
             ParseMode.Parsers.OfType<WDCX>().FirstOrDefault()?.Preprocess(srcPath);
