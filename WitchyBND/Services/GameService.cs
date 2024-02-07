@@ -101,6 +101,7 @@ public class GameService : IGameService
             lines.RemoveAt(0);
             foreach (string line in lines)
             {
+                if (string.IsNullOrWhiteSpace(line)) continue;
                 var split = line.Split(",");
                 Ac6TentativeParamTypes[split[0]] = split[1];
             }

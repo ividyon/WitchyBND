@@ -44,7 +44,7 @@ public partial class WPARAM
         if (game == WBUtil.GameType.AC6 && string.IsNullOrWhiteSpace(paramTypeToParamdef) &&
             gameService.Ac6TentativeParamTypes.TryGetValue(paramName, out string? newParamType))
         {
-            if (newParamType == null)
+            if (string.IsNullOrWhiteSpace(newParamType))
             {
                 errorService.RegisterError(new WitchyError(@$"No tentative param type alternative found for {paramTypeToParamdef}."));
                 return;
