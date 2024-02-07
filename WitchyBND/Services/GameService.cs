@@ -97,7 +97,7 @@ public class GameService : IGameService
 
         if (File.Exists(tentativeTypePath))
         {
-            var lines = File.ReadAllLines($@"{WBUtil.GetParamdexPath()}\AC6\Defs\TentativeParamType.csv").ToList();
+            var lines = File.ReadAllLines(tentativeTypePath).ToList();
             lines.RemoveAt(0);
             foreach (string line in lines)
             {

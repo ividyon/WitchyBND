@@ -10,6 +10,7 @@
 * Restricted the version update check to occur only once every 6 hours, to avoid getting timed out by GitHub when running Witchy a lot.
 * Improved game detection by scanning for executables and DSMS project.json content.
 * Enabled parallel processing for PARAM rows.
+* Updated Paramdex to the latest community values.
 * Fixed an issue where "file not found" exceptions would be erroneously filed away as "in use by another process" errors.
 * Fixed an issue where processing errors would erroneously display a "Could not find valid parser" error message.
 * Fixed an issue where directories were not included in path globbing.

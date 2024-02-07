@@ -71,11 +71,17 @@ public partial class WPARAM
             {
                 if (regVer == 0)
                     errorService.RegisterError(new WitchyError(@$"Could not carefully apply paramdef {paramTypeToParamdef}.
-The param may be out of date, or an incorrect regulation version may have been supplied.",
+The param may be out of date, or an incorrect regulation version may have been supplied.
+
+The error was:
+{e}",
                         srcPath));
                 else
                     errorService.RegisterError(new WitchyError(@$"Could not carefully apply paramdef {paramTypeToParamdef}.
-The param may be out of date for the regulation version.",
+The param may be out of date for the regulation version.
+
+The error was:
+{e}",
                         srcPath));
                 // Nothing happened yet, so can just proceed to the next file.
                 return;
