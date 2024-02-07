@@ -17,7 +17,7 @@ public partial class WTAE : WFolderParser
     public override bool Preprocess(string srcPath)
     {
         if (!(Exists(srcPath) && Is(srcPath, null, out ISoulsFile? _)) && !(ExistsUnpacked(srcPath) && IsUnpacked(srcPath))) return false;
-        var game = gameService.DetermineGameType(srcPath, false);
+        gameService.DetermineGameType(srcPath, false);
         if (templateDict.Any()) return false;
         foreach (var type in Enum.GetValues<WBUtil.GameType>().Except(new [] { WBUtil.GameType.AC6 }))
         {

@@ -252,11 +252,11 @@ public class XMLTests : TestBase
             SetLocation(path);
             string fullPath = Path.GetDirectoryName(Path.GetFullPath(path)).TrimEnd(Path.DirectorySeparatorChar);
             string gameName = fullPath.Split(Path.DirectorySeparatorChar).Last();
+            var game = (Enum.Parse<WBUtil.GameType>(gameName), (ulong)0);
 
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var file));
 
-            var game = (Enum.Parse<WBUtil.GameType>(gameName), (ulong)0);
             gameService.DetermineGameType(path, true, game.Item1, game.Item2);
             parser.Unpack(path, file);
 

@@ -3,6 +3,7 @@ using System.Xml.Linq;
 using WitchyBND;
 using WitchyBND.CliModes;
 using WitchyBND.Parsers;
+using WitchyBND.Services;
 using WitchyLib;
 using static System.Enum;
 
@@ -31,7 +32,6 @@ public class RegulationTests : TestBase
             parser.Unpack(path, outFile);
             string? destPath = parser.GetUnpackDestPath(path);
 
-
             var xml = WFileParser.LoadXml(parser.GetFolderXmlPath(destPath, "bnd3"));
             XElement? gameElement = xml.Element("game");
             if (gameElement == null) throw new XmlException("XML has no Game element");
@@ -59,6 +59,7 @@ public class RegulationTests : TestBase
     // [Category("SkipOnGitHubAction")]
     public void PARAMBND4()
     {
+        var gameService = ServiceProvider.GetService<IGameService>();
         IEnumerable<string> paths = GetSamples("PARAMBND4\\Correct");
 
         var parser = new WPARAMBND4();
@@ -73,6 +74,7 @@ public class RegulationTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var outFile));
 
+            gameService.DetermineGameType(path, true, dirGame);
             parser.Unpack(path, outFile);
             string? destPath = parser.GetUnpackDestPath(path);
 
