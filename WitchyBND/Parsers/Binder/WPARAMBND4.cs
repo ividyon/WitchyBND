@@ -174,9 +174,7 @@ public class WPARAMBND4 : WBinderParser
                 }
                 catch (Exception e)
                 {
-                    throw new MalformedBinderException(@$"The regulation binder is malformed: {Path.GetFileNameWithoutExtension(filePath)} has thrown an exception during read.
-
-{$@"{WBUtil.GetParamdexPath()}\AC6\Defs\TentativeParamType.csv"}: {File.Exists($@"{WBUtil.GetParamdexPath()}\AC6\Defs\TentativeParamType.csv")}", e);
+                    throw new MalformedBinderException(@$"The regulation binder is malformed: {Path.GetFileNameWithoutExtension(filePath)} has thrown an exception during read.", e);
                 }
             }
         }
