@@ -170,7 +170,7 @@ public class WPARAMBND4 : WBinderParser
             {
                 try
                 {
-                    paramParser.Unpack(Path.Combine(srcPath, filePath), null, true);
+                    paramParser.Unpack(Path.Combine(srcPath, filePath), null, true, (game, regVer));
                 }
                 catch (Exception e)
                 {

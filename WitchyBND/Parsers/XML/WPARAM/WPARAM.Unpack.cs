@@ -23,14 +23,14 @@ public partial class WPARAM
         Unpack(srcPath, file, false);
     }
 
-    public void Unpack(string srcPath, ISoulsFile? file, bool dry)
+    public void Unpack(string srcPath, ISoulsFile? file, bool dry, (WBUtil.GameType, ulong)? passedGameInfo = null)
     {
         if (dry && file == null)
         {
             Is(srcPath, null, out file);
         }
 
-        var gameInfo = gameService.DetermineGameType(srcPath, true);
+        var gameInfo = passedGameInfo ?? gameService.DetermineGameType(srcPath, true);
         var game = gameInfo.Item1;
         var regVer = gameInfo.Item2;
 
