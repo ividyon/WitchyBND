@@ -49,7 +49,7 @@ public partial class WPARAM
             }
             else
             {
-                errorService.RegisterError(new WitchyError(@$"No tentative param type alternative found for ""{paramTypeToParamdef}"" in {srcPath}.", srcPath));
+                errorService.RegisterError(new WitchyError(@$"No tentative param type alternative found for ""{paramTypeToParamdef}"" -> ""{paramName}"" in {srcPath}.", srcPath));
                 return;
             }
             if (string.IsNullOrWhiteSpace(newParamType))
