@@ -82,7 +82,6 @@ public class GameService : IGameService
     {
         _errorService = errorService;
         UnpackParamdex();
-        PopulateTentativeAC6Types();
 
         foreach (WBUtil.GameType game in (WBUtil.GameType[])Enum.GetValues(typeof(WBUtil.GameType)))
         {
@@ -247,6 +246,10 @@ Enter 0, or press ESC, to use the latest available paramdef.");
         }
 
         KnownGamePaths[knownPath] = game.Value;
+        if (game.Value == WBUtil.GameType.AC6)
+        {
+            PopulateTentativeAC6Types();
+        }
         if (forParams)
         {
             KnownGamePathsForParams[knownPath] = (game.Value, regVer);
