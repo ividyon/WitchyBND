@@ -81,7 +81,6 @@ public class GameService : IGameService
     public GameService(IErrorService errorService)
     {
         _errorService = errorService;
-        UnpackParamdex();
 
         foreach (WBUtil.GameType game in (WBUtil.GameType[])Enum.GetValues(typeof(WBUtil.GameType)))
         {
@@ -110,6 +109,7 @@ public class GameService : IGameService
     public (WBUtil.GameType, ulong) DetermineGameType(string path, bool forParams,
         WBUtil.GameType? game = null, ulong regVer = 0)
     {
+        UnpackParamdex();
         string knownPath = File.Exists(path) ? Path.GetDirectoryName(path)! : path;
 
         // Determine what kind of PARAM we're dealing with here
