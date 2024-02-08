@@ -176,7 +176,7 @@ public class WPARAMBND4 : WBinderParser
                 {
                     throw new MalformedBinderException(@$"The regulation binder is malformed: {Path.GetFileNameWithoutExtension(filePath)} has thrown an exception during read.
 
-{File.ReadAllText(Path.Combine(srcPath, $"{filePath}.xml"))}", e);
+{$@"{WBUtil.GetParamdexPath()}\AC6\Defs\TentativeParamType.csv"}: {File.Exists($@"{WBUtil.GetParamdexPath()}\AC6\Defs\TentativeParamType.csv")}", e);
                 }
             }
         }

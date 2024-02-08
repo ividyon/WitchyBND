@@ -28,7 +28,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup cache
+      - name: Dotnet cache
+        id: cache-dotnet-core
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/.dotnet
+          key: ${{ runner.os }}-dotnet
+          restore-keys: |
+            ${{ runner.os }}-dotnet
+
+      - name: NuGet cache
+        id: cache-nuget
         uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/.nuget/packages
@@ -37,11 +47,13 @@ jobs:
             ${{ runner.os }}-nuget-
 
       - name: Setup .NET
+        if: steps.cache-dotnet-core.outputs.cache-hit != 'true'
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore packages
+        if: steps.cache-nuget.outputs.cache-hit != 'true'
         run: nuget restore ./WitchyBND.sln -LockedMode
 
       - name: Build

@@ -35,7 +35,7 @@ public partial class WPARAM
         var regVer = gameInfo.Item2;
 
         var param = (file as FsParam)!;
-        string paramTypeToParamdef = param.ParamType;
+        string? paramTypeToParamdef = param.ParamType;
         string paramName = Path.GetFileNameWithoutExtension(srcPath);
 
         // Fixed cell style for now.
