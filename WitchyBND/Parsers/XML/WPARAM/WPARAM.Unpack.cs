@@ -41,15 +41,20 @@ public partial class WPARAM
         // Fixed cell style for now.
         CellStyle cellStyle = CellStyle.Attribute;
 
-        if (game == WBUtil.GameType.AC6 && string.IsNullOrWhiteSpace(paramTypeToParamdef) &&
-            gameService.Ac6TentativeParamTypes.TryGetValue(paramName, out string? newParamType))
+        if (game == WBUtil.GameType.AC6 && string.IsNullOrWhiteSpace(paramTypeToParamdef))
         {
-            if (string.IsNullOrWhiteSpace(newParamType))
+            if (gameService.Ac6TentativeParamTypes.TryGetValue(paramName, out string? newParamType))
+            {
+                paramTypeToParamdef = newParamType;
+            }
+            else
             {
                 errorService.RegisterError(new WitchyError(@$"No tentative param type alternative found for {paramTypeToParamdef}."));
                 return;
             }
-            paramTypeToParamdef = newParamType;
+            if (string.IsNullOrWhiteSpace(newParamType))
+            {
+            }
         }
 
         if (!gameService.ParamdefStorage[game].ContainsKey(paramTypeToParamdef))
