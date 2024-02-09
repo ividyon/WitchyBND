@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.IO;
 using PPlus;
 using SoulsFormats;
@@ -131,6 +132,20 @@ namespace WitchyBND.Services
             try
             {
                 outcome = callback();
+            }
+            catch (ProcessUserInputException e)
+            {
+                if (Configuration.IsTest)
+                    throw;
+                RegisterError(new WitchyError($@"The external process ""{e.ProcessName}"" was waiting for user input.
+
+Process output:
+{e.Output}
+
+Process error output:
+{e.Error}", source,
+                    WitchyErrorType.Generic));
+                error = true;
             }
             catch (GameUnsupportedException e)
             {
@@ -299,6 +314,25 @@ namespace WitchyBND.Errors
         {
             Message = message;
             Source = source;
+        }
+    }
+
+    public class ProcessUserInputException : Exception
+    {
+        public string ProcessName;
+        public string Output;
+        public string Error;
+        public ProcessUserInputException(Process process, string message) : base(message)
+        {
+            ProcessName = process.ProcessName;
+            Output = process.StandardOutput.ReadToEnd();
+            Error = process.StandardError.ReadToEnd();
+        }
+        public ProcessUserInputException(Process process) : base($"The process \"{process.ProcessName}\" requested user input.")
+        {
+            ProcessName = process.ProcessName;
+            Output = process.StandardOutput.ReadToEnd();
+            Error = process.StandardError.ReadToEnd();
         }
     }
 

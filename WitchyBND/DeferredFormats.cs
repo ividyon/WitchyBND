@@ -89,7 +89,7 @@ public static class DeferredFormatHandling
 
     public static void Process(DeferFormat format, string srcPath)
     {
-        var process = DeferredFormatHandling.CallDeferredTool(format, srcPath, out string output, out string error);
+        var process = CallDeferredTool(format, srcPath, out string output, out string error);
         lock (Program.ConsoleWriterLock)
         {
             PromptPlus.WriteLine(output);

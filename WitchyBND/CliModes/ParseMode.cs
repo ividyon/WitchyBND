@@ -51,7 +51,8 @@ public static class ParseMode
             new WENFL(),
             new WLUA(),
             new WHKX(),
-            new WTAE(),
+            new WTAEFolder(),
+            new WTAEFile(),
             //MSBE
         };
     }

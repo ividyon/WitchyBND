@@ -10,8 +10,14 @@ using WitchyLib;
 
 namespace WitchyBND.Parsers;
 
-public partial class WTAE
+public partial class WTAEFolder
 {
+    public override bool Is(string path, byte[]? data, out ISoulsFile? file)
+    {
+        file = null;
+        return Configuration.TaeFolder && IsRead<TAE>(path, data, out file);
+    }
+
     public override void Unpack(string srcPath, ISoulsFile? file)
     {
         TAE tae = (file as TAE)!;

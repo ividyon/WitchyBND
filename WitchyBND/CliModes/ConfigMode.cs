@@ -35,6 +35,9 @@ Disabling vastly increases XML output size.")]
         [Display(Name = "Offline mode",
             Description = "Disables any internet connectivity features, such as the update version check.")]
         ToggleOfflineMode,
+        [Display(Name = "Unpack TAE as folder",
+            Description = "Enable to unpack TAEs as a folder of XMLs, one for each animation. Disabling will unpack the TAE into a single file.")]
+        ToggleTaeFolder,
         [Display(Name = "Configure deferred tools")]
         DeferredFormats,
         [Display(Name = "Configure end delay")]
@@ -99,6 +102,9 @@ Press any key to continue to the configuration screen...");
                         case ConfigMenuItem.ToggleOfflineMode:
                             toggled = Configuration.Offline;
                             break;
+                        case ConfigMenuItem.ToggleTaeFolder:
+                            toggled = Configuration.TaeFolder;
+                            break;
                         case ConfigMenuItem.ConfigureDelay:
                             return $"{name} ({Configuration.EndDelay}ms)";
                     }
@@ -149,6 +155,10 @@ Press any key to continue to the configuration screen...");
                     break;
                 case ConfigMenuItem.ToggleOfflineMode:
                     Configuration.PauseOnError = !Configuration.PauseOnError;
+                    UpdateConfig();
+                    break;
+                case ConfigMenuItem.ToggleTaeFolder:
+                    Configuration.TaeFolder = !Configuration.TaeFolder;
                     UpdateConfig();
                     break;
                 case ConfigMenuItem.DeferredFormats:

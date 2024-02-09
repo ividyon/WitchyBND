@@ -36,6 +36,8 @@ public static class Configuration
         public bool Parallel { get; set; }
         public bool Expert { get; set; }
         public bool Offline { get; set; }
+
+        public bool TaeFolder { get; set; }
         public Dictionary<DeferFormat, DeferFormatConfiguration> DeferTools { get; set; } = new();
 
         public DateTime? LastUpdateCheckTime { get; set; }
@@ -105,6 +107,12 @@ public static class Configuration
     {
         get => _values.Offline;
         set => _values.Offline = value;
+    }
+
+    public static bool TaeFolder
+    {
+        get => _values.TaeFolder;
+        set => _values.TaeFolder = value;
     }
 
     public static Dictionary<DeferFormat, DeferFormatConfiguration> DeferTools

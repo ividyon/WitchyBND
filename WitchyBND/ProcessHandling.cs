@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using PPlus;
 using WitchyBND;
+using WitchyBND.Errors;
+using ThreadState = System.Diagnostics.ThreadState;
 
 namespace WitchyLib;
 
@@ -21,6 +25,16 @@ public static class ProcessHandling
         process.StartInfo.UseShellExecute = false;
         process.StartInfo.CreateNoWindow = true;
         process.Start();
+        while (!process.HasExited)
+        {
+            foreach(ProcessThread thread in process.Threads)
+                if (thread.ThreadState == ThreadState.Wait
+                    && thread.WaitReason is ThreadWaitReason.UserRequest or ThreadWaitReason.LpcReply)
+                {
+                    throw new ProcessUserInputException(process);
+                }
+            Thread.Sleep(200);
+        }
         process.WaitForExit();
         output = process.StandardOutput.ReadToEnd();
         error = process.StandardError.ReadToEnd();

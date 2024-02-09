@@ -12,7 +12,7 @@ using WitchyLib;
 
 namespace WitchyBND.Parsers;
 
-public partial class WTAE
+public partial class WTAEFolder
 {
     public override void Repack(string srcPath)
     {

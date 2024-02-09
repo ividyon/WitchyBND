@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Enumeration;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -40,7 +41,31 @@ public abstract class WFileParser
     public virtual string ListName => Name;
 
     public virtual int Version => 0;
-    public virtual string XmlTag => Name.ToLower();
+    public virtual string XmlTag
+    {
+        get
+        {
+            List<char> chars = new();
+            foreach (char c in Name.ToLower())
+            {
+                if (char.IsAsciiDigit(c) || char.IsAsciiLetter(c))
+                {
+                    chars.Add(c);
+                    continue;
+                }
+                try
+                {
+                    chars.Add(XmlConvert.VerifyName(c.ToString()).ToCharArray().First());
+                }
+                catch
+                {
+                    chars.Add('_');
+                }
+            }
+
+            return new string(chars.ToArray());
+        }
+    }
 
     public virtual bool HasPreprocess => false;
 

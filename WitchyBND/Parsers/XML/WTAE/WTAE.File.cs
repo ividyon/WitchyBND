@@ -7,9 +7,10 @@ using WitchyFormats;
 using WitchyLib;
 
 namespace WitchyBND.Parsers;
-public partial class WTAE : WFolderParser
+public partial class WTAEFile : WXMLParser
 {
-    public override string Name => "TAE";
+    public override string Name => "TAE (File)";
+    public override string XmlTag => "taeFile";
     public override bool HasPreprocess => true;
     public override WFileParserVerb Verb => WFileParserVerb.Serialize;
 
@@ -67,10 +68,5 @@ If DS Anim Studio does not yet support this game, an experimental build may be a
         var warned = WBUtil.ObnoxiousWarning(lines);
         WarnedAboutTAEs = warned;
         return warned;
-    }
-
-    public override bool Is(string path, byte[]? data, out ISoulsFile? file)
-    {
-        return IsRead<TAE>(path, data, out file);
     }
 }
