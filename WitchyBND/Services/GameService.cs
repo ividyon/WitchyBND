@@ -39,6 +39,19 @@ public interface IGameService
 public class GameService : IGameService
 {
     private IErrorService _errorService;
+    private IOutputService output;
+
+    public GameService(IErrorService errorService, IOutputService outputService)
+    {
+        _errorService = errorService;
+        output = outputService;
+
+        foreach (WBUtil.GameType game in (WBUtil.GameType[])Enum.GetValues(typeof(WBUtil.GameType)))
+        {
+            ParamdefStorage[game] = new();
+            NameStorage[game] = new();
+        }
+    }
 
     // Dictionary housing paramdefs for batched usage.
     public ConcurrentDictionary<WBUtil.GameType, ConcurrentDictionary<string, PARAMDEF>> ParamdefStorage { get; } =
@@ -76,17 +89,6 @@ public class GameService : IGameService
             DsmsGameType.ArmoredCoreVI => WBUtil.GameType.AC6,
             _ => null
         };
-    }
-
-    public GameService(IErrorService errorService)
-    {
-        _errorService = errorService;
-
-        foreach (WBUtil.GameType game in (WBUtil.GameType[])Enum.GetValues(typeof(WBUtil.GameType)))
-        {
-            ParamdefStorage[game] = new();
-            NameStorage[game] = new();
-        }
     }
 
     public void PopulateTentativeAC6Types()
@@ -160,8 +162,8 @@ public class GameService : IGameService
                 }
                 catch (Exception e)
                 {
-                    lock (Program.ConsoleWriterLock)
-                        PromptPlus.Error.WriteLine($"Could not read DSMS project file at {pJsonPath}.");
+                    lock (output.ConsoleWriterLock)
+                        output.Error.WriteLine($"Could not read DSMS project file at {pJsonPath}.");
                 }
             }
         }
@@ -182,16 +184,16 @@ public class GameService : IGameService
 
         if (game != null)
         {
-            lock (Program.ConsoleWriterLock)
-                PromptPlus.WriteLine($"Determined game for Paramdex: {game.Value.ToString()}".PromptPlusEscape());
+            lock (output.ConsoleWriterLock)
+                output.WriteLine($"Determined game for Paramdex: {game.Value.ToString()}".PromptPlusEscape());
         }
         else
         {
-            lock (Program.ConsoleWriterLock)
-                PromptPlus.Error.WriteLine("Could not determine param game version.");
+            lock (output.ConsoleWriterLock)
+                output.Error.WriteLine("Could not determine param game version.");
             if (!Configuration.Args.Passive)
             {
-                lock (Program.ConsoleWriterLock)
+                lock (output.ConsoleWriterLock)
                 {
                     var select = PromptPlus
                         .Select<WBUtil.GameType>("Please select the Paramdex of one of the following games")
@@ -213,24 +215,24 @@ public class GameService : IGameService
 
         if (forParams && regVer == 0)
         {
-            lock (Program.ConsoleWriterLock)
-                PromptPlus.Error.WriteLine("Could not determine regulation version.");
+            lock (output.ConsoleWriterLock)
+                output.Error.WriteLine("Could not determine regulation version.");
             if (!Configuration.Args.Passive)
             {
-                lock (Program.ConsoleWriterLock)
+                lock (output.ConsoleWriterLock)
                 {
-                    PromptPlus.WriteLine(@"Please input the regulation version to use for reading the PARAM.
+                    output.WriteLine(@"Please input the regulation version to use for reading the PARAM.
 Format examples:
     ""10210005"" for Armored Core VI 1.02.1
     ""11001000"" for Elden Ring 1.10.1
 Enter 0, or press ESC, to use the latest available paramdef.");
-                    var input = PromptPlus.Input("Input regulation version")
+                    var input = output.Input("Input regulation version")
                         .AddValidators(PromptValidators.IsTypeULong())
                         .ValidateOnDemand()
                         .Run();
                     if (input.IsAborted)
                     {
-                        PromptPlus.Error.WriteLine("Defaulting to latest paramdef.");
+                        output.Error.WriteLine("Defaulting to latest paramdef.");
                     }
                     else
                     {
@@ -240,8 +242,8 @@ Enter 0, or press ESC, to use the latest available paramdef.");
             }
             else
             {
-                lock (Program.ConsoleWriterLock)
-                    PromptPlus.Error.WriteLine("Defaulting to latest paramdef.");
+                lock (output.ConsoleWriterLock)
+                    output.Error.WriteLine("Defaulting to latest paramdef.");
             }
         }
 
@@ -266,8 +268,8 @@ Enter 0, or press ESC, to use the latest available paramdef.");
 
         if (!File.Exists(zipPath)) return;
 
-        PromptPlus.Error.WriteLine("");
-        PromptPlus.Error.WriteLine("Located Paramdex archive; replacing existing Paramdex.");
+        output.Error.WriteLine("");
+        output.Error.WriteLine("Located Paramdex archive; replacing existing Paramdex.");
         if (Directory.Exists(paramdexPath))
             Directory.Delete(paramdexPath, true);
         try
@@ -276,13 +278,13 @@ Enter 0, or press ESC, to use the latest available paramdef.");
             {
                 if (!Directory.Exists(paramdexPath))
                     Directory.CreateDirectory(paramdexPath);
-                PromptPlus.Error.WriteLine("Extracting Paramdex archive. This is a one-time operation.");
+                output.Error.WriteLine("Extracting Paramdex archive. This is a one-time operation.");
                 archive.ExtractToDirectory(paramdexPath, true);
             }
 
             File.Delete(zipPath);
-            PromptPlus.Error.WriteLine("Successfully extracted Paramdex archive.");
-            PromptPlus.Error.WriteLine("");
+            output.Error.WriteLine("Successfully extracted Paramdex archive.");
+            output.Error.WriteLine("");
         }
         catch (Exception e)
         {

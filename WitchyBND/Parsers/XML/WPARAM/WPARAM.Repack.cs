@@ -120,7 +120,7 @@ public partial class WPARAM
                     switch (cellStyle)
                     {
                         case CellStyle.Element:
-                            var fieldNode = xmlRow.SelectSingleNode(fieldName);
+                            var fieldNode = xmlRow.SelectSingleNode($"field[@name = '{fieldName}']");
                             if (fieldNode != null)
                             {
                                 value = fieldNode.InnerText;

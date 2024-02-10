@@ -26,13 +26,15 @@ public enum WFileParserVerb
 
 public abstract class WFileParser
 {
-    protected IGameService gameService;
-    protected IErrorService errorService;
+    protected readonly IGameService gameService;
+    protected readonly IErrorService errorService;
+    protected readonly IOutputService output;
 
     public WFileParser()
     {
         gameService = ServiceProvider.GetService<IGameService>();
         errorService = ServiceProvider.GetService<IErrorService>();
+        output = ServiceProvider.GetService<IOutputService>();
     }
 
     public virtual WFileParserVerb Verb => WFileParserVerb.Unpack;

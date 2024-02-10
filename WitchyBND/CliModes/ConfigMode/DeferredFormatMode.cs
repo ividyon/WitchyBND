@@ -4,21 +4,27 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using PPlus;
+using WitchyBND.Services;
 using WitchyLib;
 
 namespace WitchyBND.CliModes;
 public static class DeferredFormatMode
 {
+    private static readonly IOutputService output;
+    static DeferredFormatMode()
+    {
+        output = ServiceProvider.GetService<IOutputService>();
+    }
     public static void Run(CliOptions opt)
     {
-        using (PromptPlus.EscapeColorTokens())
+        using (output.EscapeColorTokens())
         {
             while (true)
             {
-                PromptPlus.Clear();
-                PromptPlus.DoubleDash("Deferred formats");
+                output.Clear();
+                output.DoubleDash("Deferred formats");
 
-                var select = PromptPlus.Select<DeferFormat>("Configure deferred tools")
+                var select = output.Select<DeferFormat>("Configure deferred tools")
                     .TextSelector(format => {
                         var checkbox = Configuration.DeferTools.ContainsKey(format) ? $"[x]" : "[ ]";
                         var path = Configuration.DeferTools.ContainsKey(format)
@@ -32,16 +38,16 @@ public static class DeferredFormatMode
 
                 var format = select.Value;
                 var name = format.GetAttribute<DisplayAttribute>().Name;
-                PromptPlus.WriteLine(
+                output.WriteLine(
                     @"In the following dialog, please select the executable that will be used to process the given format.
 Cancel the dialog to reset the configuration for that format.");
-                PromptPlus.KeyPress().Run();
+                output.KeyPress().Run();
                 var openDialog = NativeFileDialogSharp.Dialog.FileOpen("exe");
                 if (openDialog.IsError)
                 {
-                    PromptPlus.Error.WriteLine(
+                    output.Error.WriteLine(
                         $"There was an error while picking the executable: {openDialog.ErrorMessage}");
-                    PromptPlus.KeyPress().Run();
+                    output.KeyPress().Run();
                     continue;
                 }
 
@@ -50,13 +56,13 @@ Cancel the dialog to reset the configuration for that format.");
                 {
                     Configuration.DeferTools.Remove(format);
                     Configuration.UpdateConfiguration();
-                    PromptPlus.WriteLine($"{name} files will no longer be processed.");
-                    PromptPlus.KeyPress().Run();
+                    output.WriteLine($"{name} files will no longer be processed.");
+                    output.KeyPress().Run();
                     continue;
                 }
 
 
-                var argsSelect = PromptPlus.Select<string>("Select the arguments provided to the tool")
+                var argsSelect = output.Select<string>("Select the arguments provided to the tool")
                     .AddItems(DeferredFormatHandling.DefaultDeferToolArguments.SelectMany(a => a.Value)
                         .Select(a => a.Item1).Union(new List<string>()
                         {
@@ -71,7 +77,7 @@ Cancel the dialog to reset the configuration for that format.");
                 switch (argsSelect.Value)
                 {
                     case "Custom...":
-                            PromptPlus.WriteLine(@"Please input your custom arguments for the program being called.
+                            output.WriteLine(@"Please input your custom arguments for the program being called.
 Available placeholders:
 
 $path - Full path of file being processed
@@ -79,7 +85,7 @@ $dirname - Directory path of file being processed
 $filename - Filename (without extension) of file being processed
 $fileext - Extension of file being processed (starts with .)");
 
-                            var customArgsInput = PromptPlus.Input("Enter custom arguments").Run();
+                            var customArgsInput = output.Input("Enter custom arguments").Run();
                             if (customArgsInput.IsAborted)
                             {
                                 breakOut = true;
@@ -106,8 +112,8 @@ $fileext - Extension of file being processed (starts with .)");
 
                 if (breakOut) continue;
                 Configuration.UpdateConfiguration();
-                PromptPlus.WriteLine($"{name} files will now be processed by program \"{openDialog.Path}\".");
-                PromptPlus.KeyPress().Run();
+                output.WriteLine($"{name} files will now be processed by program \"{openDialog.Path}\".");
+                output.KeyPress().Run();
             }
         }
     }

@@ -21,8 +21,11 @@ public static class WatcherMode
     private const int ProcessDelay = 200; // Guard against IOExceptions when other programs aren't done editing (FLVER Editor)
     private const int EventRepeatThreshold = 200; // Guard against double change event bug in FileSystemWatcher
 
+    private static readonly IOutputService output;
+
     static WatcherMode()
     {
+        output = ServiceProvider.GetService<IOutputService>();
         errorService = ServiceProvider.GetService<IErrorService>();
     }
     private class WatchedFile
@@ -92,7 +95,7 @@ public static class WatcherMode
                 }
             }
 
-            PromptPlus.Error.WriteLine($"No valid unpacking parser found for {Path.GetFileName(p)}."
+            output.Error.WriteLine($"No valid unpacking parser found for {Path.GetFileName(p)}."
                 .PromptPlusEscape());
         });
 
@@ -104,7 +107,7 @@ public static class WatcherMode
 
         if (count == 0)
         {
-            PromptPlus.WriteLine($"Could not find valid parsers for any selected files. Aborting.");
+            output.WriteLine($"Could not find valid parsers for any selected files. Aborting.");
             return;
         }
 
@@ -124,7 +127,7 @@ public static class WatcherMode
             watcher.Renamed += WatchRemoval;
 
             string fullPath = Path.Combine(watcher.Path, watcher.Filter);
-            PromptPlus.WriteLine($"Watching path \"{fullPath}\" for unpacking...".PromptPlusEscape());
+            output.WriteLine($"Watching path \"{fullPath}\" for unpacking...".PromptPlusEscape());
             _watchedFiles.TryAdd(fullPath, new WatchedFileUnpack(fullPath, watcher, parser, file));
 
             watcher.EnableRaisingEvents = true;
@@ -146,7 +149,7 @@ public static class WatcherMode
             watcher.Renamed += WatchRemoval;
 
             string fullPath = Path.Combine(watcher.Path, watcher.Filter);
-            PromptPlus.WriteLine($"Watching path \"{fullPath}\" for repacking...".PromptPlusEscape());
+            output.WriteLine($"Watching path \"{fullPath}\" for repacking...".PromptPlusEscape());
             _watchedFiles.TryAdd(fullPath, new WatchedFile(fullPath, watcher, parser));
 
             watcher.EnableRaisingEvents = true;
@@ -169,22 +172,22 @@ public static class WatcherMode
             watcher.Renamed += WatchRemoval;
 
             string fullPath = watcher.Path;
-            PromptPlus.WriteLine($"Watching path \"{fullPath}\" for repacking...".PromptPlusEscape());
+            output.WriteLine($"Watching path \"{fullPath}\" for repacking...".PromptPlusEscape());
             _watchedFiles.TryAdd(fullPath, new WatchedFileFolder(fullPath, watcher, parser, files));
 
             watcher.EnableRaisingEvents = true;
         }
 
-        PromptPlus.WriteLine(
+        output.WriteLine(
             $"Watching {count} path(s) for changes.");
 
-        PromptPlus.KeyPress(@"Press any key to stop watching files...
+        output.KeyPress(@"Press any key to stop watching files...
 ").Run();
     }
 
     private static void WatchRemoval(object sender, FileSystemEventArgs e)
     {
-        PromptPlus.WriteLine(
+        output.WriteLine(
             $"Path {Path.GetFileName(e.Name)} was renamed or deleted, aborting watch.".PromptPlusEscape());
         _watchedFiles[e.FullPath].Watcher.EnableRaisingEvents = false;
         _watchedFiles.Remove(e.FullPath);
@@ -197,7 +200,7 @@ public static class WatcherMode
             return;
         file.LastChange = DateTime.Now; // In case of exceptions
         Thread.Sleep(ProcessDelay);
-        PromptPlus.WriteLine($"[{DateTime.Now:T}] Detected change in {e.Name}.".PromptPlusEscape());
+        output.WriteLine($"[{DateTime.Now:T}] Detected change in {e.Name}.".PromptPlusEscape());
         bool parsed = false;
         errorService.Catch(() => ParseMode.Unpack(e.FullPath, file!.File, file.File.Compression, file.Parser, false, out parsed),
             out bool error, e.FullPath);
@@ -212,7 +215,7 @@ public static class WatcherMode
             return;
         file.LastChange = DateTime.Now; // In case of exceptions
         Thread.Sleep(ProcessDelay);
-        PromptPlus.WriteLine($"[{DateTime.Now:T}] Detected change in {e.Name}.".PromptPlusEscape());
+        output.WriteLine($"[{DateTime.Now:T}] Detected change in {e.Name}.".PromptPlusEscape());
         bool parsed = false;
         errorService.Catch(() => ParseMode.Repack(e.FullPath, file.Parser, false, out parsed), out bool error, e.FullPath);
         ParseMode.PrintParseSuccess(file.Path, parsed, error, false);
@@ -230,7 +233,7 @@ public static class WatcherMode
             return;
         file.LastChange = DateTime.Now; // In case of exceptions
         Thread.Sleep(ProcessDelay);
-        PromptPlus.WriteLine($"[{DateTime.Now:T}] Detected change in {e.FullPath.Replace(Path.GetDirectoryName(file.Path) + "\\", "")}."
+        output.WriteLine($"[{DateTime.Now:T}] Detected change in {e.FullPath.Replace(Path.GetDirectoryName(file.Path) + "\\", "")}."
             .PromptPlusEscape());
         bool parsed = false;
         errorService.Catch(() => {

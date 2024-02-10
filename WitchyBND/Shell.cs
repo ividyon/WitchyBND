@@ -6,12 +6,19 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Win32;
 using PPlus;
+using WitchyBND.Services;
 using WitchyLib;
 
 namespace WitchyBND;
 
 public static class Shell
 {
+    private static readonly IOutputService output;
+    static Shell()
+    {
+        output = ServiceProvider.GetService<IOutputService>();
+    }
+
     const int WM_USER = 0x0400; //http://msdn.microsoft.com/en-us/library/windows/desktop/ms644931(v=vs.85).aspx
 
     private static RegistryKey Root = Registry.CurrentUser;
@@ -135,7 +142,7 @@ public static class Shell
     {
         RestartExplorer restartExplorer = new RestartExplorer();
         restartExplorer.Execute(() => {
-            PromptPlus.WriteLine("Explorer process stopped.");
+            output.WriteLine("Explorer process stopped.");
         });
     }
 

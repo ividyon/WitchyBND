@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -56,11 +57,14 @@ If DSMapStudio does not yet support this game or regulation version, an experime
     /// Attribute: Store all row cells as attributes on the row element. (readability compromise)
     /// Element: Store all row cells as separate elements (max. readability, max lines).
     /// </summary>
-    private enum CellStyle
+    public enum CellStyle
     {
-        CSV,
+        [Display(Name = "XML attribute")]
         Attribute,
-        Element
+        [Display(Name = "XML element")]
+        Element,
+        [Display(Name = "CSV")]
+        CSV
     }
 
     public override string Name => "PARAM";

@@ -39,7 +39,7 @@ public partial class WPARAM
         string paramName = Path.GetFileNameWithoutExtension(srcPath);
 
         // Fixed cell style for now.
-        CellStyle cellStyle = CellStyle.Attribute;
+        CellStyle cellStyle = Configuration.ParamCellStyle;
 
         if (game == WBUtil.GameType.AC6 && string.IsNullOrWhiteSpace(paramTypeToParamdef))
         {
@@ -284,8 +284,7 @@ The error was:
                         switch (cellStyle)
                         {
                             case CellStyle.Element:
-                                xw.WriteStartElement("cell");
-                                // xw.WriteAttributeString("idx", paramdef.Fields.FindIndex(field => field.InternalName == cell.Def.InternalName && field.SortID == cell.Def.SortID).ToString());
+                                xw.WriteStartElement("field");
                                 xw.WriteAttributeString("name", fieldName);
                                 xw.WriteString(value);
                                 xw.WriteEndElement();

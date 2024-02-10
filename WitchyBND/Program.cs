@@ -9,7 +9,6 @@ using System.Runtime.Versioning;
 using System.Threading;
 using CommandLine;
 using CommandLine.Text;
-using PPlus;
 using WitchyBND.CliModes;
 using WitchyBND.Services;
 using WitchyLib;
@@ -19,18 +18,18 @@ namespace WitchyBND;
 [SupportedOSPlatform("windows")]
 internal static class Program
 {
-    internal static readonly object ConsoleWriterLock;
     public static int ProcessedItems = 0;
 
     private static readonly IErrorService errorService;
     private static readonly IUpdateService updateService;
+    private static readonly IOutputService output;
 
 
     static Program()
     {
         errorService = ServiceProvider.GetService<IErrorService>();
         updateService = ServiceProvider.GetService<IUpdateService>();
-        ConsoleWriterLock = new();
+        output = ServiceProvider.GetService<IOutputService>();
     }
 
     [STAThread]
@@ -38,7 +37,6 @@ internal static class Program
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
         Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-        PromptPlus.Config.DefaultCulture = new CultureInfo("en-us");
 
         Assembly assembly = Assembly.GetExecutingAssembly();
 
@@ -61,12 +59,10 @@ internal static class Program
                     if (opt.Version)
                     {
                         var assembly = Assembly.GetExecutingAssembly();
-                        PromptPlus.WriteLine($"{assembly.GetName().Name} v{assembly.GetName().Version.ToString()}"
+                        output.WriteLine($"{assembly.GetName().Name} v{assembly.GetName().Version.ToString()}"
                             .PromptPlusEscape());
                         return;
                     }
-
-                    PromptPlus.DoubleDash($"{assembly.GetName().Name} {assembly.GetName().Version}");
 
                     if (opt.Dcx)
                         Configuration.Dcx = opt.Dcx;
@@ -89,6 +85,15 @@ internal static class Program
                     if (opt.Passive)
                         Configuration.Args.Passive = opt.Passive;
 
+                    if (opt.Silent)
+                    {
+                        Configuration.Args.Silent = opt.Silent;
+                        Configuration.Args.Passive = opt.Silent;
+                    }
+
+                    output.DoubleDash($"{assembly.GetName().Name} {assembly.GetName().Version}");
+
+
                     if (!string.IsNullOrWhiteSpace(opt.Location))
                     {
                         string location = opt.Location;
@@ -96,7 +101,7 @@ internal static class Program
                         {
                             if (Configuration.Args.Passive)
                                 throw new Exception("Cannot supply both \"passive\" and \"location\" options.");
-                            PromptPlus.WriteLine("Prompting user for target directory...");
+                            output.WriteLine("Prompting user for target directory...");
 
                             NativeFileDialogSharp.DialogResult dialogResult =
                                 NativeFileDialogSharp.Dialog.FolderPicker();
@@ -104,8 +109,8 @@ internal static class Program
                             if (dialogResult.IsOk && !string.IsNullOrWhiteSpace(dialogResult.Path))
                             {
                                 location = dialogResult.Path;
-                                PromptPlus.WriteLine($"Target directory set to: {location}");
-                                PromptPlus.WriteLine("");
+                                output.WriteLine($"Target directory set to: {location}");
+                                output.WriteLine("");
                             }
                             else
                             {
@@ -151,9 +156,9 @@ internal static class Program
                             var completedString = ProcessedItems == 1
                                 ? $"Operation completed on 1 item in {watch.Elapsed:hh\\:mm\\:ss}."
                                 : $"Operation completed on {ProcessedItems} items in {watch.Elapsed:hh\\:mm\\:ss}.";
-                            PromptPlus.WriteLine("");
-                            PromptPlus.WriteLine(string.Concat(Enumerable.Repeat("-", completedString.Length)));
-                            PromptPlus.WriteLine(completedString);
+                            output.WriteLine("");
+                            output.WriteLine(string.Concat(Enumerable.Repeat("-", completedString.Length)));
+                            output.WriteLine(completedString);
 
                             PrintIssues();
                             PrintFinale(pause);
@@ -200,16 +205,16 @@ internal static class Program
         pause ??= Configuration.EndDelay;
         if (!Configuration.Args.Passive)
         {
-            PromptPlus.WriteLine("");
+            output.WriteLine("");
             if (pause == -1)
             {
-                PromptPlus.KeyPress(Constants.PressAnyKey).Run();
+                output.KeyPress(Constants.PressAnyKey).Run();
                 return;
             }
 
             if (pause > 0)
             {
-                PromptPlus.WriteLine(
+                output.WriteLine(
                     $"Closing in {TimeSpan.FromMilliseconds(pause.Value).TotalSeconds} second(s)...");
                 Thread.Sleep(pause.Value);
             }
@@ -239,14 +244,14 @@ internal static class Program
 
         var longest = infoTable.Keys.MaxBy(s => s.Length).Length;
 
-        PromptPlus.SingleDash("Configuration");
+        output.SingleDash("Configuration");
         foreach ((string name, string value) in infoTable)
         {
-            PromptPlus.WriteLine($"{name.PadLeft(longest)}: {value}");
+            output.WriteLine($"{name.PadLeft(longest)}: {value}");
         }
 
-        PromptPlus.WriteLine("-------------");
-        PromptPlus.WriteLine("");
+        output.WriteLine("-------------");
+        output.WriteLine("");
     }
 
     public static void DisplayHelp(ParserResult<CliOptions> result = null, IEnumerable<Error> errors = null)
@@ -272,6 +277,6 @@ internal static class Program
             return HelpText.DefaultParsingErrorsHandler(result, h);
         }, e => e);
 
-        PromptPlus.WriteLine(helpText.ToString().PromptPlusEscape());
+        output.WriteLine(helpText.ToString().PromptPlusEscape());
     }
 }

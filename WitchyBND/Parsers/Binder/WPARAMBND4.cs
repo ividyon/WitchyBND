@@ -185,9 +185,9 @@ public class WPARAMBND4 : WBinderParser
             case WBUtil.GameType.DS2S:
                 if (!Configuration.Args.Passive)
                 {
-                    PromptPlus.WriteLine(
+                    output.WriteLine(
                         "DS2 files cannot be re-encrypted, yet, so re-packing this folder might ruin your encrypted bnd.");
-                    var confirm = PromptPlus.Confirm("Proceed to repack BND (without encryption)?")
+                    var confirm = output.Confirm("Proceed to repack BND (without encryption)?")
                         .Run();
                     if (confirm.IsAborted || confirm.Value.IsNoResponseKey())
                     {

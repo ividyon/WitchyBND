@@ -5,56 +5,81 @@ using System.Linq;
 using System.Reflection;
 using PPlus;
 using PPlus.Controls;
+using WitchyBND.Parsers;
+using WitchyBND.Services;
 using WitchyLib;
 
 namespace WitchyBND.CliModes;
 
 public static class ConfigMode
 {
+    private static readonly IOutputService output;
+
+    static ConfigMode()
+    {
+        output = ServiceProvider.GetService<IOutputService>();
+    }
+
     private enum ConfigMenuItem
     {
         [Display(Name = "Use specialized BND handlers",
-            Description = "Enable to extract certain BND types into a custom, user-friendly structure. Disable for standard handling.")]
+            Description =
+                "Enable to extract certain BND types into a custom, user-friendly structure. Disable for standard handling.")]
         ToggleBnd,
+
         [Display(Name = "DCX decompression only",
-        Description = "Enable to exclusively decompress DCX files and leave their contents intact.")]
+            Description = "Enable to exclusively decompress DCX files and leave their contents intact.")]
         ToggleDcx,
+
         [Display(Name = "Recursive binder processing",
-            Description = "Enable to recursively attempt to process any file inside unpacked binders. Very performance-intensive.")]
+            Description =
+                "Enable to recursively attempt to process any file inside unpacked binders. Very performance-intensive.")]
         ToggleRecursive,
+
         [Display(Name = "Parallel processing",
             Description = "Enable to perform WitchyBND operations in a parallelized, multi-threaded manner.")]
         ToggleParallel,
+
         [Display(Name = "Store PARAM field default values",
             Description = @"Enable to separate the default values of PARAM row fields out from the rows.
 Disabling vastly increases XML output size.")]
         ToggleParamDefaultValues,
+
         [Display(Name = "Pause on error",
-            Description = "Enable to pause the program and require a key press (unless in Passive mode) if it finishes with errors.")]
+            Description =
+                "Enable to pause the program and require a key press (unless in Passive mode) if it finishes with errors.")]
         TogglePauseOnError,
+
         [Display(Name = "Offline mode",
             Description = "Disables any internet connectivity features, such as the update version check.")]
         ToggleOfflineMode,
+
         [Display(Name = "Unpack TAE as folder",
-            Description = "Enable to unpack TAEs as a folder of XMLs, one for each animation. Disabling will unpack the TAE into a single file.")]
+            Description =
+                "Enable to unpack TAEs as a folder of XMLs, one for each animation. Disabling will unpack the TAE into a single file.")]
         ToggleTaeFolder,
+
+        [Display(Name = "Set PARAM field style")]
+        ParamCellStyle,
+
         [Display(Name = "Configure deferred tools")]
         DeferredFormats,
+
         [Display(Name = "Configure end delay")]
         ConfigureDelay,
+
         [Display(Name = "Configure Windows integration")]
         Windows,
+
         [Display(Name = "View available formats")]
         Formats,
-        [Display(Name = "View help screen")]
-        Help,
-        [Display(Name = "Exit")]
-        Exit
+        [Display(Name = "View help screen")] Help,
+        [Display(Name = "Exit")] Exit
     }
 
     public static void CliConfigMode(CliOptions opt)
     {
-        PromptPlus.WriteLine(@"Welcome to WitchyBND!
+        output.WriteLine(@"Welcome to WitchyBND!
 
 Launching the program without specifying any files will open this configuration screen.
 If you want to unpack or repack a file or directory, you can either:
@@ -69,13 +94,13 @@ Press any key to continue to the configuration screen...");
         if (Configuration.Args.Passive)
             return;
 
-        PromptPlus.ReadKey();
-        PromptPlus.Clear();
+        PromptPlus.KeyPress().Run();
         while (true)
         {
-            PromptPlus.DoubleDash("Configuration menu");
-            PromptPlus.WriteLine("This menu is paged; scroll down to find more options.");
-            var select = PromptPlus.Select<ConfigMenuItem>("Choose an option")
+            output.Clear();
+            output.DoubleDash("Configuration menu");
+            output.WriteLine("This menu is paged; scroll down to find more options.");
+            var select = output.Select<ConfigMenuItem>("Choose an option")
                 .TextSelector(a => {
                     bool? toggled = null;
                     var name = a.GetAttribute<DisplayAttribute>().Name;
@@ -105,13 +130,17 @@ Press any key to continue to the configuration screen...");
                         case ConfigMenuItem.ToggleTaeFolder:
                             toggled = Configuration.TaeFolder;
                             break;
+                        case ConfigMenuItem.ParamCellStyle:
+                            return $"{name} ({Configuration.ParamCellStyle.ToString()})";
                         case ConfigMenuItem.ConfigureDelay:
                             return $"{name} ({Configuration.EndDelay}ms)";
                     }
+
                     if (toggled != null)
                     {
                         return $"Toggle \"{name}\" " + (toggled.Value ? "(Enabled)" : "(Disabled)");
                     }
+
                     return name;
                 })
                 .ChangeDescription(a => a.GetAttribute<DisplayAttribute>().Description)
@@ -122,9 +151,8 @@ Press any key to continue to the configuration screen...");
             void UpdateConfig()
             {
                 Configuration.UpdateConfiguration();
-                PromptPlus.WriteLine("Successfully updated the configuration.");
-                PromptPlus.KeyPress(Constants.PressAnyKeyConfiguration).Run();
-                PromptPlus.Clear();
+                output.WriteLine("Successfully updated the configuration.");
+                output.KeyPress(Constants.PressAnyKeyConfiguration).Run();
             }
 
             switch (select.Value)
@@ -161,12 +189,20 @@ Press any key to continue to the configuration screen...");
                     Configuration.TaeFolder = !Configuration.TaeFolder;
                     UpdateConfig();
                     break;
+                case ConfigMenuItem.ParamCellStyle:
+                    var cellSelect = output.Select<WPARAM.CellStyle>("Select PARAM field style:").Run();
+                    if (!cellSelect.IsAborted)
+                    {
+                        Configuration.ParamCellStyle = cellSelect.Value;
+                        UpdateConfig();
+                    }
+                    break;
                 case ConfigMenuItem.DeferredFormats:
                     DeferredFormatMode.Run(opt);
-                    PromptPlus.Clear();
+                    output.Clear();
                     break;
                 case ConfigMenuItem.ConfigureDelay:
-                    var input = PromptPlus.Input("Input new delay (in milliseconds)")
+                    var input = output.Input("Input new delay (in milliseconds)")
                         .AcceptInput(char.IsNumber)
                         .AddValidators(PromptValidators.IsTypeUInt16("Input is not within valid range"))
                         .ValidateOnDemand()
@@ -174,29 +210,23 @@ Press any key to continue to the configuration screen...");
                     if (!input.IsAborted)
                     {
                         Configuration.EndDelay = Convert.ToUInt16(input.Value);
-                        Configuration.UpdateConfiguration();
                         UpdateConfig();
                     }
-                    else
-                        PromptPlus.Clear();
+
                     break;
                 case ConfigMenuItem.Windows:
                     IntegrationMode.CliShellIntegrationMode(opt);
-                    PromptPlus.Clear();
                     break;
                 case ConfigMenuItem.Formats:
-                    PromptPlus.WriteLine(
+                    output.WriteLine(
                         $"WitchyBND supports the following formats:\n{string.Join(", ", ParseMode.Parsers.Where(p => p.IncludeInList).Select(p => p.Name))}");
-                    PromptPlus.KeyPress(Constants.PressAnyKeyConfiguration).Run();
-                    PromptPlus.Clear();
+                    output.KeyPress(Constants.PressAnyKeyConfiguration).Run();
                     break;
                 case ConfigMenuItem.Help:
                     Program.DisplayHelp();
-                    PromptPlus.KeyPress(Constants.PressAnyKeyConfiguration).Run();
-                    PromptPlus.Clear();
+                    output.KeyPress(Constants.PressAnyKeyConfiguration).Run();
                     break;
                 case ConfigMenuItem.Exit:
-                    PromptPlus.Clear();
                     return;
                 default:
                     throw new IndexOutOfRangeException();

@@ -18,9 +18,11 @@ public static class ParseMode
 {
     private static readonly IErrorService errorService;
     public static List<WFileParser> Parsers;
+    private static readonly IOutputService output;
 
     static ParseMode()
     {
+        output = ServiceProvider.GetService<IOutputService>();
         errorService = ServiceProvider.GetService<IErrorService>();
 
         Parsers = new List<WFileParser>
@@ -87,8 +89,8 @@ public static class ParseMode
             {
                 if (!WPARAMBND4.FilenameIsPARAMBND4(path))
                 {
-                    lock (Program.ConsoleWriterLock)
-                        PromptPlus.WriteLine($"Decompressing DCX: {fileName.PromptPlusEscape()}...");
+                    lock (output.ConsoleWriterLock)
+                        output.WriteLine($"Decompressing DCX: {fileName.PromptPlusEscape()}...");
 
                     isDcx = true;
                     data = DCX.Decompress(path, out DCX.Type compressionVal);
@@ -155,12 +157,12 @@ public static class ParseMode
                 if (Configuration.Parallel)
                 {
                     string fileName = Path.GetFileName(path);
-                    lock (Program.ConsoleWriterLock)
+                    lock (output.ConsoleWriterLock)
                     {
                         if (recursive)
-                            PromptPlus.WriteLine($"Successfully parsed {fileName.PromptPlusEscape()} (recursive).");
+                            output.WriteLine($"Successfully parsed {fileName.PromptPlusEscape()} (recursive).");
                         else
-                            PromptPlus.WriteLine($"Successfully parsed {fileName.PromptPlusEscape()}.");
+                            output.WriteLine($"Successfully parsed {fileName.PromptPlusEscape()}.");
                     }
                 }
 
@@ -169,8 +171,8 @@ public static class ParseMode
             case false:
                 if (!error)
                 {
-                    lock (Program.ConsoleWriterLock)
-                        PromptPlus.Error.WriteLine($"Could not find valid parser for {path.PromptPlusEscape()}.");
+                    lock (output.ConsoleWriterLock)
+                        output.Error.WriteLine($"Could not find valid parser for {path.PromptPlusEscape()}.");
                 }
                 break;
         }
@@ -183,17 +185,17 @@ public static class ParseMode
 
         if (compression > file?.Compression)
             file.Compression = compression;
-        lock (Program.ConsoleWriterLock)
+        lock (output.ConsoleWriterLock)
         {
             switch (parser.Verb)
             {
                 case WFileParserVerb.Serialize:
-                    PromptPlus.WriteLine(recursive
+                    output.WriteLine(recursive
                         ? $"Serializing {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
                         : $"Serializing {parser.Name}: {fileName.PromptPlusEscape()}...");
                     break;
                 case WFileParserVerb.Unpack:
-                    PromptPlus.WriteLine(recursive
+                    output.WriteLine(recursive
                         ? $"Unpacking {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
                         : $"Unpacking {parser.Name}: {fileName.PromptPlusEscape()}...");
                     break;
@@ -211,17 +213,17 @@ public static class ParseMode
     public static bool Repack(string path, WFileParser parser, bool recursive, out bool parsed)
     {
         string fileName = Path.GetFileName(path);
-        lock (Program.ConsoleWriterLock)
+        lock (output.ConsoleWriterLock)
         {
             switch (parser.Verb)
             {
                 case WFileParserVerb.Serialize:
-                    PromptPlus.WriteLine(recursive
+                    output.WriteLine(recursive
                         ? $"Deserializing {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
                         : $"Deserializing {parser.Name}: {fileName.PromptPlusEscape()}...");
                     break;
                 case WFileParserVerb.Unpack:
-                    PromptPlus.WriteLine(recursive
+                    output.WriteLine(recursive
                         ? $"Repacking {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
                         : $"Repacking {parser.Name}: {fileName.PromptPlusEscape()}...");
                     break;

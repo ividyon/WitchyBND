@@ -30,6 +30,8 @@ public static class Configuration
         public bool Bnd { get; set; }
         public bool Dcx { get; set; }
         public bool ParamDefaultValues { get; set; }
+
+        public WPARAM.CellStyle ParamCellStyle { get; set; }
         public bool Recursive { get; set; }
         public ushort EndDelay { get; set; }
         public bool PauseOnError { get; set; }
@@ -48,6 +50,8 @@ public static class Configuration
         public bool UnpackOnly { get; set; }
         public bool RepackOnly { get; set; }
         public bool Passive { get; set; }
+
+        public bool Silent { get; set; }
         public string? Location { get; set; }
     }
 
@@ -71,6 +75,12 @@ public static class Configuration
     {
         get => _values.ParamDefaultValues;
         set => _values.ParamDefaultValues = value;
+    }
+
+    public static WPARAM.CellStyle ParamCellStyle
+    {
+        get => _values.ParamCellStyle;
+        set => _values.ParamCellStyle = value;
     }
 
     public static bool PauseOnError
@@ -190,6 +200,10 @@ public class CliOptions
         HelpText =
             "Will not prompt the user for any input or cause any delays. Suited for automatic execution in scripts.")]
     public bool Passive { get; set; }
+
+    [Option('s', "silent",
+        HelpText = "Will not print any console output. Inherently sets 'passive' to true.")]
+    public bool Silent { get; set; }
 
     [Option('l', "location",
         HelpText = "Specifies a path to unpack binders to. Enter \"prompt\" to open a folder dialog instead.")]

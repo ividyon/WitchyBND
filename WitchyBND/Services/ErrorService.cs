@@ -31,12 +31,14 @@ namespace WitchyBND.Services
     {
         private ConcurrentStack<WitchyError> AccruedErrors;
         private ConcurrentStack<WitchyNotice> AccruedNotices;
+        private readonly IOutputService output;
 
         public int AccruedErrorCount => AccruedErrors.Count;
         public int AccruedNoticeCount => AccruedNotices.Count;
 
-        public ErrorService()
+        public ErrorService(IOutputService outputService)
         {
+            output = outputService;
             AccruedErrors = new();
             AccruedNotices = new();
         }
@@ -51,8 +53,8 @@ namespace WitchyBND.Services
             AccruedNotices.Push(notice);
             if (write)
             {
-                lock (Program.ConsoleWriterLock)
-                    PromptPlus.Error.WriteLine($"{notice.Source}: {notice.Message}".PromptPlusEscape());
+                lock (output.ConsoleWriterLock)
+                    output.Error.WriteLine($"{notice.Source}: {notice.Message}".PromptPlusEscape());
             }
         }
 
@@ -83,12 +85,12 @@ namespace WitchyBND.Services
             AccruedErrors.Push(error);
             if (write)
             {
-                lock (Program.ConsoleWriterLock)
+                lock (output.ConsoleWriterLock)
                 {
                     if (error.Source != null)
-                        PromptPlus.Error.WriteLine($"{error.Source}: {error.Message}".PromptPlusEscape());
+                        output.Error.WriteLine($"{error.Source}: {error.Message}".PromptPlusEscape());
                     else
-                        PromptPlus.Error.WriteLine(error.Message.PromptPlusEscape());
+                        output.Error.WriteLine(error.Message.PromptPlusEscape());
                 }
             }
 
@@ -101,26 +103,26 @@ namespace WitchyBND.Services
         {
             if (AccruedErrors.Count > 0)
             {
-                PromptPlus.WriteLine("");
-                PromptPlus.SingleDash("Errors during operation");
+                output.WriteLine("");
+                output.SingleDash("Errors during operation");
                 foreach (WitchyError error in AccruedErrors)
                 {
-                    PromptPlus.Error.WriteLine(
+                    output.Error.WriteLine(
                         $"{error.Source}: {error.Message}".PromptPlusEscape());
                 }
             }
 
             if (AccruedNotices.Count > 0)
             {
-                PromptPlus.WriteLine("");
-                PromptPlus.SingleDash("Notices during operation");
+                output.WriteLine("");
+                output.SingleDash("Notices during operation");
                 foreach (WitchyNotice notice in AccruedNotices)
                 {
                     if (notice.Source != null)
-                        PromptPlus.Error.WriteLine($"{notice.Source}: {notice.Message}"
+                        output.Error.WriteLine($"{notice.Source}: {notice.Message}"
                             .PromptPlusEscape());
                     else
-                        PromptPlus.Error.WriteLine($"{notice.Message}".PromptPlusEscape());
+                        output.Error.WriteLine($"{notice.Message}".PromptPlusEscape());
                 }
             }
         }

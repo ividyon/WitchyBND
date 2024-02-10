@@ -2,11 +2,17 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.Win32;
 using PPlus;
+using WitchyBND.Services;
 
 namespace WitchyBND.CliModes;
 
 public static class IntegrationMode
 {
+    private static readonly IOutputService output;
+    static IntegrationMode()
+    {
+        output = ServiceProvider.GetService<IOutputService>();
+    }
     private enum IntegrationChoices
     {
         [Display(Name = "Register WitchyBND context menu",
@@ -34,48 +40,48 @@ public static class IntegrationMode
     {
         while (true)
         {
-            PromptPlus.Clear();
-            PromptPlus.DoubleDash("WitchyBND Windows integration");
-            var select = PromptPlus.Select<IntegrationChoices>("Select an option")
+            output.Clear();
+            output.DoubleDash("WitchyBND Windows integration");
+            var select = output.Select<IntegrationChoices>("Select an option")
                 .Run();
             if (select.IsAborted) return;
             switch (select.Value)
             {
                 case IntegrationChoices.Register:
                     RegisterContext();
-                    PromptPlus.WriteLine("Successfully registered WitchyBND context menu.");
+                    output.WriteLine("Successfully registered WitchyBND context menu.");
                     break;
                 case IntegrationChoices.Unregister:
                     UnregisterContext();
-                    PromptPlus.WriteLine("Successfully unregistered WitchyBND context menu.");
-                    PromptPlus.WriteLine(
+                    output.WriteLine("Successfully unregistered WitchyBND context menu.");
+                    output.WriteLine(
                         @"Explorer needs to be restarted to complete the process.
 Your taskbar will briefly disappear for a few seconds. Witchy will try to restore any open Explorer windows.");
-                    var choice = PromptPlus.Confirm("Proceed with restarting the Explorer process?").Run();
+                    var choice = output.Confirm("Proceed with restarting the Explorer process?").Run();
                     if (choice.Value.IsYesResponseKey())
                     {
                         Shell.RestartExplorer();
-                        PromptPlus.WriteLine("Restarted the Explorer process.");
+                        output.WriteLine("Restarted the Explorer process.");
                     }
                     break;
                 case IntegrationChoices.UnregisterYabber:
                     UnregisterYabberContext();
-                    PromptPlus.WriteLine("Successfully unregistered Yabber context menu.");
+                    output.WriteLine("Successfully unregistered Yabber context menu.");
                     break;
                 case IntegrationChoices.AddToPath:
                     Shell.AddToPathVariable();
-                    PromptPlus.WriteLine("Successfully added WitchyBND to PATH variable.");
+                    output.WriteLine("Successfully added WitchyBND to PATH variable.");
                     break;
                 case IntegrationChoices.RemoveFromPath:
                     Shell.RemoveFromPathVariable();
-                    PromptPlus.WriteLine("Successfully removed WitchyBND from PATH variable.");
+                    output.WriteLine("Successfully removed WitchyBND from PATH variable.");
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
 
-            PromptPlus.WriteLine(Constants.PressAnyKey);
-            PromptPlus.ReadKey();
+            output.WriteLine(Constants.PressAnyKey);
+            output.ReadKey();
         }
     }
 

@@ -18,10 +18,12 @@ public interface IUpdateService
 public class UpdateService : IUpdateService
 {
     private readonly IErrorService errorService;
+    private readonly IOutputService output;
 
-    public UpdateService(IErrorService error)
+    public UpdateService(IErrorService error, IOutputService outputService)
     {
         errorService = error;
+        output = outputService;
     }
 
     internal const int UpdateInterval = 6;
@@ -57,7 +59,7 @@ public class UpdateService : IUpdateService
 Please update at your earliest convenience, as the new version may contain important fixes and new features.");
 
                 if (!Configuration.Args.Passive)
-                    PromptPlus.KeyPress("Press any key to continue...").Run();
+                    output.KeyPress("Press any key to continue...").Run();
                 return true;
             }
         }

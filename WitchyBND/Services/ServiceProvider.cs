@@ -14,11 +14,13 @@ public static class ServiceProvider
 
     private static IServiceProvider CreateProvider()
     {
-        var error = new ErrorService();
-        var game = new GameService(error);
-        var update = new UpdateService(error);
+        var output = new OutputService();
+        var error = new ErrorService(output);
+        var game = new GameService(error, output);
+        var update = new UpdateService(error, output);
 
         var collection = new ServiceCollection()
+            .AddSingleton<IOutputService>(output)
             .AddSingleton<IErrorService>(error)
             .AddSingleton<IGameService>(game)
             .AddSingleton<IUpdateService>(update);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using PPlus;
+using WitchyBND.Services;
 using WitchyLib;
 
 namespace WitchyBND;
@@ -17,7 +18,6 @@ public enum DeferFormat
 
 public class DeferFormatConfiguration
 {
-
     public string Path { get; set; }
     public string Arguments { get; set; }
 
@@ -59,6 +59,12 @@ public class DeferToolExecutionException : Exception
 
 public static class DeferredFormatHandling
 {
+    private static readonly IOutputService output;
+    static DeferredFormatHandling()
+    {
+        output = ServiceProvider.GetService<IOutputService>();
+    }
+
 
     public static Dictionary<DeferFormat, List<(string, string)>> DefaultDeferToolArguments = new()
     {
@@ -89,10 +95,10 @@ public static class DeferredFormatHandling
 
     public static void Process(DeferFormat format, string srcPath)
     {
-        var process = CallDeferredTool(format, srcPath, out string output, out string error);
-        lock (Program.ConsoleWriterLock)
+        var process = CallDeferredTool(format, srcPath, out string text, out string error);
+        lock (output.ConsoleWriterLock)
         {
-            PromptPlus.WriteLine(output);
+            output.WriteLine(text);
         }
         if (process != 0)
         {
