@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using PPlus;
@@ -13,6 +14,10 @@ public interface IOutputService
         string? value = null,
         Style? style = null,
         bool clearrestofline = true);
+    public int WriteError(
+        string? value = null,
+        Style? style = null,
+        bool clearrestofline = true);
 
     public int DoubleDash(
         string value,
@@ -23,8 +28,6 @@ public interface IOutputService
     public void Clear();
 
     public IDisposable EscapeColorTokens();
-
-    public TextWriter Error { get; }
 
     public IControlKeyPress Confirm(string prompt, Action<IPromptConfig> config = null);
     public int SingleDash(
@@ -51,6 +54,18 @@ public class OutputService : IOutputService
         if (Configuration.Args.Silent) return 0;
         lock (ConsoleWriterLock)
             return PromptPlus.WriteLine(value, style, clearrestofline);
+    }
+
+    public int WriteError(string? value = null, Style? style = null, bool clearrestofline = true)
+    {
+        if (Configuration.Args.Silent) return 0;
+        lock (ConsoleWriterLock)
+        {
+            using (PromptPlus.OutputError())
+            {
+                return PromptPlus.WriteLine(value, style, clearrestofline);
+            }
+        }
     }
 
     public int DoubleDash(string value, DashOptions dashOptions = DashOptions.AsciiSingleBorder, int extralines = 0,

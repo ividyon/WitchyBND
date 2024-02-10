@@ -20,13 +20,13 @@ public static class HexHelpers
             if (hex.Length == 0)
             {
                 hex = "00000000";
-                PromptPlus.Error.WriteLine("Warning: Hex string was empty, adding 00000000...");
+                Console.Error.WriteLine("Warning: Hex string was empty, adding 00000000...");
             }
 
             if (hex.Length % 2 != 0)
             {
                 hex += "0";
-                PromptPlus.Error.WriteLine("Warning: Hex string was not divisible by 2, adding 0...");
+                Console.Error.WriteLine("Warning: Hex string was not divisible by 2, adding 0...");
             }
 
             if (hex.Length / 2 % 4 != 0)
@@ -35,7 +35,7 @@ public static class HexHelpers
                 {
                     hex += "00";
                 }
-                PromptPlus.Error.WriteLine("Warning: Hex string was not divisible by 4 for Custom type of CustomData, added 00 until it was.");
+                Console.Error.WriteLine("Warning: Hex string was not divisible by 4 for Custom type of CustomData, added 00 until it was.");
             }
 
             try
@@ -44,9 +44,9 @@ public static class HexHelpers
             }
             catch (Exception ex)
             {
-                PromptPlus.Error.WriteLine("An issue occurred in parsing a hex string into a byte array.");
-                PromptPlus.Error.WriteLine(ex.Message.PromptPlusEscape());
-                PromptPlus.Error.WriteLine(ex.StackTrace.PromptPlusEscape());
+                Console.Error.WriteLine("An issue occurred in parsing a hex string into a byte array.");
+                Console.Error.WriteLine(ex.Message.PromptPlusEscape());
+                Console.Error.WriteLine(ex.StackTrace.PromptPlusEscape());
                 throw;
             }
         }

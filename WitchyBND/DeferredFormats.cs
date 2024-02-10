@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
-using PPlus;
 using WitchyBND.Services;
 using WitchyLib;
 
@@ -79,9 +78,9 @@ public static class DeferredFormatHandling
     public static string BuildArgs(DeferFormat format, string srcPath)
     {
         var conf = Configuration.DeferTools[format];
-        var dirname = System.IO.Path.GetDirectoryName(srcPath);
-        var filename = System.IO.Path.GetFileNameWithoutExtension(srcPath);
-        var fileext = System.IO.Path.GetExtension(srcPath);
+        var dirname = Path.GetDirectoryName(srcPath);
+        var filename = Path.GetFileNameWithoutExtension(srcPath);
+        var fileext = Path.GetExtension(srcPath);
         return conf.Arguments.Replace("$dirname", dirname).Replace("$filename", filename).Replace("$fileext", fileext);
     }
 
@@ -90,16 +89,14 @@ public static class DeferredFormatHandling
         var conf = Configuration.DeferTools[format];
         var args = BuildArgs(format, srcPath);
         return ProcessHandling.RunProcess(conf.Path, out output,
-            out error, args, System.IO.Path.GetDirectoryName(srcPath));
+            out error, args, Path.GetDirectoryName(srcPath));
     }
 
     public static void Process(DeferFormat format, string srcPath)
     {
         var process = CallDeferredTool(format, srcPath, out string text, out string error);
-        lock (output.ConsoleWriterLock)
-        {
-            output.WriteLine(text);
-        }
+        output.WriteLine(text);
+
         if (process != 0)
         {
             throw new DeferToolExecutionException(format, process, error);

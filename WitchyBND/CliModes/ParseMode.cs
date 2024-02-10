@@ -89,8 +89,7 @@ public static class ParseMode
             {
                 if (!WPARAMBND4.FilenameIsPARAMBND4(path))
                 {
-                    lock (output.ConsoleWriterLock)
-                        output.WriteLine($"Decompressing DCX: {fileName.PromptPlusEscape()}...");
+                    output.WriteLine($"Decompressing DCX: {fileName.PromptPlusEscape()}...");
 
                     isDcx = true;
                     data = DCX.Decompress(path, out DCX.Type compressionVal);
@@ -157,13 +156,10 @@ public static class ParseMode
                 if (Configuration.Parallel)
                 {
                     string fileName = Path.GetFileName(path);
-                    lock (output.ConsoleWriterLock)
-                    {
-                        if (recursive)
-                            output.WriteLine($"Successfully parsed {fileName.PromptPlusEscape()} (recursive).");
-                        else
-                            output.WriteLine($"Successfully parsed {fileName.PromptPlusEscape()}.");
-                    }
+                    if (recursive)
+                        output.WriteLine($"Successfully parsed {fileName.PromptPlusEscape()} (recursive).");
+                    else
+                        output.WriteLine($"Successfully parsed {fileName.PromptPlusEscape()}.");
                 }
 
                 Interlocked.Increment(ref Program.ProcessedItems);
@@ -171,8 +167,7 @@ public static class ParseMode
             case false:
                 if (!error)
                 {
-                    lock (output.ConsoleWriterLock)
-                        output.Error.WriteLine($"Could not find valid parser for {path.PromptPlusEscape()}.");
+                    output.WriteError($"Could not find valid parser for {path.PromptPlusEscape()}.");
                 }
                 break;
         }
@@ -185,24 +180,22 @@ public static class ParseMode
 
         if (compression > file?.Compression)
             file.Compression = compression;
-        lock (output.ConsoleWriterLock)
+
+        switch (parser.Verb)
         {
-            switch (parser.Verb)
-            {
-                case WFileParserVerb.Serialize:
-                    output.WriteLine(recursive
-                        ? $"Serializing {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
-                        : $"Serializing {parser.Name}: {fileName.PromptPlusEscape()}...");
-                    break;
-                case WFileParserVerb.Unpack:
-                    output.WriteLine(recursive
-                        ? $"Unpacking {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
-                        : $"Unpacking {parser.Name}: {fileName.PromptPlusEscape()}...");
-                    break;
-                case WFileParserVerb.None:
-                default:
-                    break;
-            }
+            case WFileParserVerb.Serialize:
+                output.WriteLine(recursive
+                    ? $"Serializing {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
+                    : $"Serializing {parser.Name}: {fileName.PromptPlusEscape()}...");
+                break;
+            case WFileParserVerb.Unpack:
+                output.WriteLine(recursive
+                    ? $"Unpacking {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
+                    : $"Unpacking {parser.Name}: {fileName.PromptPlusEscape()}...");
+                break;
+            case WFileParserVerb.None:
+            default:
+                break;
         }
 
         parser.Unpack(path, file);
@@ -213,24 +206,22 @@ public static class ParseMode
     public static bool Repack(string path, WFileParser parser, bool recursive, out bool parsed)
     {
         string fileName = Path.GetFileName(path);
-        lock (output.ConsoleWriterLock)
+
+        switch (parser.Verb)
         {
-            switch (parser.Verb)
-            {
-                case WFileParserVerb.Serialize:
-                    output.WriteLine(recursive
-                        ? $"Deserializing {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
-                        : $"Deserializing {parser.Name}: {fileName.PromptPlusEscape()}...");
-                    break;
-                case WFileParserVerb.Unpack:
-                    output.WriteLine(recursive
-                        ? $"Repacking {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
-                        : $"Repacking {parser.Name}: {fileName.PromptPlusEscape()}...");
-                    break;
-                case WFileParserVerb.None:
-                default:
-                    break;
-            }
+            case WFileParserVerb.Serialize:
+                output.WriteLine(recursive
+                    ? $"Deserializing {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
+                    : $"Deserializing {parser.Name}: {fileName.PromptPlusEscape()}...");
+                break;
+            case WFileParserVerb.Unpack:
+                output.WriteLine(recursive
+                    ? $"Repacking {parser.Name} (recursive): {fileName.PromptPlusEscape()}..."
+                    : $"Repacking {parser.Name}: {fileName.PromptPlusEscape()}...");
+                break;
+            case WFileParserVerb.None:
+            default:
+                break;
         }
 
         if (!parser.UnpackedFitsVersion(path))

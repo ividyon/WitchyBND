@@ -95,7 +95,7 @@ public static class WatcherMode
                 }
             }
 
-            output.Error.WriteLine($"No valid unpacking parser found for {Path.GetFileName(p)}."
+            output.WriteError($"No valid unpacking parser found for {Path.GetFileName(p)}."
                 .PromptPlusEscape());
         });
 

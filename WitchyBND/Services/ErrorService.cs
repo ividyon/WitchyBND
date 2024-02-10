@@ -53,8 +53,7 @@ namespace WitchyBND.Services
             AccruedNotices.Push(notice);
             if (write)
             {
-                lock (output.ConsoleWriterLock)
-                    output.Error.WriteLine($"{notice.Source}: {notice.Message}".PromptPlusEscape());
+                output.WriteError($"{notice.Source}: {notice.Message}".PromptPlusEscape());
             }
         }
 
@@ -85,13 +84,10 @@ namespace WitchyBND.Services
             AccruedErrors.Push(error);
             if (write)
             {
-                lock (output.ConsoleWriterLock)
-                {
-                    if (error.Source != null)
-                        output.Error.WriteLine($"{error.Source}: {error.Message}".PromptPlusEscape());
-                    else
-                        output.Error.WriteLine(error.Message.PromptPlusEscape());
-                }
+                if (error.Source != null)
+                    output.WriteError($"{error.Source}: {error.Message}".PromptPlusEscape());
+                else
+                    output.WriteError(error.Message.PromptPlusEscape());
             }
 
             if (Configuration.IsTest)
@@ -107,7 +103,7 @@ namespace WitchyBND.Services
                 output.SingleDash("Errors during operation");
                 foreach (WitchyError error in AccruedErrors)
                 {
-                    output.Error.WriteLine(
+                    output.WriteError(
                         $"{error.Source}: {error.Message}".PromptPlusEscape());
                 }
             }
@@ -119,10 +115,10 @@ namespace WitchyBND.Services
                 foreach (WitchyNotice notice in AccruedNotices)
                 {
                     if (notice.Source != null)
-                        output.Error.WriteLine($"{notice.Source}: {notice.Message}"
+                        output.WriteError($"{notice.Source}: {notice.Message}"
                             .PromptPlusEscape());
                     else
-                        output.Error.WriteLine($"{notice.Message}".PromptPlusEscape());
+                        output.WriteError($"{notice.Message}".PromptPlusEscape());
                 }
             }
         }

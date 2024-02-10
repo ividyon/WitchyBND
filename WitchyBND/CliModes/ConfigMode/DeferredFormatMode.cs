@@ -45,7 +45,7 @@ Cancel the dialog to reset the configuration for that format.");
                 var openDialog = NativeFileDialogSharp.Dialog.FileOpen("exe");
                 if (openDialog.IsError)
                 {
-                    output.Error.WriteLine(
+                    output.WriteError(
                         $"There was an error while picking the executable: {openDialog.ErrorMessage}");
                     output.KeyPress().Run();
                     continue;
