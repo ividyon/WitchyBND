@@ -27,6 +27,7 @@ internal static class Program
 
     static Program()
     {
+        ServiceProvider.InitializeProvider();
         errorService = ServiceProvider.GetService<IErrorService>();
         updateService = ServiceProvider.GetService<IUpdateService>();
         output = ServiceProvider.GetService<IOutputService>();
@@ -64,31 +65,39 @@ internal static class Program
                         return;
                     }
 
-                    if (opt.Dcx)
-                        Configuration.Dcx = opt.Dcx;
-                    if (opt.Bnd)
-                        Configuration.Bnd = opt.Bnd;
-                    if (opt.ParamDefaultValues != null)
-                        Configuration.ParamDefaultValues = opt.ParamDefaultValues.Value;
-                    if (opt.Recursive)
-                        Configuration.Recursive = opt.Recursive;
-                    if (opt.Parallel)
-                        Configuration.Parallel = opt.Parallel;
+                    // Set CLI mode
+                    CliMode mode = opt.Mode;
+                    if (!opt.Paths.Any())
+                        mode = CliMode.Config;
 
-                    // Arg-only configuration
-                    if (opt.RepackOnly)
-                        Configuration.Args.RepackOnly = opt.RepackOnly;
-
-                    if (opt.UnpackOnly)
-                        Configuration.Args.UnpackOnly = opt.UnpackOnly;
-
-                    if (opt.Passive)
-                        Configuration.Args.Passive = opt.Passive;
-
-                    if (opt.Silent)
+                    if (mode != CliMode.Config)
                     {
-                        Configuration.Args.Silent = opt.Silent;
-                        Configuration.Args.Passive = opt.Silent;
+                        if (opt.Dcx)
+                            Configuration.Dcx = opt.Dcx;
+                        if (opt.Bnd)
+                            Configuration.Bnd = opt.Bnd;
+                        if (opt.ParamDefaultValues != null)
+                            Configuration.ParamDefaultValues = opt.ParamDefaultValues.Value;
+                        if (opt.Recursive)
+                            Configuration.Recursive = opt.Recursive;
+                        if (opt.Parallel)
+                            Configuration.Parallel = opt.Parallel;
+
+                        // Arg-only configuration
+                        if (opt.RepackOnly)
+                            Configuration.Args.RepackOnly = opt.RepackOnly;
+
+                        if (opt.UnpackOnly)
+                            Configuration.Args.UnpackOnly = opt.UnpackOnly;
+
+                        if (opt.Passive)
+                            Configuration.Args.Passive = opt.Passive;
+
+                        if (opt.Silent)
+                        {
+                            Configuration.Args.Silent = opt.Silent;
+                            Configuration.Args.Passive = opt.Silent;
+                        }
                     }
 
                     output.DoubleDash($"{assembly.GetName().Name} {assembly.GetName().Version}");
@@ -131,16 +140,11 @@ internal static class Program
                         }
                     }
 
-                    // Set CLI mode
-                    CliMode mode = opt.Mode;
-                    if (!opt.Paths.Any())
-                        mode = CliMode.Config;
-
                     // Execute
                     switch (mode)
                     {
                         case CliMode.Parse:
-                            SoulsOodleLib.Oodle.GrabOodle(_ => {}, false, true);
+                            SoulsOodleLib.Oodle.GrabOodle(_ => { }, false, true);
                             DisplayConfiguration(mode);
                             updateService.CheckForUpdates();
 
@@ -164,7 +168,7 @@ internal static class Program
                             PrintFinale(pause);
                             break;
                         case CliMode.Watch:
-                            SoulsOodleLib.Oodle.GrabOodle(_ => {}, false, true);
+                            SoulsOodleLib.Oodle.GrabOodle(_ => { }, false, true);
                             DisplayConfiguration(mode);
                             updateService.CheckForUpdates();
                             WatcherMode.CliWatcherMode(opt);

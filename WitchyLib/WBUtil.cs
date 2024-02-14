@@ -126,14 +126,18 @@ public static class WBUtil
         return processedPaths.Select(path => Path.GetFullPath(path)).ToList();
     }
 
-    public static string GetExeLocation(string path = null)
+    public static string GetExeLocation(params string[]? parts)
     {
-        if (path != null)
+        if (parts != null && parts.Any())
         {
-            return Path.Combine(ExeLocation, path);
+            return Path.Combine(new [] { ExeLocation }.Union(parts).ToArray());
         }
-
         return ExeLocation;
+    }
+
+    public static string GetExeLocation()
+    {
+        return GetExeLocation(Array.Empty<string>());
     }
 
     public enum GameType

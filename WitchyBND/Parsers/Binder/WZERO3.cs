@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using SoulsFormats;
 using SoulsFormats.AC4;
 
@@ -33,6 +34,6 @@ public class WZERO3 : WFolderParser
 
     public override void Repack(string srcPath)
     {
-        // Do nothing.
+        throw new NotSupportedException();
     }
 }

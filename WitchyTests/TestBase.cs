@@ -6,6 +6,7 @@ using PPlus;
 using WitchyBND;
 using WitchyBND.Services;
 using WitchyLib;
+using WitchyTests.Services;
 using ServiceProvider = WitchyBND.Services.ServiceProvider;
 
 namespace WitchyTests;
@@ -16,11 +17,13 @@ public class TestBase
     protected static IGameService _gameService;
     static IServiceProvider CreateProvider()
     {
-        var error = new ErrorService();
-        var game = new GameService(error);
-        var update = new UpdateService(error);
+        var output = new TestOutputService();
+        var error = new ErrorService(output);
+        var game = new GameService(error, output);
+        var update = new UpdateService(error, output);
 
         var collection = new ServiceCollection()
+            .AddSingleton<IOutputService>(output)
             .AddSingleton<IErrorService>(error)
             .AddSingleton<IGameService>(game)
             .AddSingleton<IUpdateService>(update);
@@ -38,7 +41,7 @@ public class TestBase
 
     static TestBase()
     {
-        ServiceProvider.ReplaceProvider(CreateProvider());
+        ServiceProvider.ChangeProvider(CreateProvider());
         _gameService = ServiceProvider.GetService<IGameService>();
     }
 

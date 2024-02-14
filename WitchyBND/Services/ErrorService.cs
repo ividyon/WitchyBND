@@ -126,13 +126,13 @@ namespace WitchyBND.Services
         public bool Catch(Func<bool> callback, out bool error, string? source = null)
         {
             error = false;
-            bool outcome = false;
             try
             {
-                outcome = callback();
+                return callback();
             }
             catch (ProcessUserInputException e)
             {
+                error = true;
                 if (Configuration.IsTest)
                     throw;
                 RegisterError(new WitchyError($@"The external process ""{e.ProcessName}"" was waiting for user input.
@@ -143,93 +143,92 @@ Process output:
 Process error output:
 {e.Error}", source,
                     WitchyErrorType.Generic));
-                error = true;
             }
             catch (GameUnsupportedException e)
             {
+                error = true;
                 if (Configuration.IsTest)
                     throw;
                 RegisterError(new WitchyError($"The parser does not support the game {e.Game}.", source,
                     WitchyErrorType.Generic));
-                error = true;
             }
             catch (DeferToolExecutionException e)
             {
+                error = true;
                 if (Configuration.IsTest)
                     throw;
                 RegisterError(new WitchyError(
                     @$"The {e.Format.GetAttribute<DisplayAttribute>().Name} tool located at ""{Configuration.DeferTools[e.Format].Path}"" exited with code {e.ExitCode} with the following error message:
 
 {e.Error}", source, WitchyErrorType.Generic));
-                error = true;
             }
             catch (DeferToolPathException e)
             {
+                error = true;
                 if (Configuration.IsTest)
                     throw;
                 RegisterError(new WitchyError(
                     $"No tool is configured for the deferred format \"{e.Format.GetAttribute<DisplayAttribute>().Name}\". Please configure it in WitchyBND before attempting to process files of this type.",
                     source, WitchyErrorType.Generic));
-                error = true;
             }
             catch (NoOodleFoundException)
             {
+                error = true;
                 if (Configuration.IsTest)
                     throw;
 
                 RegisterError(new WitchyError(
                     "ERROR: Oodle DLL not found. Please copy oo2core_6_win64.dll or oo2core_8_win64.dll from the game directory to WitchyBND's directory.",
                     WitchyErrorType.NoOodle));
-                error = true;
             }
             catch (Exception e) when (e.Message.Contains("oo2core_6_win64.dll") ||
                                       e.Message.Contains("oo2core_8_win64.dll") || e is NoOodleFoundException)
             {
+                error = true;
                 if (Configuration.IsTest)
                     throw;
 
                 RegisterError(new WitchyError(
                     "ERROR: Oodle DLL not found. Please copy oo2core_6_win64.dll or oo2core_8_win64.dll from the game directory to WitchyBND's directory.",
                     WitchyErrorType.NoOodle));
-                error = true;
             }
             catch (UnauthorizedAccessException)
             {
+                error = true;
                 if (Configuration.IsTest || Configuration.IsDebug)
                     throw;
 
                 RegisterError(new WitchyError(
                     "WitchyBND had no access to perform this action; perhaps try Administrator Mode?", source,
                     WitchyErrorType.NoAccess));
-                error = true;
             }
             catch (IOException e) when (e is not FileNotFoundException)
             {
+                error = true;
                 if (Configuration.IsDebug) throw;
 
                 RegisterError(new WitchyError(
                     "WitchyBND could not operate on the file as it was being used by another process.", source,
                     WitchyErrorType.InUse));
-                error = true;
             }
             catch (FriendlyException e)
             {
+                error = true;
                 if (Configuration.IsTest)
                     throw;
 
                 RegisterError(new WitchyError(e.Message, source));
-                error = true;
             }
             catch (Exception e)
             {
+                error = true;
                 if (Configuration.IsTest || Configuration.IsDebug)
                     throw;
 
                 RegisterException(e, source);
-                error = true;
             }
 
-            return outcome;
+            return false;
         }
     }
 }

@@ -113,8 +113,10 @@ public static class WatcherMode
 
         foreach ((string path, var (parser, file)) in filesToUnpack)
         {
-            bool parsed = false;
-            errorService.Catch(() => ParseMode.Unpack(path, file, file.Compression, parser, false, out parsed),
+            bool parsed = errorService.Catch(() => {
+                    ParseMode.Unpack(path, file, file.Compression, parser, false);
+                    return true;
+                },
                 out bool error, path);
             ParseMode.PrintParseSuccess(path, parsed, error, false);
 
@@ -135,8 +137,10 @@ public static class WatcherMode
 
         foreach ((string path, WFileParser parser) in filesToRepack)
         {
-            bool parsed = false;
-            errorService.Catch(() => ParseMode.Repack(path, parser, false, out parsed),
+            bool parsed = errorService.Catch(() => {
+                    ParseMode.Repack(path, parser, false);
+                    return true;
+                },
                 out bool error, path);
             ParseMode.PrintParseSuccess(path, parsed, error, false);
 
@@ -201,8 +205,10 @@ public static class WatcherMode
         file.LastChange = DateTime.Now; // In case of exceptions
         Thread.Sleep(ProcessDelay);
         output.WriteLine($"[{DateTime.Now:T}] Detected change in {e.Name}.".PromptPlusEscape());
-        bool parsed = false;
-        errorService.Catch(() => ParseMode.Unpack(e.FullPath, file!.File, file.File.Compression, file.Parser, false, out parsed),
+        bool parsed = errorService.Catch(() => {
+                ParseMode.Unpack(e.FullPath, file!.File, file.File.Compression, file.Parser, false);
+                return true;
+            },
             out bool error, e.FullPath);
         ParseMode.PrintParseSuccess(file.Path, parsed, error, false);
         file.LastChange = DateTime.Now; // Due to long-lasting operations
@@ -216,8 +222,10 @@ public static class WatcherMode
         file.LastChange = DateTime.Now; // In case of exceptions
         Thread.Sleep(ProcessDelay);
         output.WriteLine($"[{DateTime.Now:T}] Detected change in {e.Name}.".PromptPlusEscape());
-        bool parsed = false;
-        errorService.Catch(() => ParseMode.Repack(e.FullPath, file.Parser, false, out parsed), out bool error, e.FullPath);
+        bool parsed = errorService.Catch(() => {
+            ParseMode.Repack(e.FullPath, file.Parser, false);
+            return true;
+        }, out bool error, e.FullPath);
         ParseMode.PrintParseSuccess(file.Path, parsed, error, false);
         file.LastChange = DateTime.Now; // Due to long-lasting operations
     }
@@ -235,10 +243,9 @@ public static class WatcherMode
         Thread.Sleep(ProcessDelay);
         output.WriteLine($"[{DateTime.Now:T}] Detected change in {e.FullPath.Replace(Path.GetDirectoryName(file.Path) + "\\", "")}."
             .PromptPlusEscape());
-        bool parsed = false;
-        errorService.Catch(() => {
-            bool output = ParseMode.Repack(file.Path, file.Parser, false, out parsed);
-            return output;
+        bool parsed = errorService.Catch(() => {
+            ParseMode.Repack(file.Path, file.Parser, false);
+            return true;
         }, out bool error, e.FullPath);
         ParseMode.PrintParseSuccess(file.Path, parsed, error, false);
         file.LastChange = DateTime.Now; // Due to long-lasting operations

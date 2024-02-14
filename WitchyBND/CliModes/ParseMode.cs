@@ -52,7 +52,7 @@ public static class ParseMode
             new WDBSUB(),
             new WENFL(),
             new WLUA(),
-            new WHKX(),
+            // new WHKX(),
             new WTAEFolder(),
             new WTAEFile(),
             //MSBE
@@ -99,24 +99,26 @@ public static class ParseMode
 
             foreach (WFileParser parser in Parsers)
             {
-                bool toBreak = errorService.Catch(() => {
+                parsed = errorService.Catch(() => {
                     ISoulsFile? file;
                     if ((Configuration.Args.UnpackOnly || !Configuration.Args.RepackOnly) && parser.Exists(path) &&
                         parser.Is(path, data, out file))
                     {
-                        return Unpack(path, file, compression, parser, recursive, out parsed);
+                        Unpack(path, file, compression, parser, recursive);
+                        return true;
                     }
 
                     if ((Configuration.Args.RepackOnly || !Configuration.Args.UnpackOnly) &&
                         parser.ExistsUnpacked(path) && parser.IsUnpacked(path))
                     {
-                        return Repack(path, parser, recursive, out parsed);
+                        Repack(path, parser, recursive);
+                        return true;
                     }
 
                     return false;
                 }, out error, path);
 
-                if (toBreak)
+                if (parsed)
                     break;
             }
 
@@ -124,7 +126,10 @@ public static class ParseMode
             if (!parsed && isDcx && !Configuration.Args.RepackOnly)
             {
                 WDCX dcxParser = Parsers.OfType<WDCX>().First();
-                Unpack(path, null, compression, dcxParser, false, out parsed);
+                parsed = errorService.Catch(() => {
+                    Unpack(path, null, compression, dcxParser, false);
+                    return true;
+                }, out error, path);
             }
 
             PrintParseSuccess(path, parsed, error, recursive);
@@ -173,8 +178,7 @@ public static class ParseMode
         }
     }
 
-    public static bool Unpack(string path, ISoulsFile? file, DCX.Type compression, WFileParser? parser, bool recursive,
-        out bool parsed)
+    public static void Unpack(string path, ISoulsFile? file, DCX.Type compression, WFileParser? parser, bool recursive)
     {
         string fileName = Path.GetFileName(path);
 
@@ -199,11 +203,9 @@ public static class ParseMode
         }
 
         parser.Unpack(path, file);
-        parsed = true;
-        return true;
     }
 
-    public static bool Repack(string path, WFileParser parser, bool recursive, out bool parsed)
+    public static void Repack(string path, WFileParser parser, bool recursive)
     {
         string fileName = Path.GetFileName(path);
 
@@ -231,7 +233,5 @@ public static class ParseMode
         }
 
         parser.Repack(path);
-        parsed = true;
-        return true;
     }
 }

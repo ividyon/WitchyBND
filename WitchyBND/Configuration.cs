@@ -41,8 +41,6 @@ public static class Configuration
 
         public bool TaeFolder { get; set; }
         public Dictionary<DeferFormat, DeferFormatConfiguration> DeferTools { get; set; } = new();
-
-        public DateTime? LastUpdateCheckTime { get; set; }
     }
 
     public class WitchyArgValues
@@ -129,12 +127,6 @@ public static class Configuration
     {
         get => _values.DeferTools;
         set => _values.DeferTools = value;
-    }
-
-    public static DateTime? LastUpdateCheckTime
-    {
-        get => _values.LastUpdateCheckTime;
-        set => _values.LastUpdateCheckTime = value;
     }
 
     public static void ReplaceConfig(IConfigurationRoot config)

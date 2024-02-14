@@ -1,9 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Xml.Linq;
-using PPlus;
 using SoulsFormats;
-using WitchyBND.CliModes;
-using WitchyLib;
 
 namespace WitchyBND.Parsers;
 
@@ -32,7 +30,7 @@ public class WHKX : WSingleFileParser
 
     public override string GetUnpackDestPath(string srcPath)
     {
-        throw new System.NotImplementedException();
+        throw new NotSupportedException();
     }
 
     public override void Unpack(string srcPath, ISoulsFile? file)
@@ -42,11 +40,11 @@ public class WHKX : WSingleFileParser
 
     public override void Repack(string srcPath)
     {
-        throw new System.NotImplementedException();
+        throw new NotSupportedException();
     }
 
     public override string GetRepackDestPath(string srcPath, XElement xml)
     {
-        throw new System.NotImplementedException();
+        throw new NotSupportedException();
     }
 }

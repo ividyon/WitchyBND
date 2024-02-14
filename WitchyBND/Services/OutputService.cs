@@ -52,28 +52,34 @@ public class OutputService : IOutputService
     public int WriteLine(string? value = null, Style? style = null, bool clearrestofline = true)
     {
         if (Configuration.Args.Silent) return 0;
+        int outCode;
         lock (ConsoleWriterLock)
-            return PromptPlus.WriteLine(value, style, clearrestofline);
+            outCode = PromptPlus.Write(value + Environment.NewLine, style, clearrestofline);
+        return outCode;
     }
 
     public int WriteError(string? value = null, Style? style = null, bool clearrestofline = true)
     {
         if (Configuration.Args.Silent) return 0;
+        int outCode;
         lock (ConsoleWriterLock)
         {
             using (PromptPlus.OutputError())
             {
-                return PromptPlus.WriteLine(value, style, clearrestofline);
+                outCode = PromptPlus.Write(value + Environment.NewLine, style, clearrestofline);
             }
         }
+        return outCode;
     }
 
     public int DoubleDash(string value, DashOptions dashOptions = DashOptions.AsciiSingleBorder, int extralines = 0,
         Style? style = null)
     {
         if (Configuration.Args.Silent) return 0;
+        int outCode;
         lock (ConsoleWriterLock)
-            return PromptPlus.DoubleDash(value, dashOptions, extralines, style);
+            outCode = PromptPlus.DoubleDash(value, dashOptions, extralines, style);
+        return outCode;
     }
 
     public IControlSelect<T> Select<T>(string prompt, string? description = null)
@@ -94,8 +100,6 @@ public class OutputService : IOutputService
         return PromptPlus.EscapeColorTokens();
     }
 
-    public TextWriter Error => PromptPlus.Error;
-
     public IControlKeyPress Confirm(string prompt, Action<IPromptConfig> config = null)
     {
         lock (ConsoleWriterLock)
@@ -106,8 +110,10 @@ public class OutputService : IOutputService
         Style? style = null)
     {
         if (Configuration.Args.Silent) return 0;
+        int outCode;
         lock (ConsoleWriterLock)
-            return PromptPlus.SingleDash(value, dashOptions, extralines, style);
+            outCode = PromptPlus.SingleDash(value, dashOptions, extralines, style);
+        return outCode;
     }
 
     public IControlInput Input(string prompt, Action<IPromptConfig> config = null)

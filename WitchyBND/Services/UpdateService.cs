@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
@@ -6,7 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PPlus;
+using SoulsFormats.KF4;
 using WitchyBND.Services;
+using WitchyLib;
 
 namespace WitchyBND;
 
@@ -33,16 +37,44 @@ public class UpdateService : IUpdateService
     internal const string UserAgent =
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36";
 
+    public DateTime ReadUpdateFile()
+    {
+        DateTime? time = null;
+        var path = WBUtil.GetExeLocation("last-update.txt");
+        if (File.Exists(path))
+        {
+            var parsed = DateTime.TryParse(File.ReadAllText(path), out var parsedTime);
+            if (parsed)
+            {
+                time = parsedTime;
+            }
+        }
+        return time ?? new DateTime(0);
+    }
+
+    public bool WriteUpdateFile(DateTime time)
+    {
+        try
+        {
+            File.WriteAllText(WBUtil.GetExeLocation("last-update.txt"), time.ToString(CultureInfo.InvariantCulture));
+        }
+        catch (Exception)
+        {
+            output.WriteError("Could not write current time to file.");
+            return false;
+        }
+
+        return true;
+    }
     public bool CheckForUpdates()
     {
         if (Configuration.Offline) return false;
-        DateTime? updateTime = Configuration.LastUpdateCheckTime;
-        if (updateTime != null && updateTime - DateTime.UtcNow > TimeSpan.FromHours(UpdateInterval)) return false;
+        DateTime updateTime = ReadUpdateFile();
+        if (updateTime - DateTime.Now > TimeSpan.FromHours(UpdateInterval)) return false;
         try
         {
             // Update last update time
-            Configuration.LastUpdateCheckTime = DateTime.UtcNow;
-            Configuration.UpdateConfiguration();
+            WriteUpdateFile(DateTime.Now);
 
             var client = new HttpClient();
             client.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);

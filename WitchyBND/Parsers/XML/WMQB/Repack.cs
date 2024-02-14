@@ -15,7 +15,6 @@ public partial class WMQB
 
     public override void Repack(string srcPath)
     {
-
         MQB mqb = new MQB();
         XmlDocument xml = new XmlDocument();
         xml.Load(srcPath);

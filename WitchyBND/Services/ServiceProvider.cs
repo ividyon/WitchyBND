@@ -12,7 +12,7 @@ public static class ServiceProvider
         return _provider.GetRequiredService<T>();
     }
 
-    private static IServiceProvider CreateProvider()
+    public static IServiceProvider CreateProvider()
     {
         var output = new OutputService();
         var error = new ErrorService(output);
@@ -28,12 +28,12 @@ public static class ServiceProvider
         return collection.BuildServiceProvider();
     }
 
-    public static void ReplaceProvider(IServiceProvider provider)
+    public static void ChangeProvider(IServiceProvider provider)
     {
         _provider = provider;
     }
 
-    static ServiceProvider()
+    public static void InitializeProvider()
     {
         _provider = CreateProvider();
     }
