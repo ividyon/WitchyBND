@@ -148,7 +148,15 @@ public abstract class WFileParser
 
     public static bool IsRead<TFormat>(string path, byte[]? data, out ISoulsFile? file) where TFormat : SoulsFile<TFormat>, new()
     {
-        return data != null ? IsRead<TFormat>(data, out file) : IsRead<TFormat>(path, out file);
+        try
+        {
+            return data != null ? IsRead<TFormat>(data, out file) : IsRead<TFormat>(path, out file);
+        }
+        catch (Exception)
+        {
+            file = null;
+            return false;
+        }
     }
 }
 

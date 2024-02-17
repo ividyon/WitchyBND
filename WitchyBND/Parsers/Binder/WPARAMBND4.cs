@@ -83,12 +83,11 @@ public class WPARAMBND4 : WBinderParser
     public override bool Preprocess(string srcPath)
     {
         if (gameService.KnownGamePathsForParams.Any(p => srcPath.StartsWith(p.Key))) return false;
-
         if (!(Exists(srcPath) && Is(srcPath, null, out ISoulsFile? _)) && !(ExistsUnpacked(srcPath) && IsUnpacked(srcPath))) return false;
 
         gameService.DetermineGameType(srcPath, true);
 
-        return true;
+        return false; // Preprocess them all to perform WarnAboutParams
     }
 
     public override bool Is(string path, byte[]? _, out ISoulsFile? file)
@@ -99,13 +98,18 @@ public class WPARAMBND4 : WBinderParser
 
     public override bool IsUnpacked(string path)
     {
-        if (!Directory.Exists(path)) return false;
+        return innerIsUnpacked() && WPARAM.WarnAboutParams();
 
-        string xmlPath = Path.Combine(path, GetFolderXmlFilename("bnd4"));
-        if (!File.Exists(xmlPath)) return false;
+        bool innerIsUnpacked()
+        {
+            if (!Directory.Exists(path)) return false;
 
-        var doc = XDocument.Load(xmlPath);
-        return doc.Root != null && doc.Root.Name.ToString().ToLower() == "bnd4" && doc.Root.Element("game") != null;
+            string xmlPath = Path.Combine(path, GetFolderXmlFilename("bnd4"));
+            if (!File.Exists(xmlPath)) return false;
+
+            var doc = XDocument.Load(xmlPath);
+            return doc.Root != null && doc.Root.Name.ToString().ToLower() == "bnd4" && doc.Root.Element("game") != null;
+        }
     }
 
     public override void Unpack(string srcPath, ISoulsFile? _)
@@ -128,8 +132,6 @@ public class WPARAMBND4 : WBinderParser
 
     public override void Repack(string srcPath)
     {
-        if (!WPARAM.WarnAboutParams()) return;
-
         var bndParser = ParseMode.Parsers.OfType<WBND4>().First();
         var xmlPath = GetFolderXmlPath(srcPath, "bnd4");
         var doc = XDocument.Load(xmlPath);

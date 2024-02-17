@@ -195,17 +195,18 @@ Process error output:
             catch (UnauthorizedAccessException)
             {
                 error = true;
-                if (Configuration.IsTest || Configuration.IsDebug)
+                if (Configuration.IsTest)
                     throw;
 
                 RegisterError(new WitchyError(
                     "WitchyBND had no access to perform this action; perhaps try Administrator Mode?", source,
                     WitchyErrorType.NoAccess));
             }
-            catch (IOException e) when (e is not FileNotFoundException)
+            catch (IOException e) when (e.GetType().Name == "IOException")
             {
                 error = true;
-                if (Configuration.IsDebug) throw;
+                if (Configuration.IsTest)
+                    throw;
 
                 RegisterError(new WitchyError(
                     "WitchyBND could not operate on the file as it was being used by another process.", source,
@@ -222,7 +223,7 @@ Process error output:
             catch (Exception e)
             {
                 error = true;
-                if (Configuration.IsTest || Configuration.IsDebug)
+                if (Configuration.IsTest)
                     throw;
 
                 RegisterException(e, source);

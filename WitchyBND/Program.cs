@@ -185,7 +185,7 @@ internal static class Program
                 }
                 catch (Exception e)
                 {
-                    if (Configuration.IsTest || Configuration.IsDebug)
+                    if (Configuration.IsTest)
                         throw;
 
                     errorService.RegisterException(e);

@@ -88,12 +88,20 @@ public static class WBUtil
 
         throw new InvalidDataException("File element is missing path.");
     }
-
     public static List<string> ProcessPathGlobs(List<string> paths)
     {
         var processedPaths = new List<string>();
-        foreach (string path in paths)
-        {
+        foreach (string path in paths.Select(p => {
+                     try
+                     {
+                         return Path.GetFullPath(p);
+                     }
+                     catch (Exception e)
+                     {
+                         Console.WriteLine($"Invalid path: {p} ({e.Message})");
+                         return null;
+                     }
+                 }).Where(p => p != null).Cast<string>()) {
             if (path.Contains('*'))
             {
                 var matcher = new Matcher();
@@ -102,19 +110,27 @@ public static class WBUtil
                 var rest = path.Substring(root.Length + 1);
 
                 matcher = matcher.AddInclude(rest.Replace(Path.DirectorySeparatorChar.ToString(), "/"));
+
+                var rootPath = Path.Combine(Environment.CurrentDirectory, root);
+                if (!Directory.Exists(rootPath))
+                {
+                    Console.Error.WriteLine($"Invalid path: {rootPath}");
+                    continue;
+                }
                 var files = Directory.GetFiles(Path.Combine(Environment.CurrentDirectory, root), "*",
                     SearchOption.AllDirectories);
+                var fileMatch = matcher.Match(Path.Combine(Environment.CurrentDirectory, root), files);
+                if (fileMatch.HasMatches)
+                {
+                    processedPaths.AddRange(fileMatch.Files.Select(m => Path.Combine(root, m.Path)).Where(globFilter).ToList());
+                }
+
                 var dirs = Directory.GetDirectories(Path.Combine(Environment.CurrentDirectory, root), "*",
                     SearchOption.AllDirectories);
-                var match = matcher.Match(Path.Combine(Environment.CurrentDirectory, root), files);
-                if (match.HasMatches)
+                var dirMatch = matcher.Match(Path.Combine(Environment.CurrentDirectory, root), dirs);
+                if (dirMatch.HasMatches)
                 {
-                    processedPaths.AddRange(match.Files.Select(m => Path.Combine(root, m.Path)).ToList());
-                }
-                var match2 = matcher.Match(Path.Combine(Environment.CurrentDirectory, root), dirs);
-                if (match2.HasMatches)
-                {
-                    processedPaths.AddRange(match2.Files.Select(m => Path.Combine(root, m.Path)).ToList());
+                    processedPaths.AddRange(dirMatch.Files.Select(m => Path.Combine(root, m.Path)).Where(globFilter).ToList());
                 }
             }
             else
@@ -124,6 +140,11 @@ public static class WBUtil
         }
 
         return processedPaths.Select(path => Path.GetFullPath(path)).ToList();
+
+        bool globFilter(string path)
+        {
+            return !path.EndsWith(".bak");
+        }
     }
 
     public static string GetExeLocation(params string[]? parts)

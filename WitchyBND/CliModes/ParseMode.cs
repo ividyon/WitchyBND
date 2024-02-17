@@ -62,7 +62,7 @@ public static class ParseMode
     {
         var paths = opt.Paths.ToList();
 
-        paths = WBUtil.ProcessPathGlobs(paths);
+        paths = WBUtil.ProcessPathGlobs(paths).ToList();
 
         ParseFiles(paths);
     }
@@ -84,53 +84,58 @@ public static class ParseMode
 
             byte[] data = null;
             bool isDcx = false;
-            DCX.Type compression = DCX.Type.None;
-            if (File.Exists(path) && DCX.Is(path))
-            {
-                if (!WPARAMBND4.FilenameIsPARAMBND4(path))
+            parsed = errorService.Catch(() => {
+                var innerParsed = false;
+                DCX.Type compression = DCX.Type.None;
+                if (File.Exists(path) && DCX.Is(path))
                 {
-                    output.WriteLine($"Decompressing DCX: {fileName.PromptPlusEscape()}...");
+                    if (!WPARAMBND4.FilenameIsPARAMBND4(path))
+                    {
+                        output.WriteLine($"Decompressing DCX: {fileName.PromptPlusEscape()}...");
 
-                    isDcx = true;
-                    data = DCX.Decompress(path, out DCX.Type compressionVal);
-                    compression = compressionVal;
+                        isDcx = true;
+                        data = DCX.Decompress(path, out DCX.Type compressionVal);
+                        compression = compressionVal;
+                    }
                 }
-            }
 
-            foreach (WFileParser parser in Parsers)
-            {
-                parsed = errorService.Catch(() => {
-                    ISoulsFile? file;
-                    if ((Configuration.Args.UnpackOnly || !Configuration.Args.RepackOnly) && parser.Exists(path) &&
-                        parser.Is(path, data, out file))
-                    {
-                        Unpack(path, file, compression, parser, recursive);
+                foreach (WFileParser parser in Parsers)
+                {
+                    innerParsed = errorService.Catch(() => {
+                        ISoulsFile? file;
+                        if ((Configuration.Args.UnpackOnly || !Configuration.Args.RepackOnly) && parser.Exists(path) &&
+                            parser.Is(path, data, out file))
+                        {
+                            Unpack(path, file, compression, parser, recursive);
+                            return true;
+                        }
+
+                        if ((Configuration.Args.RepackOnly || !Configuration.Args.UnpackOnly) &&
+                            parser.ExistsUnpacked(path) && parser.IsUnpacked(path))
+                        {
+                            Repack(path, parser, recursive);
+                            return true;
+                        }
+
+                        return false;
+                    }, out error, path);
+
+                    if (innerParsed)
+                        break;
+                }
+
+                // If no other parser present but file is a DCX, at least un-DCX it
+                if (!innerParsed && isDcx && !Configuration.Args.RepackOnly)
+                {
+                    WDCX dcxParser = Parsers.OfType<WDCX>().First();
+                    parsed = errorService.Catch(() => {
+                        Unpack(path, null, compression, dcxParser, false);
                         return true;
-                    }
+                    }, out error, path);
+                }
 
-                    if ((Configuration.Args.RepackOnly || !Configuration.Args.UnpackOnly) &&
-                        parser.ExistsUnpacked(path) && parser.IsUnpacked(path))
-                    {
-                        Repack(path, parser, recursive);
-                        return true;
-                    }
-
-                    return false;
-                }, out error, path);
-
-                if (parsed)
-                    break;
-            }
-
-            // If no other parser present but file is a DCX, at least un-DCX it
-            if (!parsed && isDcx && !Configuration.Args.RepackOnly)
-            {
-                WDCX dcxParser = Parsers.OfType<WDCX>().First();
-                parsed = errorService.Catch(() => {
-                    Unpack(path, null, compression, dcxParser, false);
-                    return true;
-                }, out error, path);
-            }
+                return innerParsed;
+            }, out error, path);
 
             PrintParseSuccess(path, parsed, error, recursive);
         }
@@ -172,7 +177,7 @@ public static class ParseMode
             case false:
                 if (!error)
                 {
-                    output.WriteError($"Could not find valid parser for {path.PromptPlusEscape()}.");
+                    // output.WriteError($"Could not find valid parser for {path.PromptPlusEscape()}.");
                 }
                 break;
         }

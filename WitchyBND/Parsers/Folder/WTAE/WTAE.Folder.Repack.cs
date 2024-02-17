@@ -14,10 +14,17 @@ namespace WitchyBND.Parsers;
 
 public partial class WTAEFolder
 {
+    public override bool IsUnpacked(string path)
+    {
+        if (base.IsUnpacked(path))
+        {
+            return WarnAboutTAEs();
+        }
+        return false;
+    }
+
     public override void Repack(string srcPath)
     {
-        if (!WarnAboutTAEs()) return;
-
         var tae = new TAE();
 
         XElement xml = LoadXml(GetFolderXmlPath(srcPath));

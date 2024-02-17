@@ -9,3 +9,4 @@
 * Added -s "silent" parameter which attempts to suppress Witchy output. Useful when running Witchy in an environment that does not support its console output.
 * Witchy will now throw an error when a deferred tool tries to ask for user input.
 * Fixed an issue where the update checker would accidentally save arguments as configuration.
+* Fix an issue with TAE and PARAM warnings when using Parallel processing.

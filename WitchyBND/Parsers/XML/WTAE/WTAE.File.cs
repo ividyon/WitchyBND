@@ -17,7 +17,7 @@ public partial class WTAEFile : WXMLParser
     private static readonly Dictionary<WBUtil.GameType, TAE.Template> templateDict = new();
     public override bool Preprocess(string srcPath)
     {
-        if (!(Exists(srcPath) && Is(srcPath, null, out ISoulsFile? _)) && !(ExistsUnpacked(srcPath) && IsUnpacked(srcPath))) return false;
+        if (!(ExistsUnpacked(srcPath) && IsUnpacked(srcPath)) && !(Exists(srcPath) && Is(srcPath, null, out ISoulsFile? _))) return false;
         gameService.DetermineGameType(srcPath, false);
         if (templateDict.Any()) return false;
         foreach (var type in Enum.GetValues<WBUtil.GameType>().Except(new [] { WBUtil.GameType.AC6 }))
@@ -26,7 +26,7 @@ public partial class WTAEFile : WXMLParser
             if (File.Exists(path))
                 templateDict[type] = TAE.Template.ReadXMLFile(path);
         }
-        return true;
+        return false; // Preprocess them all to perform WarnAboutTAEs
     }
 
     private static WBUtil.GameType FormatToGame(TAE.TAEFormat format)
