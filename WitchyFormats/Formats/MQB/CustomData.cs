@@ -12,27 +12,96 @@ namespace WitchyFormats
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
         public class CustomData
         {
+            /// <summary>
+            /// The different supported data types.
+            /// </summary>
             public enum DataType : uint
             {
+                /// <summary>
+                /// A true or false boolean.
+                /// </summary>
                 Bool = 1,
+
+                /// <summary>
+                /// An signed 8-bit integer.
+                /// </summary>
                 SByte = 2,
+
+                /// <summary>
+                /// An unsigned 8-bit integer.
+                /// </summary>
                 Byte = 3,
+
+                /// <summary>
+                /// A signed 16-bit integer.
+                /// </summary>
                 Short = 4,
+
+                // I would assume at this point?
+                /// <summary>
+                /// An unsigned 16-bit integer.
+                /// </summary>
+                // UShort = 5,
+
+                /// <summary>
+                /// A signed 32-bit integer.
+                /// </summary>
                 Int = 6,
+
+                /// <summary>
+                /// An unsigned 32-bit integer.
+                /// </summary>
                 UInt = 7,
+
+                /// <summary>
+                /// A 32-bit floating point number.
+                /// </summary>
                 Float = 8,
+
+                /// <summary>
+                /// A string.
+                /// </summary>
                 String = 10,
+
+                /// <summary>
+                /// A custom data type.
+                /// </summary>
                 Custom = 11,
+
+                /// <summary>
+                /// A color.
+                /// </summary>
                 Color = 13,
-                Vector3 = 18
+
+                /// <summary>
+                /// A vector.
+                /// </summary>
+                Vector = 18
             }
 
+            /// <summary>
+            /// The name of this <see cref="CustomData"/> entry.
+            /// </summary>
             public string Name { get; set; }
 
+            /// <summary>
+            /// The type of the data contained within this <see cref="CustomData"/>.
+            /// </summary>
             public DataType Type { get; set; }
 
-            public int Unk44 { get; set; }
+            /// <summary>
+            /// The total number of members in a data type.
+            /// <para/>
+            /// Example:<br/>
+            /// 2 for Vector2<br/>
+            /// 3 for Vector3<br/>
+            /// 4 for Vector4
+            /// </summary>
+            public int MemberCount { get; set; }
 
+            /// <summary>
+            /// The value of the data.
+            /// </summary>
             public object Value { get; set; }
 
             public List<Sequence> Sequences { get; set; }
@@ -49,11 +118,12 @@ namespace WitchyFormats
             {
                 Name = br.ReadFixStrW(0x40);
                 Type = br.ReadEnum32<DataType>();
-                br.AssertInt32(Type == DataType.Color || Type == DataType.Vector3 ? 3 : 0);
+                MemberCount = br.ReadInt32();
 
                 long valueOffset = br.Position;
                 switch (Type)
                 {
+                    // Actual value
                     case DataType.Bool: Value = br.ReadBoolean(); break;
                     case DataType.SByte: Value = br.ReadSByte(); break;
                     case DataType.Byte: Value = br.ReadByte(); break;
@@ -61,10 +131,12 @@ namespace WitchyFormats
                     case DataType.Int: Value = br.ReadInt32(); break;
                     case DataType.UInt: Value = br.ReadUInt32(); break;
                     case DataType.Float: Value = br.ReadSingle(); break;
+
+                    // Length of value fields plus padding
                     case DataType.String:
                     case DataType.Custom:
-                    case DataType.Color: Value = br.ReadInt32(); break;
-                    case DataType.Vector3: Value = br.ReadInt32(); break;
+                    case DataType.Color:
+                    case DataType.Vector: Value = br.ReadInt32(); break;
                     default: throw new NotImplementedException($"Unimplemented custom data type: {Type}");
                 }
 
@@ -84,34 +156,52 @@ namespace WitchyFormats
                 br.AssertInt32(0);
                 br.AssertInt32(0);
 
-                if (Type == DataType.String || Type == DataType.Color || Type == DataType.Custom || Type == DataType.Vector3)
+                if (Type == DataType.String || Type == DataType.Color || Type == DataType.Custom || Type == DataType.Vector)
                 {
                     int length = (int)Value;
                     if (Type == DataType.String)
                     {
                         if (length == 0 || length % 0x10 != 0)
-                            throw new InvalidDataException($"Unexpected custom data string length: {length}");
+                            throw new InvalidDataException($"Unexpected custom {nameof(DataType.String)} {nameof(length)}: {length}");
                         Value = br.ReadFixStrW(length);
                     }
                     else if (Type == DataType.Custom)
                     {
                         if (length % 4 != 0)
-                            throw new InvalidDataException($"Unexpected custom data custom length: {length}");
+                            throw new InvalidDataException($"Unexpected custom {nameof(DataType.Custom)} {nameof(length)}: {length}");
                         Value = br.ReadBytes(length);
                     }
                     else if (Type == DataType.Color)
                     {
+                        if (MemberCount != 3)
+                            throw new NotImplementedException($"{nameof(MemberCount)} {MemberCount} not implemented for: {nameof(DataType.Color)}");
                         if (length != 4)
-                            throw new InvalidDataException($"Unexpected custom data color length: {length}");
+                            throw new InvalidDataException($"Unexpected custom {nameof(DataType.Color)} {nameof(length)}: {length}");
+
                         valueOffset = br.Position;
                         Value = Color.FromArgb(br.ReadByte(), br.ReadByte(), br.ReadByte());
                         br.AssertByte(0);
                     }
-                    else if (Type == DataType.Vector3)
+                    else if (Type == DataType.Vector)
                     {
-                        if (length != 16)
-                            throw new InvalidDataException($"Unexpected custom data vector3 length: {length}");
-                        Value = br.ReadVector3();
+                        if (length != (MemberCount * 4) + 4)
+                            throw new InvalidDataException($"Unexpected custom {nameof(DataType.Vector)} {nameof(length)}: {length}");
+
+                        switch (MemberCount)
+                        {
+                            case 2:
+                                Value = br.ReadVector2();
+                                break;
+                            case 3:
+                                Value = br.ReadVector3();
+                                break;
+                            case 4:
+                                Value = br.ReadVector4();
+                                break;
+                            default:
+                                throw new NotImplementedException($"{nameof(MemberCount)} {MemberCount} not implemented for: {nameof(DataType.Vector)}");
+                        }
+                        
                         br.AssertInt32(0);
                     }
                 }
@@ -132,7 +222,7 @@ namespace WitchyFormats
             {
                 bw.WriteFixStrW(Name, 0x40, 0x00);
                 bw.WriteUInt32((uint)Type);
-                bw.WriteInt32(Type == DataType.Color || Type == DataType.Vector3 ? 3 : 0);
+                bw.WriteInt32(MemberCount);
 
                 int length = -1;
                 if (Type == DataType.String)
@@ -149,11 +239,11 @@ namespace WitchyFormats
                 }
                 else if (Type == DataType.Color)
                 {
-                    length = 4;
+                    length = MemberCount + 1;
                 }
-                else if (Type == DataType.Vector3)
+                else if (Type == DataType.Vector)
                 {
-                    length = 16;
+                    length = (MemberCount * 4) + 4;
                 }
 
                 long valueOffset = bw.Position;
@@ -169,8 +259,8 @@ namespace WitchyFormats
                     case DataType.String:
                     case DataType.Custom:
                     case DataType.Color:
-                    case DataType.Vector3:bw.WriteInt32(length); break;
-                    default: throw new NotImplementedException($"Unimplemented custom data type: {Type}");
+                    case DataType.Vector:bw.WriteInt32(length); break;
+                    default: throw new NotImplementedException($"Unimplemented custom {nameof(DataType)}: {Type}");
                 }
 
                 if (Type == DataType.Bool || Type == DataType.SByte || Type == DataType.Byte)
@@ -200,6 +290,9 @@ namespace WitchyFormats
                 }
                 else if (Type == DataType.Color)
                 {
+                    if (MemberCount != 3)
+                        throw new NotSupportedException($"{nameof(MemberCount)} {MemberCount} not expected or implemented for: {nameof(DataType.Color)}");
+
                     var color = (Color)Value;
                     valueOffset = bw.Position;
                     bw.WriteByte(color.R);
@@ -207,11 +300,30 @@ namespace WitchyFormats
                     bw.WriteByte(color.B);
                     bw.WriteByte(0);
                 }
-                else if (Type == DataType.Vector3)
+                else if (Type == DataType.Vector)
                 {
-                    var vector = (Vector3)Value;
-                    valueOffset = bw.Position;
-                    bw.WriteVector3(vector);
+                    switch (MemberCount)
+                    {
+                        case 2:
+                            var vector2 = (Vector2)Value;
+                            valueOffset = bw.Position;
+                            bw.WriteVector2(vector2);
+                            break;
+                        case 3:
+                            var vector3 = (Vector3)Value;
+                            valueOffset = bw.Position;
+                            bw.WriteVector3(vector3);
+                            break;
+                        case 4:
+                            var vector4 = (Vector4)Value;
+                            valueOffset = bw.Position;
+                            bw.WriteVector4(vector4);
+                            break;
+                        default:
+                            throw new NotImplementedException($"{nameof(MemberCount)} {MemberCount} not implemented for: {nameof(DataType.Vector)}");
+                    }
+                    
+                    // Vector padding
                     bw.WriteInt32(0);
                 }
 
