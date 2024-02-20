@@ -9,6 +9,7 @@ using System.Runtime.Versioning;
 using System.Threading;
 using CommandLine;
 using CommandLine.Text;
+using SoulsFormats;
 using WitchyBND.CliModes;
 using WitchyBND.Services;
 using WitchyLib;
@@ -96,6 +97,9 @@ internal static class Program
                             Configuration.Args.Silent = opt.Silent;
                             Configuration.Args.Passive = opt.Silent;
                         }
+
+                        if (Configuration.Flexible)
+                            BinaryReaderEx.IsFlexible = true;
                     }
 
                     output.DoubleDash($"{assembly.GetName().Name} {assembly.GetName().Version}");

@@ -13,7 +13,7 @@ The game archives need to be unpacked with [UXM Selective Unpacker](https://gith
 WitchyBND should run out-of-the-box on Windows versions newer than Windows 8.
 
 * For older versions, WitchyBND's context menu integration may require [.NET Framework 4.6](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net46).
-* In case of unexpected issues, or if using Wine on Linux, [.NET Desktop Runtime 7.0](https://aka.ms/dotnet/7.0/windowsdesktop-runtime-win-x64.exe) may be necessary.
+* In case of unexpected issues, or if using Wine on Linux, [.NET Desktop Runtime 8.0](https://aka.ms/dotnet/8.0/windowsdesktop-runtime-win-x64.exe) may be necessary.
 
 # Updating WitchyBND
 
@@ -62,7 +62,7 @@ For all intents and purposes, Witchy should be treated as a new version of Yabbe
 * *Meowmaritus, NamelessHoodie* - initial FXR serialization
 * *Avocado* - YabberAvocado additions
 * *NatsuDragneelTheFireDragon* - MQB support
-* *Vawser* - preliminary Armored Core VI paramdefs
+* *Vawser* - preliminary Armored Core VI paramdefs, Smithbox additions
 * *CCCode* - FXR research
 * *ivi* - WitchyBND maintainer
 

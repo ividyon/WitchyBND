@@ -41,6 +41,8 @@ public static class Configuration
 
         public bool TaeFolder { get; set; }
         public Dictionary<DeferFormat, DeferFormatConfiguration> DeferTools { get; set; } = new();
+
+        public bool Flexible { get; set; }
     }
 
     public class WitchyArgValues
@@ -93,6 +95,12 @@ public static class Configuration
     {
         get => _values.Recursive;
         set => _values.Recursive = value;
+    }
+
+    public static bool Flexible
+    {
+        get => _values.Flexible;
+        set => _values.Flexible = value;
     }
 
     public static ushort EndDelay

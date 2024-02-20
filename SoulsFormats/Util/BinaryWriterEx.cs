@@ -369,7 +369,7 @@ namespace SoulsFormats
         /// <summary>
         /// Writes an array of four-byte signed integers.
         /// </summary>
-        public void WriteInt32s(IEnumerable<int> values)
+        public void WriteInt32s(IList<int> values)
         {
             foreach (int value in values)
                 WriteInt32(value);

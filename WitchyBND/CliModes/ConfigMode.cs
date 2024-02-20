@@ -54,6 +54,9 @@ public static class ConfigMode
                 "Enable to unpack TAEs as a folder of XMLs, one for each animation. Disabling will unpack the TAE into a single file.")]
         ToggleTaeFolder,
 
+        [Display(Name = "Flexible decompression", Description = "Foregoes some stricter format checks to detect tampering with the compressed data, aka. \"\"\"encryption technology\"\"\" DRM.")]
+        ToggleFlexible,
+
         [Display(Name = "PARAM field default threshold",
             Description =
                 @"If the same field value is present in more than (this amount) of rows, it will be marked as ""default value"" for that field. Enter 0 to disable. Higher thresholds increase XML output size.")]
@@ -127,6 +130,9 @@ Press any key to continue to the configuration screen...");
                         case ConfigMenuItem.ToggleTaeFolder:
                             toggled = Configuration.TaeFolder;
                             break;
+                        case ConfigMenuItem.ToggleFlexible:
+                            toggled = Configuration.Flexible;
+                            break;
                         case ConfigMenuItem.ParamDefaultThreshold:
                             var val = Configuration.ParamDefaultValueThreshold > 0f
                                 ? Configuration.ParamDefaultValueThreshold.ToString()
@@ -185,6 +191,10 @@ Press any key to continue to the configuration screen...");
                     break;
                 case ConfigMenuItem.ToggleTaeFolder:
                     Configuration.TaeFolder = !Configuration.TaeFolder;
+                    UpdateConfig();
+                    break;
+                case ConfigMenuItem.ToggleFlexible:
+                    Configuration.Flexible = !Configuration.Flexible;
                     UpdateConfig();
                     break;
                 case ConfigMenuItem.ParamDefaultThreshold:

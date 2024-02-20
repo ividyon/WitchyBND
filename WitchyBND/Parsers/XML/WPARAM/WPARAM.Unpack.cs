@@ -186,11 +186,9 @@ The error was:
                     throw new Exception($"Row {id} is missing cell {fieldName}.");
                 }
 
-                if (!fieldCounts.ContainsKey(fieldName))
-                    fieldCounts[fieldName] = new ConcurrentDictionary<string, int>();
-
                 var value = CellValueToString(cell.Value);
 
+                fieldCounts.TryAdd(fieldName, new ConcurrentDictionary<string, int>());
                 fieldCounts[fieldName].TryAdd(value, 0);
                 fieldCounts[fieldName].TryGetValue(value, out int count);
                 fieldCounts[fieldName][value] = count + 1;
