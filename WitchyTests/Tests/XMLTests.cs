@@ -38,7 +38,7 @@ public class XMLTests : TestBase
             parser.Repack(destPath);
 
             var xml = WFileParser.LoadXml(destPath);
-            Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml)));
+            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
         }
     }
 
@@ -66,7 +66,7 @@ public class XMLTests : TestBase
             parser.Repack(destPath);
 
             var xml = WFileParser.LoadXml(destPath);
-            Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml)));
+            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
         }
     }
 
@@ -94,7 +94,7 @@ public class XMLTests : TestBase
             parser.Repack(destPath);
 
             var xml = WFileParser.LoadXml(destPath);
-            Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml)));
+            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
         }
     }
 
@@ -122,7 +122,7 @@ public class XMLTests : TestBase
             parser.Repack(destPath);
 
             var xml = WFileParser.LoadXml(destPath);
-            Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml)));
+            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
         }
     }
 
@@ -150,7 +150,7 @@ public class XMLTests : TestBase
             parser.Repack(destPath);
 
             var xml = WFileParser.LoadXml(destPath);
-            Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml)));
+            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
         }
     }
 
@@ -178,7 +178,7 @@ public class XMLTests : TestBase
             parser.Repack(destPath);
 
             var xml = WFileParser.LoadXml(destPath);
-            Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml)));
+            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
         }
     }
 
@@ -206,7 +206,7 @@ public class XMLTests : TestBase
             parser.Repack(destPath);
 
             var xml = WFileParser.LoadXml(destPath);
-            Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml)));
+            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
         }
     }
 
@@ -234,7 +234,7 @@ public class XMLTests : TestBase
             parser.Repack(destPath);
 
             var xml = WFileParser.LoadXml(destPath);
-            Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml)));
+            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
         }
     }
 
@@ -269,7 +269,7 @@ public class XMLTests : TestBase
             parser.Repack(destPath);
 
             var xml = WFileParser.LoadXml(destPath);
-            Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml)));
+            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
         }
     }
 

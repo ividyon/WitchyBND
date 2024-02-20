@@ -35,7 +35,7 @@ public class SpecialBinderTests : TestBase
             parser.Repack(destPath);
             var xml = WFileParser.LoadXml(parser.GetFolderXmlPath(destPath));
 
-            Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml)));
+            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
         }
 
         IEnumerable<string> wrongPaths = GetSamples("FFXBND");
@@ -80,7 +80,7 @@ public class SpecialBinderTests : TestBase
             parser.Repack(destPath);
             var xml = WFileParser.LoadXml(parser.GetFolderXmlPath(destPath));
 
-            Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml)));
+            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
         }
     }
 
@@ -119,7 +119,7 @@ public class SpecialBinderTests : TestBase
             parser.Repack(destPath);
             var xml = WFileParser.LoadXml(parser.GetFolderXmlPath(destPath));
 
-            Assert.IsTrue(File.Exists(parser.GetRepackDestPath(destPath, xml)));
+            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
         }
     }
 
