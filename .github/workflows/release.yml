@@ -16,7 +16,7 @@ permissions:
   contents: write
 
 env:
-  DOTNET_VERSION: '7.0.x'
+  DOTNET_VERSION: '8.0.x'
   NEXUSMOD_API_KEY: ${{ secrets.NEXUSMODS_API_KEY }}
   NEXUSMOD_COOKIE_SID_DEVELOP: ${{ secrets.NEXUSMODS_SESSION_COOKIE }}
   NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
