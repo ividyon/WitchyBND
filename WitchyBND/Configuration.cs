@@ -203,11 +203,6 @@ public class CliOptions
         HelpText = "Specifies a path to unpack binders to. Enter \"prompt\" to open a folder dialog instead.")]
     public string Location { get; set; }
 
-    [Option('a', "param-default-values",
-        HelpText =
-            "Whether serialized PARAM will separately store default values for param rows. Provide \"true\" or \"false\".")]
-    public bool? ParamDefaultValues { get; set; }
-
     [Option('d', "dcx", HelpText = "Simply decompress DCX files instead of unpacking their content.")]
     public bool Dcx { get; set; }
 

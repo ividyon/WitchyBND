@@ -76,8 +76,6 @@ internal static class Program
                             Configuration.Dcx = opt.Dcx;
                         if (opt.Bnd)
                             Configuration.Bnd = opt.Bnd;
-                        if (opt.ParamDefaultValues != null)
-                            Configuration.ParamDefaultValues = opt.ParamDefaultValues.Value;
                         if (opt.Recursive)
                             Configuration.Recursive = opt.Recursive;
                         if (opt.Parallel)
