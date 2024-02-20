@@ -29,7 +29,7 @@ public static class Configuration
     {
         public bool Bnd { get; set; }
         public bool Dcx { get; set; }
-        public bool ParamDefaultValues { get; set; }
+        public float ParamDefaultValueThreshold { get; set; }
 
         public WPARAM.CellStyle ParamCellStyle { get; set; }
         public bool Recursive { get; set; }
@@ -69,11 +69,13 @@ public static class Configuration
         set => _values.Dcx = value;
     }
 
-    public static bool ParamDefaultValues
+    public static float ParamDefaultValueThreshold
     {
-        get => _values.ParamDefaultValues;
-        set => _values.ParamDefaultValues = value;
+        get => _values.ParamDefaultValueThreshold;
+        set => _values.ParamDefaultValueThreshold = value;
     }
+
+    public static bool ParamDefaultValues => _values.ParamDefaultValueThreshold > 0f;
 
     public static WPARAM.CellStyle ParamCellStyle
     {

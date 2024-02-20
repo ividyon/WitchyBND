@@ -40,11 +40,6 @@ public static class ConfigMode
             Description = "Enable to perform WitchyBND operations in a parallelized, multi-threaded manner.")]
         ToggleParallel,
 
-        [Display(Name = "Store PARAM field default values",
-            Description = @"Enable to separate the default values of PARAM row fields out from the rows.
-Disabling vastly increases XML output size.")]
-        ToggleParamDefaultValues,
-
         [Display(Name = "Pause on error",
             Description =
                 "Enable to pause the program and require a key press (unless in Passive mode) if it finishes with errors.")]
@@ -58,6 +53,11 @@ Disabling vastly increases XML output size.")]
             Description =
                 "Enable to unpack TAEs as a folder of XMLs, one for each animation. Disabling will unpack the TAE into a single file.")]
         ToggleTaeFolder,
+
+        [Display(Name = "PARAM field default threshold",
+            Description =
+                @"If the same field value is present in more than (this amount) of rows, it will be marked as ""default value"" for that field. Enter 0 to disable. Higher thresholds increase XML output size.")]
+        ParamDefaultThreshold,
 
         [Display(Name = "Set PARAM field style")]
         ParamCellStyle,
@@ -118,9 +118,6 @@ Press any key to continue to the configuration screen...");
                         case ConfigMenuItem.ToggleParallel:
                             toggled = Configuration.Parallel;
                             break;
-                        case ConfigMenuItem.ToggleParamDefaultValues:
-                            toggled = Configuration.ParamDefaultValues;
-                            break;
                         case ConfigMenuItem.TogglePauseOnError:
                             toggled = Configuration.PauseOnError;
                             break;
@@ -130,6 +127,11 @@ Press any key to continue to the configuration screen...");
                         case ConfigMenuItem.ToggleTaeFolder:
                             toggled = Configuration.TaeFolder;
                             break;
+                        case ConfigMenuItem.ParamDefaultThreshold:
+                            var val = Configuration.ParamDefaultValueThreshold > 0f
+                                ? Configuration.ParamDefaultValueThreshold.ToString()
+                                : "Disabled";
+                            return $"{name} ({val})";
                         case ConfigMenuItem.ParamCellStyle:
                             return $"{name} ({Configuration.ParamCellStyle.ToString()})";
                         case ConfigMenuItem.ConfigureDelay:
@@ -173,10 +175,6 @@ Press any key to continue to the configuration screen...");
                     Configuration.Parallel = !Configuration.Parallel;
                     UpdateConfig();
                     break;
-                case ConfigMenuItem.ToggleParamDefaultValues:
-                    Configuration.ParamDefaultValues = !Configuration.ParamDefaultValues;
-                    UpdateConfig();
-                    break;
                 case ConfigMenuItem.TogglePauseOnError:
                     Configuration.PauseOnError = !Configuration.PauseOnError;
                     UpdateConfig();
@@ -189,8 +187,36 @@ Press any key to continue to the configuration screen...");
                     Configuration.TaeFolder = !Configuration.TaeFolder;
                     UpdateConfig();
                     break;
+                case ConfigMenuItem.ParamDefaultThreshold:
+                    while (true)
+                    {
+                        var thresholdSelect = output.Input("Input new threshold (between 0.0 and 1.0")
+                            .AddValidators(PromptValidators.IsTypeFloat())
+                            .Run();
+                        if (thresholdSelect.IsAborted) break;
+                        var threshold = float.Parse(thresholdSelect.Value);
+                        if (threshold < 0f)
+                        {
+                            output.WriteError("Number cannot be less than 0.");
+                            output.KeyPress().Run();
+                            continue;
+                        }
+
+                        if (threshold > 1f)
+                        {
+                            output.WriteError("Number cannot be more than 1.");
+                            output.KeyPress().Run();
+                            continue;
+                        }
+
+                        Configuration.ParamDefaultValueThreshold = threshold;
+                        UpdateConfig();
+                        break;
+                    }
+
+                    break;
                 case ConfigMenuItem.ParamCellStyle:
-                    var cellSelect = output.Select<WPARAM.CellStyle>("Select PARAM field style:").Run();
+                    var cellSelect = output.Select<WPARAM.CellStyle>("Select PARAM field style").Run();
                     if (!cellSelect.IsAborted)
                     {
                         Configuration.ParamCellStyle = cellSelect.Value;
@@ -199,7 +225,6 @@ Press any key to continue to the configuration screen...");
                     break;
                 case ConfigMenuItem.DeferredFormats:
                     DeferredFormatMode.Run(opt);
-                    output.Clear();
                     break;
                 case ConfigMenuItem.ConfigureDelay:
                     var input = output.Input("Input new delay (in milliseconds)")
@@ -212,7 +237,6 @@ Press any key to continue to the configuration screen...");
                         Configuration.EndDelay = Convert.ToUInt16(input.Value);
                         UpdateConfig();
                     }
-
                     break;
                 case ConfigMenuItem.Windows:
                     IntegrationMode.CliShellIntegrationMode(opt);
