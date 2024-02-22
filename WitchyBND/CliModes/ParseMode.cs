@@ -128,7 +128,7 @@ public static class ParseMode
                 if (!innerParsed && isDcx && !Configuration.Args.RepackOnly)
                 {
                     WDCX dcxParser = Parsers.OfType<WDCX>().First();
-                    parsed = errorService.Catch(() => {
+                    innerParsed = errorService.Catch(() => {
                         Unpack(path, null, compression, dcxParser, false);
                         return true;
                     }, out error, path);
