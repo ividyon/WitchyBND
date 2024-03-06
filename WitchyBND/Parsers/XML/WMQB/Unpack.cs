@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Numerics;
 using System.Xml;
 using SoulsFormats;
@@ -67,8 +68,21 @@ public partial class WMQB
 
             switch (customdata.Type)
             {
-                case MQB.CustomData.DataType.Vector3:
-                    xw.WriteElementString("Value", ((Vector3)customdata.Value).Vector3ToString());
+                case MQB.CustomData.DataType.Vector:
+                    switch (customdata.MemberCount)
+                    {
+                        case 2:
+                            xw.WriteElementString("Value", ((Vector2)customdata.Value).Vector2ToString());
+                            break;
+                        case 3:
+                            xw.WriteElementString("Value", ((Vector3)customdata.Value).Vector3ToString());
+                            break;
+                        case 4:
+                            xw.WriteElementString("Value", ((Vector4)customdata.Value).Vector4ToString());
+                            break;
+                        default:
+                            throw new NotImplementedException($"{nameof(MQB.CustomData.MemberCount)} {customdata.MemberCount} not implemented for: {nameof(MQB.CustomData.DataType.Vector)}");
+                    }
                     break;
                 case MQB.CustomData.DataType.Custom:
                     xw.WriteElementString("Value", ((byte[])customdata.Value).ToHexString());
@@ -78,9 +92,9 @@ public partial class WMQB
                     break;
             }
 
-            xw.WriteElementString("Unk44", $"{customdata.Unk44}");
+            xw.WriteElementString("MemberCount", $"{customdata.MemberCount}");
             xw.WriteStartElement("Sequences");
-            foreach (var sequence in customdata.Sequences)
+            foreach (MQB.CustomData.Sequence sequence in customdata.Sequences)
                 UnpackSequence(xw, sequence);
             xw.WriteEndElement();
             xw.WriteEndElement();

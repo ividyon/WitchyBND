@@ -15,6 +15,7 @@ public partial class WMQB
 
     public override void Repack(string srcPath)
     {
+
         MQB mqb = new MQB();
         XmlDocument xml = new XmlDocument();
         xml.Load(srcPath);
@@ -82,9 +83,10 @@ public partial class WMQB
 
             string name = customdataNode.SelectSingleNode("Name").InnerText;
             var type = FriendlyParseEnum<MQB.CustomData.DataType>(nameof(MQB.CustomData), nameof(MQB.CustomData.Type), customdataNode.SelectSingleNode("Type").InnerText);
-            object value = ConvertValueToDataType(customdataNode.SelectSingleNode("Value").InnerText, type);
-            int unk44 = FriendlyParseInt32(nameof(MQB.CustomData), nameof(MQB.CustomData.Unk44), customdataNode.SelectSingleNode("Unk44").InnerText);
-            List<MQB.CustomData.Sequence> sequences = new List<MQB.CustomData.Sequence>();
+            
+            int memberCount = FriendlyParseInt32(nameof(MQB.CustomData), nameof(MQB.CustomData.MemberCount), customdataNode.SelectSingleNode("MemberCount").InnerText);
+            object value = ConvertValueToDataType(customdataNode.SelectSingleNode("Value").InnerText, type, memberCount);
+            var sequences = new List<MQB.CustomData.Sequence>();
 
             var seqsNode = customdataNode.SelectSingleNode("Sequences");
             foreach (XmlNode seqNode in seqsNode.SelectNodes("Sequence"))
@@ -93,7 +95,7 @@ public partial class WMQB
             customdata.Name = name;
             customdata.Type = type;
             customdata.Value = value;
-            customdata.Unk44 = unk44;
+            customdata.MemberCount = memberCount;
             customdata.Sequences = sequences;
             return customdata;
         }
@@ -253,7 +255,7 @@ public partial class WMQB
             return transform;
         }
 
-        public static object ConvertValueToDataType(string str, MQB.CustomData.DataType type)
+        public static object ConvertValueToDataType(string str, MQB.CustomData.DataType type, int memberCount)
         {
             try
             {
@@ -270,8 +272,15 @@ public partial class WMQB
                     case MQB.CustomData.DataType.String: return str;
                     case MQB.CustomData.DataType.Custom: return str.FriendlyHexToByteArray();
                     case MQB.CustomData.DataType.Color: return ConvertValueToColor(value);
-                    case MQB.CustomData.DataType.Vector3: return str.ToVector3();
-                    default: throw new NotImplementedException($"Unimplemented custom data type: {type}");
+                    case MQB.CustomData.DataType.Vector:
+                        switch (memberCount)
+                        {
+                            case 2: return str.ToVector2();
+                            case 3: return str.ToVector3();
+                            case 4: return str.ToVector4();
+                            default: throw new NotSupportedException($"{nameof(MQB.CustomData.MemberCount)} {memberCount} not supported for: {nameof(MQB.CustomData.DataType.Vector)}");
+                        }
+                    default: throw new NotImplementedException($"Unimplemented custom {nameof(MQB.CustomData.DataType)}: {type}");
                 }
             }
             catch
