@@ -69,9 +69,16 @@ namespace WitchyFormats
                 Custom = 11,
 
                 /// <summary>
-                /// A color.
+                /// A color with each member as an unsigned byte.<br/>
+                /// Only seen with 3 members so far.
                 /// </summary>
                 Color = 13,
+
+                /// <summary>
+                /// A color with each member as an int.<br/>
+                /// Only seen with 4 members so far.
+                /// </summary>
+                IntColor = 17,
 
                 /// <summary>
                 /// A vector.
@@ -136,6 +143,7 @@ namespace WitchyFormats
                     case DataType.String:
                     case DataType.Custom:
                     case DataType.Color:
+                    case DataType.IntColor:
                     case DataType.Vector: Value = br.ReadInt32(); break;
                     default: throw new NotImplementedException($"Unimplemented custom data type: {Type}");
                 }
@@ -156,7 +164,7 @@ namespace WitchyFormats
                 br.AssertInt32(0);
                 br.AssertInt32(0);
 
-                if (Type == DataType.String || Type == DataType.Color || Type == DataType.Custom || Type == DataType.Vector)
+                if (Type == DataType.String || Type == DataType.Custom || Type == DataType.Color || Type == DataType.IntColor || Type == DataType.Vector)
                 {
                     int length = (int)Value;
                     if (Type == DataType.String)
@@ -181,6 +189,21 @@ namespace WitchyFormats
                         valueOffset = br.Position;
                         Value = Color.FromArgb(br.ReadByte(), br.ReadByte(), br.ReadByte());
                         br.AssertByte(0);
+                    }
+                    else if (Type == DataType.IntColor)
+                    {
+                        if (MemberCount != 4)
+                            throw new NotImplementedException($"{nameof(MemberCount)} {MemberCount} not implemented for: {nameof(DataType.IntColor)}");
+                        if (length != 20)
+                            throw new InvalidDataException($"Unexpected custom {nameof(DataType.IntColor)} {nameof(length)}: {length}");
+
+                        valueOffset = br.Position;
+                        int r = br.ReadInt32();
+                        int g = br.ReadInt32();
+                        int b = br.ReadInt32();
+                        int a = br.ReadInt32();
+                        Value = Color.FromArgb(a, r, g, b);
+                        br.AssertInt32(0);
                     }
                     else if (Type == DataType.Vector)
                     {
@@ -241,6 +264,10 @@ namespace WitchyFormats
                 {
                     length = MemberCount + 1;
                 }
+                else if (Type == DataType.IntColor)
+                {
+                    length = (MemberCount * 4) + 4;
+                }
                 else if (Type == DataType.Vector)
                 {
                     length = (MemberCount * 4) + 4;
@@ -259,6 +286,7 @@ namespace WitchyFormats
                     case DataType.String:
                     case DataType.Custom:
                     case DataType.Color:
+                    case DataType.IntColor:
                     case DataType.Vector:bw.WriteInt32(length); break;
                     default: throw new NotImplementedException($"Unimplemented custom {nameof(DataType)}: {Type}");
                 }
@@ -299,6 +327,19 @@ namespace WitchyFormats
                     bw.WriteByte(color.G);
                     bw.WriteByte(color.B);
                     bw.WriteByte(0);
+                }
+                else if (Type == DataType.IntColor)
+                {
+                    if (MemberCount != 4)
+                        throw new NotSupportedException($"{nameof(MemberCount)} {MemberCount} not expected or implemented for: {nameof(DataType.IntColor)}");
+
+                    var color = (Color)Value;
+                    valueOffset = bw.Position;
+                    bw.WriteInt32(color.R);
+                    bw.WriteInt32(color.G);
+                    bw.WriteInt32(color.B);
+                    bw.WriteInt32(color.A);
+                    bw.WriteInt32(0);
                 }
                 else if (Type == DataType.Vector)
                 {

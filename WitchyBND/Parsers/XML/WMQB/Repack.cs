@@ -272,6 +272,7 @@ public partial class WMQB
                     case MQB.CustomData.DataType.String: return str;
                     case MQB.CustomData.DataType.Custom: return str.FriendlyHexToByteArray();
                     case MQB.CustomData.DataType.Color: return ConvertValueToColor(value);
+                    case MQB.CustomData.DataType.IntColor: return ConvertValueToColor(value);
                     case MQB.CustomData.DataType.Vector:
                         switch (memberCount)
                         {
