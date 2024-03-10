@@ -69,7 +69,6 @@ namespace SoulsFormats
                         return i < br.Length - 2 && br.GetASCII(i + 1, 2) == "\r\n";
                     }
                 }
-
                 return false;
             }
 
@@ -106,8 +105,7 @@ namespace SoulsFormats
                     ext = ".esd";
                 else if (magic == "EVD\0")
                     ext = ".evd";
-                else if (br.Length >= 3 && br.GetASCII(0, 3) == "FEV" ||
-                         br.Length >= 0x10 && br.GetASCII(8, 8) == "FEV FMT ")
+                else if (br.Length >= 3 && br.GetASCII(0, 3) == "FEV" || br.Length >= 0x10 && br.GetASCII(8, 8) == "FEV FMT ")
                     ext = ".fev";
                 else if (br.Length >= 6 && br.GetASCII(0, 6) == "FLVER\0")
                     ext = ".flver";
@@ -142,8 +140,7 @@ namespace SoulsFormats
                 else if (br.Length >= 5 && br.GetASCII(0, 5) == "<?xml")
                     ext = ".xml";
                 // This is pretty sketchy
-                else if (br.Length >= 0xC && br.GetByte(0) == 0 && br.GetByte(3) == 0 && br.GetInt32(4) == br.Length &&
-                         br.GetInt16(0xA) == 0)
+                else if (br.Length >= 0xC && br.GetByte(0) == 0 && br.GetByte(3) == 0 && br.GetInt32(4) == br.Length && br.GetInt16(0xA) == 0)
                     ext = ".fmg";
             }
 
@@ -323,7 +320,6 @@ namespace SoulsFormats
                 {
                     deflateStream.CopyTo(decompressedStream);
                 }
-
                 return decompressedStream.ToArray();
             }
         }

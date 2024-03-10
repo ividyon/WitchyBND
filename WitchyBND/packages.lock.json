@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net7.0-windows7.0": {
+    "net8.0-windows7.0": {
       "CommandLineParser": {
         "type": "Direct",
         "requested": "[2.9.1, )",
@@ -58,17 +58,11 @@
           "Microsoft.Extensions.Logging.Abstractions": "8.0.0"
         }
       },
-      "Microsoft.NET.ILLink.Analyzers": {
-        "type": "Direct",
-        "requested": "[7.0.100-1.23211.1, )",
-        "resolved": "7.0.100-1.23211.1",
-        "contentHash": "0GvbEgDGcUQA9KuWcQU1WwYHXt1tBzNr1Nls/M57rM7NA/AndFwCaCEoJpJkmxRY7xLlPDBnmGp8h5+FNqUngg=="
-      },
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
-        "requested": "[7.0.100-1.23211.1, )",
-        "resolved": "7.0.100-1.23211.1",
-        "contentHash": "tvG8XZYLjT0o3WicCyKBZysVWo1jC9HdCFmNRmddx3WbAz0UCsd0qKZqpiEo99VLA8Re+FzWK51OcRldQPbt2Q=="
+        "requested": "[8.0.2, )",
+        "resolved": "8.0.2",
+        "contentHash": "hKTrehpfVzOhAz0mreaTAZgbz0DrMEbWq4n3hAo8Ks6WdxdqQhNPvzOqn9VygKuWf1bmxPdraqzTaXriO/sn0A=="
       },
       "NativeFileDialogSharp": {
         "type": "Direct",
@@ -302,7 +296,7 @@
         "dependencies": {
           "BouncyCastle.Cryptography": "[2.2.0, )",
           "NativeFileDialogSharp": "[0.6.0-alpha, )",
-          "SoulsFormats": "[2.5.0, )"
+          "SoulsFormats": "[2.6.1.1, )"
         }
       },
       "studioutils": {
@@ -311,8 +305,8 @@
       "witchyformats": {
         "type": "Project",
         "dependencies": {
-          "SoulsFormats": "[2.5.0, )",
-          "StudioUtils": "[2.5.0, )"
+          "SoulsFormats": "[2.6.1.1, )",
+          "StudioUtils": "[2.6.1.1, )"
         }
       },
       "witchylib": {
@@ -322,12 +316,12 @@
           "Microsoft.Extensions.FileSystemGlobbing": "[8.0.0-preview.2.23128.3, )",
           "Newtonsoft.Json": "[13.0.3, )",
           "PromptPlus": "[4.2.0, )",
-          "SoulsFormats": "[2.5.0, )",
-          "WitchyFormats": "[2.5.0, )"
+          "SoulsFormats": "[2.6.1.1, )",
+          "WitchyFormats": "[2.6.1.1, )"
         }
       }
     },
-    "net7.0-windows7.0/win-x64": {
+    "net8.0-windows7.0/win-x64": {
       "NativeFileDialogSharp": {
         "type": "Direct",
         "requested": "[0.6.0-alpha, )",

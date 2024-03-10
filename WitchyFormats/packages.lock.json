@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net7.0-windows7.0": {
+    "net8.0-windows7.0": {
       "BouncyCastle.Cryptography": {
         "type": "Transitive",
         "resolved": "2.2.0",

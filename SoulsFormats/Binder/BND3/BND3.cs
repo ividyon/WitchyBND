@@ -118,7 +118,7 @@ namespace SoulsFormats
             bw.WriteASCII("BND3");
             bw.WriteFixStr(bnd.Version, 8);
 
-            Binder.WriteFormat(bw, bnd.BigEndian, bnd.Format);
+            Binder.WriteFormat(bw, bnd.BitBigEndian, bnd.Format);
             bw.WriteBoolean(bnd.BigEndian);
             bw.WriteBoolean(bnd.BitBigEndian);
             bw.WriteByte(0);

@@ -260,11 +260,11 @@ public class RSFXR : SoulsFile<RSFXR>
             return;
 
         bw.FillInt32("ReferenceOffset", (int)bw.Position);
-        bw.WriteInt32s(ReferenceList);
+        bw.WriteInt32s(ReferenceList.ToList());
         bw.Pad(16);
 
         bw.FillInt32("ExternalValueOffset", (int)bw.Position);
-        bw.WriteInt32s(ExternalValueList);
+        bw.WriteInt32s(ExternalValueList.ToList());
         bw.Pad(16);
 
         bw.FillInt32("UnkBloodEnablerOffset", (int)bw.Position);

@@ -13,6 +13,7 @@ namespace SoulsFormats
     /// </summary>
     public class BinaryReaderEx
     {
+        public static bool IsFlexible { get; set; }
         private BinaryReader br;
         private Stack<long> steps;
 
@@ -103,6 +104,8 @@ namespace SoulsFormats
         /// </summary>
         private T AssertValue<T>(T value, string typeName, string valueFormat, T[] options) where T : IEquatable<T>
         {
+            if (IsFlexible) return value;
+
             foreach (T option in options)
                 if (value.Equals(option))
                     return value;

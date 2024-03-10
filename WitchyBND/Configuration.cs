@@ -29,7 +29,7 @@ public static class Configuration
     {
         public bool Bnd { get; set; }
         public bool Dcx { get; set; }
-        public bool ParamDefaultValues { get; set; }
+        public float ParamDefaultValueThreshold { get; set; }
 
         public WPARAM.CellStyle ParamCellStyle { get; set; }
         public bool Recursive { get; set; }
@@ -41,6 +41,8 @@ public static class Configuration
 
         public bool TaeFolder { get; set; }
         public Dictionary<DeferFormat, DeferFormatConfiguration> DeferTools { get; set; } = new();
+
+        public bool Flexible { get; set; }
     }
 
     public class WitchyArgValues
@@ -69,11 +71,13 @@ public static class Configuration
         set => _values.Dcx = value;
     }
 
-    public static bool ParamDefaultValues
+    public static float ParamDefaultValueThreshold
     {
-        get => _values.ParamDefaultValues;
-        set => _values.ParamDefaultValues = value;
+        get => _values.ParamDefaultValueThreshold;
+        set => _values.ParamDefaultValueThreshold = value;
     }
+
+    public static bool ParamDefaultValues => _values.ParamDefaultValueThreshold > 0f;
 
     public static WPARAM.CellStyle ParamCellStyle
     {
@@ -91,6 +95,12 @@ public static class Configuration
     {
         get => _values.Recursive;
         set => _values.Recursive = value;
+    }
+
+    public static bool Flexible
+    {
+        get => _values.Flexible;
+        set => _values.Flexible = value;
     }
 
     public static ushort EndDelay
@@ -200,11 +210,6 @@ public class CliOptions
     [Option('l', "location",
         HelpText = "Specifies a path to unpack binders to. Enter \"prompt\" to open a folder dialog instead.")]
     public string Location { get; set; }
-
-    [Option('a', "param-default-values",
-        HelpText =
-            "Whether serialized PARAM will separately store default values for param rows. Provide \"true\" or \"false\".")]
-    public bool? ParamDefaultValues { get; set; }
 
     [Option('d', "dcx", HelpText = "Simply decompress DCX files instead of unpacking their content.")]
     public bool Dcx { get; set; }

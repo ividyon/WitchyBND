@@ -49,9 +49,12 @@ public partial class WPARAM
             }
             else
             {
-                errorService.RegisterError(new WitchyError(@$"No tentative param type alternative found for ""{paramTypeToParamdef}"" -> ""{paramName}"" in {srcPath}.", srcPath));
+                errorService.RegisterError(new WitchyError(
+                    @$"No tentative param type alternative found for ""{paramTypeToParamdef}"" -> ""{paramName}"" in {srcPath}.",
+                    srcPath));
                 return;
             }
+
             if (string.IsNullOrWhiteSpace(newParamType))
             {
             }
@@ -80,14 +83,16 @@ public partial class WPARAM
             catch (Exception e)
             {
                 if (regVer == 0)
-                    errorService.RegisterError(new WitchyError(@$"Could not carefully apply paramdef {paramTypeToParamdef}.
+                    errorService.RegisterError(new WitchyError(
+                        @$"Could not carefully apply paramdef {paramTypeToParamdef}.
 The param may be out of date, or an incorrect regulation version may have been supplied.
 
 The error was:
 {e}",
                         srcPath));
                 else
-                    errorService.RegisterError(new WitchyError(@$"Could not carefully apply paramdef {paramTypeToParamdef}.
+                    errorService.RegisterError(new WitchyError(
+                        @$"Could not carefully apply paramdef {paramTypeToParamdef}.
 The param may be out of date for the regulation version.
 
 The error was:
@@ -141,7 +146,8 @@ The error was:
 
         // Prepare rows
         var rows = new List<WPARAMRow>();
-        var fieldNames = paramdef.Fields.FilterByGameVersion(gameInfo.Item2).Select(field => field.InternalName).ToList();
+        var fieldNames = paramdef.Fields.FilterByGameVersion(gameInfo.Item2).Select(field => field.InternalName)
+            .ToList();
 
         var fieldCounts = new ConcurrentDictionary<string, ConcurrentDictionary<string, int>>();
         var fieldMaxes = new ConcurrentDictionary<string, (string, int)>();
@@ -180,11 +186,9 @@ The error was:
                     throw new Exception($"Row {id} is missing cell {fieldName}.");
                 }
 
-                if (!fieldCounts.ContainsKey(fieldName))
-                    fieldCounts[fieldName] = new ConcurrentDictionary<string, int>();
-
                 var value = CellValueToString(cell.Value);
 
+                fieldCounts.TryAdd(fieldName, new ConcurrentDictionary<string, int>());
                 fieldCounts[fieldName].TryAdd(value, 0);
                 fieldCounts[fieldName].TryGetValue(value, out int count);
                 fieldCounts[fieldName][value] = count + 1;
@@ -218,10 +222,14 @@ The error was:
             rows.Add(row);
         }
 
-        int threshold = (int)(rows.Count * 0.6);
-        string GetMajorityValue(KeyValuePair<string, int> c) => c.Value > threshold ? c.Key : null;
-        var defaultValues =
-            fieldCounts.ToDictionary(e => e.Key, e => GetMajorityValue(e.Value.MaxBy(c => c.Value)));
+        int threshold = (int)(rows.Count * Configuration.ParamDefaultValueThreshold);
+
+        var defaultValues = fieldCounts.SelectMany(fc => {
+            KeyValuePair<string, int> max = fc.Value.MaxBy(c => c.Value);
+            if (max.Value >= threshold)
+                return new[] { new KeyValuePair<string, string>(fc.Key, max.Key) };
+            return Array.Empty<KeyValuePair<string, string>>();
+        }).ToDictionary(a => a.Key, b => b.Value);
 
         // Field info (def & default values)
         xw.WriteStartElement("fields");
@@ -243,8 +251,7 @@ The error was:
             xw.WriteAttributeString("unkc0", field.UnkC0);
 
             // Store common "default" values
-            if (Configuration.ParamDefaultValues && defaultValues.TryGetValue(fieldName, out string value) &&
-                value != null)
+            if (Configuration.ParamDefaultValues && defaultValues.TryGetValue(fieldName, out string? value))
             {
                 xw.WriteAttributeString("defaultValue", value);
             }
