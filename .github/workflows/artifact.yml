@@ -18,7 +18,7 @@ on:
     branches: [ "main" ]
 
 env:
-  DOTNET_VERSION: '8.0.201'
+  DOTNET_VERSION: '8.0.204'
   NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
 
 jobs:
