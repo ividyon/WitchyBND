@@ -71,6 +71,24 @@ Special thanks to Nordgaren, The12thAvenger, philiquaz, TKGP, thefifthmatt, Kirn
 # Changelog
 ## WitchyBND
 
+### 2.6.2.0
+
+* Fixed the "Reflection-based serialization has been disabled" error that has paralyzed parts of the program since switching to .NET 8.
+* Fixed an issue that caused the update check to run every single time, instead of max. once every 6 hours as intended.
+* Increased the update check threshold to max. once every 24 hours.
+* Added a description to the "PARAM Field Style" setting to explain what it does.
+* Added previously unknown "IntColor" CustomData type to MQB. (Thanks to WarpZephyr)
+
+### 2.6.1.1
+
+* Fixed an issue with BND3 repacking incorrectly.
+* Improved support for AC6 MQB files (thanks to WarpZephyr).
+
+### 2.6.1.0
+
+* Further work on "decrypting" some groundbreaking "encryption" "technology".
+* Fixed a small visual issue where a decompressed DCX would not be counted as a processed item.
+
 ### 2.6.0.0
 
 * Updated to .NET 8.

@@ -3,3 +3,5 @@
 * Increased the update check threshold to max. once every 24 hours.
 * Added a description to the "PARAM Field Style" setting to explain what it does.
 * Added previously unknown "IntColor" CustomData type to MQB. (Thanks to WarpZephyr)
+* Further "encryption technology" countermeasures.
+* Updated Paramdex.

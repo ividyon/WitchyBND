@@ -126,6 +126,8 @@ namespace WitchyBND.Services
         public bool Catch(Func<bool> callback, out bool error, string? source = null)
         {
             error = false;
+            if (Configuration.IsDebug)
+                return callback();
             try
             {
                 return callback();

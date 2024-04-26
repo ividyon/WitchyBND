@@ -357,7 +357,7 @@ namespace SoulsFormats
             br.AssertASCII("DCA\0");
             int compressedHeaderLength = br.ReadInt32();
 
-            return SFUtil.ReadZlib(br, compressedSize);
+            return SFUtil.ReadZlib(br, Convert.ToInt32(br.Length - br.Position));
         }
 
         private static byte[] DecompressDCXKRAK(BinaryReaderEx br, bool maxCompression = false)
