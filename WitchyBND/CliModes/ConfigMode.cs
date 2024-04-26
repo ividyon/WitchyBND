@@ -62,7 +62,8 @@ public static class ConfigMode
                 @"If the same field value is present in more than (this amount) of rows, it will be marked as ""default value"" for that field. Enter 0 to disable. Higher thresholds increase XML output size.")]
         ParamDefaultThreshold,
 
-        [Display(Name = "Set PARAM field style")]
+        [Display(Name = "Set PARAM field style",
+            Description = @"Determines how fields are written and read in PARAM XML serialization. Attributes have the least file size, but make it more difficult to find differences between rows.")]
         ParamCellStyle,
 
         [Display(Name = "Configure deferred tools")]
