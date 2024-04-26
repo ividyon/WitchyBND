@@ -63,7 +63,7 @@ public static class ConfigMode
         ParamDefaultThreshold,
 
         [Display(Name = "Set PARAM field style",
-            Description = @"Determines how fields are written and read in PARAM XML serialization. Attributes have the least file size, but make it more difficult to find differences between rows.")]
+            Description = @"Determines how fields are written and read in PARAM XML serialization.")]
         ParamCellStyle,
 
         [Display(Name = "Configure deferred tools")]
@@ -103,7 +103,8 @@ Press any key to continue to the configuration screen...");
         {
             output.Clear();
             output.DoubleDash("Configuration menu");
-            output.WriteLine("This menu is paged; scroll down to find more options.");
+            output.WriteLine("This menu is [YELLOW]paged[/]; scroll down to find more options.");
+            output.WriteLine();
             var select = output.Select<ConfigMenuItem>("Choose an option")
                 .TextSelector(a => {
                     bool? toggled = null;

@@ -59,11 +59,14 @@ If DSMapStudio does not yet support this game or regulation version, an experime
     /// </summary>
     public enum CellStyle
     {
-        [Display(Name = "XML attribute")]
+        [Display(Name = "XML attribute",
+            Description = @"Each field is added to the row element as an attribute. Small file size.")]
         Attribute,
-        [Display(Name = "XML element")]
+        [Display(Name = "XML element",
+            Description = @"Each field is added to the row element as a child element. Easier to tell differences between two versions of the file.")]
         Element,
-        [Display(Name = "CSV")]
+        [Display(Name = "CSV",
+            Description = @"Stores all fields as a single delimited string. The least readable, potentially smallest file size.")]
         CSV
     }
 
