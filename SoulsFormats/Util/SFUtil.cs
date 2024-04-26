@@ -477,14 +477,14 @@ namespace SoulsFormats
             ArmoredCore6 = 2,
         }
 
-        private static readonly Dictionary<RegulationKey, byte[]> RegulationKeyDictionary = new()
-        {
-            { RegulationKey.DarkSouls3, SFEncoding.ASCII.GetBytes("ds3#jn/8_7(rsY9pg55GFN7VFL#+3n/)") },
-            { RegulationKey.EldenRing, ParseHexString(
-                "99 BF FC 36 6A 6B C8 C6 F5 82 7D 09 36 02 D6 76 C4 28 92 A0 1C 20 7F B0 24 D3 AF 4E 49 3F EF 99")},
-            { RegulationKey.ArmoredCore6, ParseHexString(
-                "10 CE ED 47 7B 7C D9 D7 E6 93 8E 11 47 13 E7 87 D5 39 13 B1 D 31 8E C1 35 E4 BE 50 50 4E E 10")}
-        };
+            private static readonly Dictionary<RegulationKey, byte[]> RegulationKeyDictionary = new()
+            {
+                { RegulationKey.DarkSouls3, SFEncoding.ASCII.GetBytes("ds3#jn/8_7(rsY9pg55GFN7VFL#+3n/)") },
+                { RegulationKey.EldenRing, ParseHexString(
+                    "99 BF FC 36 6A 6B C8 C6 F5 82 7D 09 36 02 D6 76 C4 28 92 A0 1C 20 7F B0 24 D3 AF 4E 49 3F EF 99")},
+                { RegulationKey.ArmoredCore6, ParseHexString(
+                    "10 CE ED 47 7B 7C D9 D7 E6 93 8E 11 47 13 E7 87 D5 39 13 B1 D 31 8E C1 35 E4 BE 50 50 4E E 10")}
+            };
 
         /// <summary>
         /// Decrypts and unpacks DS3's regulation BND4 from the specified path.

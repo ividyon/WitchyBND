@@ -30,7 +30,7 @@ public class UpdateService : IUpdateService
         output = outputService;
     }
 
-    internal const int UpdateInterval = 6;
+    internal const int UpdateInterval = 24;
     internal const string UpdateManifestUrl =
         "https://api.github.com/repos/ividyon/WitchyBND/tags";
 
@@ -70,7 +70,7 @@ public class UpdateService : IUpdateService
     {
         if (Configuration.Offline) return false;
         DateTime updateTime = ReadUpdateFile();
-        if (updateTime - DateTime.Now > TimeSpan.FromHours(UpdateInterval)) return false;
+        if ((updateTime - DateTime.Now).Duration() < TimeSpan.FromHours(UpdateInterval).Duration()) return false;
         try
         {
             // Update last update time
