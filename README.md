@@ -71,6 +71,10 @@ Special thanks to Nordgaren, The12thAvenger, philiquaz, TKGP, thefifthmatt, Kirn
 # Changelog
 ## WitchyBND
 
+### 2.6.2.1
+
+* Fixed an issue that prevented Sekiro PARAM files from opening.
+
 ### 2.6.2.0
 
 * Fixed the "Reflection-based serialization has been disabled" error that has paralyzed parts of the program since switching to .NET 8.
@@ -78,6 +82,8 @@ Special thanks to Nordgaren, The12thAvenger, philiquaz, TKGP, thefifthmatt, Kirn
 * Increased the update check threshold to max. once every 24 hours.
 * Added a description to the "PARAM Field Style" setting to explain what it does.
 * Added previously unknown "IntColor" CustomData type to MQB. (Thanks to WarpZephyr)
+* Further "encryption technology" countermeasures.
+* Updated Paramdex.
 
 ### 2.6.1.1
 

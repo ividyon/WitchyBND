@@ -133,7 +133,14 @@ public class GameService : IGameService
 
                 if (xDoc.Root?.Element("version")?.Value != null)
                 {
-                    regVer = Convert.ToUInt64(xDoc.Root!.Element("version")!.Value ?? "0");
+                    try
+                    {
+                        regVer = Convert.ToUInt64(xDoc.Root!.Element("version")!.Value ?? "0");
+                    }
+                    catch
+                    {
+                        regVer = 0;
+                    }
                 }
 
                 knownPath = Path.GetDirectoryName(xmlPath);
@@ -216,12 +223,16 @@ public class GameService : IGameService
 Format examples:
 ""10210005"" for Armored Core VI 1.02.1
 ""11001000"" for Elden Ring 1.10.1
-Enter 0, or press ESC, to use the latest available paramdef.");
+Enter 0, or leave it empty, to use the latest available paramdef.");
                 var input = output.Input("Input regulation version")
                     .AddValidators(PromptValidators.IsTypeULong())
                     .ValidateOnDemand()
+                    .DefaultIfEmpty("0")
+                    .Config(config => {
+                        config.EnabledAbortKey(false);
+                    })
                     .Run();
-                if (input.IsAborted)
+                if (input.IsAborted || input.Value == "0")
                 {
                     output.WriteError("Defaulting to latest paramdef.");
                 }
