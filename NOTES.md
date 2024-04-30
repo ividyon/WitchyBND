@@ -1,1 +1,1 @@
-* Fixed an issue that prevented Sekiro PARAM files from opening.
+* Fixed an issue that prevented AC4/ACFA regulations from opening.

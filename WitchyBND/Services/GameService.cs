@@ -307,7 +307,8 @@ Enter 0, or leave it empty, to use the latest available paramdef.");
 
         if (!Directory.Exists(paramdefPath))
         {
-            throw new Exception($"Paramdef path not found for {gameName}.");
+            _errorService.RegisterError($"Paramdef path not found for {gameName}. Errors may occur.");
+            return;
         }
 
         // Reading XML paramdefs
