@@ -305,7 +305,7 @@ namespace WitchyFormats
             /// <summary>
             /// Allows multiple parts to be identified by the same entity ID.
             /// </summary>
-            public uint[] EntityGroupIDs { get; private set; }
+            public uint[] EntityGroupIDs { get; set; }
 
             /// <summary>
             /// Unknown.
@@ -747,17 +747,17 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public uint[] DisplayGroups { get; private set; }
+                public uint[] DisplayGroups { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public uint[] DrawGroups { get; private set; }
+                public uint[] DrawGroups { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public uint[] CollisionMask { get; private set; }
+                public uint[] CollisionMask { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -857,7 +857,7 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public uint[] DispGroups { get; private set; }
+                public uint[] DispGroups { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -1269,7 +1269,7 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public byte[] MapID { get; private set; }
+                public byte[] MapID { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -1612,7 +1612,7 @@ namespace WitchyFormats
                 /// Refers to SpEffectSetParam ID. Applies SpEffects to an enemy.
                 /// </summary>
                 [MSBParamReference(ParamName = "SpEffectSetParam")]
-                public int[] SpEffectSetParamID { get; private set; }
+                public int[] SpEffectSetParamID { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -2294,7 +2294,7 @@ namespace WitchyFormats
                 /// <summary>
                 /// The map to load when on this collision.
                 /// </summary>
-                public byte[] MapID { get; private set; }
+                public byte[] MapID { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -2499,7 +2499,7 @@ namespace WitchyFormats
                 /// Unknown.
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Part))]
-                public string[] UnkPartNames { get; private set; }
+                public string[] UnkPartNames { get; set; }
                 private int[] UnkPartIndices;
 
                 /// <summary>
@@ -2797,7 +2797,7 @@ namespace WitchyFormats
                     /// <summary>
                     /// Disables the asset when the specified map is loaded.
                     /// </summary>
-                    public sbyte[] DisableWhenMapLoadedMapID { get; private set; }
+                    public sbyte[] DisableWhenMapLoadedMapID { get; set; }
 
                     /// <summary>
                     /// Unknown.

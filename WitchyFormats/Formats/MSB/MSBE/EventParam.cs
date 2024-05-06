@@ -566,14 +566,14 @@ namespace WitchyFormats
                 /// Regions where parts will spawn from.
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Region))]
-                public string[] SpawnRegionNames { get; private set; }
+                public string[] SpawnRegionNames { get; set; }
                 private int[] SpawnRegionIndices;
 
                 /// <summary>
                 /// Parts that will be respawned.
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Part))]
-                public string[] SpawnPartNames { get; private set; }
+                public string[] SpawnPartNames { get; set; }
                 private int[] SpawnPartIndices;
 
                 /// <summary>
@@ -907,7 +907,7 @@ namespace WitchyFormats
                 /// Unknown.
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Part))]
-                public string[] GroupPartsNames { get; private set; }
+                public string[] GroupPartsNames { get; set; }
                 private int[] GroupPartsIndices;
 
                 /// <summary>
@@ -974,7 +974,7 @@ namespace WitchyFormats
                 /// Unknown.
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Region))]
-                public string[] WalkRegionNames { get; private set; }
+                public string[] WalkRegionNames { get; set; }
                 private short[] WalkRegionIndices;
 
                 /// <summary>

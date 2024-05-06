@@ -55,7 +55,7 @@ public static class ParseMode
             // new WHKX(),
             new WTAEFolder(),
             new WTAEFile(),
-            //MSBE
+            new WMSBEFolder(),
         };
     }
     internal static void CliParseMode(CliOptions opt)

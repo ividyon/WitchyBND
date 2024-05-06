@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Xml.Serialization;
 using SoulsFormats;
 
 namespace WitchyFormats
@@ -21,6 +22,15 @@ namespace WitchyFormats
         /// <summary>
         /// The shape of a map region.
         /// </summary>
+        [
+            XmlInclude(typeof(Composite)),
+            XmlInclude(typeof(Shape.Rectangle)),
+            XmlInclude(typeof(Shape.Box)),
+            XmlInclude(typeof(Shape.Cylinder)),
+            XmlInclude(typeof(Shape.Circle)),
+            XmlInclude(typeof(Shape.Point)),
+            XmlInclude(typeof(Shape.Sphere)),
+        ]
         public abstract class Shape
         {
             internal abstract ShapeType Type { get; }
@@ -339,7 +349,7 @@ namespace WitchyFormats
                 /// <summary>
                 /// Other regions referenced by this shape.
                 /// </summary>
-                public Child[] Children { get; private set; }
+                public Child[] Children { get; set; }
 
                 /// <summary>
                 /// Creates a Composite with 8 empty references.

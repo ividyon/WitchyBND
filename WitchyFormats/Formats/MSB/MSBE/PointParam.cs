@@ -841,7 +841,7 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public byte[] UnkMapID { get; private set; }
+                public byte[] UnkMapID { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -949,7 +949,7 @@ namespace WitchyFormats
                 /// References to other regions used to build a composite shape.
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Region))]
-                public string[] ChildRegionNames { get; private set; }
+                public string[] ChildRegionNames { get; set; }
                 private int[] ChildRegionIndices;
 
                 /// <summary>
@@ -1391,7 +1391,7 @@ namespace WitchyFormats
                 /// <summary>
                 /// Map ID this connection targets.
                 /// </summary>
-                public sbyte[] TargetMapID { get; private set; }
+                public sbyte[] TargetMapID { get; set; }
 
                 /// <summary>
                 /// Creates a Connection with default values.
@@ -1952,7 +1952,7 @@ namespace WitchyFormats
                 /// References to enemies to defeat to receive the reward.
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Part))]
-                public string[] PartNames { get; private set; }
+                public string[] PartNames { get; set; }
                 private int[] PartIndices;
 
                 /// <summary>
