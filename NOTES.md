@@ -1,3 +1,2 @@
-* Added MSB serialization support for ELDEN RING.
-  * This is exclusively for comparisons, and not intended to be used for serious editing in any way.
-* Fixed an issue that prevented AC4/ACFA regulations from opening.
+* Fixed an issue where drive paths would not be removed in BNDs which do not have a shared root folder (such as a hypothetical "different network drives" case).
+* Fixed an issue where a DCX would be decompressed as a consolation prize if an error was thrown while unpacking what's inside the DCX.

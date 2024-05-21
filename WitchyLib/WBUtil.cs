@@ -373,16 +373,16 @@ public static class WBUtil
     /// </summary>
     public static string UnrootBNDPath(string path, string root)
     {
-        if (string.IsNullOrEmpty(root))
-            return path;
-
-        path = path.Substring(root.Length);
-
         Match drive = DriveRx.Match(path);
         if (drive.Success)
         {
             path = drive.Groups[2].Value;
         }
+
+        if (string.IsNullOrEmpty(root))
+            return path;
+
+        path = path.Substring(root.Length);
 
         Match traversal = TraversalRx.Match(path);
         if (traversal.Success)

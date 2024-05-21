@@ -224,11 +224,12 @@ The error was:
 
         int threshold = (int)(rows.Count * Configuration.ParamDefaultValueThreshold);
 
-        var defaultValues = fieldCounts.SelectMany(fc => {
-            KeyValuePair<string, int> max = fc.Value.MaxBy(c => c.Value);
+        var defaultsAboveThreshold = new HashSet<string>();
+        var defaultValues = fieldCounts.OrderBy(a => a.Key).SelectMany(fc => {
+            KeyValuePair<string, int> max = fc.Value.OrderBy(d => d.Key).MaxBy(c => c.Value);
             if (max.Value >= threshold)
-                return new[] { new KeyValuePair<string, string>(fc.Key, max.Key) };
-            return Array.Empty<KeyValuePair<string, string>>();
+                defaultsAboveThreshold.Add(fc.Key);
+            return new[] { new KeyValuePair<string, string>(fc.Key, max.Key) };
         }).ToDictionary(a => a.Key, b => b.Value);
 
         // Field info (def & default values)
@@ -284,6 +285,7 @@ The error was:
                     string value = fieldPair.Value;
 
                     bool isDefaultValue = defaultValues.ContainsKey(fieldName) &&
+                                          defaultsAboveThreshold.Contains(fieldName) &&
                                           defaultValues[fieldName] == value;
 
                     if (!isDefaultValue)

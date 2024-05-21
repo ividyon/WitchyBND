@@ -173,16 +173,6 @@ Process error output:
                     $"No tool is configured for the deferred format \"{e.Format.GetAttribute<DisplayAttribute>().Name}\". Please configure it in WitchyBND before attempting to process files of this type.",
                     source, WitchyErrorType.Generic));
             }
-            catch (NoOodleFoundException)
-            {
-                error = true;
-                if (Configuration.IsTest)
-                    throw;
-
-                RegisterError(new WitchyError(
-                    "ERROR: Oodle DLL not found. Please copy oo2core_6_win64.dll or oo2core_8_win64.dll from the game directory to WitchyBND's directory.",
-                    WitchyErrorType.NoOodle));
-            }
             catch (Exception e) when (e.Message.Contains("oo2core_6_win64.dll") ||
                                       e.Message.Contains("oo2core_8_win64.dll") || e is NoOodleFoundException)
             {

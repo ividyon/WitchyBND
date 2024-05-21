@@ -125,7 +125,7 @@ public static class ParseMode
                 }
 
                 // If no other parser present but file is a DCX, at least un-DCX it
-                if (!innerParsed && isDcx && !Configuration.Args.RepackOnly)
+                if (!innerParsed && !error && isDcx && !Configuration.Args.RepackOnly)
                 {
                     WDCX dcxParser = Parsers.OfType<WDCX>().First();
                     innerParsed = errorService.Catch(() => {

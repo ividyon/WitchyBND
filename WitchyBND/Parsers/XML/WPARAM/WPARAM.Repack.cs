@@ -71,7 +71,7 @@ public partial class WPARAM
 
             paramdef.Fields = new List<PARAMDEF.Field>();
 
-            var defaultValues = new Dictionary<string, string>();
+            var defaultValues = new Dictionary<string, string?>();
 
             foreach (XmlNode xmlRow in xml.SelectNodes("param/fields/field"))
             {
@@ -87,8 +87,7 @@ public partial class WPARAM
                 field.UnkB8 = xmlRow.Attributes["unkb8"].InnerText;
                 field.UnkC0 = xmlRow.Attributes["unkc0"].InnerText;
 
-                var defaultValue = xmlRow.Attributes["defaultValue"]?.InnerText ?? string.Empty;
-                defaultValues[field.InternalName] = defaultValue;
+                defaultValues[field.InternalName] = xmlRow.Attributes["defaultValue"]?.InnerText;
 
                 paramdef.Fields.Add(field);
             }
@@ -116,7 +115,7 @@ public partial class WPARAM
                 {
                     string fieldName = column.Def.InternalName;
                     string defaultValue = defaultValues[column.Def.InternalName];
-                    string value = defaultValue;
+                    string? value = defaultValue;
                     switch (cellStyle)
                     {
                         case CellStyle.Element:
@@ -145,9 +144,9 @@ public partial class WPARAM
                             break;
                     }
 
-                    if (value == null)
+                    if (value == null || (string.IsNullOrWhiteSpace(value) && column.Def.DisplayType != PARAMDEF.DefType.fixstr && column.Def.DisplayType != PARAMDEF.DefType.fixstrW))
                     {
-                        throw new Exception($"Row {id} is missing value for cell {fieldName}.");
+                        throw new Exception($"Row {id} {name} is missing value for cell {fieldName}.");
                     }
 
                     row[column.Def.InternalName]!.Value.SetValue(StringToCellValue(column.Def, value));
