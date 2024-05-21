@@ -371,18 +371,19 @@ public static class WBUtil
     /// <summary>
     /// Removes common network path roots if present.
     /// </summary>
-    public static string UnrootBNDPath(string path, string root)
+    public static string UnrootBNDPath(string path, string? root)
     {
+        path = path.Substring(root?.Length ?? 0);
+
         Match drive = DriveRx.Match(path);
+
         if (drive.Success)
         {
             path = drive.Groups[2].Value;
         }
 
-        if (string.IsNullOrEmpty(root))
+        if (string.IsNullOrWhiteSpace(root))
             return path;
-
-        path = path.Substring(root.Length);
 
         Match traversal = TraversalRx.Match(path);
         if (traversal.Success)

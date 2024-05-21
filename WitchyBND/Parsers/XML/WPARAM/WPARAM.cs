@@ -21,10 +21,6 @@ public partial class WPARAM : WXMLParser
 
     private static bool WarnedAboutParams { get; set; }
 
-    public WPARAM()
-    {
-    }
-
     public static bool WarnAboutParams()
     {
         if (Configuration.Expert || WarnedAboutParams || Configuration.Args.Passive) return true;
@@ -71,6 +67,7 @@ If DSMapStudio does not yet support this game or regulation version, an experime
     }
 
     public override string Name => "PARAM";
+    public override int Version => WBUtil.WitchyVersionToInt("2.7.1.0");
 
     public override bool HasPreprocess => true;
 
