@@ -1,3 +1,5 @@
+[![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
+
 <p align="center">
   <img src="https://github.com/ividyon/WitchyBND/blob/main/public/logo.png?raw=true" />
 </p>
@@ -67,6 +69,17 @@ For all intents and purposes, Witchy should be treated as a new version of Yabbe
 * *ivi* - WitchyBND maintainer
 
 Special thanks to Nordgaren, The12thAvenger, philiquaz, TKGP, thefifthmatt, Kirnifr, Rayan and many more for various assistance during development.
+
+# License
+
+This work is licensed under a
+[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License][cc-by-nc-sa].
+
+[![CC BY-NC-SA 4.0][cc-by-nc-sa-image]][cc-by-nc-sa]
+
+WitchyBND is built using the following licensed works:
+* [SoulsFormats](https://github.com/JKAnderson/SoulsFormats/tree/er) by JKAnderson (see [License](licenses/LICENSE-SoulsFormats.md))
+* [PromptPlus](https://github.com/FRACerqueira/PromptPlus), Copyright 2021 @ Fernando Cerqueira (see [License](licenses/LICENSE-PromptPlus.md))
 
 # Changelog
 ## WitchyBND
@@ -455,3 +468,7 @@ Due to being a large rewrite, bugs are expected. Please diligently report them.
 
 ### 1.0.1
 * Fix bad BXF4 repacking
+
+[cc-by-nc-sa]: http://creativecommons.org/licenses/by-nc-sa/4.0/
+[cc-by-nc-sa-image]: https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png
+[cc-by-nc-sa-shield]: https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg
