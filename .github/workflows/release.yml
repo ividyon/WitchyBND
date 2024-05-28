@@ -17,8 +17,8 @@ permissions:
 
 env:
   DOTNET_VERSION: '8.0.204'
-  NEXUSMOD_API_KEY: ${{ secrets.NEXUSMODS_API_KEY }}
-  NEXUSMOD_COOKIE_SID_DEVELOP: ${{ secrets.NEXUSMODS_SESSION_COOKIE }}
+  NEXUSMOD_API_KEY: ${{ secrets.NEXUSMOD_API_KEY }}
+  NEXUSMOD_SESSION_COOKIE: ${{ secrets.NEXUSMOD_SESSION_COOKIE }}
   NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
 
 jobs:
