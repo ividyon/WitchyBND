@@ -22,7 +22,7 @@ internal static class Program
     public static int ProcessedItems = 0;
 
     private static readonly IErrorService errorService;
-    private static readonly IUpdateService updateService;
+    private static readonly IStartupService startupService;
     private static readonly IOutputService output;
 
 
@@ -30,7 +30,7 @@ internal static class Program
     {
         ServiceProvider.InitializeProvider();
         errorService = ServiceProvider.GetService<IErrorService>();
-        updateService = ServiceProvider.GetService<IUpdateService>();
+        startupService = ServiceProvider.GetService<IStartupService>();
         output = ServiceProvider.GetService<IOutputService>();
     }
 
@@ -104,7 +104,6 @@ internal static class Program
 
                     output.DoubleDash($"{assembly.GetName().Name} {assembly.GetName().Version}");
 
-
                     if (!string.IsNullOrWhiteSpace(opt.Location))
                     {
                         string location = opt.Location;
@@ -142,13 +141,14 @@ internal static class Program
                         }
                     }
 
+                    startupService.CheckForUpdates();
+                    startupService.UpgradeActions();
                     // Execute
                     switch (mode)
                     {
                         case CliMode.Parse:
                             SoulsOodleLib.Oodle.GrabOodle(_ => { }, false, true);
                             DisplayConfiguration(mode);
-                            updateService.CheckForUpdates();
 
                             Stopwatch watch = new Stopwatch();
 
@@ -172,13 +172,11 @@ internal static class Program
                         case CliMode.Watch:
                             SoulsOodleLib.Oodle.GrabOodle(_ => { }, false, true);
                             DisplayConfiguration(mode);
-                            updateService.CheckForUpdates();
                             WatcherMode.CliWatcherMode(opt);
                             PrintIssues();
                             PrintFinale();
                             break;
                         case CliMode.Config:
-                            updateService.CheckForUpdates();
                             ConfigMode.CliConfigMode(opt);
                             break;
                         default:

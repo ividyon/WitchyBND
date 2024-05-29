@@ -43,6 +43,12 @@ public static class Configuration
         public Dictionary<DeferFormat, DeferFormatConfiguration> DeferTools { get; set; } = new();
 
         public bool Flexible { get; set; }
+
+        public DateTime LastUpdateCheck { get; set; }
+
+        public Version SkipUpdateVersion { get; set; }
+
+        public Version LastLaunchedVersion { get; set; }
     }
 
     public class WitchyArgValues
@@ -139,6 +145,21 @@ public static class Configuration
         set => _values.DeferTools = value;
     }
 
+    public static DateTime LastUpdateCheck {
+        get => _values.LastUpdateCheck;
+        set => _values.LastUpdateCheck = value;
+    }
+
+    public static Version SkipUpdateVersion {
+        get => _values.SkipUpdateVersion;
+        set => _values.SkipUpdateVersion = value;
+    }
+
+    public static Version LastLaunchedVersion {
+        get => _values.LastLaunchedVersion;
+        set => _values.LastLaunchedVersion = value;
+    }
+
     public static void ReplaceConfig(IConfigurationRoot config)
     {
         _values = config.Get<WitchyConfigValues>();
@@ -158,13 +179,14 @@ public static class Configuration
             .AddJsonFile(GetConfigLocation("appsettings.user.json"), true)
             .AddJsonFile(GetConfigLocation("appsettings.override.json"), true)
             .Build();
-        ;
         _values = config.Get<WitchyConfigValues>();
     }
 
     public static void UpdateConfiguration()
     {
         var configuration = _values;
+        configuration.LastUpdateCheck = DateTime.UtcNow;
+        configuration.SkipUpdateVersion = new Version(0, 0, 0, 0);
         // instead of updating appsettings.json file directly I will just write the part I need to update to appsettings.MyOverrides.json
         // .Net Core in turn will read my overrides from appsettings.MyOverrides.json file
         const string overrideFileName = "appsettings.user.json";

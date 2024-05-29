@@ -17,13 +17,13 @@ public static class ServiceProvider
         var output = new OutputService();
         var error = new ErrorService(output);
         var game = new GameService(error, output);
-        var update = new UpdateService(error, output);
+        var update = new StartupService(error, output);
 
         var collection = new ServiceCollection()
             .AddSingleton<IOutputService>(output)
             .AddSingleton<IErrorService>(error)
             .AddSingleton<IGameService>(game)
-            .AddSingleton<IUpdateService>(update);
+            .AddSingleton<IStartupService>(update);
 
         return collection.BuildServiceProvider();
     }

@@ -98,7 +98,7 @@ Press any key to continue to the configuration screen...");
         if (Configuration.Args.Passive)
             return;
 
-        PromptPlus.KeyPress().Run();
+        output.KeyPress().Run();
         while (true)
         {
             output.Clear();

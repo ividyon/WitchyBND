@@ -166,7 +166,7 @@ public class WFFXBNDModern : WBinderParser
 
         ConcurrentBag<BinderFile> bag = new();
 
-        const string rootPath = @"N:\GR\data\INTERROOT_win64\sfx\";
+        const string rootPath = @"N:\GR\data\INTERROOT_win64\sfx";
 
         WFileParser effectParser = ParseMode.Parsers.OfType<WFXR3>().First();
 

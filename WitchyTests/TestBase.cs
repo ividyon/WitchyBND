@@ -20,13 +20,13 @@ public class TestBase
         var output = new TestOutputService();
         var error = new ErrorService(output);
         var game = new GameService(error, output);
-        var update = new UpdateService(error, output);
+        var startup = new StartupService(error, output);
 
         var collection = new ServiceCollection()
             .AddSingleton<IOutputService>(output)
             .AddSingleton<IErrorService>(error)
             .AddSingleton<IGameService>(game)
-            .AddSingleton<IUpdateService>(update);
+            .AddSingleton<IStartupService>(startup);
 
         return collection.BuildServiceProvider();
     }
