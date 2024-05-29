@@ -20,6 +20,8 @@ on:
 env:
   DOTNET_VERSION: '8.0.204'
   NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+  NEXUSMOD_API_KEY: ${{ secrets.NEXUSMOD_API_KEY }}
+  NEXUSMOD_SESSION_COOKIE: ${{ secrets.NEXUSMOD_SESSION_COOKIE }}
 
 jobs:
   build:
