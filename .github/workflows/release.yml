@@ -76,16 +76,16 @@ jobs:
     needs: build
     runs-on: windows-latest
     steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: 'WitchyBND-SHA${{ github.sha }}'
-
       - name: Setup mod uploader
         run: dotnet tool install -g Digitalroot.ModUploader
 
       - name: Check mod uploader
         run: drmu nx check
+
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: 'WitchyBND-SHA${{ github.sha }}'
 
       - name: Upload to Elden Ring Nexus
         run: drmu nexusmods upload

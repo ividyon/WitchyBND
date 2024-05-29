@@ -56,15 +56,20 @@ If you only want to remove the DCX compression from a DCX archive, use the **(DC
 ## Upgrading from Yabber
 For all intents and purposes, Witchy should be treated as a new version of Yabber. It functions mostly the same and is used for all the same purposes. All the original workflows are preserved.
 
-# Contributors
+# Credits
+
+This project is created and maintained by [ividyon](https://github.com/ividyon).
+It is originally based on [Yabber](https://github.com/JKAnderson/Yabber) by TKGP.
+
 * *TKGP* - SoulsFormats and Yabber
 * *katalash* - GPARAM support, FsParam
-* *Nordgaren* - Yabber+ additions, Armored Core VI additions, Oodle DLL location
+* *Nordgaren* - Yabber+, ACVI additions, Oodle DLL location
 * *DSMapStudio team* - Paramdex
-* *Meowmaritus, NamelessHoodie* - initial FXR serialization
+* *Meowmaritus* - initial FXR serialization, SoulsAssetPipeline TAE class
+* *NamelessHoodie* - initial FXR serialization
 * *Avocado* - YabberAvocado additions
 * *NatsuDragneelTheFireDragon* - MQB support
-* *Vawser* - preliminary Armored Core VI paramdefs, Smithbox additions
+* *Vawser* - Paramdex, Smithbox additions
 * *CCCode* - FXR research
 * *ivi* - WitchyBND maintainer
 
