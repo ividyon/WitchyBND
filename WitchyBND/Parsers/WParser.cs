@@ -43,6 +43,7 @@ public abstract class WFileParser
     public virtual string ListName => Name;
 
     public virtual int Version => 0;
+    public virtual string VersionAttributeName => "WitchyVersion";
     public virtual string XmlTag
     {
         get
@@ -85,8 +86,12 @@ public abstract class WFileParser
 
     public virtual int GetUnpackedVersion(string path)
     {
-        return Version;
+        var doc = XDocument.Load(path);
+        var attr = doc.Root?.Attribute(VersionAttributeName);
+        if (attr == null) return 0;
+        return int.Parse(attr.Value);
     }
+
     public virtual bool UnpackedFitsVersion(string path)
     {
         if (Version == 0) return true;
@@ -175,7 +180,6 @@ public abstract class WSingleFileParser : WFileParser
 
 public abstract class WXMLParser : WSingleFileParser
 {
-    public virtual string VersionAttributeName => "WitchyVersion";
     public override WFileParserVerb Verb => WFileParserVerb.Serialize;
 
     public override string GetUnpackDestPath(string srcPath)

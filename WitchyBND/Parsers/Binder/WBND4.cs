@@ -52,6 +52,8 @@ public class WBND4 : WBinderParser
                 new XElement("unk05", bnd.Unk05.ToString()),
                 files);
 
+        if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
+
         if (!string.IsNullOrEmpty(Configuration.Args.Location))
             filename.AddAfterSelf(new XElement("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath))));
 

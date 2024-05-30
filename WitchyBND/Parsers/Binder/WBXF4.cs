@@ -74,6 +74,8 @@ public class WBXF4 : WBinderParser
                 new XElement("unk05", bxf.Unk05.ToString()),
                 files);
 
+        if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
+
         if (!string.IsNullOrEmpty(Configuration.Args.Location))
             bdtFilename.AddAfterSelf(new XElement("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath))));
 

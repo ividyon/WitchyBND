@@ -14,7 +14,7 @@ public class SpecialBinderTests : TestBase
     [Test]
     public void FFXBNDModern()
     {
-        IEnumerable<string> paths = GetSamples("FFXBNDModern");
+        IEnumerable<string> paths = GetSamples("FFXBNDModern").Union(GetSamples("FFXBND"));
 
         var parser = new WFFXBNDModern();
 
@@ -36,12 +36,6 @@ public class SpecialBinderTests : TestBase
             var xml = WFileParser.LoadXml(parser.GetFolderXmlPath(destPath));
 
             Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
-        }
-
-        IEnumerable<string> wrongPaths = GetSamples("FFXBND");
-        foreach (string wrongPath in wrongPaths)
-        {
-            Assert.That(parser.Is(wrongPath, null, out _), Is.False);
         }
     }
 

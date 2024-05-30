@@ -35,6 +35,9 @@ public partial class WTAEFolder
 
         XDocument xDoc = new XDocument();
         XElement root = new XElement(XmlTag);
+
+        if (Version > 0) root.SetAttributeValue(VersionAttributeName, Version.ToString());
+
         xDoc.Add(root);
         root.AddE("id", tae.ID);
         root.AddE("compression", tae.Compression);

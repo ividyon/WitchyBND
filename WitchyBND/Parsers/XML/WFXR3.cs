@@ -19,14 +19,6 @@ public class WFXR3 : WXMLParser
         return IsRead<RSFXR>(path, data, out file);
     }
 
-    public override int GetUnpackedVersion(string path)
-    {
-        var doc = XDocument.Load(path);
-        var attr = doc.Root?.Attribute(VersionAttributeName);
-        if (attr == null) return 0;
-        return int.Parse(attr.Value);
-    }
-
     public override void Unpack(string srcPath, ISoulsFile? file)
     {
         var fxr = (file as RSFXR)!;
@@ -39,7 +31,7 @@ public class WFXR3 : WXMLParser
             thing.Serialize(xmlWriter, fxr);
         }
 
-        xDoc.Root?.Add(new XAttribute(VersionAttributeName, Version.ToString()));
+        if (Version > 0) xDoc.Root?.Add(new XAttribute(VersionAttributeName, Version.ToString()));
 
         var destPath = GetUnpackDestPath(srcPath);
         AddLocationToXml(srcPath, xDoc.Root!);

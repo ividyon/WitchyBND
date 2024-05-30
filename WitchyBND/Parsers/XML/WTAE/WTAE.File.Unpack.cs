@@ -46,6 +46,8 @@ public partial class WTAEFile
         root.AddE("flags", string.Join(",", tae.Flags));
         root.AddE("bigendian", tae.BigEndian);
 
+        if (Version > 0) root.SetAttributeValue(VersionAttributeName, Version.ToString());
+
         if (tae.Animations.Any())
         {
             var bag = new ConcurrentBag<XElement>();

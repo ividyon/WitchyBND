@@ -31,6 +31,8 @@ public partial class WMSBEFolder
         XElement root = new XElement(XmlTag);
         xDoc.Add(root);
 
+        if (Version > 0) root.SetAttributeValue(VersionAttributeName, Version.ToString());
+
         root.AddE("compression", msb.Compression);
 
         var taskList = new List<Task>();

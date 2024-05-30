@@ -69,6 +69,8 @@ public class WBXF3 : WBinderParser
                 new XElement("bitbigendian", bxf.BitBigEndian.ToString()),
                 files);
 
+        if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
+
         if (!string.IsNullOrEmpty(Configuration.Args.Location))
             bdtFilename.AddAfterSelf(new XElement("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath))));
 

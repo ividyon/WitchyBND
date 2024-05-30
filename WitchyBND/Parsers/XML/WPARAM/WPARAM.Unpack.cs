@@ -109,7 +109,8 @@ The error was:
         var xws = new XmlWriterSettings();
         xws.Indent = true;
         XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath), xws);
-        xw.WriteStartElement("param");
+        xw.WriteStartElement(XmlTag);
+        if (Version > 0) xw.WriteAttributeString(VersionAttributeName, Version.ToString());
 
         // Meta data
         xw.WriteElementString("fileName", Path.GetFileName(srcPath));

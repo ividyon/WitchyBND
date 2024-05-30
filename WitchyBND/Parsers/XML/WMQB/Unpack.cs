@@ -21,6 +21,8 @@ public partial class WMQB
         xws.Indent = true;
         var xw = XmlWriter.Create(targetPath, xws);
         xw.WriteStartElement(XmlTag);
+        if (Version > 0) xw.WriteAttributeString(VersionAttributeName, Version.ToString());
+
         xw.WriteElementString("Name", mqb.Name);
 
         if (!string.IsNullOrEmpty(Configuration.Args.Location))
@@ -32,6 +34,7 @@ public partial class WMQB
         xw.WriteElementString("BigEndian", mqb.BigEndian.ToString());
         xw.WriteElementString("Compression", mqb.Compression.ToString());
         xw.WriteElementString("ResourceDirectory", mqb.ResourceDirectory);
+
         xw.WriteStartElement("Resources");
         foreach (var resource in mqb.Resources)
             UnpackResource(xw, resource);
