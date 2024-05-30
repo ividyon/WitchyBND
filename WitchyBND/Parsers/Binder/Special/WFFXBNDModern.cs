@@ -150,14 +150,14 @@ public class WFFXBNDModern : WBinderParser
             if (!effectNames.SetEquals(resNames))
             {
                 string[] diff1 = effectNames.Except(resNames).ToArray();
-                string[] diff2 = effectNames.Except(resNames).ToArray();
+                string[] diff2 = resNames.Except(effectNames).ToArray();
                 if (diff1.Any())
                 {
-                    throw new Exception($"Following FXRs are missing reslists: {string.Join(", ", diff1)}");
+                    throw new Exception($"Following FXRs are missing reslists:\n\n{string.Join("\n", diff1)}");
                 }
                 if (diff2.Any())
                 {
-                    throw new Exception($"Following reslists are missing FXRs: {string.Join(", ", diff2)}");
+                    throw new Exception($"Following reslists are missing FXRs:\n\n{string.Join("\n", diff2)}");
                 }
             }
         }
