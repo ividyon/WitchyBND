@@ -40,8 +40,8 @@ Simply replace the compression level in the {GetFolderXmlFilename()} file to thi
     public override string GetUnpackDestPath(string srcPath)
     {
         string sourceDir = new FileInfo(srcPath).Directory?.FullName;
-        if (!string.IsNullOrEmpty(Configuration.Args.Location))
-            sourceDir = Configuration.Args.Location;
+        if (!string.IsNullOrEmpty(Configuration.Active.Location))
+            sourceDir = Configuration.Active.Location;
         string fileName = Path.GetFileName(srcPath);
         return $"{sourceDir}\\{fileName.Replace('.', '-')}";
     }

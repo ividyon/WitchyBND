@@ -1,15 +1,9 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
-using System.Runtime.InteropServices;
-using PPlus;
 using SoulsFormats;
-using WitchyBND.Errors;
-using WitchyBND.Services;
 using WitchyFormats;
 using WitchyLib;
 using PARAMDEF = WitchyFormats.PARAMDEF;
@@ -23,7 +17,7 @@ public partial class WPARAM : WXMLParser
 
     public static bool WarnAboutParams()
     {
-        if (Configuration.Expert || WarnedAboutParams || Configuration.Args.Passive) return true;
+        if (Configuration.Active.Expert || WarnedAboutParams || Configuration.Active.Passive) return true;
 
         List<string> lines = new()
         {
@@ -177,7 +171,7 @@ If DSMapStudio does not yet support this game or regulation version, an experime
     public static object StringToValue(PARAMDEF.Field def, object value)
     {
         if (value == null)
-            throw new NullReferenceException($"Cell value may not be null.");
+            throw new NullReferenceException("Cell value may not be null.");
 
         switch (def.DisplayType)
         {

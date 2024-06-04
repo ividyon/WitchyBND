@@ -30,7 +30,7 @@ public class WFMG : WXMLParser
         xw.WriteStartElement("fmg");
 
         xw.WriteElementString("filename", Path.GetFileName(srcPath));
-        if (!string.IsNullOrEmpty(Configuration.Args.Location))
+        if (!string.IsNullOrEmpty(Configuration.Active.Location))
             xw.WriteElementString("sourcePath", Path.GetDirectoryName(srcPath));
 
         xw.WriteElementString("compression", fmg.Compression.ToString());

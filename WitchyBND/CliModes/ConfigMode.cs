@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Reflection;
-using PPlus;
 using PPlus.Controls;
 using WitchyBND.Parsers;
 using WitchyBND.Services;
@@ -95,7 +92,7 @@ If you want to unpack or repack a file or directory, you can either:
 
 Press any key to continue to the configuration screen...");
 
-        if (Configuration.Args.Passive)
+        if (Configuration.Active.Passive)
             return;
 
         output.KeyPress().Run();
@@ -112,38 +109,38 @@ Press any key to continue to the configuration screen...");
                     switch (a)
                     {
                         case ConfigMenuItem.ToggleBnd:
-                            toggled = Configuration.Bnd;
+                            toggled = Configuration.Stored.Bnd;
                             break;
                         case ConfigMenuItem.ToggleDcx:
-                            toggled = Configuration.Dcx;
+                            toggled = Configuration.Stored.Dcx;
                             break;
                         case ConfigMenuItem.ToggleRecursive:
-                            toggled = Configuration.Recursive;
+                            toggled = Configuration.Stored.Recursive;
                             break;
                         case ConfigMenuItem.ToggleParallel:
-                            toggled = Configuration.Parallel;
+                            toggled = Configuration.Stored.Parallel;
                             break;
                         case ConfigMenuItem.TogglePauseOnError:
-                            toggled = Configuration.PauseOnError;
+                            toggled = Configuration.Stored.PauseOnError;
                             break;
                         case ConfigMenuItem.ToggleOfflineMode:
-                            toggled = Configuration.Offline;
+                            toggled = Configuration.Stored.Offline;
                             break;
                         case ConfigMenuItem.ToggleTaeFolder:
-                            toggled = Configuration.TaeFolder;
+                            toggled = Configuration.Stored.TaeFolder;
                             break;
                         case ConfigMenuItem.ToggleFlexible:
-                            toggled = Configuration.Flexible;
+                            toggled = Configuration.Stored.Flexible;
                             break;
                         case ConfigMenuItem.ParamDefaultThreshold:
-                            var val = Configuration.ParamDefaultValueThreshold > 0f
-                                ? Configuration.ParamDefaultValueThreshold.ToString()
+                            var val = Configuration.Stored.ParamDefaultValueThreshold > 0f
+                                ? Configuration.Stored.ParamDefaultValueThreshold.ToString()
                                 : "Disabled";
                             return $"{name} ({val})";
                         case ConfigMenuItem.ParamCellStyle:
-                            return $"{name} ({Configuration.ParamCellStyle.ToString()})";
+                            return $"{name} ({Configuration.Stored.ParamCellStyle.ToString()})";
                         case ConfigMenuItem.ConfigureDelay:
-                            return $"{name} ({Configuration.EndDelay}ms)";
+                            return $"{name} ({Configuration.Stored.EndDelay}ms)";
                     }
 
                     if (toggled != null)
@@ -158,46 +155,39 @@ Press any key to continue to the configuration screen...");
 
             if (select.IsAborted) return;
 
-            void UpdateConfig()
-            {
-                Configuration.UpdateConfiguration();
-                output.WriteLine("Successfully updated the configuration.");
-                output.KeyPress(Constants.PressAnyKeyConfiguration).Run();
-            }
-
             switch (select.Value)
             {
                 case ConfigMenuItem.ToggleBnd:
-                    Configuration.Bnd = !Configuration.Bnd;
-                    UpdateConfig();
+                    Configuration.Stored.Bnd = !Configuration.Stored.Bnd;
+                    updateConfig();
                     break;
                 case ConfigMenuItem.ToggleDcx:
-                    Configuration.Dcx = !Configuration.Dcx;
-                    UpdateConfig();
+                    Configuration.Stored.Dcx = !Configuration.Stored.Dcx;
+                    updateConfig();
                     break;
                 case ConfigMenuItem.ToggleRecursive:
-                    Configuration.Recursive = !Configuration.Recursive;
-                    UpdateConfig();
+                    Configuration.Stored.Recursive = !Configuration.Stored.Recursive;
+                    updateConfig();
                     break;
                 case ConfigMenuItem.ToggleParallel:
-                    Configuration.Parallel = !Configuration.Parallel;
-                    UpdateConfig();
+                    Configuration.Stored.Parallel = !Configuration.Stored.Parallel;
+                    updateConfig();
                     break;
                 case ConfigMenuItem.TogglePauseOnError:
-                    Configuration.PauseOnError = !Configuration.PauseOnError;
-                    UpdateConfig();
+                    Configuration.Stored.PauseOnError = !Configuration.Stored.PauseOnError;
+                    updateConfig();
                     break;
                 case ConfigMenuItem.ToggleOfflineMode:
-                    Configuration.PauseOnError = !Configuration.PauseOnError;
-                    UpdateConfig();
+                    Configuration.Stored.PauseOnError = !Configuration.Stored.PauseOnError;
+                    updateConfig();
                     break;
                 case ConfigMenuItem.ToggleTaeFolder:
-                    Configuration.TaeFolder = !Configuration.TaeFolder;
-                    UpdateConfig();
+                    Configuration.Stored.TaeFolder = !Configuration.Stored.TaeFolder;
+                    updateConfig();
                     break;
                 case ConfigMenuItem.ToggleFlexible:
-                    Configuration.Flexible = !Configuration.Flexible;
-                    UpdateConfig();
+                    Configuration.Stored.Flexible = !Configuration.Stored.Flexible;
+                    updateConfig();
                     break;
                 case ConfigMenuItem.ParamDefaultThreshold:
                     while (true)
@@ -221,8 +211,8 @@ Press any key to continue to the configuration screen...");
                             continue;
                         }
 
-                        Configuration.ParamDefaultValueThreshold = threshold;
-                        UpdateConfig();
+                        Configuration.Stored.ParamDefaultValueThreshold = threshold;
+                        updateConfig();
                         break;
                     }
 
@@ -231,8 +221,8 @@ Press any key to continue to the configuration screen...");
                     var cellSelect = output.Select<WPARAM.CellStyle>("Select PARAM field style").Run();
                     if (!cellSelect.IsAborted)
                     {
-                        Configuration.ParamCellStyle = cellSelect.Value;
-                        UpdateConfig();
+                        Configuration.Stored.ParamCellStyle = cellSelect.Value;
+                        updateConfig();
                     }
                     break;
                 case ConfigMenuItem.DeferredFormats:
@@ -246,8 +236,8 @@ Press any key to continue to the configuration screen...");
                         .Run();
                     if (!input.IsAborted)
                     {
-                        Configuration.EndDelay = Convert.ToUInt16(input.Value);
-                        UpdateConfig();
+                        Configuration.Stored.EndDelay = Convert.ToUInt16(input.Value);
+                        updateConfig();
                     }
                     break;
                 case ConfigMenuItem.Windows:
@@ -266,6 +256,15 @@ Press any key to continue to the configuration screen...");
                     return;
                 default:
                     throw new IndexOutOfRangeException();
+            }
+
+            continue;
+
+            void updateConfig()
+            {
+                Configuration.SaveConfiguration();
+                output.WriteLine("Successfully updated the configuration.");
+                output.KeyPress(Constants.PressAnyKeyConfiguration).Run();
             }
         }
     }

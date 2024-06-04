@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
@@ -28,7 +26,7 @@ public class WLUAGNL : WXMLParser
         xw.WriteStartElement("luagnl");
 
         xw.WriteElementString("filename", Path.GetFileName(srcPath));
-        if (!string.IsNullOrEmpty(Configuration.Args.Location))
+        if (!string.IsNullOrEmpty(Configuration.Active.Location))
             xw.WriteElementString("sourcePath", Path.GetDirectoryName(srcPath));
 
         xw.WriteElementString("bigendian", gnl.BigEndian.ToString());

@@ -4,8 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Xml.Linq;
-using Microsoft.Extensions.DependencyInjection;
-using PPlus;
 using SoulsFormats;
 using WitchyBND.Parsers;
 using WitchyBND.Services;
@@ -107,7 +105,7 @@ public static class WatcherMode
 
         if (count == 0)
         {
-            output.WriteLine($"Could not find valid parsers for any selected files. Aborting.");
+            output.WriteLine("Could not find valid parsers for any selected files. Aborting.");
             return;
         }
 

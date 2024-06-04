@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -185,7 +184,7 @@ public class WPARAMBND4 : WBinderParser
         {
             case WBUtil.GameType.DS2:
             case WBUtil.GameType.DS2S:
-                if (!Configuration.Args.Passive)
+                if (!Configuration.Active.Passive)
                 {
                     output.WriteLine(
                         "DS2 files cannot be re-encrypted, yet, so re-packing this folder might ruin your encrypted bnd.");

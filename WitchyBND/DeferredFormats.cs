@@ -77,7 +77,7 @@ public static class DeferredFormatHandling
 
     public static string BuildArgs(DeferFormat format, string srcPath)
     {
-        var conf = Configuration.DeferTools[format];
+        var conf = Configuration.Active.DeferTools[format];
         var dirname = Path.GetDirectoryName(srcPath);
         var filename = Path.GetFileNameWithoutExtension(srcPath);
         var fileext = Path.GetExtension(srcPath);
@@ -86,7 +86,7 @@ public static class DeferredFormatHandling
 
     public static int CallDeferredTool(DeferFormat format, string srcPath, out string output, out string error)
     {
-        var conf = Configuration.DeferTools[format];
+        var conf = Configuration.Active.DeferTools[format];
         var args = BuildArgs(format, srcPath);
         return ProcessHandling.RunProcess(conf.Path, out output,
             out error, args, Path.GetDirectoryName(srcPath));

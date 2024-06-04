@@ -3,7 +3,6 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using SoulsFormats;
-using WitchyFormats;
 using WitchyLib;
 
 namespace WitchyBND.Parsers;

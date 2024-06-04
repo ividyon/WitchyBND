@@ -3,13 +3,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
-using PPlus;
 using SoulsFormats;
 using WitchyBND.Errors;
-using WitchyBND.Services;
 using WitchyFormats;
 using WitchyLib;
 using PARAMDEF = WitchyFormats.PARAMDEF;
@@ -39,7 +36,7 @@ public partial class WPARAM
         string paramName = Path.GetFileNameWithoutExtension(srcPath);
 
         // Fixed cell style for now.
-        CellStyle cellStyle = Configuration.ParamCellStyle;
+        CellStyle cellStyle = Configuration.Active.ParamCellStyle;
 
         if (game == WBUtil.GameType.AC6 && string.IsNullOrWhiteSpace(paramTypeToParamdef))
         {
@@ -119,7 +116,7 @@ The error was:
 
         xw.WriteElementString("game", game.ToString());
 
-        if (!string.IsNullOrEmpty(Configuration.Args.Location))
+        if (!string.IsNullOrEmpty(Configuration.Active.Location))
             xw.WriteElementString("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath)));
 
         xw.WriteElementString("cellStyle", ((int)cellStyle).ToString());
@@ -172,7 +169,7 @@ The error was:
                     paramdexName = gameService.NameStorage[game][paramName][id];
             }
 
-            var prepRow = new WPARAMRow()
+            var prepRow = new WPARAMRow
             {
                 ID = id,
                 Name = name,
@@ -206,7 +203,7 @@ The error was:
             rowDict.TryAdd(i, prepRow);
         }
 
-        if (Configuration.Parallel)
+        if (Configuration.Active.Parallel)
         {
             Parallel.ForEach(param.Rows, ParallelCallback);
         }
@@ -223,7 +220,7 @@ The error was:
             rows.Add(row);
         }
 
-        int threshold = (int)(rows.Count * Configuration.ParamDefaultValueThreshold);
+        int threshold = (int)(rows.Count * Configuration.Active.ParamDefaultValueThreshold);
 
         var defaultsAboveThreshold = new HashSet<string>();
         var defaultValues = fieldCounts.OrderBy(a => a.Key).SelectMany(fc => {

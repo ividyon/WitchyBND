@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
@@ -156,7 +155,7 @@ public partial class WPARAM
             }
             var rows = xml.SelectNodes("param/rows/row").Cast<XmlNode>().ToList();
 
-            // if (Configuration.Parallel)
+            // if (Configuration.Active.Parallel)
             // {
                 // Parallel.ForEach(rows, ParallelCallback);
             // }

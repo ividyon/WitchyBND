@@ -13,7 +13,7 @@ public abstract class WBND4Unsorted : WUnsortedBinderParser
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
         file = null;
-        return Configuration.Bnd && EndsInExtension(path) && IsRead<BND4>(path, data, out file);
+        return Configuration.Active.Bnd && EndsInExtension(path) && IsRead<BND4>(path, data, out file);
     }
 
     public override void Unpack(string srcPath, ISoulsFile? file)
@@ -48,7 +48,7 @@ public abstract class WBND4Unsorted : WUnsortedBinderParser
 
         if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
 
-        if (!string.IsNullOrEmpty(Configuration.Args.Location))
+        if (!string.IsNullOrEmpty(Configuration.Active.Location))
             filename.AddAfterSelf(new XElement("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath))));
 
         if (!string.IsNullOrEmpty(root))

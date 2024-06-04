@@ -6,13 +6,16 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
+using System.Text;
 using System.Threading;
 using CommandLine;
 using CommandLine.Text;
+using NativeFileDialogSharp;
 using SoulsFormats;
 using WitchyBND.CliModes;
 using WitchyBND.Services;
 using WitchyLib;
+using Oodle = SoulsOodleLib.Oodle;
 
 namespace WitchyBND;
 
@@ -22,7 +25,7 @@ internal static class Program
     public static int ProcessedItems = 0;
 
     private static readonly IErrorService errorService;
-    private static readonly IStartupService startupService;
+    private static readonly IUpdateService updateService;
     private static readonly IOutputService output;
 
 
@@ -30,14 +33,14 @@ internal static class Program
     {
         ServiceProvider.InitializeProvider();
         errorService = ServiceProvider.GetService<IErrorService>();
-        startupService = ServiceProvider.GetService<IStartupService>();
+        updateService = ServiceProvider.GetService<IUpdateService>();
         output = ServiceProvider.GetService<IOutputService>();
     }
 
     [STAThread]
     static void Main(string[] args)
     {
-        Console.OutputEncoding = System.Text.Encoding.UTF8;
+        Console.OutputEncoding = Encoding.UTF8;
         Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
         Assembly assembly = Assembly.GetExecutingAssembly();
@@ -74,31 +77,28 @@ internal static class Program
                     if (mode != CliMode.Config)
                     {
                         if (opt.Dcx)
-                            Configuration.Dcx = opt.Dcx;
+                            Configuration.Active.Dcx = opt.Dcx;
                         if (opt.Bnd)
-                            Configuration.Bnd = opt.Bnd;
+                            Configuration.Active.Bnd = opt.Bnd;
                         if (opt.Recursive)
-                            Configuration.Recursive = opt.Recursive;
+                            Configuration.Active.Recursive = opt.Recursive;
                         if (opt.Parallel)
-                            Configuration.Parallel = opt.Parallel;
+                            Configuration.Active.Parallel = opt.Parallel;
 
                         // Arg-only configuration
                         if (opt.RepackOnly)
-                            Configuration.Args.RepackOnly = opt.RepackOnly;
-
+                            Configuration.Active.RepackOnly = opt.RepackOnly;
                         if (opt.UnpackOnly)
-                            Configuration.Args.UnpackOnly = opt.UnpackOnly;
-
+                            Configuration.Active.UnpackOnly = opt.UnpackOnly;
                         if (opt.Passive)
-                            Configuration.Args.Passive = opt.Passive;
-
+                            Configuration.Active.Passive = opt.Passive;
                         if (opt.Silent)
                         {
-                            Configuration.Args.Silent = opt.Silent;
-                            Configuration.Args.Passive = opt.Silent;
+                            Configuration.Active.Silent = opt.Silent;
+                            Configuration.Active.Passive = opt.Silent;
                         }
 
-                        if (Configuration.Flexible)
+                        if (Configuration.Active.Flexible)
                             BinaryReaderEx.IsFlexible = true;
                     }
 
@@ -109,12 +109,12 @@ internal static class Program
                         string location = opt.Location;
                         if (opt.Location == "prompt")
                         {
-                            if (Configuration.Args.Passive)
+                            if (Configuration.Active.Passive)
                                 throw new Exception("Cannot supply both \"passive\" and \"location\" options.");
                             output.WriteLine("Prompting user for target directory...");
 
-                            NativeFileDialogSharp.DialogResult dialogResult =
-                                NativeFileDialogSharp.Dialog.FolderPicker();
+                            DialogResult dialogResult =
+                                Dialog.FolderPicker();
 
                             if (dialogResult.IsOk && !string.IsNullOrWhiteSpace(dialogResult.Path))
                             {
@@ -137,17 +137,19 @@ internal static class Program
                                 throw new DirectoryNotFoundException($"Location {location} is invalid.");
                             }
 
-                            Configuration.Args.Location = location;
+                            Configuration.Active.Location = location;
                         }
                     }
 
-                    startupService.CheckForUpdates();
-                    startupService.UpgradeActions();
+                    if (!Configuration.Active.Passive)
+                        updateService.CheckForUpdates(args);
+                    updateService.PostUpdateActions();
+
                     // Execute
                     switch (mode)
                     {
                         case CliMode.Parse:
-                            SoulsOodleLib.Oodle.GrabOodle(_ => { }, false, true);
+                            Oodle.GrabOodle(_ => { }, false, true);
                             DisplayConfiguration(mode);
 
                             Stopwatch watch = new Stopwatch();
@@ -156,8 +158,8 @@ internal static class Program
                             ParseMode.CliParseMode(opt);
                             watch.Stop();
 
-                            int pause = Configuration.EndDelay;
-                            if (Configuration.PauseOnError && errorService.AccruedErrorCount > 0)
+                            int pause = Configuration.Active.EndDelay;
+                            if (Configuration.Active.PauseOnError && errorService.AccruedErrorCount > 0)
                                 pause = -1;
                             var completedString = ProcessedItems == 1
                                 ? $"Operation completed on 1 item in {watch.Elapsed:hh\\:mm\\:ss}."
@@ -170,7 +172,7 @@ internal static class Program
                             PrintFinale(pause);
                             break;
                         case CliMode.Watch:
-                            SoulsOodleLib.Oodle.GrabOodle(_ => { }, false, true);
+                            Oodle.GrabOodle(_ => { }, false, true);
                             DisplayConfiguration(mode);
                             WatcherMode.CliWatcherMode(opt);
                             PrintIssues();
@@ -206,8 +208,8 @@ internal static class Program
 
     private static void PrintFinale(int? pause = null)
     {
-        pause ??= Configuration.EndDelay;
-        if (!Configuration.Args.Passive)
+        pause ??= Configuration.Active.EndDelay;
+        if (!Configuration.Active.Passive)
         {
             output.WriteLine("");
             if (pause == -1)
@@ -227,24 +229,24 @@ internal static class Program
 
     private static void DisplayConfiguration(CliMode mode)
     {
-        var infoTable = new Dictionary<string, string>()
+        var infoTable = new Dictionary<string, string>
         {
             { "Selected mode", mode.ToString() },
-            { "Specialized BND handling", Configuration.Bnd.ToString() },
-            { "DCX decompression only", Configuration.Dcx.ToString() },
+            { "Specialized BND handling", Configuration.Active.Bnd.ToString() },
+            { "DCX decompression only", Configuration.Active.Dcx.ToString() },
             { "Store PARAM field default values", Configuration.ParamDefaultValues.ToString() },
-            { "Recursive binder processing", Configuration.Recursive.ToString() },
-            { "Parallel processing", Configuration.Parallel.ToString() }
+            { "Recursive binder processing", Configuration.Active.Recursive.ToString() },
+            { "Parallel processing", Configuration.Active.Parallel.ToString() }
         };
 
-        if (Configuration.Args.Passive)
-            infoTable.Add("Passive", Configuration.Args.Passive.ToString());
-        if (!string.IsNullOrEmpty(Configuration.Args.Location))
-            infoTable.Add("Location", Configuration.Args.Location);
-        if (Configuration.Args.RepackOnly)
-            infoTable.Add("Repack only", Configuration.Args.RepackOnly.ToString());
-        if (Configuration.Args.UnpackOnly)
-            infoTable.Add("Unpack only", Configuration.Args.UnpackOnly.ToString());
+        if (Configuration.Active.Passive)
+            infoTable.Add("Passive", Configuration.Active.Passive.ToString());
+        if (!string.IsNullOrEmpty(Configuration.Active.Location))
+            infoTable.Add("Location", Configuration.Active.Location);
+        if (Configuration.Active.RepackOnly)
+            infoTable.Add("Repack only", Configuration.Active.RepackOnly.ToString());
+        if (Configuration.Active.UnpackOnly)
+            infoTable.Add("Unpack only", Configuration.Active.UnpackOnly.ToString());
 
         var longest = infoTable.Keys.MaxBy(s => s.Length).Length;
 

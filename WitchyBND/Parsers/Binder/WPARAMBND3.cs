@@ -1,9 +1,6 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using System.Xml;
 using System.Xml.Linq;
-using PPlus;
 using SoulsFormats;
 using WitchyBND.CliModes;
 using WitchyLib;

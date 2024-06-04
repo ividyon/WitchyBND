@@ -110,6 +110,16 @@ namespace WitchyBND.Shell
                 processRecursiveMenuItem.Click += ProcessRecursiveMenuItemOnClick;
                 witchyMenu.DropDownItems.Add(processRecursiveMenuItem);
 
+                if (dcx)
+                {
+                    ToolStripMenuItem processDcxMenuItem = new ToolStripMenuItem
+                    {
+                        Text = "Process here (DCX compression)"
+                    };
+                    processDcxMenuItem.Click += ProcessDcxMenuItemOnClick;
+                    witchyMenu.DropDownItems.Add(processDcxMenuItem);
+                }
+
                 ToolStripMenuItem processMoreMenuItem = new ToolStripMenuItem
                 {
                     Text = "Process..."
@@ -124,16 +134,6 @@ namespace WitchyBND.Shell
                     };
                     processBndMenuItem.Click += ProcessBndMenuItemOnClick;
                     processMoreMenuItem.DropDownItems.Add(processBndMenuItem);
-                }
-
-                if (dcx)
-                {
-                    ToolStripMenuItem processDcxMenuItem = new ToolStripMenuItem
-                    {
-                        Text = "Process here (DCX compression)"
-                    };
-                    processDcxMenuItem.Click += ProcessDcxMenuItemOnClick;
-                    processMoreMenuItem.DropDownItems.Add(processDcxMenuItem);
                 }
 
                 ToolStripMenuItem processToMenuItem = new ToolStripMenuItem
@@ -186,8 +186,6 @@ namespace WitchyBND.Shell
                 };
                 watchRecursiveMenuItem.Click += WatchRecursiveMenuItemOnClick;
                 witchyMenu.DropDownItems.Add(watchRecursiveMenuItem);
-
-
             }
 
             witchyMenu.DropDownItems.Add(new ToolStripSeparator());

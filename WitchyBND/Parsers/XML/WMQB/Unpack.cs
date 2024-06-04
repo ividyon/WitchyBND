@@ -25,7 +25,7 @@ public partial class WMQB
 
         xw.WriteElementString("Name", mqb.Name);
 
-        if (!string.IsNullOrEmpty(Configuration.Args.Location))
+        if (!string.IsNullOrEmpty(Configuration.Active.Location))
             xw.WriteElementString("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath)));
 
         xw.WriteElementString("Version", mqb.Version.ToString());
@@ -51,7 +51,7 @@ public partial class WMQB
 
         public static void UnpackResource(XmlWriter xw, MQB.Resource resource)
         {
-            xw.WriteStartElement($"Resource");
+            xw.WriteStartElement("Resource");
             xw.WriteElementString("Name", $"{resource.Name}");
             xw.WriteElementString("Path", $"{resource.Path}");
             xw.WriteElementString("ParentIndex", $"{resource.ParentIndex}");
@@ -65,7 +65,7 @@ public partial class WMQB
 
         public static void UnpackCustomData(XmlWriter xw, MQB.CustomData customdata)
         {
-            xw.WriteStartElement($"CustomData");
+            xw.WriteStartElement("CustomData");
             xw.WriteElementString("Name", $"{customdata.Name}");
             xw.WriteElementString("Type", $"{customdata.Type}");
 
@@ -105,7 +105,7 @@ public partial class WMQB
 
         public static void UnpackSequence(XmlWriter xw, MQB.CustomData.Sequence sequence)
         {
-            xw.WriteStartElement($"Sequence");
+            xw.WriteStartElement("Sequence");
             xw.WriteElementString("ValueIndex", $"{sequence.ValueIndex}");
             xw.WriteElementString("ValueType", $"{sequence.ValueType}");
             xw.WriteElementString("PointType", $"{sequence.PointType}");
@@ -118,7 +118,7 @@ public partial class WMQB
 
         public static void UnpackPoint(XmlWriter xw, MQB.CustomData.Sequence.Point point)
         {
-            xw.WriteStartElement($"Point");
+            xw.WriteStartElement("Point");
             xw.WriteElementString("Value", $"{point.Value}");
             xw.WriteElementString("Unk08", $"{point.Unk08}");
             xw.WriteElementString("Unk10", $"{point.Unk10}");
@@ -128,11 +128,11 @@ public partial class WMQB
 
         public static void UnpackCut(XmlWriter xw, MQB.Cut cut)
         {
-            xw.WriteStartElement($"Cut");
+            xw.WriteStartElement("Cut");
             xw.WriteElementString("Name", $"{cut.Name}");
             xw.WriteElementString("Duration", $"{cut.Duration}");
             xw.WriteElementString("Unk44", $"{cut.Unk44}");
-            xw.WriteStartElement($"Timelines");
+            xw.WriteStartElement("Timelines");
             foreach (var timeline in cut.Timelines)
                 UnpackTimeline(xw, timeline);
             xw.WriteEndElement();
@@ -141,13 +141,13 @@ public partial class WMQB
 
         public static void UnpackTimeline(XmlWriter xw, MQB.Timeline timeline)
         {
-            xw.WriteStartElement($"Timeline");
+            xw.WriteStartElement("Timeline");
             xw.WriteElementString("Unk10", $"{timeline.Unk10}");
-            xw.WriteStartElement($"Dispositions");
+            xw.WriteStartElement("Dispositions");
             foreach (var disposition in timeline.Dispositions)
                 UnpackDisposition(xw, disposition);
             xw.WriteEndElement();
-            xw.WriteStartElement($"Timeline_CustomData");
+            xw.WriteStartElement("Timeline_CustomData");
             foreach (var customdata in timeline.CustomData)
                 UnpackCustomData(xw, customdata);
             xw.WriteEndElement();
@@ -156,7 +156,7 @@ public partial class WMQB
 
         public static void UnpackDisposition(XmlWriter xw, MQB.Disposition disposition)
         {
-            xw.WriteStartElement($"Disposition");
+            xw.WriteStartElement("Disposition");
             xw.WriteElementString("ID", $"{disposition.ID}");
             xw.WriteElementString("Duration", $"{disposition.Duration}");
             xw.WriteElementString("ResourceIndex", $"{disposition.ResourceIndex}");
@@ -167,11 +167,11 @@ public partial class WMQB
             xw.WriteElementString("Unk1C", $"{disposition.Unk1C}");
             xw.WriteElementString("Unk20", $"{disposition.Unk20}");
             xw.WriteElementString("Unk28", $"{disposition.Unk28}");
-            xw.WriteStartElement($"Transforms");
+            xw.WriteStartElement("Transforms");
             foreach (var transform in disposition.Transforms)
                 UnpackTransform(xw, transform);
             xw.WriteEndElement();
-            xw.WriteStartElement($"Disposition_CustomData");
+            xw.WriteStartElement("Disposition_CustomData");
             foreach (var customdata in disposition.CustomData)
                 UnpackCustomData(xw, customdata);
             xw.WriteEndElement();
@@ -180,7 +180,7 @@ public partial class WMQB
 
         public static void UnpackTransform(XmlWriter xw, MQB.Transform transform)
         {
-            xw.WriteStartElement($"Transform");
+            xw.WriteStartElement("Transform");
             xw.WriteElementString("Frame", $"{transform.Frame}");
             xw.WriteElementString("Translation", transform.Translation.Vector3ToString());
             xw.WriteElementString("Rotation", transform.Rotation.Vector3ToString());

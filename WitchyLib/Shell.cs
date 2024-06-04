@@ -1,31 +1,25 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading;
 using Microsoft.Win32;
-using PPlus;
-using WitchyBND.Services;
-using WitchyLib;
 
-namespace WitchyBND;
+namespace WitchyLib;
 
 public static class Shell
 {
-    private static readonly IOutputService output;
     static Shell()
     {
-        output = ServiceProvider.GetService<IOutputService>();
     }
 
-    const int WM_USER = 0x0400; //http://msdn.microsoft.com/en-us/library/windows/desktop/ms644931(v=vs.85).aspx
+    private static readonly string exePath = Path.GetDirectoryName(AppContext.BaseDirectory)!;
+    const int WmUser = 0x0400; //http://msdn.microsoft.com/en-us/library/windows/desktop/ms644931(v=vs.85).aspx
 
     private static RegistryKey Root = Registry.CurrentUser;
     private static string ClassesKey = @"Software\Classes";
     private static string ProgIdQuick = "WitchyBND.A";
     private static string ProgId = "WitchyBND.B";
-    public static readonly string WitchyPath = Path.Combine(WBUtil.GetExeLocation() ?? ".", "WitchyBND.exe");
+    public static readonly string WitchyPath = Path.Combine(exePath, "WitchyBND.exe");
 
     private const string ClsidRegistryKey = @"Software\Classes\CLSID";
     private const string ClassesRegistryKey = @"Software\Classes";
@@ -34,9 +28,15 @@ public static class Shell
     private const string ComplexMenuGuid = "{cce90c57-0a92-4cb7-8e9b-0cfa92138ae9}";
     private const string ComplexMenuFullName = "WitchyBND.Shell.WitchyContextMenu";
 
+    public static bool ComplexContextMenuIsRegistered()
+    {
+        var probeKey = string.Join(Path.DirectorySeparatorChar, [ClassesRegistryKey, ComplexMenuFullName]);
+        return Root.OpenSubKey(probeKey) != null;
+    }
+
     public static void RegisterComplexContextMenu()
     {
-        var assemblyPath = $"file:///{WBUtil.GetExeLocation().Replace(Path.DirectorySeparatorChar, '/').TrimEnd('/')}/WitchyBND.Shell.dll";
+        var assemblyPath = $"file:///{exePath.Replace(Path.DirectorySeparatorChar, '/').TrimEnd('/')}/WitchyBND.Shell.dll";
         var runtimeVersion = "v4.0.30319";
         var version = "1.0.0.0";
         var assemblyFullName = $"WitchyBND.Shell, Version={version}, Culture=neutral, PublicKeyToken=1eff254c75ae9a19";
@@ -142,7 +142,6 @@ public static class Shell
     {
         RestartExplorer restartExplorer = new RestartExplorer();
         restartExplorer.Execute(() => {
-            output.WriteLine("Explorer process stopped.");
         });
     }
 
@@ -152,7 +151,7 @@ public static class Shell
         var name = "PATH";
         var scope = EnvironmentVariableTarget.User;
         var oldValue = Environment.GetEnvironmentVariable(name, scope);
-        var newValue  = oldValue + @$";{WBUtil.GetExeLocation()}\\";
+        var newValue  = oldValue + @$";{exePath}\\";
         Environment.SetEnvironmentVariable(name, newValue, scope);
     }
 
@@ -161,7 +160,7 @@ public static class Shell
         var name = "PATH";
         var scope = EnvironmentVariableTarget.User;
         var oldValue = Environment.GetEnvironmentVariable(name, scope);
-        var newValue = oldValue.Replace(@$";{WBUtil.GetExeLocation()}\\", "");
+        var newValue = oldValue.Replace(@$";{exePath}\\", "");
         Environment.SetEnvironmentVariable(name, newValue, scope);
     }
 

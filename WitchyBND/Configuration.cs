@@ -4,12 +4,49 @@ using System.IO;
 using System.Text.Json;
 using CommandLine;
 using Microsoft.Extensions.Configuration;
-using WitchyBND.CliModes;
 using WitchyBND.Parsers;
 using WitchyLib;
 
 namespace WitchyBND;
 
+public interface IStoredConfig
+{
+    public bool Bnd { get; set; }
+    public bool Dcx { get; set; }
+    public float ParamDefaultValueThreshold { get; set; }
+
+    public WPARAM.CellStyle ParamCellStyle { get; set; }
+    public bool Recursive { get; set; }
+    public ushort EndDelay { get; set; }
+    public bool PauseOnError { get; set; }
+    public bool Parallel { get; set; }
+    public bool Expert { get; set; }
+    public bool Offline { get; set; }
+
+    public bool TaeFolder { get; set; }
+    public Dictionary<DeferFormat, DeferFormatConfiguration> DeferTools { get; set; }
+
+    public bool Flexible { get; set; }
+}
+
+public interface IStoredOnlyConfig
+{
+    public DateTime LastUpdateCheck { get; set; }
+
+    public Version SkipUpdateVersion { get; set; }
+
+    public Version LastLaunchedVersion { get; set; }
+}
+
+public interface ITempConfig
+{
+    public bool UnpackOnly { get; set; }
+    public bool RepackOnly { get; set; }
+    public bool Passive { get; set; }
+
+    public bool Silent { get; set; }
+    public string? Location { get; set; }
+}
 public static class Configuration
 {
     public static bool IsTest { get; set; }
@@ -25,7 +62,7 @@ public static class Configuration
         }
     }
 
-    public class WitchyConfigValues
+    public class StoredConfig : IStoredConfig, IStoredOnlyConfig
     {
         public bool Bnd { get; set; }
         public bool Dcx { get; set; }
@@ -51,147 +88,85 @@ public static class Configuration
         public Version LastLaunchedVersion { get; set; }
     }
 
-    public class WitchyArgValues
+    public class ActiveConfig : IStoredConfig, ITempConfig
     {
+        public bool Bnd { get; set; }
+        public bool Dcx { get; set; }
+        public float ParamDefaultValueThreshold { get; set; }
+        public WPARAM.CellStyle ParamCellStyle { get; set; }
+        public bool Recursive { get; set; }
+        public ushort EndDelay { get; set; }
+        public bool PauseOnError { get; set; }
+        public bool Parallel { get; set; }
+        public bool Expert { get; set; }
+        public bool Offline { get; set; }
+        public bool TaeFolder { get; set; }
+        public Dictionary<DeferFormat, DeferFormatConfiguration> DeferTools { get; set; }
+        public bool Flexible { get; set; }
+
+        // The following are args-only or otherwise temporary
         public bool UnpackOnly { get; set; }
         public bool RepackOnly { get; set; }
         public bool Passive { get; set; }
-
         public bool Silent { get; set; }
         public string? Location { get; set; }
     }
 
-    private static WitchyConfigValues _values;
+    public static StoredConfig Stored;
+    public static ActiveConfig Active;
 
-    public static WitchyArgValues Args;
+    public static string AppDataDirectory = Path.Combine(Environment.ExpandEnvironmentVariables("%AppData%"), "WitchyBND");
 
-    public static bool Bnd
+    public static bool ParamDefaultValues => Active.ParamDefaultValueThreshold > 0f;
+
+    public static void ReplaceStoredConfig(IConfigurationRoot config)
     {
-        get => _values.Bnd;
-        set => _values.Bnd = value;
-    }
-
-    public static bool Dcx
-    {
-        get => _values.Dcx;
-        set => _values.Dcx = value;
-    }
-
-    public static float ParamDefaultValueThreshold
-    {
-        get => _values.ParamDefaultValueThreshold;
-        set => _values.ParamDefaultValueThreshold = value;
-    }
-
-    public static bool ParamDefaultValues => _values.ParamDefaultValueThreshold > 0f;
-
-    public static WPARAM.CellStyle ParamCellStyle
-    {
-        get => _values.ParamCellStyle;
-        set => _values.ParamCellStyle = value;
-    }
-
-    public static bool PauseOnError
-    {
-        get => _values.PauseOnError;
-        set => _values.PauseOnError = value;
-    }
-
-    public static bool Recursive
-    {
-        get => _values.Recursive;
-        set => _values.Recursive = value;
-    }
-
-    public static bool Flexible
-    {
-        get => _values.Flexible;
-        set => _values.Flexible = value;
-    }
-
-    public static ushort EndDelay
-    {
-        get => _values.EndDelay;
-        set => _values.EndDelay = value;
-    }
-
-    public static bool Expert
-    {
-        get => _values.Expert;
-        set => _values.Expert = value;
-    }
-
-    public static bool Parallel
-    {
-        get => _values.Parallel;
-        set => _values.Parallel = value;
-    }
-
-    public static bool Offline
-    {
-        get => _values.Offline;
-        set => _values.Offline = value;
-    }
-
-    public static bool TaeFolder
-    {
-        get => _values.TaeFolder;
-        set => _values.TaeFolder = value;
-    }
-
-    public static Dictionary<DeferFormat, DeferFormatConfiguration> DeferTools
-    {
-        get => _values.DeferTools;
-        set => _values.DeferTools = value;
-    }
-
-    public static DateTime LastUpdateCheck {
-        get => _values.LastUpdateCheck;
-        set => _values.LastUpdateCheck = value;
-    }
-
-    public static Version SkipUpdateVersion {
-        get => _values.SkipUpdateVersion;
-        set => _values.SkipUpdateVersion = value;
-    }
-
-    public static Version LastLaunchedVersion {
-        get => _values.LastLaunchedVersion;
-        set => _values.LastLaunchedVersion = value;
-    }
-
-    public static void ReplaceConfig(IConfigurationRoot config)
-    {
-        _values = config.Get<WitchyConfigValues>();
-    }
-
-    private static string GetConfigLocation(string path)
-    {
-        return WBUtil.GetExeLocation(path);
+        Stored = config.Get<StoredConfig>();
     }
 
     static Configuration()
     {
-        _values = new WitchyConfigValues();
-        Args = new WitchyArgValues();
-        IConfigurationRoot config = new ConfigurationBuilder()
-            .AddJsonFile(GetConfigLocation("appsettings.json"), true)
-            .AddJsonFile(GetConfigLocation("appsettings.user.json"), true)
-            .AddJsonFile(GetConfigLocation("appsettings.override.json"), true)
-            .Build();
-        _values = config.Get<WitchyConfigValues>();
+        Active = new ActiveConfig();
+
+        if (!Directory.Exists(AppDataDirectory))
+            Directory.CreateDirectory(AppDataDirectory);
+
+        LoadConfiguration();
     }
 
-    public static void UpdateConfiguration()
+    public static void LoadConfiguration()
     {
-        var configuration = _values;
-        configuration.LastUpdateCheck = DateTime.UtcNow;
-        configuration.SkipUpdateVersion = new Version(0, 0, 0, 0);
-        // instead of updating appsettings.json file directly I will just write the part I need to update to appsettings.MyOverrides.json
-        // .Net Core in turn will read my overrides from appsettings.MyOverrides.json file
-        const string overrideFileName = "appsettings.user.json";
-        var newConfig = JsonSerializer.Serialize(configuration, new JsonSerializerOptions { WriteIndented = true });
-        File.WriteAllText(GetConfigLocation(overrideFileName), newConfig);
+        IConfigurationRoot config = new ConfigurationBuilder()
+            .AddJsonFile(WBUtil.GetExeLocation("appsettings.json"))
+            .AddJsonFile(Path.Combine(AppDataDirectory, "appsettings.user.json"), true)
+            .AddJsonFile(WBUtil.GetExeLocation("appsettings.override.json"), true)
+            .Build();
+
+        Stored = config.Get<StoredConfig>() ?? new StoredConfig();
+        ActivateStoredConfiguration(Stored);
+    }
+
+    public static void SaveConfiguration()
+    {
+        var newStored = JsonSerializer.Serialize(Stored, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(Path.Combine(AppDataDirectory, "appsettings.user.json"), newStored);
+    }
+
+    public static void ActivateStoredConfiguration(StoredConfig stored)
+    {
+        Active.Bnd = stored.Bnd;
+        Active.Dcx = stored.Dcx;
+        Active.ParamDefaultValueThreshold = stored.ParamDefaultValueThreshold;
+        Active.ParamCellStyle = stored.ParamCellStyle;
+        Active.Recursive = stored.Recursive;
+        Active.EndDelay = stored.EndDelay;
+        Active.PauseOnError = stored.PauseOnError;
+        Active.Parallel = stored.Parallel;
+        Active.Expert = stored.Expert;
+        Active.Offline = stored.Offline;
+        Active.TaeFolder = stored.TaeFolder;
+        Active.DeferTools = stored.DeferTools;
+        Active.Flexible = stored.Flexible;
     }
 }
 

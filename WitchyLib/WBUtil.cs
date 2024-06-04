@@ -161,6 +161,11 @@ public static class WBUtil
         return GetExeLocation(Array.Empty<string>());
     }
 
+    public static string GetExecutablePath()
+    {
+        return System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName;
+    }
+
     public enum GameType
     {
         [Display(Name = "Armored Core 4")] AC4,
@@ -541,6 +546,9 @@ public static class WBUtil
 
     public static void XmlSerialize<T>(object obj, string targetFile)
     {
+        var dir = Path.GetDirectoryName(targetFile)!;
+        if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+
         using (var xw = XmlWriter.Create(targetFile, new XmlWriterSettings() { Indent = true }))
         {
             var xmlSer = new XmlSerializer(typeof(T));

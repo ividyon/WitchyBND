@@ -1,11 +1,9 @@
 ﻿using System.Collections.Concurrent;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using SoulsFormats;
 using WitchyBND.Errors;
-using WitchyBND.Services;
 using WitchyFormats;
 using WitchyLib;
 
@@ -17,7 +15,7 @@ public partial class WTAEFile
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
         file = null;
-        return !Configuration.TaeFolder && IsRead<TAE>(path, data, out file);
+        return !Configuration.Active.TaeFolder && IsRead<TAE>(path, data, out file);
     }
 
     public override void Unpack(string srcPath, ISoulsFile? file)
@@ -58,7 +56,7 @@ public partial class WTAEFile
                 bag.Add(UnpackAnim(tae, anim));
             }
 
-            if (Configuration.Parallel)
+            if (Configuration.Active.Parallel)
             {
                 Parallel.ForEach(tae.Animations, Callback);
             }

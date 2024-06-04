@@ -195,7 +195,7 @@ public class GameService : IGameService
         else
         {
             output.WriteError("Could not determine param game version.");
-            if (!Configuration.Args.Passive)
+            if (!Configuration.Active.Passive)
             {
                 var select = PromptPlus
                     .Select<WBUtil.GameType>("Please select the Paramdex of one of the following games")
@@ -217,7 +217,7 @@ public class GameService : IGameService
         if (forParams && regVer == 0)
         {
             output.WriteError("Could not determine regulation version.");
-            if (!Configuration.Args.Passive)
+            if (!Configuration.Active.Passive)
             {
                 output.WriteLine(@"Please input the regulation version to use for reading the PARAM.
 Format examples:

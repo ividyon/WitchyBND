@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
-using PPlus;
 using SoulsFormats;
 using WitchyBND.CliModes;
 using WitchyLib;
@@ -25,7 +24,7 @@ public class WFFXBNDModern : WBinderParser
     {
         file = null;
         path = path.ToLower();
-        return Configuration.Bnd &&
+        return Configuration.Active.Bnd &&
                path.Contains(".ffxbnd") && IsRead<BND4>(path, data, out file);
     }
 
@@ -39,7 +38,7 @@ public class WFFXBNDModern : WBinderParser
         var filename = new XElement("filename", srcName);
         var rootFile = bnd.Files.FirstOrDefault(f => f.Name.Contains("\\sfx\\"));
         if (rootFile == null)
-            throw new Exception($"FFXBND has invalid structure; expected \\sfx\\ path.");
+            throw new Exception("FFXBND has invalid structure; expected \\sfx\\ path.");
         var rootPath = rootFile.Name.Substring(0, rootFile.Name.IndexOf("\\sfx\\", StringComparison.Ordinal) + 5);
         var xml = new XElement("ffxbnd",
             filename,
@@ -57,7 +56,7 @@ public class WFFXBNDModern : WBinderParser
 
         if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
 
-        if (!string.IsNullOrEmpty(Configuration.Args.Location))
+        if (!string.IsNullOrEmpty(Configuration.Active.Location))
             filename.AddAfterSelf(new XElement("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath))));
 
         // Files
@@ -127,7 +126,7 @@ public class WFFXBNDModern : WBinderParser
             File.WriteAllBytes($"{fileTargetDir}\\{fileTargetName}", bytes);
         }
 
-        if (Configuration.Parallel)
+        if (Configuration.Active.Parallel)
             Parallel.ForEach(bnd.Files, Callback);
         else
             bnd.Files.ForEach(Callback);
@@ -196,7 +195,7 @@ public class WFFXBNDModern : WBinderParser
             var dir = xml.Element("effectDir")!.Value;
             string basePath = Path.Combine(rootPath, dir);
 
-            if (Configuration.Parallel)
+            if (Configuration.Active.Parallel)
                 Parallel.ForEach(effectPaths, inEffectCallback);
             else
                 effectPaths.ForEach(inEffectCallback);
@@ -223,7 +222,7 @@ public class WFFXBNDModern : WBinderParser
             var dir = xml.Element("textureDir")!.Value;
             string basePath = Path.Combine(rootPath, dir);
 
-            if (Configuration.Parallel)
+            if (Configuration.Active.Parallel)
                 Parallel.ForEach(texturePaths, inTextureCallback);
             else
                 texturePaths.ForEach(inTextureCallback);
@@ -273,7 +272,7 @@ public class WFFXBNDModern : WBinderParser
             var dir = xml.Element("modelDir")!.Value;
             string basePath = Path.Combine(rootPath, dir);
 
-            if (Configuration.Parallel)
+            if (Configuration.Active.Parallel)
                 Parallel.ForEach(modelPaths, inModelCallback);
             else
                 modelPaths.ForEach(inModelCallback);
@@ -299,7 +298,7 @@ public class WFFXBNDModern : WBinderParser
             var dir = xml.Element("animDir")!.Value;
             string basePath = Path.Combine(rootPath, dir);
 
-            if (Configuration.Parallel)
+            if (Configuration.Active.Parallel)
                 Parallel.ForEach(animPaths, inAnimCallback);
             else
                 animPaths.ForEach(inAnimCallback);
@@ -325,7 +324,7 @@ public class WFFXBNDModern : WBinderParser
             var dir = xml.Element("resDir")!.Value;
             string basePath = Path.Combine(rootPath, dir);
 
-            if (Configuration.Parallel)
+            if (Configuration.Active.Parallel)
                 Parallel.ForEach(resPaths, inResCallback);
             else
                 resPaths.ForEach(inResCallback);
@@ -344,7 +343,7 @@ public class WFFXBNDModern : WBinderParser
             }
         }
 
-        if (Configuration.Parallel)
+        if (Configuration.Active.Parallel)
         {
             Parallel.Invoke(effectCallback, textureCallback, modelCallback, animCallback, resCallback);
         }

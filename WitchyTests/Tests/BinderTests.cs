@@ -11,7 +11,7 @@ public class BinderTests : TestBase
 {
     public void DCX()
     {
-        Configuration.Dcx = true;
+        Configuration.Active.Dcx = true;
 
         IEnumerable<string> paths = GetSamples("DCX");
 

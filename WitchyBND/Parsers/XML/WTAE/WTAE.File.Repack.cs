@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -59,7 +58,7 @@ public partial class WTAEFile
                 bag.Add(RepackAnim(animEl, tae, template));
             }
 
-            if (Configuration.Parallel)
+            if (Configuration.Active.Parallel)
             {
                 Parallel.ForEach(animEls, Callback);
             }

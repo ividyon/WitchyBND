@@ -135,9 +135,12 @@
       "witchyformats": {
         "type": "Project",
         "dependencies": {
-          "SoulsFormats": "[2.8.0, )",
-          "StudioUtils": "[2.8.0, )"
+          "SoulsFormats": "[2.9.0, )",
+          "StudioUtils": "[2.9.0, )"
         }
+      },
+      "witchyshellsharedlib": {
+        "type": "Project"
       }
     }
   }

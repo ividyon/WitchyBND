@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using PPlus;
 using PPlus.Controls;
 
@@ -51,7 +49,7 @@ public class OutputService : IOutputService
     public object ConsoleWriterLock => new();
     public int WriteLine(string? value = null, Style? style = null, bool clearrestofline = true)
     {
-        if (Configuration.Args.Silent) return 0;
+        if (Configuration.Active.Silent) return 0;
         int outCode;
         lock (ConsoleWriterLock)
             outCode = PromptPlus.Write(value + Environment.NewLine, style, clearrestofline);
@@ -60,7 +58,7 @@ public class OutputService : IOutputService
 
     public int WriteError(string? value = null, Style? style = null, bool clearrestofline = true)
     {
-        if (Configuration.Args.Silent) return 0;
+        if (Configuration.Active.Silent) return 0;
         int outCode;
         lock (ConsoleWriterLock)
         {
@@ -75,7 +73,7 @@ public class OutputService : IOutputService
     public int DoubleDash(string value, DashOptions dashOptions = DashOptions.AsciiSingleBorder, int extralines = 0,
         Style? style = null)
     {
-        if (Configuration.Args.Silent) return 0;
+        if (Configuration.Active.Silent) return 0;
         int outCode;
         lock (ConsoleWriterLock)
             outCode = PromptPlus.DoubleDash(value, dashOptions, extralines, style);
@@ -90,7 +88,7 @@ public class OutputService : IOutputService
 
     public void Clear()
     {
-        if (Configuration.Args.Silent) return;
+        if (Configuration.Active.Silent) return;
         lock (ConsoleWriterLock)
             PromptPlus.Clear();
     }
@@ -109,7 +107,7 @@ public class OutputService : IOutputService
     public int SingleDash(string value, DashOptions dashOptions = DashOptions.AsciiSingleBorder, int extralines = 0,
         Style? style = null)
     {
-        if (Configuration.Args.Silent) return 0;
+        if (Configuration.Active.Silent) return 0;
         int outCode;
         lock (ConsoleWriterLock)
             outCode = PromptPlus.SingleDash(value, dashOptions, extralines, style);

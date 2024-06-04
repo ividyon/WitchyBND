@@ -1,9 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
-using PPlus;
 using SoulsFormats;
 using WitchyLib;
 
@@ -22,7 +20,7 @@ public class WDCX : WSingleFileParser
     public override bool Is(string path, byte[] _, out ISoulsFile? file)
     {
         file = null;
-        return Configuration.Dcx && DCX.Is(path);
+        return Configuration.Active.Dcx && DCX.Is(path);
     }
 
     public override string GetUnpackDestPath(string srcPath)
@@ -79,7 +77,7 @@ public class WDCX : WSingleFileParser
         xw.WriteStartElement("dcx");
 
         xw.WriteElementString("filename", Path.GetFileName(srcPath));
-        if (!string.IsNullOrEmpty(Configuration.Args.Location))
+        if (!string.IsNullOrEmpty(Configuration.Active.Location))
             xw.WriteElementString("sourcePath", Path.GetDirectoryName(srcPath));
 
         xw.WriteElementString("compression", comp.ToString());

@@ -1,9 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Xml.Linq;
-using PPlus;
 using SoulsFormats;
-using WitchyBND.CliModes;
-using WitchyLib;
 
 namespace WitchyBND.Parsers;
 
@@ -16,7 +14,7 @@ public class WLUA : WSingleFileParser
         file = null;
         var extension = Path.GetExtension(path).ToLower();
         var cond = extension is ".lua" or ".hks";
-        if (cond && !Configuration.DeferTools.ContainsKey(DeferFormat.Hkx))
+        if (cond && !Configuration.Active.DeferTools.ContainsKey(DeferFormat.Hkx))
             throw new DeferToolPathException(DeferFormat.Lua);
         return cond;
     }
@@ -32,7 +30,7 @@ public class WLUA : WSingleFileParser
 
     public override string GetUnpackDestPath(string srcPath)
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 
     public override void Unpack(string srcPath, ISoulsFile? file)
@@ -42,11 +40,11 @@ public class WLUA : WSingleFileParser
 
     public override void Repack(string srcPath)
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 
     public override string GetRepackDestPath(string srcPath, XElement xml)
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 }

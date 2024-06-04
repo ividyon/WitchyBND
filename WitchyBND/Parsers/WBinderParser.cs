@@ -80,7 +80,7 @@ public abstract class WBinderParser : WFolderParser
             bag.TryAdd(file.Name, fileElement);
         }
 
-        if (Configuration.Parallel)
+        if (Configuration.Active.Parallel)
             Parallel.ForEach(bnd.Files, ParallelCallback);
         else
         {
@@ -96,7 +96,7 @@ public abstract class WBinderParser : WFolderParser
             files.Add(bag[file.Name]);
         }
 
-        if (Configuration.Recursive)
+        if (Configuration.Active.Recursive)
         {
             ParseMode.ParseFiles(resultingPaths.ToList(), true);
         }
@@ -107,7 +107,7 @@ public abstract class WBinderParser : WFolderParser
     // Recursive repack: Check if any files from the file list are unpacked, and repack them before continuing.
     protected static void RecursiveRepackFile(string path, IEnumerable<WFileParser> parsers)
     {
-        if (!Configuration.Recursive) return;
+        if (!Configuration.Active.Recursive) return;
         WFileParser? parser = parsers.FirstOrDefault(p => p.Exists(path) && p.Is(path, null, out ISoulsFile? _));
         if (parser != null)
         {
@@ -170,7 +170,7 @@ public abstract class WBinderParser : WFolderParser
                 CompressionType = compressionType
             });
         }
-        if (Configuration.Parallel)
+        if (Configuration.Active.Parallel)
             Parallel.ForEach(filesElement.Elements("file"), Callback);
         else
         {

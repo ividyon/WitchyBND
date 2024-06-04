@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using System.Xml.Linq;
-using PPlus;
 using SoulsFormats;
 using WitchyBND.Errors;
-using WitchyBND.Services;
 using WitchyFormats.Utils;
 using WitchyLib;
 using TPF = WitchyFormats.TPF;
@@ -85,7 +83,7 @@ public class WTPF : WFolderParser
 
         if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
 
-        if (!string.IsNullOrEmpty(Configuration.Args.Location))
+        if (!string.IsNullOrEmpty(Configuration.Active.Location))
             filename.AddAfterSelf(new XElement("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath))));
 
         using var xw = XmlWriter.Create(GetFolderXmlPath(destDir), new XmlWriterSettings

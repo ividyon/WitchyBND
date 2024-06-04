@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using PPlus;
 using SoulsFormats;
 using WitchyBND.Parsers;
 using WitchyBND.Services;
@@ -103,14 +100,14 @@ public static class ParseMode
                 {
                     innerParsed = errorService.Catch(() => {
                         ISoulsFile? file;
-                        if ((Configuration.Args.UnpackOnly || !Configuration.Args.RepackOnly) && parser.Exists(path) &&
+                        if ((Configuration.Active.UnpackOnly || !Configuration.Active.RepackOnly) && parser.Exists(path) &&
                             parser.Is(path, data, out file))
                         {
                             Unpack(path, file, compression, parser, recursive);
                             return true;
                         }
 
-                        if ((Configuration.Args.RepackOnly || !Configuration.Args.UnpackOnly) &&
+                        if ((Configuration.Active.RepackOnly || !Configuration.Active.UnpackOnly) &&
                             parser.ExistsUnpacked(path) && parser.IsUnpacked(path))
                         {
                             Repack(path, parser, recursive);
@@ -125,7 +122,7 @@ public static class ParseMode
                 }
 
                 // If no other parser present but file is a DCX, at least un-DCX it
-                if (!innerParsed && !error && isDcx && !Configuration.Args.RepackOnly)
+                if (!innerParsed && !error && isDcx && !Configuration.Active.RepackOnly)
                 {
                     WDCX dcxParser = Parsers.OfType<WDCX>().First();
                     innerParsed = errorService.Catch(() => {
@@ -152,7 +149,7 @@ public static class ParseMode
             }
         }
 
-        if (Configuration.Parallel)
+        if (Configuration.Active.Parallel)
             Parallel.ForEach(pathsList, Callback);
         else
             pathsList.ToList().ForEach(Callback);
@@ -163,7 +160,7 @@ public static class ParseMode
         switch (parsed)
         {
             case true:
-                if (Configuration.Parallel)
+                if (Configuration.Active.Parallel)
                 {
                     string fileName = Path.GetFileName(path);
                     if (recursive)

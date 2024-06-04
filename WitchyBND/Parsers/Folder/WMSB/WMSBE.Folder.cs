@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using SoulsFormats;
-using WitchyFormats;
+﻿using System.Collections.Generic;
 using WitchyLib;
 
 namespace WitchyBND.Parsers;
@@ -13,15 +8,16 @@ public partial class WMSBEFolder : WFolderParser
     public override string XmlTag => "msbe";
     public override bool HasPreprocess => true;
     public override WFileParserVerb Verb => WFileParserVerb.Serialize;
+    public override int Version => WBUtil.WitchyVersionToInt("2.8.0.1");
     public override bool Preprocess(string srcPath)
     {
-        return false; // Preprocess them all to perform WarnAboutTAEs
+        return false; // Preprocess them all to perform WarnAboutMSBs
     }
     private static bool WarnedAboutMSBs { get; set; }
 
     public static bool WarnAboutMSBs()
     {
-        if (Configuration.Expert || WarnedAboutMSBs || Configuration.Args.Passive) return true;
+        if (Configuration.Active.Expert || WarnedAboutMSBs || Configuration.Active.Passive) return true;
 
         List<string> lines = new()
         {

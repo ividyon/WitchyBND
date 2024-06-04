@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using SoulsFormats;
 using WitchyBND.Errors;
-using WitchyBND.Services;
 using WitchyFormats;
 using WitchyLib;
 
@@ -58,7 +57,7 @@ public partial class WTAEFolder
             bag.Add(anim);
         }
 
-        if (Configuration.Parallel)
+        if (Configuration.Active.Parallel)
         {
             Parallel.ForEach(animFiles, Callback);
         }

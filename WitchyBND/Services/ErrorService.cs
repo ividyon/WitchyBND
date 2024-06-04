@@ -3,9 +3,7 @@ using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.IO;
-using PPlus;
 using SoulsFormats;
-using WitchyBND;
 using WitchyBND.Errors;
 using WitchyLib;
 
@@ -22,6 +20,7 @@ namespace WitchyBND.Services
         public void RegisterException(Exception e, string? source = null);
         public void RegisterError(string message, bool write = true);
         public void RegisterError(WitchyError error, bool write = true);
+        public void CriticalError(string message);
         public void PrintIssues();
 
         public bool Catch(Func<bool> callback, out bool error, string? source = null);
@@ -94,6 +93,14 @@ namespace WitchyBND.Services
                 throw new Exception(error.Message);
         }
 
+        public void CriticalError(string message)
+        {
+            output.WriteError(message.PromptPlusEscape());
+            output.WriteLine("The application will now shut down.");
+            output.KeyPress("Press any key to continue...").Run();
+            Environment.Exit(0);
+        }
+
 
         public void PrintIssues()
         {
@@ -160,7 +167,7 @@ Process error output:
                 if (Configuration.IsTest)
                     throw;
                 RegisterError(new WitchyError(
-                    @$"The {e.Format.GetAttribute<DisplayAttribute>().Name} tool located at ""{Configuration.DeferTools[e.Format].Path}"" exited with code {e.ExitCode} with the following error message:
+                    @$"The {e.Format.GetAttribute<DisplayAttribute>().Name} tool located at ""{Configuration.Active.DeferTools[e.Format].Path}"" exited with code {e.ExitCode} with the following error message:
 
 {e.Error}", source, WitchyErrorType.Generic));
             }
@@ -241,7 +248,7 @@ namespace WitchyBND.Errors
     {
         public string Message { get; set; }
         public WitchyErrorType Type { get; set; } = WitchyErrorType.Generic;
-        public string? Source { get; set; } = null;
+        public string? Source { get; set; }
         public short ErrorCode { get; set; } = -1;
 
         public WitchyError(string message)

@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using SoulsFormats;
-using WitchyBND.Errors;
-using WitchyBND.Services;
 using WitchyFormats;
 using WitchyLib;
 
@@ -76,7 +72,7 @@ public partial class WMSBEFolder
             }
         }));
 
-        if (Configuration.Parallel)
+        if (Configuration.Active.Parallel)
         {
             Parallel.ForEach(taskList, task => {
                 task.Start();
@@ -100,7 +96,7 @@ public partial class WMSBEFolder
 
     private MSBE.Event RepackEvent(string srcPath, string type, string fileName)
     {
-        var filePath = Path.Combine(srcPath, "Event", $"{fileName}.xml");
+        var filePath = Path.Combine(srcPath, "Event", type, $"{fileName}.xml");
         switch (type)
         {
             case "Generator":
@@ -132,7 +128,7 @@ public partial class WMSBEFolder
 
     private MSBE.Region RepackRegion(string srcPath, string type, string fileName)
     {
-        var filePath = Path.Combine(srcPath, "Region", $"{fileName}.xml");
+        var filePath = Path.Combine(srcPath, "Region", type, $"{fileName}.xml");
 
         switch (type)
         {
@@ -217,7 +213,7 @@ public partial class WMSBEFolder
 
     private MSBE.Model RepackModel(string srcPath, string type, string fileName)
     {
-        var filePath = Path.Combine(srcPath, "Model", $"{fileName}.xml");
+        var filePath = Path.Combine(srcPath, "Model", type, $"{fileName}.xml");
 
         switch (type)
         {
@@ -239,7 +235,7 @@ public partial class WMSBEFolder
 
     private MSBE.Part RepackPart(string srcPath, string type, string fileName)
     {
-        var filePath = Path.Combine(srcPath, "Part", $"{fileName}.xml");
+        var filePath = Path.Combine(srcPath, "Part", type, $"{fileName}.xml");
 
         switch (type)
         {
@@ -268,7 +264,7 @@ public partial class WMSBEFolder
 
     private MSBE.Route RepackRoute(string srcPath, string type, string fileName)
     {
-        var filePath = Path.Combine(srcPath, "Route", $"{fileName}.xml");
+        var filePath = Path.Combine(srcPath, "Route", type, $"{fileName}.xml");
 
         switch (type)
         {

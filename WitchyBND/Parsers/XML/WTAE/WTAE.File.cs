@@ -54,7 +54,7 @@ public partial class WTAEFile : WXMLParser
 
     public static bool WarnAboutTAEs()
     {
-        if (Configuration.Expert || WarnedAboutTAEs || Configuration.Args.Passive) return true;
+        if (Configuration.Active.Expert || WarnedAboutTAEs || Configuration.Active.Passive) return true;
 
         List<string> lines = new()
         {

@@ -1,18 +1,11 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Enumeration;
 using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
-using Microsoft.Extensions.DependencyInjection;
 using SoulsFormats;
-using WitchyBND.CliModes;
 using WitchyBND.Services;
-using WitchyLib;
 using ServiceProvider = WitchyBND.Services.ServiceProvider;
 
 namespace WitchyBND.Parsers;
@@ -117,7 +110,7 @@ public abstract class WFileParser
     }
     public static void AddLocationToXml(string path, XElement xml)
     {
-        if (!string.IsNullOrEmpty(Configuration.Args.Location))
+        if (!string.IsNullOrEmpty(Configuration.Active.Location))
             xml.AddFirst(new XElement("sourcePath", Path.GetDirectoryName(path)));
         xml.AddFirst(new XElement("filename", Path.GetFileName(path)));
     }
@@ -184,9 +177,9 @@ public abstract class WXMLParser : WSingleFileParser
 
     public override string GetUnpackDestPath(string srcPath)
     {
-        if (string.IsNullOrEmpty(Configuration.Args.Location))
+        if (string.IsNullOrEmpty(Configuration.Active.Location))
             return $"{srcPath}.xml";
-        return $"{Configuration.Args.Location}\\{Path.GetFileName(srcPath)}.xml";
+        return $"{Configuration.Active.Location}\\{Path.GetFileName(srcPath)}.xml";
     }
 
     public override string GetRepackDestPath(string srcPath, XElement xml)

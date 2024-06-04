@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
@@ -26,7 +25,7 @@ public class WLUAINFO : WXMLParser
         xw.WriteStartElement("luainfo");
 
         xw.WriteElementString("filename", Path.GetFileName(srcPath));
-        if (!string.IsNullOrEmpty(Configuration.Args.Location))
+        if (!string.IsNullOrEmpty(Configuration.Active.Location))
             xw.WriteElementString("sourcePath", Path.GetDirectoryName(srcPath));
 
         xw.WriteElementString("bigendian", info.BigEndian.ToString());

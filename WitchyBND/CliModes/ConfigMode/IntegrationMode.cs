@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.Win32;
 using PPlus;
 using WitchyBND.Services;
+using WitchyLib;
 
 namespace WitchyBND.CliModes;
 
