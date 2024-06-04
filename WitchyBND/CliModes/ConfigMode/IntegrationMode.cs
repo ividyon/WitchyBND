@@ -61,6 +61,7 @@ Your taskbar will briefly disappear for a few seconds. Witchy will try to restor
                     var choice = output.Confirm("Proceed with restarting the Explorer process?").Run();
                     if (choice.Value.IsYesResponseKey())
                     {
+                        output.WriteLine("Restarting the Explorer process...");
                         Shell.RestartExplorer();
                         output.WriteLine("Restarted the Explorer process.");
                     }

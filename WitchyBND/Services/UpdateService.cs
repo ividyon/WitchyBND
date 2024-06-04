@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PPlus;
+using WitchyBND.CliModes;
 using WitchyLib;
 
 namespace WitchyBND.Services;
@@ -202,7 +203,7 @@ public class UpdateService : IUpdateService
     {
         var exePath = WBUtil.GetExecutablePath();
         var tempPath = exePath.Replace(".exe", ".exe.tmp");
-        var hasContextMenu = !dry && Shell.ComplexContextMenuIsRegistered();
+        var hasContextMenu = !dry && Shell.ComplexContextMenuIsRegistered(WBUtil.GetExeLocation());
 
         (Version, string) getOnlineVersion()
         {
@@ -379,8 +380,22 @@ Witchy will try to restore any open Explorer windows.");
         output.WriteLine($"Successfully updated WitchyBND to v{onlineVersion}.\nThe application will now restart.");
 
         if (!hasContextMenu)
-            output.WriteLine(
-                "Consider enabling Windows integration for a right-click context menu. You may find it in the WitchyBND settings screen.");
+        {
+            var contextMenuQuery = output.Confirm(
+                @"Would you like to enable Windows context menu integration?
+You'll be able to perform common WitchyBND operations by right-clicking on files and folders.")
+                .Config(c => c.EnabledAbortKey(false))
+                .Run();
+            if (contextMenuQuery.Value.IsYesResponseKey())
+            {
+                IntegrationMode.RegisterContext();
+                output.WriteLine("Windows integration enabled.");
+            }
+            else
+            {
+                output.WriteLine("You can find the Windows integration setup in the WitchyBND settings if you wish to enable it later.");
+            }
+        }
 
         if (!Configuration.Active.Passive)
             output.KeyPress("Press any key to continue...").Run();

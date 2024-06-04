@@ -137,7 +137,7 @@ public static class Configuration
     public static void LoadConfiguration()
     {
         IConfigurationRoot config = new ConfigurationBuilder()
-            .AddJsonFile(WBUtil.GetExeLocation("appsettings.json"))
+            .AddJsonFile(WBUtil.GetExeLocation("appsettings.json"), true)
             .AddJsonFile(Path.Combine(AppDataDirectory, "appsettings.user.json"), true)
             .AddJsonFile(WBUtil.GetExeLocation("appsettings.override.json"), true)
             .Build();

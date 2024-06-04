@@ -28,10 +28,13 @@ public static class Shell
     private const string ComplexMenuGuid = "{cce90c57-0a92-4cb7-8e9b-0cfa92138ae9}";
     private const string ComplexMenuFullName = "WitchyBND.Shell.WitchyContextMenu";
 
-    public static bool ComplexContextMenuIsRegistered()
+    public static bool ComplexContextMenuIsRegistered(string path = null)
     {
-        var probeKey = string.Join(Path.DirectorySeparatorChar, [ClassesRegistryKey, ComplexMenuFullName]);
-        return Root.OpenSubKey(probeKey) != null;
+        if (path != null)
+            path = $"file:///{path.Replace(Path.DirectorySeparatorChar, '/').TrimEnd('/')}/WitchyBND.Shell.dll";
+        var probeKey = string.Join(Path.DirectorySeparatorChar, [ClsidRegistryKey, ComplexMenuGuid, "InprocServer32"]);
+        var key = Root.OpenSubKey(probeKey);
+        return path != null ? (string)key?.GetValue("CodeBase") == path : key != null;
     }
 
     public static void RegisterComplexContextMenu()
