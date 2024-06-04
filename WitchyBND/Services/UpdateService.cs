@@ -379,7 +379,7 @@ Witchy will try to restore any open Explorer windows.");
 
         output.WriteLine($"Successfully updated WitchyBND to v{onlineVersion}.\nThe application will now restart.");
 
-        if (!hasContextMenu)
+        if (!Shell.ComplexContextMenuIsRegistered())
         {
             var contextMenuQuery = output.Confirm(
                 @"Would you like to enable Windows context menu integration?
