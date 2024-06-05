@@ -20,13 +20,13 @@ public class TestBase
         var output = new TestOutputService();
         var error = new ErrorService(output);
         var game = new GameService(error, output);
-        var startup = new UpdateService(error, output);
+        var update = new UpdateService(error, output);
 
         var collection = new ServiceCollection()
             .AddSingleton<IOutputService>(output)
             .AddSingleton<IErrorService>(error)
             .AddSingleton<IGameService>(game)
-            .AddSingleton<IUpdateService>(startup);
+            .AddSingleton<IUpdateService>(update);
 
         return collection.BuildServiceProvider();
     }
@@ -48,7 +48,7 @@ public class TestBase
     [OneTimeSetUp]
     public void StartUp()
     {
-        Configuration.ReplaceStoredConfig(new ConfigurationBuilder()
+        Configuration.SwapOutConfig(new ConfigurationBuilder()
             .AddJsonFile(Path.Combine(TestContext.CurrentContext.TestDirectory, "appsettings.json"))
             .Build());
         Configuration.Active.Passive = true;

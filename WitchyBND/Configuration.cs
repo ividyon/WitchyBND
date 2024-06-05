@@ -119,9 +119,10 @@ public static class Configuration
 
     public static bool ParamDefaultValues => Active.ParamDefaultValueThreshold > 0f;
 
-    public static void ReplaceStoredConfig(IConfigurationRoot config)
+    public static void SwapOutConfig(IConfigurationRoot config)
     {
         Stored = config.Get<StoredConfig>();
+        ActivateStoredConfiguration();
     }
 
     static Configuration()
@@ -143,7 +144,7 @@ public static class Configuration
             .Build();
 
         Stored = config.Get<StoredConfig>() ?? new StoredConfig();
-        ActivateStoredConfiguration(Stored);
+        ActivateStoredConfiguration();
     }
 
     public static void SaveConfiguration()
@@ -152,8 +153,9 @@ public static class Configuration
         File.WriteAllText(Path.Combine(AppDataDirectory, "appsettings.user.json"), newStored);
     }
 
-    public static void ActivateStoredConfiguration(StoredConfig stored)
+    public static void ActivateStoredConfiguration(StoredConfig? stored = null)
     {
+        stored ??= Stored;
         Active.Bnd = stored.Bnd;
         Active.Dcx = stored.Dcx;
         Active.ParamDefaultValueThreshold = stored.ParamDefaultValueThreshold;
