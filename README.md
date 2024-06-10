@@ -89,6 +89,12 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.9.0.1
+
+* Replaced the error thrown when a FFXBND is missing reslist files, or has too many reslist files, with a notice.
+  * As of now, they don't have any known effect, and FXRs work fine without reslists.
+* Fixed an issue where the Offline Mode setting could not be toggled from the configuration menu.
+
 ### 2.9.0.0
 
 Note: This version adds an auto-update feature. If you're using the context menu Windows integration, you'll have to unregister the context menu one last time to install this update, and then re-register the context menu. The auto-updater will handle this smoothly moving forward.
