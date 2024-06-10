@@ -171,11 +171,19 @@ public class WFFXBNDModern : WBinderParser
                 string[] diff2 = resNames.Except(effectNames).ToArray();
                 if (diff1.Any())
                 {
-                    throw new Exception($"Following FXRs are missing reslists:\n\n{string.Join("\n", diff1)}");
+                    errorService.RegisterNotice(@$"Following FXRs are missing reslists:
+
+{string.Join("\n", diff1)}
+
+As of now, reslist files aren't known to serve a purpose, so this is probably not a problem.");
                 }
                 if (diff2.Any())
                 {
-                    throw new Exception($"Following reslists are missing FXRs:\n\n{string.Join("\n", diff2)}");
+                    errorService.RegisterNotice(@$"Following reslists are missing FXRs:
+
+{string.Join("\n", diff2)}
+
+Consider tidying up the unpacked archive folder.");
                 }
             }
         }
