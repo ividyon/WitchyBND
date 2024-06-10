@@ -86,9 +86,9 @@ Launching the program without specifying any files will open this configuration 
 If you want to unpack or repack a file or directory, you can either:
 
   a) Drag and drop it into the WitchyBND executable.
-  b) Configure the context menu in the following screen,
-     then right-click the file or directory and select
-     ""WitchyBND"" in the context menu.
+  b) Configure the context menu under ""Windows integration""
+     in the following screen, then right-click the file or
+     directory and select ""WitchyBND"" in the context menu.
 
 Press any key to continue to the configuration screen...");
 
@@ -178,7 +178,7 @@ Press any key to continue to the configuration screen...");
                     updateConfig();
                     break;
                 case ConfigMenuItem.ToggleOfflineMode:
-                    Configuration.Stored.PauseOnError = !Configuration.Stored.PauseOnError;
+                    Configuration.Stored.Offline = !Configuration.Stored.Offline;
                     updateConfig();
                     break;
                 case ConfigMenuItem.ToggleTaeFolder:
