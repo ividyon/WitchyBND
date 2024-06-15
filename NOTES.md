@@ -1,3 +1,2 @@
-* Replaced the error thrown when a FFXBND is missing reslist files, or has too many reslist files, with a notice.
-  * As of now, they don't have any known effect, and FXRs work fine without reslists.
-* Fixed an issue where the Offline Mode setting could not be toggled from the configuration menu.
+* Fixed an issue where FXRs wouldn't appear ingame. You need a ffxreslist file for each FXR after all, but it can be empty. 
+  * WitchyBND will now auto-generate an empty FFXRESLIST file for every FXR file in an FFX binder that doesn't have one.

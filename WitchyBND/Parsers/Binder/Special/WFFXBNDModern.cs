@@ -161,21 +161,22 @@ public class WFFXBNDModern : WBinderParser
         // Sanity check fxr and reslist
         // Every FXR must have a matching reslist with the exact same name and vice versa
         // therefore there must also be the same amount of FXRs as reslists
+        List<string> missingReslists = new();
         if (effectPaths.Count > 0 && resPaths.Count > 0)
         {
             var effectNames = new SortedSet<string>(effectPaths.Select(p => Path.GetFileNameWithoutExtension(p)));
             var resNames = new SortedSet<string>(resPaths.Select(p => Path.GetFileNameWithoutExtension(p)));
             if (!effectNames.SetEquals(resNames))
             {
-                string[] diff1 = effectNames.Except(resNames).ToArray();
+                missingReslists = effectNames.Except(resNames).ToList();
                 string[] diff2 = resNames.Except(effectNames).ToArray();
-                if (diff1.Any())
+                if (missingReslists.Any())
                 {
                     errorService.RegisterNotice(@$"Following FXRs are missing reslists:
 
-{string.Join("\n", diff1)}
+{string.Join("\n", missingReslists)}
 
-As of now, reslist files aren't known to serve a purpose, so this is probably not a problem.");
+WitchyBND will create empty reslist files to compensate.");
                 }
                 if (diff2.Any())
                 {
@@ -351,9 +352,31 @@ Consider tidying up the unpacked archive folder.");
             }
         }
 
+        void missingResCallback()
+        {
+            if (!missingReslists.Any()) return;
+
+            var dir = xml.Element("resDir")!.Value;
+            string basePath = Path.Combine(rootPath, dir);
+
+            if (Configuration.Active.Parallel)
+                Parallel.ForEach(missingReslists, inMissingResCallback);
+            else
+                missingReslists.ForEach(inMissingResCallback);
+            return;
+
+            void inMissingResCallback(string effectName)
+            {
+                var fileName = $"{effectName}.ffxreslist";
+                var effect = effectPaths.First(f => f.ToLower().EndsWith($"{effectName.ToLower()}.fxr"));
+                var file = new BinderFile(Binder.FileFlags.Flag1, 400000 + effectPaths.IndexOf(effect), Path.Combine(basePath, fileName), Array.Empty<byte>());
+                bag.Add(file);
+            }
+        }
+
         if (Configuration.Active.Parallel)
         {
-            Parallel.Invoke(effectCallback, textureCallback, modelCallback, animCallback, resCallback);
+            Parallel.Invoke(effectCallback, textureCallback, modelCallback, animCallback, resCallback, missingResCallback);
         }
         else
         {
@@ -362,6 +385,7 @@ Consider tidying up the unpacked archive folder.");
             modelCallback();
             animCallback();
             resCallback();
+            missingResCallback();
         }
 
         bnd.Files = bag.OrderBy(f => f.ID).ToList();

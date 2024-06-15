@@ -89,6 +89,11 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.9.0.2
+
+* Fixed an issue where FXRs wouldn't appear ingame. You need a ffxreslist file for each FXR after all, but it can be empty.
+  * WitchyBND will now auto-generate an empty FFXRESLIST file for every FXR file in an FFX binder that doesn't have one.
+
 ### 2.9.0.1
 
 * Replaced the error thrown when a FFXBND is missing reslist files, or has too many reslist files, with a notice.
