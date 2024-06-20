@@ -283,14 +283,14 @@
     <autoFootEffectDecalBaseId1 AltName="Automatic Foot Effect - Decal Base ID [1]" Wiki="Decal to be attached when a foot effect occurs. Floor material is also taken into consideration" />
     <toughness AltName="Toughness" Wiki="Basic value of toughness" />
     <toughnessRecoverCorrection AltName="Toughness Correction" Wiki="Correction value for toughness recovery time" />
-    <regainRate_PhysNeutral AltName="Absorption: Standard" />
-    <regainRate_PhysSlash AltName="Absorption: Slash" />
-    <regainRate_PhysBlow AltName="Absorption: Strike" />
-    <regainRate_PhysThrust AltName="Absorption: Thrust" />
-    <regainRate_Magic AltName="Absorption: Magic" />
-    <regainRate_Fire AltName="Absorption: Fire" />
-    <regainRate_Thunder AltName="Absorption: Lightning" />
-    <regainRate_Dark AltName="Absorption: Dark" />
+    <regainRate_PhysNeutral AltName="Absorption: Standard"  IsInvertedPercentage=""/>
+    <regainRate_PhysSlash AltName="Absorption: Slash" IsInvertedPercentage=""/>
+    <regainRate_PhysBlow AltName="Absorption: Strike" IsInvertedPercentage=""/>
+    <regainRate_PhysThrust AltName="Absorption: Thrust" IsInvertedPercentage=""/>
+    <regainRate_Magic AltName="Absorption: Magic" IsInvertedPercentage=""/>
+    <regainRate_Fire AltName="Absorption: Fire" IsInvertedPercentage=""/>
+    <regainRate_Thunder AltName="Absorption: Lightning" IsInvertedPercentage=""/>
+    <regainRate_Dark AltName="Absorption: Dark" IsInvertedPercentage=""/>
 	<darkGuardCutRate AltName="Guard Absorption: Dark" />
     <clothUpdateOffset AltName="Cloth Update Offset" Wiki="Cross update priority offset [m]" />
     <npcPlayerWeightType AltName="NPC Player Weight Type" Wiki="Equipment weight type applied for NPC players" Enum="NPC_WEIGHT_TYPE" />
@@ -337,8 +337,8 @@
     <mpEstusFlaskRecovery_failedLotPointAdd AltName="Missed FP Flask Recovery - Bonus Chance" Wiki="The next probability increase value when the MP est recovery lottery is missed. Addition value of numerator." />
     <WanderGhostPhantomId AltName="Wandering Ghost Phantom ID" Wiki="Phantom shader with ID specified only on the guest side Specify the phantom shader ID and make it an illusion" Refs="PhantomParam" />
     <hearingHeadSize AltName="Listen Head Size" Wiki="The offset size to be set instead of the capsule offset at the time of hearing judgment. Use this value as an offset only if it is set to 0 or higher." />
-    <pad1 AltName="" />
-    <pad2 AltName="" />
+    <pad1 AltName="" IsHidden=""/>
+    <pad2 AltName="" IsHidden=""/>
   </Field>
   <Self Wiki="NPC data" AlternativeOrder="behaviorVariationId,AiThinkId,-,
 nameId,hp,mp,stamina,staminaRecoverBaseVal,getSoul,-,

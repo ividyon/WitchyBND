@@ -12,6 +12,7 @@
     <behaviorJudgeId AltName="behaviorJudgeId" />
     <ezStateBehaviorType_old AltName="ezStateBehaviorType_old" />
     <refType AltName="refType" Enum="BEHAVIOR_REF_TYPE" />
+    <refType AltName="refType" />
     <pad0 AltName="pad0" />
     <atkParamId AltName="atkParamId" Refs="AtkParam_Npc(refType=0),AtkParam_Pc(refType=0)"/>
     <bulletParamId AltName="bulletParamId" Refs="Bullet(refType=1)" />

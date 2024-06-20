@@ -9,6 +9,38 @@
       <Option Value="4" Name="Type 4" />
     </Enum>
   </Enums>
+  <ColorEdit>
+    <ColorEditor Name="Edge Color">
+        <Field Name="edgeColorR" Type="u8"/> 
+        <Field Name="edgeColorG" Type="u8"/> 
+        <Field Name="edgeColorB" Type="u8"/> 
+        <Field Name="edgeColorA" Type="f32"/>
+    </ColorEditor>
+    <ColorEditor Name="Front Color">
+        <Field Name="frontColorR" Type="u8"/> 
+        <Field Name="frontColorG" Type="u8"/> 
+        <Field Name="frontColorB" Type="u8"/> 
+        <Field Name="frontColorA" Type="f32"/>
+    </ColorEditor>
+    <ColorEditor Name="Diffuse Color">
+        <Field Name="diffMulColorR" Type="u8"/> 
+        <Field Name="diffMulColorG" Type="u8"/> 
+        <Field Name="diffMulColorB" Type="u8"/> 
+        <Field Name="specMulColorA" Type="f32"/>
+    </ColorEditor>
+    <ColorEditor Name="Specular Color">
+        <Field Name="specMulColorR" Type="u8"/> 
+        <Field Name="specMulColorG" Type="u8"/> 
+        <Field Name="specMulColorB" Type="u8"/> 
+        <Field Name="specMulColorA" Type="f32"/>
+    </ColorEditor>
+    <ColorEditor Name="Light Color">
+        <Field Name="lightColorR" Type="u8"/> 
+        <Field Name="lightColorG" Type="u8"/> 
+        <Field Name="lightColorB" Type="u8"/> 
+        <Field Name="null" Type="f32"/>
+    </ColorEditor>
+  </ColorEdit>
   <Field>
     <edgeColorA AltName="Edge Color: Alpha" Wiki="Edge color A." />
     <frontColorA AltName="Front Color: Alpha" Wiki="The front color is A." />
@@ -30,7 +62,7 @@
     <lightColorR AltName="Light Color: R" Wiki="Light color R." />
     <lightColorG AltName="Light Color: G" Wiki="Light color G." />
     <lightColorB AltName="Light Color: B" Wiki="Light color B." />
-    <reserve AltName=""/>
+    <reserve AltName="" IsHidden=""/>
     <alpha AltName="Overall Alpha" Wiki="The overall transparency." />
     <blendRate AltName="Blend Rate" Wiki="The blend ratio." />
     <blendType AltName="Blend Type" Wiki="The type of alpha blend." Enum="PHANTOM_BLEN_TYPE_ENUM" />
@@ -38,7 +70,7 @@
     <isFrontSubtract AltName="Perform Front Color Subtraction" Wiki="Is it front color subtraction?" IsBool="" />
     <isNo2Pass AltName="Is 1 Pass Only" Wiki="Do you not do 2pass?" IsBool="" />
     
-    <pad1 AltName="" />
+    <pad1 AltName="" IsHidden=""/>
   </Field>
   <Self Wiki="Phantom shader coloring"/>
 </PARAMMETA>

@@ -3246,8 +3246,6 @@
 503356 Baldachin's Blessing - Used [Cycle]
 503359 Baldachin's Blessing - Remove Held Debuff
 503360 Baldachin's Blessing - Held Debuff
-503361 Radiant Baldachin's Blessing
-503362 Radiant Baldachin's Blessing [Cycle]
 503500 Uplifting Aromatic
 503501 Uplifting Aromatic
 503520 Ironjar Aromatic
