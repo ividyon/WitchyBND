@@ -3,3 +3,4 @@
 * Updated to the latest Paramdex from Smithbox.
   * This includes preliminary 1.12 PARAM support.
 * Fixed an issue where unpacking a regulation.bin would needlessly ask for the PARAM version even though the archive provides it.
+* Refined the error message that appears when a FFXBND is empty.

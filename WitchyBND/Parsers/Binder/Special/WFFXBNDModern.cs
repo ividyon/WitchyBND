@@ -36,9 +36,12 @@ public class WFFXBNDModern : WBinderParser
         Directory.CreateDirectory(destDir);
 
         var filename = new XElement("filename", srcName);
+        if (!bnd.Files.Any())
+            throw new FriendlyException("FFXBND is empty, no need to unpack.");
+
         var rootFile = bnd.Files.FirstOrDefault(f => f.Name.Contains("\\sfx\\"));
         if (rootFile == null)
-            throw new Exception("FFXBND has invalid structure; expected \\sfx\\ path.");
+            throw new FriendlyException("FFXBND has invalid structure; expected \\sfx\\ path.");
         var rootPath = rootFile.Name.Substring(0, rootFile.Name.IndexOf("\\sfx\\", StringComparison.Ordinal) + 5);
         var xml = new XElement("ffxbnd",
             filename,
