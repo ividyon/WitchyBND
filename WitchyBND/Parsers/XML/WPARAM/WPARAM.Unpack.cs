@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using SoulsFormats;
 using WitchyBND.Errors;
+using WitchyBND.Services;
 using WitchyFormats;
 using WitchyLib;
 using PARAMDEF = WitchyFormats.PARAMDEF;
@@ -27,7 +28,7 @@ public partial class WPARAM
             Is(srcPath, null, out file);
         }
 
-        var gameInfo = passedGameInfo ?? gameService.DetermineGameType(srcPath, true);
+        var gameInfo = passedGameInfo ?? gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.PARAM);
         var game = gameInfo.Item1;
         var regVer = gameInfo.Item2;
 

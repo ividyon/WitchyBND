@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
-using ZstdSharp;
 
 namespace SoulsFormats
 {
@@ -712,7 +711,7 @@ namespace SoulsFormats
             bw.Pad(0x10);
         }
 
-        private static void CompressDCXZSTD(byte[] data, BinaryWriterEx bw, int compressionLevel = 21)
+        private static void CompressDCXZSTD(byte[] data, BinaryWriterEx bw, int compressionLevel = 5)
         {
             byte[] compressed = SFUtil.WriteZstd(data, compressionLevel);
 
@@ -726,7 +725,7 @@ namespace SoulsFormats
             bw.WriteUInt32((uint)data.Length);
             bw.WriteUInt32((uint)compressed.Length);
             bw.WriteASCII("DCP\0");
-            bw.WriteASCII("KRAK");
+            bw.WriteASCII("ZSTD");
             bw.WriteInt32(0x20);
             bw.WriteByte((byte)compressionLevel);
             bw.WriteByte(0);

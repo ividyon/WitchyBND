@@ -73,7 +73,6 @@ public class RegulationTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var outFile));
 
-            _gameService.DetermineGameType(path, true, dirGame);
             parser.Unpack(path, outFile);
             string? destPath = parser.GetUnpackDestPath(path);
 
@@ -88,7 +87,7 @@ public class RegulationTests : TestBase
             File.Delete(path);
 
             Assert.That(Directory.Exists(destPath));
-            _gameService.DetermineGameType(destPath, true, dirGame);
+            _gameService.DetermineGameType(destPath, IGameService.GameDeterminationType.PARAMBND, dirGame);
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
             parser.Preprocess(destPath);

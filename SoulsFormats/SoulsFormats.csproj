@@ -21,7 +21,7 @@
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.2.0" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-    <PackageReference Include="ZstdSharp.Port" Version="0.8.1" />
+    <PackageReference Include="ZstdNet" Version="1.4.5" />
   </ItemGroup>
   <ItemGroup>
     <None Update="oo2core_6_win64.dll">

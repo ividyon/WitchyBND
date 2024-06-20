@@ -6,7 +6,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using ZstdSharp;
+using ZstdNet;
 
 namespace SoulsFormats
 {
@@ -624,7 +624,8 @@ namespace SoulsFormats
 
         public static byte[] WriteZstd(byte[] data, int compressionLevel)
         {
-            using var compressor = new Compressor(compressionLevel);
+            var options = new CompressionOptions(compressionLevel);
+            using var compressor = new Compressor(options);
             return compressor.Wrap(data).ToArray();
         }
     }

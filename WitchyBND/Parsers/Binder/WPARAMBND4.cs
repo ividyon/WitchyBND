@@ -6,15 +6,22 @@ using System.Xml.Linq;
 using PPlus;
 using SoulsFormats;
 using WitchyBND.CliModes;
+using WitchyBND.Services;
 using WitchyLib;
 
 namespace WitchyBND.Parsers;
 
 public class WPARAMBND4 : WBinderParser
 {
+    private readonly IGameService _gameService;
 
     public override string Name => "PARAM BND4";
     public override bool IncludeInList => false;
+
+    public WPARAMBND4()
+    {
+        _gameService = ServiceProvider.GetService<IGameService>();
+    }
 
     private static bool FilenameIsDS2Regulation(string path)
     {
@@ -84,7 +91,7 @@ public class WPARAMBND4 : WBinderParser
         if (gameService.KnownGamePathsForParams.Any(p => srcPath.StartsWith(p.Key))) return false;
         if (!(Exists(srcPath) && Is(srcPath, null, out ISoulsFile? _)) && !(ExistsUnpacked(srcPath) && IsUnpacked(srcPath))) return false;
 
-        gameService.DetermineGameType(srcPath, true);
+        _gameService.UnpackParamdex();
 
         return false; // Preprocess them all to perform WarnAboutParams
     }
@@ -113,7 +120,10 @@ public class WPARAMBND4 : WBinderParser
 
     public override void Unpack(string srcPath, ISoulsFile? _)
     {
-        var bnd = GetRegulationWithGameType(srcPath, out WBUtil.GameType? game);
+        BND4? bnd = GetRegulationWithGameType(srcPath, out WBUtil.GameType? game);
+        if (bnd == null)
+            throw new InvalidDataException("Could not parse binder from regulation file.");
+
         switch (game)
         {
             case WBUtil.GameType.DS2:
@@ -122,6 +132,7 @@ public class WPARAMBND4 : WBinderParser
             case WBUtil.GameType.ER:
             case WBUtil.GameType.SDT:
             case WBUtil.GameType.AC6:
+                _gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.PARAMBND, game, ulong.Parse(bnd.Version));
                 ParseMode.Parsers.OfType<WBND4>().First().Unpack(srcPath, bnd, game);
                 break;
             default:
@@ -144,6 +155,8 @@ public class WPARAMBND4 : WBinderParser
         var versionElement = xml.Element("version");
         if (versionElement == null) throw new XmlException("XML has no Version element");
         var regVer = Convert.ToUInt64(versionElement.Value);
+
+        _gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.PARAMBND, game, regVer);
 
         ulong? latestVer = WBUtil.GetLatestKnownRegulationVersion(game);
         if (latestVer < regVer)

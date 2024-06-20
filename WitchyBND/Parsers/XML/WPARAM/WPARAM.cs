@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using SoulsFormats;
+using WitchyBND.Services;
 using WitchyFormats;
 using WitchyLib;
 using PARAMDEF = WitchyFormats.PARAMDEF;
@@ -71,7 +72,7 @@ If DSMapStudio does not yet support this game or regulation version, an experime
 
         if (!Is(srcPath, null, out ISoulsFile? _)) return false;
 
-        gameService.DetermineGameType(srcPath, true);
+        gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.PARAM);
 
         return true;
     }

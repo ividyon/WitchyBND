@@ -2,3 +2,4 @@
   * This allows unpacking the 1.12 regulation.bin file.
 * Updated to the latest Paramdex from Smithbox.
   * This includes preliminary 1.12 PARAM support.
+* Fixed an issue where unpacking a regulation.bin would needlessly ask for the PARAM version even though the archive provides it.

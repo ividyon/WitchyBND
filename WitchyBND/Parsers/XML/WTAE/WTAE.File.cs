@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using SoulsFormats;
+using WitchyBND.Services;
 using WitchyFormats;
 using WitchyLib;
 
@@ -18,7 +19,7 @@ public partial class WTAEFile : WXMLParser
     public override bool Preprocess(string srcPath)
     {
         if (!(ExistsUnpacked(srcPath) && IsUnpacked(srcPath)) && !(Exists(srcPath) && Is(srcPath, null, out ISoulsFile? _))) return false;
-        gameService.DetermineGameType(srcPath, false);
+        gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.Other);
         if (templateDict.Any()) return false;
         foreach (var type in Enum.GetValues<WBUtil.GameType>().Except(new [] { WBUtil.GameType.AC6 }))
         {

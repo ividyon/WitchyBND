@@ -17,6 +17,13 @@ namespace WitchyBND.Services;
 
 public interface IGameService
 {
+
+    public enum GameDeterminationType
+    {
+        PARAM,
+        PARAMBND,
+        Other
+    }
     ConcurrentDictionary<WBUtil.GameType, ConcurrentDictionary<string, PARAMDEF>> ParamdefStorage { get; }
 
     ConcurrentDictionary<WBUtil.GameType, ConcurrentDictionary<string, ConcurrentDictionary<int, string>>> NameStorage
@@ -29,10 +36,11 @@ public interface IGameService
     Dictionary<string, WBUtil.GameType> KnownGamePaths { get; }
     Dictionary<string, WBUtil.GameType> KnownExecutables { get; }
 
-    (WBUtil.GameType, ulong) DetermineGameType(string path, bool forParams, WBUtil.GameType? game = null,
+    (WBUtil.GameType, ulong) DetermineGameType(string path, GameDeterminationType type, WBUtil.GameType? game = null,
         ulong regVer = 0);
 
     void PopulateParamdex(WBUtil.GameType game);
+    void UnpackParamdex();
     void PopulateNames(WBUtil.GameType game, string paramName);
 }
 
@@ -107,15 +115,14 @@ public class GameService : IGameService
             }
         }
     }
-
-    public (WBUtil.GameType, ulong) DetermineGameType(string path, bool forParams,
+    public (WBUtil.GameType, ulong) DetermineGameType(string path, IGameService.GameDeterminationType type,
         WBUtil.GameType? game = null, ulong regVer = 0)
     {
         UnpackParamdex();
         string knownPath = File.Exists(path) ? Path.GetDirectoryName(path)! : path;
 
         // Determine what kind of PARAM we're dealing with here
-        if (forParams)
+        if (type == IGameService.GameDeterminationType.PARAM || type == IGameService.GameDeterminationType.PARAMBND)
         {
             var known = KnownGamePathsForParams.Keys.FirstOrDefault(p => path.StartsWith(p));
             if (known != null) return KnownGamePathsForParams[known];
@@ -125,13 +132,13 @@ public class GameService : IGameService
             {
                 XDocument xDoc = XDocument.Load(xmlPath);
 
-                if (xDoc.Root?.Element("game")?.Value != null)
+                if (game == null && xDoc.Root?.Element("game")?.Value != null)
                 {
                     Enum.TryParse(xDoc.Root!.Element("game")!.Value, out WBUtil.GameType regGame);
                     game = regGame;
                 }
 
-                if (xDoc.Root?.Element("version")?.Value != null)
+                if (regVer == 0 && xDoc.Root?.Element("version")?.Value != null)
                 {
                     try
                     {
@@ -161,9 +168,9 @@ public class GameService : IGameService
                 try
                 {
                     var json = File.ReadAllLines(pJsonPath);
-                    var type = json.Select(s =>
+                    var gameType = json.Select(s =>
                         Regex.Match(s, @"\s*?""GameType"":\s(.*?),")).FirstOrDefault(s => s.Success);
-                    var dsmsGameType = Enum.Parse<DsmsGameType>(type.Groups[1].Value);
+                    var dsmsGameType = Enum.Parse<DsmsGameType>(gameType.Groups[1].Value);
                     game = DsmsGameTypeToWitchyGameType(dsmsGameType);
                     knownPath = Path.GetDirectoryName(pJsonPath);
                 }
@@ -214,36 +221,44 @@ public class GameService : IGameService
             }
         }
 
-        if (forParams && regVer == 0)
+        if (regVer == 0)
         {
-            output.WriteError("Could not determine regulation version.");
-            if (!Configuration.Active.Passive)
+            switch (type)
             {
-                output.WriteLine(@"Please input the regulation version to use for reading the PARAM.
+                case IGameService.GameDeterminationType.PARAM:
+                    output.WriteError("Could not determine regulation version.");
+                    if (!Configuration.Active.Passive)
+                    {
+                        output.WriteLine(@"Please input the regulation version to use for reading the PARAM.
 Format examples:
 ""10210005"" for Armored Core VI 1.02.1
 ""11001000"" for Elden Ring 1.10.1
 Enter 0, or leave it empty, to use the latest available paramdef.");
-                var input = output.Input("Input regulation version")
-                    .AddValidators(PromptValidators.IsTypeULong())
-                    .ValidateOnDemand()
-                    .DefaultIfEmpty("0")
-                    .Config(config => {
-                        config.EnabledAbortKey(false);
-                    })
-                    .Run();
-                if (input.IsAborted || input.Value == "0")
-                {
-                    output.WriteError("Defaulting to latest paramdef.");
-                }
-                else
-                {
-                    regVer = Convert.ToUInt64(input.Value);
-                }
-            }
-            else
-            {
-                output.WriteError("Defaulting to latest paramdef.");
+                        var input = output.Input("Input regulation version")
+                            .AddValidators(PromptValidators.IsTypeULong())
+                            .ValidateOnDemand()
+                            .DefaultIfEmpty("0")
+                            .Config(config => {
+                                config.EnabledAbortKey(false);
+                            })
+                            .Run();
+                        if (input.IsAborted || input.Value == "0")
+                        {
+                            output.WriteError("Defaulting to latest paramdef.");
+                        }
+                        else
+                        {
+                            regVer = Convert.ToUInt64(input.Value);
+                        }
+                    }
+                    else
+                    {
+                        output.WriteError("Defaulting to latest paramdef.");
+                    }
+                    break;
+                // case IGameService.GameDeterminationType.PARAMBND:
+                //
+                //     break;
             }
         }
 
@@ -252,7 +267,7 @@ Enter 0, or leave it empty, to use the latest available paramdef.");
         {
             PopulateTentativeAC6Types();
         }
-        if (forParams)
+        if (type == IGameService.GameDeterminationType.PARAM || type == IGameService.GameDeterminationType.PARAMBND)
         {
             KnownGamePathsForParams[knownPath] = (game.Value, regVer);
             PopulateParamdex(game.Value);

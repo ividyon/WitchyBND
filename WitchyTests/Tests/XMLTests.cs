@@ -255,13 +255,13 @@ public class XMLTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var file));
 
-            _gameService.DetermineGameType(path, true, game.Item1, game.Item2);
+            _gameService.DetermineGameType(path, IGameService.GameDeterminationType.PARAM, game.Item1, game.Item2);
             parser.Unpack(path, file);
 
             File.Delete(path);
 
             string destPath = parser.GetUnpackDestPath(path);
-            _gameService.DetermineGameType(destPath, true, game.Item1, game.Item2);
+            _gameService.DetermineGameType(destPath, IGameService.GameDeterminationType.PARAM, game.Item1, game.Item2);
             Assert.That(File.Exists(destPath));
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));

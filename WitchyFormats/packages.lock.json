@@ -17,10 +17,10 @@
         "resolved": "4.5.0",
         "contentHash": "okurQJO6NRE/apDIP23ajJ0hpiNmJ+f0BwOlB/cSqTLQlw5upkf+5+96+iG2Jw40G1fCVCyPz/FhIABUjMR+RQ=="
       },
-      "ZstdSharp.Port": {
+      "ZstdNet": {
         "type": "Transitive",
-        "resolved": "0.8.1",
-        "contentHash": "19tNz33kn2EkyViFXuxfVn338UJaRmkwBphVqP2dVJIYQUQgFrgG5h061mxkRRg1Ax6r+6WOj1FxaFZ5qaWqqg=="
+        "resolved": "1.4.5",
+        "contentHash": "fi9aP1QY3ZenIMUW1pxdSjku6lYAUjScrwfXSXT1qyKtTdLxOIzeBMe+w/hQm0vMsvQnjcFInByMrIT7AlXUHA=="
       },
       "soulsformats": {
         "type": "Project",
@@ -28,7 +28,7 @@
           "BouncyCastle.Cryptography": "[2.2.0, )",
           "System.Text.Encoding.CodePages": "[7.0.0, )",
           "System.ValueTuple": "[4.5.0, )",
-          "ZstdSharp.Port": "[0.8.1, )"
+          "ZstdNet": "[1.4.5, )"
         }
       },
       "studioutils": {
