@@ -90,6 +90,11 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.10.0.1
+
+* Fixed an issue where the 1.12 regulation.bin would not open due to a missing library file.
+* Improved the error message when unable to open a regulation.bin file.
+
 ### 2.10.0.0
 
 An initial release for basic ELDEN RING 1.12 (Shadow of the Erdtree) support.

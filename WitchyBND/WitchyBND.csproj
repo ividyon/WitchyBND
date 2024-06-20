@@ -89,7 +89,7 @@
     
     <Target Name="IncludeAdditions" AfterTargets="Publish">
         <Message Importance="high"  Text="Including Shell DLL and Updater..." />
-        <Copy SourceFiles="..\WitchyBND.Shell\bin\$(Configuration)\WitchyBND.Shell.dll;..\WitchyBND.Shell\bin\$(Configuration)\SharpShell.dll" DestinationFolder="$(PublishDir)" />
+        <Copy SourceFiles="..\WitchyBND.Shell\bin\$(Configuration)\WitchyBND.Shell.dll;..\WitchyBND.Shell\bin\$(Configuration)\SharpShell.dll;..\SoulsFormats\bin\Release\net7.0-windows\x64\libzstd.dll" DestinationFolder="$(PublishDir)" />
 <!--        <Move SourceFiles="$(PublishDir)\WitchyUpdater.exe" DestinationFiles="$(PublishDir)\Updater.exe" />-->
     </Target>
 

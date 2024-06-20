@@ -248,17 +248,16 @@ public static class WBUtil
             game = GameType.ER;
             return SFUtil.DecryptERRegulation(path);
         }
-        catch (Exception)
+        catch (InvalidDataException e)
         {
             try
             {
                 game = GameType.AC6;
                 return SFUtil.DecryptAC6Regulation(path);
             }
-            catch (Exception e2)
+            catch (InvalidDataException e2)
             {
-                throw new InvalidDataException($"File is not a regulation.bin BND for Elden Ring or Armored Core VI.",
-                    e2);
+                throw new InvalidDataException($"Could not read sane data using either ER or AC6 decryption keys.");
             }
         }
     }
