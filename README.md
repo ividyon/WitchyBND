@@ -71,6 +71,7 @@ It is originally based on [Yabber](https://github.com/JKAnderson/Yabber) by TKGP
 * *NatsuDragneelTheFireDragon* - MQB support
 * *Vawser* - Paramdex, Smithbox additions
 * *CCCode* - FXR research
+* *ClayAmore* - ZSTD Decompression
 * *ivi* - WitchyBND maintainer
 
 Special thanks to Nordgaren, The12thAvenger, philiquaz, TKGP, thefifthmatt, Kirnifr, Rayan and many more for various assistance during development.

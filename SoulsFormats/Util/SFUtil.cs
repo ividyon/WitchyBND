@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using ZstdSharp;
 
 namespace SoulsFormats
 {
@@ -601,6 +602,30 @@ namespace SoulsFormats
 
                 return ms.ToArray();
             }
+        }
+
+        /**
+         * Written by ClayAmore
+         */
+        public static byte[] ReadZstd(BinaryReaderEx br, int compressedSize)
+        {
+            byte[] compressed = br.ReadBytes(compressedSize);
+
+            using (var decompressedStream = new MemoryStream())
+            {
+                using (var compressedStream = new MemoryStream(compressed))
+                using (var deflateStream = new DecompressionStream(compressedStream))
+                {
+                    deflateStream.CopyTo(decompressedStream);
+                }
+                return decompressedStream.ToArray();
+            }
+        }
+
+        public static byte[] WriteZstd(byte[] data, int compressionLevel)
+        {
+            using var compressor = new Compressor(compressionLevel);
+            return compressor.Wrap(data).ToArray();
         }
     }
 }

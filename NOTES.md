@@ -1,2 +1,2 @@
-* Fixed an issue where FXRs wouldn't appear ingame. You need a ffxreslist file for each FXR after all, but it can be empty. 
-  * WitchyBND will now auto-generate an empty FFXRESLIST file for every FXR file in an FFX binder that doesn't have one.
+* Added support for DCX ZSTD compression (used in ELDEN RING 1.12). Thanks to ClayAmore for the decompression code.
+    * This allows unpacking the 1.12 regulation.bin file.
