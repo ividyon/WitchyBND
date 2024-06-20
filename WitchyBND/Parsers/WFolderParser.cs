@@ -12,6 +12,7 @@ namespace WitchyBND.Parsers;
 public abstract class WFolderParser : WFileParser
 {
     private static bool WarnedAboutKrak { get; set; }
+    private static bool WarnedAboutZstd { get; set; }
 
     public override WFileParserVerb Verb => WFileParserVerb.Unpack;
 
@@ -25,8 +26,8 @@ public abstract class WFolderParser : WFileParser
 
     protected void WarnAboutKrak(DCX.Type compression, int count)
     {
-        if (WarnedAboutKrak) return;
         if (compression is not DCX.Type.DCX_KRAK and not DCX.Type.DCX_KRAK_MAX) return;
+        if (WarnedAboutKrak) return;
         if (count <= 10) return;
 
         errorService.RegisterNotice(@$"DCX compression is set to DCX_KRAK or DCX_KRAK_MAX.
@@ -35,6 +36,19 @@ Consider switching to a faster compression such as: DCX_DFLT_11000_44_9_15
 Simply replace the compression level in the {GetFolderXmlFilename()} file to this value.");
 
         WarnedAboutKrak = true;
+    }
+
+    protected bool WarnAboutZstd(DCX.Type compression)
+    {
+        if (compression is not DCX.Type.DCX_ZSTD) return false;
+        if (WarnedAboutZstd) return true;
+
+        errorService.RegisterNotice(@$"DCX compression is set to DCX_ZSTD.
+Zstd compression is currently not supported. The file will be compressed using Deflate compression.
+This should not cause adverse effects in the game.");
+
+        WarnedAboutZstd = true;
+        return true;
     }
 
     public override string GetUnpackDestPath(string srcPath)
