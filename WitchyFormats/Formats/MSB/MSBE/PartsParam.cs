@@ -155,7 +155,7 @@ namespace WitchyFormats
         /// </summary>
         public abstract class Part : Entry, IMsbPart
         {
-            public enum GameEditionDisableType : int
+            public enum GameEditionDisableType : uint
             {
                 NeverDisable = 0,
 
@@ -2036,6 +2036,12 @@ namespace WitchyFormats
                 /// Unknown.
                 /// </summary>
                 [IgnoreProperty]
+                public int UnkT06 { get; set; }
+
+                /// <summary>
+                /// Unknown.
+                /// </summary>
+                [IgnoreProperty]
                 public float UnkT14 { get; set; }
 
                 /// <summary>
@@ -2160,7 +2166,7 @@ namespace WitchyFormats
                     UnkT02 = br.ReadByte();
                     UnkT03 = br.ReadBoolean();
                     UnkT04 = br.ReadSingle();
-                    br.AssertInt32(0);
+                    UnkT06 = br.ReadInt32();
                     br.AssertInt32(0);
                     br.AssertInt32(0);
                     UnkT14 = br.ReadSingle();
@@ -2201,7 +2207,7 @@ namespace WitchyFormats
                     bw.WriteByte(UnkT02);
                     bw.WriteBoolean(UnkT03);
                     bw.WriteSingle(UnkT04);
-                    bw.WriteInt32(0);
+                    bw.WriteInt32(UnkT06);
                     bw.WriteInt32(0);
                     bw.WriteInt32(0);
                     bw.WriteSingle(UnkT14);
@@ -2260,6 +2266,11 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                public int UnkT18 { get; set; }
+
+                /// <summary>
+                /// Unknown.
+                /// </summary>
                 public GparamConfig Gparam { get; set; }
 
                 /// <summary>
@@ -2302,7 +2313,7 @@ namespace WitchyFormats
                     br.AssertInt32(0);
                     br.AssertInt32(-1);
                     br.AssertInt32(-1);
-                    br.AssertInt32(-1);
+                    UnkT18 = br.ReadInt32();
                     br.AssertInt32(-1);
                 }
 
@@ -2319,7 +2330,7 @@ namespace WitchyFormats
                     bw.WriteInt32(0);
                     bw.WriteInt32(-1);
                     bw.WriteInt32(-1);
-                    bw.WriteInt32(-1);
+                    bw.WriteInt32(UnkT18);
                     bw.WriteInt32(-1);
                 }
 
@@ -2552,6 +2563,11 @@ namespace WitchyFormats
                 /// </summary>
                 public UnkStruct11 Unk11 { get; set; }
 
+                /// <summary>
+                /// Unknown.
+                /// </summary>
+                [IgnoreProperty]
+                public short UnkT00 { get; set; }
                 /// <summary>
                 /// Unknown.
                 /// </summary>
@@ -2976,6 +2992,12 @@ namespace WitchyFormats
                     public bool Unk25 { get; set; }
 
                     /// <summary>
+                    /// Unknown.
+                    /// </summary>
+                    [IgnoreProperty]
+                    public int Unk28 { get; set; }
+
+                    /// <summary>
                     /// Creates an AssetUnkStruct3 with default values.
                     /// </summary>
                     public AssetUnkStruct3()
@@ -3012,7 +3034,7 @@ namespace WitchyFormats
                         Unk25 = br.ReadBoolean();
                         br.AssertByte(0);
                         br.AssertByte(0);
-                        br.AssertInt32(0);
+                        Unk28 = br.ReadInt32();
                         br.AssertInt32(0);
                         br.AssertInt32(0);
                         br.AssertInt32(0);
@@ -3039,7 +3061,7 @@ namespace WitchyFormats
                         bw.WriteBoolean(Unk25);
                         bw.WriteByte(0);
                         bw.WriteByte(0);
-                        bw.WriteInt32(0);
+                        bw.WriteInt32(Unk28);
                         bw.WriteInt32(0);
                         bw.WriteInt32(0);
                         bw.WriteInt32(0);
@@ -3203,7 +3225,7 @@ namespace WitchyFormats
 
                 private protected override void ReadTypeData(BinaryReaderEx br)
                 {
-                    br.AssertInt16(0);
+                    UnkT00 = br.ReadInt16();
                     UnkT02 = br.AssertInt16([0, 1]);
                     br.AssertInt32(0);
                     br.AssertInt32(0);
@@ -3256,7 +3278,7 @@ namespace WitchyFormats
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
-                    bw.WriteInt16(0);
+                    bw.WriteInt16(UnkT00);
                     bw.WriteInt16(UnkT02);
                     bw.WriteInt32(0);
                     bw.WriteInt32(0);

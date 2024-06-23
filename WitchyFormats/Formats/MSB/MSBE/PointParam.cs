@@ -1339,6 +1339,11 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                public byte UnkT32 { get; set; }
+
+                /// <summary>
+                /// Unknown.
+                /// </summary>
                 public bool UnkT33 { get; set; }
 
                 /// <summary>
@@ -1372,7 +1377,7 @@ namespace WitchyFormats
                     IsModifyLight = br.ReadBoolean();
                     UnkT2F = br.ReadBoolean();
                     UnkT30 = br.ReadInt16();
-                    br.AssertByte(0);
+                    UnkT32 = br.ReadByte();
                     UnkT33 = br.ReadBoolean();
                     UnkT34 = br.ReadInt16();
                     UnkT36 = br.ReadInt16();
@@ -1393,7 +1398,7 @@ namespace WitchyFormats
                     bw.WriteBoolean(IsModifyLight);
                     bw.WriteBoolean(UnkT2F);
                     bw.WriteInt16(UnkT30);
-                    bw.WriteByte(0);
+                    bw.WriteByte(UnkT32);
                     bw.WriteBoolean(UnkT33);
                     bw.WriteInt16(UnkT34);
                     bw.WriteInt16(UnkT36);
@@ -1832,6 +1837,11 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                public int UnkT10 { get; set; }
+
+                /// <summary>
+                /// Unknown.
+                /// </summary>
                 public float UnkT14 { get; set; }
 
                 /// <summary>
@@ -1852,7 +1862,7 @@ namespace WitchyFormats
                     UnkT04 = br.ReadInt32();
                     UnkT08 = br.ReadSingle();
                     UnkT0C = br.ReadSingle();
-                    br.AssertInt32(-1);
+                    UnkT10 = br.ReadInt32();
                     UnkT14 = br.ReadSingle();
                     UnkT18 = br.ReadSingle();
                     br.AssertInt32(0);
@@ -1864,7 +1874,7 @@ namespace WitchyFormats
                     bw.WriteInt32(UnkT04);
                     bw.WriteSingle(UnkT08);
                     bw.WriteSingle(UnkT0C);
-                    bw.WriteInt32(-1);
+                    bw.WriteInt32(UnkT10);
                     bw.WriteSingle(UnkT14);
                     bw.WriteSingle(UnkT18);
                     bw.WriteInt32(0);
@@ -1885,6 +1895,8 @@ namespace WitchyFormats
                 [MSBParamReference(ParamName = "WeatherLotParam")]
                 public int WeatherLotParamID { get; set; }
 
+                public int UnkT08 { get; set; }
+
                 /// <summary>
                 /// Creates a WeatherOverride with default values.
                 /// </summary>
@@ -1896,7 +1908,7 @@ namespace WitchyFormats
                 {
                     WeatherLotParamID = br.ReadInt32();
                     br.AssertInt32(-1);
-                    br.AssertInt32(0x0, 0xFFFFFF, 0x1FFFF);
+                    UnkT08 = br.ReadInt32();
                     br.AssertInt32(0);
                     br.AssertInt32(0);
                     br.AssertInt32(0);
@@ -1908,7 +1920,7 @@ namespace WitchyFormats
                 {
                     bw.WriteInt32(WeatherLotParamID);
                     bw.WriteInt32(-1);
-                    bw.WriteInt32(0);
+                    bw.WriteInt32(UnkT08);
                     bw.WriteInt32(0);
                     bw.WriteInt32(0);
                     bw.WriteInt32(0);
