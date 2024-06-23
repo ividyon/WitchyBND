@@ -277,6 +277,7 @@ public class UpdateService : IUpdateService
                 "WitchyBND.Shell.dll",
                 "SharpShell.dll",
                 "README.md",
+                "libzstd.dll",
                 "Assets",
             };
 

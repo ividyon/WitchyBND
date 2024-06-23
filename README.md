@@ -90,6 +90,11 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.10.0.3
+
+* Improved MSBE serialization.
+* Fixed an issue with the auto-updater where it would get stuck on the ZSTD library DLL.
+
 ### 2.10.0.2
 
 * Set the "Flexible" feature to Off. This feature skipped important sanity checks which were abused by malicious actors like Garden of Eyes, but are once again important for working with potentially broken DLC files.
