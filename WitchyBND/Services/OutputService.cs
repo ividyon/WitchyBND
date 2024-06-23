@@ -50,24 +50,39 @@ public class OutputService : IOutputService
     public int WriteLine(string? value = null, Style? style = null, bool clearrestofline = true)
     {
         if (Configuration.Active.Silent) return 0;
-        int outCode;
-        lock (ConsoleWriterLock)
-            outCode = PromptPlus.Write(value + Environment.NewLine, style, clearrestofline);
-        return outCode;
+        try
+        {
+            int outCode;
+            lock (ConsoleWriterLock)
+                outCode = PromptPlus.Write(value + Environment.NewLine, style, clearrestofline);
+            return outCode;
+        }
+        catch
+        {
+            return -1;
+        }
     }
 
     public int WriteError(string? value = null, Style? style = null, bool clearrestofline = true)
     {
         if (Configuration.Active.Silent) return 0;
-        int outCode;
-        lock (ConsoleWriterLock)
+        try
         {
-            using (PromptPlus.OutputError())
+            int outCode;
+            lock (ConsoleWriterLock)
             {
-                outCode = PromptPlus.Write(value + Environment.NewLine, style, clearrestofline);
+                using (PromptPlus.OutputError())
+                {
+                    outCode = PromptPlus.Write(value + Environment.NewLine, style, clearrestofline);
+                }
             }
+
+            return outCode;
         }
-        return outCode;
+        catch
+        {
+            return -1;
+        }
     }
 
     public int DoubleDash(string value, DashOptions dashOptions = DashOptions.AsciiSingleBorder, int extralines = 0,

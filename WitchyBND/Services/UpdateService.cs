@@ -128,7 +128,8 @@ public class UpdateService : IUpdateService
                         case UpdateOptions.SkipVersion:
                             // Update last update time
                             var confirm = output.Confirm(
-                                "Are you sure? You will not receive any more update prompts for this version, and be unable to use the auto-updater for it.").Run();
+                                    "Are you sure? You will not receive any more update prompts for this version, and be unable to use the auto-updater for it.")
+                                .Run();
                             if (confirm.Value.IsYesResponseKey())
                             {
                                 Configuration.Stored.LastUpdateCheck = DateTime.UtcNow;
@@ -139,6 +140,7 @@ public class UpdateService : IUpdateService
                                 output.KeyPress("Press any key to continue...").Run();
                                 loop = false;
                             }
+
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -168,31 +170,34 @@ public class UpdateService : IUpdateService
             var lastUpdateFile = WBUtil.GetExeLocation("last-update.txt");
             if (File.Exists(lastUpdateFile))
                 File.Delete(lastUpdateFile);
-
-            Configuration.Stored.LastLaunchedVersion = version;
-            Configuration.SaveConfiguration();
-            return;
         }
-
-        // Further upgrades go here
-
-        // 2.9.0.0: Move settings
-        if (Configuration.Stored.LastLaunchedVersion < new Version(2, 9, 0, 0))
+        else
         {
-            var userConfig = WBUtil.GetExeLocation("appsettings.user.json");
-            var newConfigPath = Path.Combine(Configuration.AppDataDirectory, "appsettings.user.json");
-            if (File.Exists(userConfig))
-                File.Move(userConfig, newConfigPath, true);
-            Configuration.LoadConfiguration();
-        }
+            // Further upgrades go here
+            // 2.9.0.0: Move settings
+            if (Configuration.Stored.LastLaunchedVersion < new Version(2, 9, 0, 0))
+            {
+                var userConfig = WBUtil.GetExeLocation("appsettings.user.json");
+                var newConfigPath = Path.Combine(Configuration.AppDataDirectory, "appsettings.user.json");
+                if (File.Exists(userConfig))
+                    File.Move(userConfig, newConfigPath, true);
+            }
 
-        if (Configuration.Stored.LastLaunchedVersion < version)
-        {
-            var exePath = WBUtil.GetExecutablePath();
-            var tempPath = exePath.Replace(".exe", ".exe.tmp");
+            // 2.10.0.2: Turn off Flexible
+            if (Configuration.Stored.LastLaunchedVersion < new Version(2, 10, 0, 2))
+            {
+                Configuration.Stored.Flexible = false;
+                Configuration.Active.Flexible = false;
+            }
 
-            if (File.Exists(tempPath))
-                File.Delete(tempPath);
+            if (Configuration.Stored.LastLaunchedVersion < version)
+            {
+                var exePath = WBUtil.GetExecutablePath();
+                var tempPath = exePath.Replace(".exe", ".exe.tmp");
+
+                if (File.Exists(tempPath))
+                    File.Delete(tempPath);
+            }
         }
 
         Configuration.Stored.LastLaunchedVersion = version;
@@ -382,7 +387,7 @@ Witchy will try to restore any open Explorer windows.");
         if (!Shell.ComplexContextMenuIsRegistered())
         {
             var contextMenuQuery = output.Confirm(
-                @"Would you like to enable Windows context menu integration?
+                    @"Would you like to enable Windows context menu integration?
 You'll be able to perform common WitchyBND operations by right-clicking on files and folders.")
                 .Config(c => c.EnabledAbortKey(false))
                 .Run();
@@ -393,7 +398,8 @@ You'll be able to perform common WitchyBND operations by right-clicking on files
             }
             else
             {
-                output.WriteLine("You can find the Windows integration setup in the WitchyBND settings if you wish to enable it later.");
+                output.WriteLine(
+                    "You can find the Windows integration setup in the WitchyBND settings if you wish to enable it later.");
             }
         }
 
