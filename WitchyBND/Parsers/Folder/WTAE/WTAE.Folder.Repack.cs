@@ -133,9 +133,12 @@ public partial class WTAEFolder
                         var startTime = float.Parse(evEl.Element("startTime")!.Value);
                         var endTime = float.Parse(evEl.Element("endTime")!.Value);
                         var isUnk = bool.Parse(evEl.Element("isUnk")?.Value ?? "false");
-                        if (!isUnk)
+                        var hasTemplate = template.Any(t => t.Value.ContainsKey(evType));
+                        if (!hasTemplate)
+                            errorService.RegisterNotice($"Missing template for TAE event type {evType}.");
+                        if (!isUnk && hasTemplate)
                         {
-                            var ev = new TAE.Event(startTime, endTime, evType, unk04, tae.BigEndian, template[tae.EventBank][evType]);
+                            var ev = new TAE.Event(startTime, endTime, evType, unk04, tae.BigEndian, template.First(t => t.Value.ContainsKey(evType)).Value[evType]);
                             ev.Group = group;
 
                             var paramsEl = evEl.Element("params");

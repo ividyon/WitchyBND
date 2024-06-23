@@ -110,7 +110,8 @@ public partial class WTAEFolder
                     eventEl.AddE("unk04", ev.Unk04);
                     eventEl.AddE("startTime", ev.StartTime);
                     eventEl.AddE("endTime", ev.EndTime);
-                    if (tae.AppliedTemplate[tae.EventBank].ContainsKey(ev.Type))
+
+                    if (ev.Parameters != null && ev.Parameters.Template != null)
                     {
                         eventEl.AddE("params", ev.Parameters?.Values.Select(p => {
                             var paramEl = new XElement("param");
@@ -121,6 +122,7 @@ public partial class WTAEFolder
                     }
                     else
                     {
+                        errorService.RegisterNotice($"Missing template for TAE event type {ev.Type}.");
                         eventEl.AddE("isUnk", true);
                         eventEl.AddE("unkParams", string.Join(",", ev.GetParameterBytes(tae.BigEndian)));
                     }

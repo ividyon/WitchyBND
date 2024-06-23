@@ -4,5 +4,5 @@ There is a high likelihood of Witchy corrupting files or providing incomplete da
 
 These builds are primarily intended for datamining purposes.
 
-* Improved MSBE serialization.
-* Fixed an issue with the auto-updater where it would get stuck on the ZSTD library DLL.
+* Removed the requirement for TAE events to be contained in the correct event bank.
+  * This is kind of a janky workaround until a newer version of SoulsAssetPipeline is available.
