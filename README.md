@@ -90,6 +90,14 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.10.0.2
+
+* Set the "Flexible" feature to Off. This feature skipped important sanity checks which were abused by malicious actors like Garden of Eyes, but are once again important for working with potentially broken DLC files.
+  * It can be re-enabled in options at your own risk.
+* Fixed some issues with the MSB parser.
+* Added some failsafes for text output crashing the actual process.
+* Updated Paramdex to the latest from Smithbox.
+
 ### 2.10.0.1
 
 * Fixed an issue where the 1.12 regulation.bin would not open due to a missing library file.
