@@ -184,6 +184,11 @@ public partial class WMSBEFolder
                     WBUtil.XmlSerialize<MSBE.Event.Treasure>(treasure, filePath);
                     el.SetAttributeValue("type", treasure.GetType().Name);
                     break;
+                case MSBE.Event.AreaTeam areaTeam:
+                    filePath = WBUtil.NextAvailableFilename(Path.Combine(entryDir, areaTeam.GetType().Name, $"{fileName}.xml"));
+                    WBUtil.XmlSerialize<MSBE.Event.AreaTeam>(areaTeam, filePath);
+                    el.SetAttributeValue("type", areaTeam.GetType().Name);
+                    break;
                 case MSBE.Model.Asset asset:
                     filePath = WBUtil.NextAvailableFilename(Path.Combine(entryDir, asset.GetType().Name, $"{fileName}.xml"));
                     WBUtil.XmlSerialize<MSBE.Model.Asset>(asset, filePath);
@@ -264,6 +269,11 @@ public partial class WMSBEFolder
                     WBUtil.XmlSerialize<MSBE.Region.Connection>(connection, filePath);
                     el.SetAttributeValue("type", connection.GetType().Name);
                     break;
+                case MSBE.Region.DisableTumbleweed disableTumbleweed:
+                    filePath = WBUtil.NextAvailableFilename(Path.Combine(entryDir, disableTumbleweed.GetType().Name, $"{fileName}.xml"));
+                    WBUtil.XmlSerialize<MSBE.Region.DisableTumbleweed>(disableTumbleweed, filePath);
+                    el.SetAttributeValue("type", disableTumbleweed.GetType().Name);
+                    break;
                 case MSBE.Region.Dummy dummy:
                     filePath = WBUtil.NextAvailableFilename(Path.Combine(entryDir, dummy.GetType().Name, $"{fileName}.xml"));
                     WBUtil.XmlSerialize<MSBE.Region.Dummy>(dummy, filePath);
@@ -308,6 +318,16 @@ public partial class WMSBEFolder
                     filePath = WBUtil.NextAvailableFilename(Path.Combine(entryDir, horseRideOverride.GetType().Name, $"{fileName}.xml"));
                     WBUtil.XmlSerialize<MSBE.Region.HorseRideOverride>(horseRideOverride, filePath);
                     el.SetAttributeValue("type", horseRideOverride.GetType().Name);
+                    break;
+                case MSBE.Region.LockedMountJump lockedMountJump:
+                    filePath = WBUtil.NextAvailableFilename(Path.Combine(entryDir, lockedMountJump.GetType().Name, $"{fileName}.xml"));
+                    WBUtil.XmlSerialize<MSBE.Region.LockedMountJump>(lockedMountJump, filePath);
+                    el.SetAttributeValue("type", lockedMountJump.GetType().Name);
+                    break;
+                case MSBE.Region.LockedMountJumpFall lockedMountJumpFall:
+                    filePath = WBUtil.NextAvailableFilename(Path.Combine(entryDir, lockedMountJumpFall.GetType().Name, $"{fileName}.xml"));
+                    WBUtil.XmlSerialize<MSBE.Region.LockedMountJumpFall>(lockedMountJumpFall, filePath);
+                    el.SetAttributeValue("type", lockedMountJumpFall.GetType().Name);
                     break;
                 case MSBE.Region.InvasionPoint invasionPoint:
                     filePath = WBUtil.NextAvailableFilename(Path.Combine(entryDir, invasionPoint.GetType().Name, $"{fileName}.xml"));

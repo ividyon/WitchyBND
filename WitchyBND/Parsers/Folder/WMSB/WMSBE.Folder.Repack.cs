@@ -121,6 +121,8 @@ public partial class WMSBEFolder
                 return WBUtil.XmlDeserialize<MSBE.Event.SignPool>(filePath);
             case "Treasure":
                 return WBUtil.XmlDeserialize<MSBE.Event.Treasure>(filePath);
+            case "AreaTeam":
+                return WBUtil.XmlDeserialize<MSBE.Event.AreaTeam>(filePath);
             default:
                 throw new ArgumentOutOfRangeException(type);
         }
@@ -138,6 +140,8 @@ public partial class WMSBEFolder
                 return WBUtil.XmlDeserialize<MSBE.Region.BuddySummonPoint>(filePath);
             case "Connection":
                 return WBUtil.XmlDeserialize<MSBE.Region.Connection>(filePath);
+            case "DisableTumbleweed":
+                return WBUtil.XmlDeserialize<MSBE.Region.DisableTumbleweed>(filePath);
             case "Dummy":
                 return WBUtil.XmlDeserialize<MSBE.Region.Dummy>(filePath);
             case "EnvironmentMapEffectBox":
@@ -156,6 +160,10 @@ public partial class WMSBEFolder
                 return WBUtil.XmlDeserialize<MSBE.Region.Hitset>(filePath);
             case "HorseRideOverride":
                 return WBUtil.XmlDeserialize<MSBE.Region.HorseRideOverride>(filePath);
+            case "LockedMountJump":
+                return WBUtil.XmlDeserialize<MSBE.Region.LockedMountJump>(filePath);
+            case "LockedMountJumpFall":
+                return WBUtil.XmlDeserialize<MSBE.Region.LockedMountJumpFall>(filePath);
             case "InvasionPoint":
                 return WBUtil.XmlDeserialize<MSBE.Region.InvasionPoint>(filePath);
             case "MapNameOverride":
