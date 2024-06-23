@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using System.Runtime.Serialization;
+using System.Xml.Serialization;
 using SoulsFormats;
 
 namespace WitchyFormats
@@ -1640,8 +1641,10 @@ namespace WitchyFormats
                 [EnemyProperty]
                 [MSBReference(ReferenceType = typeof(Collision))]
                 public string CollisionPartName { get; set; }
+
                 [IndexProperty]
-                public int CollisionPartIndex { get; set; }
+                [XmlIgnore]
+                private int CollisionPartIndex { get; set; }
 
                 /// <summary>
                 /// Walk route followed by this enemy.
@@ -1649,8 +1652,10 @@ namespace WitchyFormats
                 [EnemyProperty]
                 [MSBReference(ReferenceType = typeof(Event.PatrolInfo))]
                 public string WalkRouteName { get; set; }
+
                 [IndexProperty]
-                public short WalkRouteIndex { get; set; }
+                [XmlIgnore]
+                private short WalkRouteIndex { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -2402,8 +2407,10 @@ namespace WitchyFormats
                 [MSBReference(ReferenceType = typeof(Collision))]
                 [NoRenderGroupInheritence()]
                 public string CollisionName { get; set; }
+
                 [IndexProperty]
-                public int CollisionIndex { get; set; }
+                [XmlIgnore]
+                private int CollisionIndex { get; set; }
 
                 /// <summary>
                 /// The map to load when on this collision.
@@ -2632,7 +2639,10 @@ namespace WitchyFormats
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Part))]
                 public string[] UnkPartNames { get; set; }
-                private int[] UnkPartIndices;
+
+                [IndexProperty]
+                [XmlIgnore]
+                private int[] UnkPartIndices { get; set; }
 
                 /// <summary>
                 /// Unknown.

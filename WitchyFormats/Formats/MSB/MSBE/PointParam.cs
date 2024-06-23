@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
+using System.Xml.Serialization;
 using SoulsFormats;
 
 namespace WitchyFormats
@@ -573,8 +574,10 @@ namespace WitchyFormats
             /// </summary>
             [MSBReference(ReferenceType = typeof(Part))]
             public string ActivationPartName { get; set; }
+
             [IndexProperty]
-            public int ActivationPartIndex { get; set; }
+            [XmlIgnore]
+            private int ActivationPartIndex { get; set; }
 
             /// <summary>
             /// Identifies the region in event scripts.
@@ -986,7 +989,10 @@ namespace WitchyFormats
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Region))]
                 public string[] ChildRegionNames { get; set; }
-                public int[] ChildRegionIndices;
+
+                [IndexProperty]
+                [XmlIgnore]
+                private int[] ChildRegionIndices { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -1100,8 +1106,10 @@ namespace WitchyFormats
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Region))]
                 public string WindAreaName { get; set; }
+
                 [IndexProperty]
-                public int WindAreaIndex { get; set; }
+                [XmlIgnore]
+                private int WindAreaIndex { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -1906,11 +1914,11 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public byte UnkT10 { get; set; }
+                public byte UnkT0A { get; set; }
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public byte UnkT11 { get; set; }
+                public byte UnkT0B { get; set; }
 
                 /// <summary>
                 /// Creates a WeatherOverride with default values.
@@ -1925,8 +1933,8 @@ namespace WitchyFormats
                     br.AssertInt32(-1);
                     UnkT08 = br.ReadByte();
                     UnkT09 = br.ReadByte();
-                    UnkT10 = br.ReadByte();
-                    UnkT11 = br.ReadByte();
+                    UnkT0A = br.ReadByte();
+                    UnkT0B = br.ReadByte();
                     br.AssertInt32(0);
                     br.AssertInt32(0);
                     br.AssertInt32(0);
@@ -1940,8 +1948,8 @@ namespace WitchyFormats
                     bw.WriteInt32(-1);
                     bw.WriteByte(UnkT08);
                     bw.WriteByte(UnkT09);
-                    bw.WriteByte(UnkT10);
-                    bw.WriteByte(UnkT11);
+                    bw.WriteByte(UnkT0A);
+                    bw.WriteByte(UnkT0B);
                     bw.WriteInt32(0);
                     bw.WriteInt32(0);
                     bw.WriteInt32(0);
@@ -2023,7 +2031,10 @@ namespace WitchyFormats
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Part))]
                 public string[] PartNames { get; set; }
-                public int[] PartIndices;
+
+                [IndexProperty]
+                [XmlIgnore]
+                private int[] PartIndices { get; set; }
 
                 /// <summary>
                 /// Unknown.
