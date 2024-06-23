@@ -19,6 +19,7 @@ namespace WitchyFormats
             Mount = 21,
             SignPool = 23,
             RetryPoint = 24,
+            AreaTeam = 25,
             Other = 0xFFFFFFFF,
         }
 
@@ -80,6 +81,11 @@ namespace WitchyFormats
             /// <summary>
             /// Unknown.
             /// </summary>
+            public List<Event.AreaTeam> AreaTeams { get; set; }
+
+            /// <summary>
+            /// Unknown.
+            /// </summary>
             public List<Event.Other> Others { get; set; }
 
             /// <summary>
@@ -97,6 +103,7 @@ namespace WitchyFormats
                 Mounts = new List<Event.Mount>();
                 SignPools = new List<Event.SignPool>();
                 RetryPoints = new List<Event.RetryPoint>();
+                AreaTeams = new List<Event.AreaTeam>();
                 Others = new List<Event.Other>();
             }
 
@@ -117,6 +124,7 @@ namespace WitchyFormats
                     case Event.Mount e: Mounts.Add(e); break;
                     case Event.SignPool e: SignPools.Add(e); break;
                     case Event.RetryPoint e: RetryPoints.Add(e); break;
+                    case Event.AreaTeam e: AreaTeams.Add(e); break;
                     case Event.Other e: Others.Add(e); break;
 
                     default:
@@ -133,7 +141,7 @@ namespace WitchyFormats
             {
                 return SFUtil.ConcatAll<Event>(
                     Treasures, Generators, ObjActs, Navmeshes, PseudoMultiplayers, PlatoonInfo,
-                    PatrolInfo, Mounts, SignPools, RetryPoints, Others);
+                    PatrolInfo, Mounts, SignPools, RetryPoints, AreaTeams, Others);
             }
             IReadOnlyList<IMsbEvent> IMsbParam<IMsbEvent>.GetEntries() => GetEntries();
 
@@ -172,6 +180,9 @@ namespace WitchyFormats
                     case EventType.RetryPoint:
                         return RetryPoints.EchoAdd(new Event.RetryPoint(br));
 
+                    case EventType.AreaTeam:
+                        return AreaTeams.EchoAdd(new Event.AreaTeam(br));
+
                     case EventType.Other:
                         return Others.EchoAdd(new Event.Other(br));
 
@@ -204,14 +215,16 @@ namespace WitchyFormats
             /// </summary>
             [MSBReference(ReferenceType = typeof(Part))]
             public string PartName { get; set; }
-            private int PartIndex;
+            [IndexProperty]
+            public int PartIndex { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
             [MSBReference(ReferenceType = typeof(Region))]
             public string RegionName { get; set; }
-            private int RegionIndex;
+            [IndexProperty]
+            public int RegionIndex { get; set; }
 
             /// <summary>
             /// Identifies the Event in event scripts.
@@ -276,7 +289,7 @@ namespace WitchyFormats
                 EventID = br.ReadInt32();
                 br.AssertUInt32((uint)Type);
                 OtherID = br.ReadInt32(); // ID
-                Unk14 = br.AssertInt32(0, 1);
+                Unk14 = br.AssertInt32([0, 1]);
                 long baseDataOffset = br.ReadInt64();
                 long typeDataOffset = br.ReadInt64();
                 long unk3Offset = br.ReadInt64();
@@ -414,7 +427,8 @@ namespace WitchyFormats
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Part))]
                 public string TreasurePartName { get; set; }
-                private int TreasurePartIndex;
+                [IndexProperty]
+                public int TreasurePartIndex { get; set; }
 
                 /// <summary>
                 /// The item lot to be given.
@@ -567,14 +581,14 @@ namespace WitchyFormats
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Region))]
                 public string[] SpawnRegionNames { get; set; }
-                private int[] SpawnRegionIndices;
+                public int[] SpawnRegionIndices;
 
                 /// <summary>
                 /// Parts that will be respawned.
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Part))]
                 public string[] SpawnPartNames { get; set; }
-                private int[] SpawnPartIndices;
+                public int[] SpawnPartIndices;
 
                 /// <summary>
                 /// Creates a Generator with default values.
@@ -648,8 +662,8 @@ namespace WitchyFormats
                 internal override void GetIndices(MSBE msb, Entries entries)
                 {
                     base.GetIndices(msb, entries);
-                    SpawnRegionIndices = MSB.FindIndices(entries.Regions, SpawnRegionNames);
-                    SpawnPartIndices = MSB.FindIndices(entries.Parts, SpawnPartNames);
+                    SpawnRegionIndices = MSB.FindIndices(this, entries.Regions, SpawnRegionNames);
+                    SpawnPartIndices = MSB.FindIndices(this, entries.Parts, SpawnPartNames);
                 }
             }
 
@@ -672,7 +686,8 @@ namespace WitchyFormats
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Part))]
                 public string ObjActPartName { get; set; }
-                private int ObjActPartIndex;
+                [IndexProperty]
+                public int ObjActPartIndex { get; set; }
 
                 /// <summary>
                 /// A row in ObjActParam.
@@ -756,7 +771,8 @@ namespace WitchyFormats
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Region))]
                 public string NavmeshRegionName { get; set; }
-                private int NavmeshRegionIndex;
+                [IndexProperty]
+                public int NavmeshRegionIndex { get; set; }
 
                 /// <summary>
                 /// Creates a Navmesh with default values.
@@ -908,7 +924,7 @@ namespace WitchyFormats
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Part))]
                 public string[] GroupPartsNames { get; set; }
-                private int[] GroupPartsIndices;
+                public int[] GroupPartsIndices;
 
                 /// <summary>
                 /// Creates a PlatoonInfo with default values.
@@ -953,7 +969,7 @@ namespace WitchyFormats
                 internal override void GetIndices(MSBE msb, Entries entries)
                 {
                     base.GetIndices(msb, entries);
-                    GroupPartsIndices = MSB.FindIndices(entries.Parts, GroupPartsNames);
+                    GroupPartsIndices = MSB.FindIndices(this, entries.Parts, GroupPartsNames);
                 }
             }
 
@@ -968,6 +984,7 @@ namespace WitchyFormats
                 /// <summary>
                 /// Determines patrol behavior. 0 = return to first region on loop, 1 = go through list backwards on loop, etc.
                 /// </summary>
+                [MSBEnum(EnumType = "PATROL_TYPE")]
                 public byte PatrolType { get; set; }
 
                 /// <summary>
@@ -975,13 +992,15 @@ namespace WitchyFormats
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Region))]
                 public string[] WalkRegionNames { get; set; }
-                private short[] WalkRegionIndices;
+                [IndexProperty]
+                public short[] WalkRegionIndices { get; set; }
 
                 /// <summary>
                 /// Creates a PatrolInfo with default values.
                 /// </summary>
                 public PatrolInfo() : base($"{nameof(Event)}: {nameof(PatrolInfo)}")
                 {
+                    WalkRegionIndices = new short[64];
                     WalkRegionNames = new string[64];
                 }
 
@@ -1047,14 +1066,16 @@ namespace WitchyFormats
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Part))]
                 public string RiderPartName { get; set; }
-                private int RiderPartIndex;
+                [IndexProperty]
+                public int RiderPartIndex { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Part))]
                 public string MountPartName { get; set; }
-                private int MountPartIndex;
+                [IndexProperty]
+                public int MountPartIndex { get; set; }
 
                 /// <summary>
                 /// Creates a Mount with default values.
@@ -1107,12 +1128,14 @@ namespace WitchyFormats
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Part))]
                 public string SignPartName { get; set; }
-                private int SignPartIndex;
+                [IndexProperty]
+                public int SignPartIndex { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public int UnkT04 { get; set; }
+                [MSBParamReference(ParamName = "SignPuddleParam")]
+                public int SignPuddleParamID { get; set; }
 
                 /// <summary>
                 /// Creates a SignPool with default values.
@@ -1127,7 +1150,7 @@ namespace WitchyFormats
                 private protected override void ReadTypeData(BinaryReaderEx br)
                 {
                     SignPartIndex = br.ReadInt32();
-                    UnkT04 = br.ReadInt32();
+                    SignPuddleParamID = br.ReadInt32();
                     br.AssertInt32(0);
                     br.AssertInt32(0);
                 }
@@ -1135,7 +1158,7 @@ namespace WitchyFormats
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
                     bw.WriteInt32(SignPartIndex);
-                    bw.WriteInt32(UnkT04);
+                    bw.WriteInt32(SignPuddleParamID);
                     bw.WriteInt32(0);
                     bw.WriteInt32(0);
                 }
@@ -1156,37 +1179,99 @@ namespace WitchyFormats
             /// <summary>
             /// Unknown.
             /// </summary>
+            public class AreaTeam : Event
+            {
+                private protected override EventType Type => EventType.AreaTeam;
+                private protected override bool HasTypeData => true;
+
+                public int EntityID_Leader { get; set; }
+                public int EUnk04 { get; set; }
+                public int EUnk08 { get; set; }
+                public int EUnk0c { get; set; }
+                public int RegionID_Leader { get; set; }
+                public int RegionID_Guest1 { get; set; }
+                public int RegionID_Guest2 { get; set; }
+                public int EUnk1c { get; set; }
+                public int EUnk20 { get; set; }
+                public int EUnk24 { get; set; }
+                public int EUnk28 { get; set; }
+
+                /// <summary>
+                /// Creates a AreaTeam with default values.
+                /// </summary>
+                public AreaTeam() : base($"{nameof(Event)}: {nameof(AreaTeam)}")
+                {
+                }
+
+                internal AreaTeam(BinaryReaderEx br) : base(br) { }
+
+                private protected override void ReadTypeData(BinaryReaderEx br)
+                {
+                    EntityID_Leader = br.ReadInt32();
+                    EUnk04 = br.ReadInt32();
+                    EUnk08 = br.ReadInt32();
+                    EUnk0c = br.ReadInt32();
+                    RegionID_Leader = br.ReadInt32();
+                    RegionID_Guest1 = br.ReadInt32();
+                    RegionID_Guest2 = br.ReadInt32();
+                    EUnk1c = br.ReadInt32();
+                    EUnk20 = br.ReadInt32();
+                    EUnk24 = br.ReadInt32();
+                    EUnk28 = br.ReadInt32();
+                }
+
+                private protected override void WriteTypeData(BinaryWriterEx bw)
+                {
+                    bw.WriteInt32(EntityID_Leader);
+                    bw.WriteInt32(EUnk04);
+                    bw.WriteInt32(EUnk08);
+                    bw.WriteInt32(EUnk0c);
+                    bw.WriteInt32(RegionID_Leader);
+                    bw.WriteInt32(RegionID_Guest1);
+                    bw.WriteInt32(RegionID_Guest2);
+                    bw.WriteInt32(EUnk1c);
+                    bw.WriteInt32(EUnk20);
+                    bw.WriteInt32(EUnk24);
+                    bw.WriteInt32(EUnk28);
+                }
+            }
+
+            /// <summary>
+            /// Unknown.
+            /// </summary>
             public class RetryPoint : Event
             {
                 private protected override EventType Type => EventType.RetryPoint;
                 private protected override bool HasTypeData => true;
 
                 /// <summary>
-                /// Unknown.
+                /// The asset name that the stake is represented by.
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Part))]
                 public string RetryPartName { get; set; }
-                private int RetryPartIndex;
+                [IndexProperty]
+                public int RetryPartIndex { get; set; }
 
                 /// <summary>
                 /// Flag that must be set for stake to be available.
                 /// </summary>
-                public uint EventFlagID { get; set; }
+                public uint TriggerEventFlagID { get; set; }
 
                 /// <summary>
-                /// Unknown.
+                /// The distance at which the retry point is active (only used if no retry region is set).
                 /// </summary>
-                public float UnkT08 { get; set; }
+                public float RetryDistance { get; set; }
 
                 /// <summary>
-                /// Unknown.
+                /// The region in which the retry point is active.
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Region))]
                 public string RetryRegionName { get; set; }
-                private short RetryRegionIndex;
+                [IndexProperty]
+                public short RetryRegionIndex { get; set; }
 
                 /// <summary>
-                /// Creates a SignPool with default values.
+                /// Creates a RetryPoint with default values.
                 /// </summary>
                 public RetryPoint() : base($"{nameof(Event)}: {nameof(RetryPoint)}") { }
 
@@ -1195,8 +1280,8 @@ namespace WitchyFormats
                 private protected override void ReadTypeData(BinaryReaderEx br)
                 {
                     RetryPartIndex = br.ReadInt32();
-                    EventFlagID = br.ReadUInt32();
-                    UnkT08 = br.ReadSingle();
+                    TriggerEventFlagID = br.ReadUInt32();
+                    RetryDistance = br.ReadSingle();
                     RetryRegionIndex = br.ReadInt16();
                     br.AssertInt16(0);
                 }
@@ -1204,8 +1289,8 @@ namespace WitchyFormats
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
                     bw.WriteInt32(RetryPartIndex);
-                    bw.WriteUInt32(EventFlagID);
-                    bw.WriteSingle(UnkT08);
+                    bw.WriteUInt32(TriggerEventFlagID);
+                    bw.WriteSingle(RetryDistance);
                     bw.WriteInt16(RetryRegionIndex);
                     bw.WriteInt16(0);
                 }

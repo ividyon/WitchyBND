@@ -155,22 +155,42 @@ namespace WitchyFormats
         /// </summary>
         public abstract class Part : Entry, IMsbPart
         {
+            public enum GameEditionDisableType : int
+            {
+                NeverDisable = 0,
+
+                /// <summary>
+                /// Disabled if Localize.PkgEdition byte ptr [rcx+0B73h] == 1.
+                /// The value is 1 in all released versions of Elden Ring.
+                /// </summary>
+                DisableInRelease = 1,
+
+                /// <summary>
+                /// Disabled if Localize.PkgEdition byte ptr [rcx+0B73h] == 2.
+                /// The value is 1 in all released versions of Elden Ring.
+                /// </summary>
+                DisableInPkgEditionFlag2 = 2,
+
+                DisableInNetworkTest = 3,
+            }
+
             private protected abstract PartType Type { get; }
             private protected abstract bool HasUnk1 { get; }
             private protected abstract bool HasUnk2 { get; }
             private protected abstract bool HasGparamConfig { get; }
             private protected abstract bool HasSceneGparamConfig { get; }
-            private protected abstract bool HasUnk7 { get; }
+            private protected abstract bool HasGrassConfig { get; }
             private protected abstract bool HasUnk8 { get; }
             private protected abstract bool HasUnk9 { get; }
-            private protected abstract bool HasUnk10 { get; }
+            private protected abstract bool HasTileLoadConfig { get; }
             private protected abstract bool HasUnk11 { get; }
 
             /// <summary>
             /// The model used by this part; requires an entry in ModelParam.
             /// </summary>
             public string ModelName { get; set; }
-            private int ModelIndex;
+            [IndexProperty]
+            public int ModelIndex { get; set; }
 
             /// <summary>
             /// Involved with serialization.
@@ -180,147 +200,166 @@ namespace WitchyFormats
             /// <summary>
             /// A path to a .sib file, presumably some kind of editor placeholder.
             /// </summary>
+            [IgnoreProperty]
             public string SibPath { get; set; }
 
             /// <summary>
             /// Location of the part.
             /// </summary>
+            [PositionProperty]
             public Vector3 Position { get; set; }
 
             /// <summary>
             /// Rotation of the part.
             /// </summary>
+            [RotationProperty]
             public Vector3 Rotation { get; set; }
 
             /// <summary>
             /// Scale of the part; only works for map pieces and objects.
             /// </summary>
+            [ScaleProperty]
             public Vector3 Scale { get; set; }
 
             /// <summary>
-            /// Unknown
+            /// 1 disables the part, 2 and 3 are unknown.
             /// </summary>
-            public int Unk44 { get; set; }
+            [IgnoreProperty]
+            public GameEditionDisableType GameEditionDisable { get; set; } = GameEditionDisableType.NeverDisable;
 
             /// <summary>
             /// Very speculative
             /// </summary>
+            [IgnoreProperty]
             public uint MapStudioLayer { get; set; }
 
             /// <summary>
             /// Identifies the part in event scripts.
             /// </summary>
+            [EnemyProperty]
             public uint EntityID { get; set; }
 
             /// <summary>
-            /// Unknown.
+            /// Enables use of PartsDrawParamID. If false, asset param is used instead.
             /// </summary>
-            public byte UnkE04 { get; set; }
+            [IgnoreProperty]
+            public byte isUsePartsDrawParamID { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
-            public byte LodParamID { get; set; }
+            [MSBParamReference(ParamName = "PartsDrawParam")]
+            [IgnoreProperty]
+            public short PartsDrawParamID { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
-            public byte UnkE09 { get; set; }
-
-            /// <summary>
-            /// Unknown.
-            /// </summary>
+            [IgnoreProperty]
             public sbyte IsPointLightShadowSrc { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public byte UnkE0B { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public bool IsShadowSrc { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public byte IsStaticShadowSrc { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public byte IsCascade3ShadowSrc { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public byte UnkE0F { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public byte UnkE10 { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public bool IsShadowDest { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public bool IsShadowOnly { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public bool DrawByReflectCam { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public bool DrawOnlyReflectCam { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public byte EnableOnAboveShadow { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public bool DisablePointLightEffect { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public byte UnkE17 { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public int UnkE18 { get; set; }
 
             /// <summary>
             /// Allows multiple parts to be identified by the same entity ID.
             /// </summary>
+            [EnemyProperty]
             public uint[] EntityGroupIDs { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public short UnkE3C { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public short UnkE3E { get; set; }
 
-            public Part()
-            {
-
-            }
             private protected Part(string name)
             {
                 Name = name;
@@ -356,7 +395,7 @@ namespace WitchyFormats
                 Position = br.ReadVector3();
                 Rotation = br.ReadVector3();
                 Scale = br.ReadVector3();
-                Unk44 = br.ReadInt32();
+                GameEditionDisable = br.ReadEnum32<GameEditionDisableType>();
                 MapStudioLayer = br.ReadUInt32();
                 br.AssertInt32(0);
                 long unkOffset1 = br.ReadInt64();
@@ -390,13 +429,13 @@ namespace WitchyFormats
                     throw new InvalidDataException($"Unexpected {nameof(gparamOffset)} 0x{gparamOffset:X} in type {GetType()}.");
                 if (HasSceneGparamConfig ^ sceneGParamOffset != 0)
                     throw new InvalidDataException($"Unexpected {nameof(sceneGParamOffset)} 0x{sceneGParamOffset:X} in type {GetType()}.");
-                if (HasUnk7 ^ unkOffset7 != 0)
+                if (HasGrassConfig ^ unkOffset7 != 0)
                     throw new InvalidDataException($"Unexpected {nameof(unkOffset7)} 0x{unkOffset7:X} in type {GetType()}.");
                 if (HasUnk8 ^ unkOffset8 != 0)
                     throw new InvalidDataException($"Unexpected {nameof(unkOffset8)} 0x{unkOffset8:X} in type {GetType()}.");
                 if (HasUnk9 ^ unkOffset9 != 0)
                     throw new InvalidDataException($"Unexpected {nameof(unkOffset9)} 0x{unkOffset9:X} in type {GetType()}.");
-                if (HasUnk10 ^ unkOffset10 != 0)
+                if (HasTileLoadConfig ^ unkOffset10 != 0)
                     throw new InvalidDataException($"Unexpected {nameof(unkOffset10)} 0x{unkOffset10:X} in type {GetType()}.");
                 if (HasUnk11 ^ unkOffset11 != 0)
                     throw new InvalidDataException($"Unexpected {nameof(unkOffset11)} 0x{unkOffset11:X} in type {GetType()}.");
@@ -437,10 +476,10 @@ namespace WitchyFormats
                     ReadSceneGparamConfig(br);
                 }
 
-                if (HasUnk7)
+                if (HasGrassConfig)
                 {
                     br.Position = start + unkOffset7;
-                    ReadUnk7(br);
+                    ReadGrassConfig(br);
                 }
 
                 if (HasUnk8)
@@ -455,10 +494,10 @@ namespace WitchyFormats
                     ReadUnk9(br);
                 }
 
-                if (HasUnk10)
+                if (HasTileLoadConfig)
                 {
                     br.Position = start + unkOffset10;
-                    ReadUnk10(br);
+                    ReadTileLoad(br);
                 }
 
                 if (HasUnk11)
@@ -471,12 +510,11 @@ namespace WitchyFormats
             private void ReadEntityData(BinaryReaderEx br)
             {
                 EntityID = br.ReadUInt32();
-                UnkE04 = br.ReadByte();
+                isUsePartsDrawParamID = br.ReadByte();
                 br.AssertByte(0);
                 br.AssertByte(0);
                 br.AssertByte(0); // Former lantern ID
-                LodParamID = br.ReadByte();
-                UnkE09 = br.ReadByte();
+                PartsDrawParamID = br.ReadInt16();
                 IsPointLightShadowSrc = br.ReadSByte(); // Seems to be 0 or -1
                 UnkE0B = br.ReadByte();
                 IsShadowSrc = br.ReadBoolean();
@@ -512,8 +550,8 @@ namespace WitchyFormats
             private protected virtual void ReadSceneGparamConfig(BinaryReaderEx br)
                 => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(ReadSceneGparamConfig)}.");
 
-            private protected virtual void ReadUnk7(BinaryReaderEx br)
-                => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(ReadUnk7)}.");
+            private protected virtual void ReadGrassConfig(BinaryReaderEx br)
+                => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(ReadGrassConfig)}.");
 
             private protected virtual void ReadUnk8(BinaryReaderEx br)
                 => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(ReadUnk8)}.");
@@ -521,8 +559,8 @@ namespace WitchyFormats
             private protected virtual void ReadUnk9(BinaryReaderEx br)
                 => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(ReadUnk9)}.");
 
-            private protected virtual void ReadUnk10(BinaryReaderEx br)
-                => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(ReadUnk10)}.");
+            private protected virtual void ReadTileLoad(BinaryReaderEx br)
+                => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(ReadTileLoad)}.");
 
             private protected virtual void ReadUnk11(BinaryReaderEx br)
                 => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(ReadUnk11)}.");
@@ -539,7 +577,7 @@ namespace WitchyFormats
                 bw.WriteVector3(Position);
                 bw.WriteVector3(Rotation);
                 bw.WriteVector3(Scale);
-                bw.WriteInt32(Unk44);
+                bw.WriteInt32((int)GameEditionDisable);
                 bw.WriteUInt32(MapStudioLayer);
                 bw.WriteInt32(0);
                 bw.ReserveInt64("UnkOffset1");
@@ -610,10 +648,10 @@ namespace WitchyFormats
                     bw.FillInt64("SceneGparamOffset", 0);
                 }
 
-                if (HasUnk7)
+                if (HasGrassConfig)
                 {
                     bw.FillInt64("UnkOffset7", bw.Position - start);
-                    WriteUnk7(bw);
+                    WriteGrassConfig(bw);
                 }
                 else
                 {
@@ -640,10 +678,10 @@ namespace WitchyFormats
                     bw.FillInt64("UnkOffset9", 0);
                 }
 
-                if (HasUnk10)
+                if (HasTileLoadConfig)
                 {
                     bw.FillInt64("UnkOffset10", bw.Position - start);
-                    WriteUnk10(bw);
+                    WriteTileLoad(bw);
                 }
                 else
                 {
@@ -664,12 +702,11 @@ namespace WitchyFormats
             private void WriteEntityData(BinaryWriterEx bw)
             {
                 bw.WriteUInt32(EntityID);
-                bw.WriteByte(UnkE04);
+                bw.WriteByte(isUsePartsDrawParamID);
                 bw.WriteByte(0);
                 bw.WriteByte(0);
                 bw.WriteByte(0);
-                bw.WriteByte(LodParamID);
-                bw.WriteByte(UnkE09);
+                bw.WriteInt16(PartsDrawParamID);
                 bw.WriteSByte(IsPointLightShadowSrc);
                 bw.WriteByte(UnkE0B);
                 bw.WriteBoolean(IsShadowSrc);
@@ -706,8 +743,8 @@ namespace WitchyFormats
             private protected virtual void WriteSceneGparamConfig(BinaryWriterEx bw)
                 => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(WriteSceneGparamConfig)}.");
 
-            private protected virtual void WriteUnk7(BinaryWriterEx bw)
-                => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(WriteUnk7)}.");
+            private protected virtual void WriteGrassConfig(BinaryWriterEx bw)
+                => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(WriteGrassConfig)}.");
 
             private protected virtual void WriteUnk8(BinaryWriterEx bw)
                 => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(WriteUnk8)}.");
@@ -715,8 +752,8 @@ namespace WitchyFormats
             private protected virtual void WriteUnk9(BinaryWriterEx bw)
                 => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(WriteUnk9)}.");
 
-            private protected virtual void WriteUnk10(BinaryWriterEx bw)
-                => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(WriteUnk10)}.");
+            private protected virtual void WriteTileLoad(BinaryWriterEx bw)
+                => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(WriteTileLoad)}.");
 
             private protected virtual void WriteUnk11(BinaryWriterEx bw)
                 => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(WriteUnk11)}.");
@@ -762,31 +799,37 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte Condition1 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte Condition2 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkC2 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkC3 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public short UnkC4 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public short UnkC6 { get; set; }
 
                 /// <summary>
@@ -811,6 +854,8 @@ namespace WitchyFormats
                 public UnkStruct1 DeepCopy()
                 {
                     var unk1 = (UnkStruct1)MemberwiseClone();
+                    unk1.DisplayGroups = (uint[])DisplayGroups.Clone();
+                    unk1.DrawGroups = (uint[])DrawGroups.Clone();
                     unk1.CollisionMask = (uint[])CollisionMask.Clone();
                     return unk1;
                 }
@@ -852,6 +897,7 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int Condition { get; set; }
 
                 /// <summary>
@@ -862,11 +908,13 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public short Unk24 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public short Unk26 { get; set; }
 
                 /// <summary>
@@ -1004,21 +1052,25 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public sbyte Unk1C { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public sbyte Unk1D { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public sbyte Unk20 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public sbyte Unk21 { get; set; }
 
                 /// <summary>
@@ -1090,37 +1142,43 @@ namespace WitchyFormats
             /// <summary>
             /// Unknown. Grass related?
             /// </summary>
-            public class UnkStruct7
+            public class GrassConfig
             {
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public int Unk00 { get; set; }
+                [MSBParamReference(ParamName = "GrassTypeParam")]
+                public int GrassParamId0 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public int Unk04 { get; set; }
+                [MSBParamReference(ParamName = "GrassTypeParam")]
+                public int GrassParamId1 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public int Unk08 { get; set; }
+                [MSBParamReference(ParamName = "GrassTypeParam")]
+                public int GrassParamId2 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public int Unk0C { get; set; }
+                [MSBParamReference(ParamName = "GrassTypeParam")]
+                public int GrassParamId3 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public int Unk10 { get; set; }
+                [MSBParamReference(ParamName = "GrassTypeParam")]
+                public int GrassParamId4 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public int Unk14 { get; set; }
+                [MSBParamReference(ParamName = "GrassTypeParam")]
+                public int GrassParamId5 { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -1130,36 +1188,36 @@ namespace WitchyFormats
                 /// <summary>
                 /// Creates an UnkStruct7 with default values.
                 /// </summary>
-                public UnkStruct7() { }
+                public GrassConfig() { }
 
                 /// <summary>
                 /// Creates a deep copy of the struct.
                 /// </summary>
-                public UnkStruct7 DeepCopy()
+                public GrassConfig DeepCopy()
                 {
-                    return (UnkStruct7)MemberwiseClone();
+                    return (GrassConfig)MemberwiseClone();
                 }
 
-                internal UnkStruct7(BinaryReaderEx br)
+                internal GrassConfig(BinaryReaderEx br)
                 {
-                    Unk00 = br.ReadInt32();
-                    Unk04 = br.ReadInt32();
-                    Unk08 = br.ReadInt32();
-                    Unk0C = br.ReadInt32();
-                    Unk10 = br.ReadInt32();
-                    Unk14 = br.ReadInt32();
+                    GrassParamId0 = br.ReadInt32();
+                    GrassParamId1 = br.ReadInt32();
+                    GrassParamId2 = br.ReadInt32();
+                    GrassParamId3 = br.ReadInt32();
+                    GrassParamId4 = br.ReadInt32();
+                    GrassParamId5 = br.ReadInt32();
                     Unk18 = br.ReadInt32();
                     br.AssertInt32(0);
                 }
 
                 internal void Write(BinaryWriterEx bw)
                 {
-                    bw.WriteInt32(Unk00);
-                    bw.WriteInt32(Unk04);
-                    bw.WriteInt32(Unk08);
-                    bw.WriteInt32(Unk0C);
-                    bw.WriteInt32(Unk10);
-                    bw.WriteInt32(Unk14);
+                    bw.WriteInt32(GrassParamId0);
+                    bw.WriteInt32(GrassParamId1);
+                    bw.WriteInt32(GrassParamId2);
+                    bw.WriteInt32(GrassParamId3);
+                    bw.WriteInt32(GrassParamId4);
+                    bw.WriteInt32(GrassParamId5);
                     bw.WriteInt32(Unk18);
                     bw.WriteInt32(0);
                 }
@@ -1173,6 +1231,7 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int Unk00 { get; set; }
 
                 /// <summary>
@@ -1190,7 +1249,7 @@ namespace WitchyFormats
 
                 internal UnkStruct8(BinaryReaderEx br)
                 {
-                    Unk00 = br.AssertInt32(0, 1);
+                    Unk00 = br.AssertInt32([0, 1]);
                     br.AssertInt32(0);
                     br.AssertInt32(0);
                     br.AssertInt32(0);
@@ -1264,7 +1323,7 @@ namespace WitchyFormats
             /// <summary>
             /// Unknown.
             /// </summary>
-            public class UnkStruct10
+            public class TileLoadConfig
             {
                 /// <summary>
                 /// Unknown.
@@ -1274,27 +1333,30 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int Unk04 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int Unk0C { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int Unk10 { get; set; }
 
                 /// <summary>
-                /// Unknown.
+                /// Unknown culling behaviour field for extreme height differences. Values 0000 - 10000.
                 /// </summary>
-                public int Unk14 { get; set; }
+                public int CullingHeightBehavior { get; set; }
 
                 /// <summary>
                 /// Creates an UnkStruct7 with default values.
                 /// </summary>
-                public UnkStruct10()
+                public TileLoadConfig()
                 {
                     MapID = new byte[4];
                 }
@@ -1302,21 +1364,21 @@ namespace WitchyFormats
                 /// <summary>
                 /// Creates a deep copy of the struct.
                 /// </summary>
-                public UnkStruct10 DeepCopy()
+                public TileLoadConfig DeepCopy()
                 {
-                    var unks10 = (UnkStruct10)MemberwiseClone();
+                    var unks10 = (TileLoadConfig)MemberwiseClone();
                     unks10.MapID = (byte[])MapID.Clone();
                     return unks10;
                 }
 
-                internal UnkStruct10(BinaryReaderEx br)
+                internal TileLoadConfig(BinaryReaderEx br)
                 {
                     MapID = br.ReadBytes(4);
                     Unk04 = br.ReadInt32();
                     br.AssertInt32(0);
                     Unk0C = br.ReadInt32();
-                    Unk10 = br.AssertInt32(0, 1);
-                    Unk14 = br.ReadInt32();
+                    Unk10 = br.AssertInt32([0, 1]);
+                    CullingHeightBehavior = br.ReadInt32();
                     br.AssertInt32(0);
                     br.AssertInt32(0);
                 }
@@ -1328,7 +1390,7 @@ namespace WitchyFormats
                     bw.WriteInt32(0);
                     bw.WriteInt32(Unk0C);
                     bw.WriteInt32(Unk10);
-                    bw.WriteInt32(Unk14);
+                    bw.WriteInt32(CullingHeightBehavior);
                     bw.WriteInt32(0);
                     bw.WriteInt32(0);
                 }
@@ -1342,11 +1404,13 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int Unk00 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int Unk04 { get; set; }
 
                 /// <summary>
@@ -1397,10 +1461,10 @@ namespace WitchyFormats
                 private protected override bool HasUnk2 => false;
                 private protected override bool HasGparamConfig => true;
                 private protected override bool HasSceneGparamConfig => false;
-                private protected override bool HasUnk7 => true;
+                private protected override bool HasGrassConfig => true;
                 private protected override bool HasUnk8 => true;
                 private protected override bool HasUnk9 => true;
-                private protected override bool HasUnk10 => true;
+                private protected override bool HasTileLoadConfig => true;
                 private protected override bool HasUnk11 => true;
 
                 /// <summary>
@@ -1416,7 +1480,7 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public UnkStruct7 Unk7 { get; set; }
+                public GrassConfig Grass { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -1431,7 +1495,7 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public UnkStruct10 Unk10 { get; set; }
+                public TileLoadConfig TileLoad { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -1445,10 +1509,10 @@ namespace WitchyFormats
                 {
                     Unk1 = new UnkStruct1();
                     Gparam = new GparamConfig();
-                    Unk7 = new UnkStruct7();
+                    Grass = new GrassConfig();
                     Unk8 = new UnkStruct8();
                     Unk9 = new UnkStruct9();
-                    Unk10 = new UnkStruct10();
+                    TileLoad = new TileLoadConfig();
                     Unk11 = new UnkStruct11();
                 }
 
@@ -1457,10 +1521,10 @@ namespace WitchyFormats
                     var piece = (MapPiece)part;
                     piece.Unk1 = Unk1.DeepCopy();
                     piece.Gparam = Gparam.DeepCopy();
-                    piece.Unk7 = Unk7.DeepCopy();
+                    piece.Grass = Grass.DeepCopy();
                     piece.Unk8 = Unk8.DeepCopy();
                     piece.Unk9 = Unk9.DeepCopy();
-                    piece.Unk10 = Unk10.DeepCopy();
+                    piece.TileLoad = TileLoad.DeepCopy();
                     piece.Unk11 = Unk11.DeepCopy();
                 }
 
@@ -1474,10 +1538,10 @@ namespace WitchyFormats
 
                 private protected override void ReadUnk1(BinaryReaderEx br) => Unk1 = new UnkStruct1(br);
                 private protected override void ReadGparamConfig(BinaryReaderEx br) => Gparam = new GparamConfig(br);
-                private protected override void ReadUnk7(BinaryReaderEx br) => Unk7 = new UnkStruct7(br);
+                private protected override void ReadGrassConfig(BinaryReaderEx br) => Grass = new GrassConfig(br);
                 private protected override void ReadUnk8(BinaryReaderEx br) => Unk8 = new UnkStruct8(br);
                 private protected override void ReadUnk9(BinaryReaderEx br) => Unk9 = new UnkStruct9(br);
-                private protected override void ReadUnk10(BinaryReaderEx br) => Unk10 = new UnkStruct10(br);
+                private protected override void ReadTileLoad(BinaryReaderEx br) => TileLoad = new TileLoadConfig(br);
                 private protected override void ReadUnk11(BinaryReaderEx br) => Unk11 = new UnkStruct11(br);
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
@@ -1488,10 +1552,10 @@ namespace WitchyFormats
 
                 private protected override void WriteUnk1(BinaryWriterEx bw) => Unk1.Write(bw);
                 private protected override void WriteGparamConfig(BinaryWriterEx bw) => Gparam.Write(bw);
-                private protected override void WriteUnk7(BinaryWriterEx bw) => Unk7.Write(bw);
+                private protected override void WriteGrassConfig(BinaryWriterEx bw) => Grass.Write(bw);
                 private protected override void WriteUnk8(BinaryWriterEx bw) => Unk8.Write(bw);
                 private protected override void WriteUnk9(BinaryWriterEx bw) => Unk9.Write(bw);
-                private protected override void WriteUnk10(BinaryWriterEx bw) => Unk10.Write(bw);
+                private protected override void WriteTileLoad(BinaryWriterEx bw) => TileLoad.Write(bw);
                 private protected override void WriteUnk11(BinaryWriterEx bw) => Unk11.Write(bw);
             }
 
@@ -1504,10 +1568,10 @@ namespace WitchyFormats
                 private protected override bool HasUnk2 => false;
                 private protected override bool HasGparamConfig => true;
                 private protected override bool HasSceneGparamConfig => false;
-                private protected override bool HasUnk7 => false;
+                private protected override bool HasGrassConfig => false;
                 private protected override bool HasUnk8 => true;
                 private protected override bool HasUnk9 => false;
-                private protected override bool HasUnk10 => true;
+                private protected override bool HasTileLoadConfig => true;
                 private protected override bool HasUnk11 => false;
 
                 /// <summary>
@@ -1528,95 +1592,114 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public UnkStruct10 Unk10 { get; set; }
+                public TileLoadConfig TileLoad { get; set; }
 
                 /// <summary>
                 /// An ID in NPCThinkParam that determines the enemy's AI characteristics.
                 /// </summary>
+                [EnemyProperty]
                 [MSBParamReference(ParamName = "NpcThinkParam")]
                 public int ThinkParamID { get; set; }
 
                 /// <summary>
                 /// An ID in NPCParam that determines a variety of enemy properties.
                 /// </summary>
+                [EnemyProperty]
                 [MSBParamReference(ParamName = "NpcParam")]
                 public int NPCParamID { get; set; }
 
                 /// <summary>
                 /// Talk ID
                 /// </summary>
+                [EnemyProperty]
                 public int TalkID { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
+                [EnemyProperty]
                 public bool UnkT15 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [EnemyProperty]
                 public short PlatoonID { get; set; }
 
                 /// <summary>
                 /// An ID in CharaInitParam that determines a human's inventory and stats.
                 /// </summary>
+                [EnemyProperty]
                 [MSBParamReference(ParamName = "CharaInitParam")]
                 public int CharaInitID { get; set; }
 
                 /// <summary>
                 /// Should reference the collision the enemy starts on.
                 /// </summary>
+                [EnemyProperty]
                 [MSBReference(ReferenceType = typeof(Collision))]
                 public string CollisionPartName { get; set; }
-                private int CollisionPartIndex;
+                [IndexProperty]
+                public int CollisionPartIndex { get; set; }
 
                 /// <summary>
                 /// Walk route followed by this enemy.
                 /// </summary>
+                [EnemyProperty]
                 [MSBReference(ReferenceType = typeof(Event.PatrolInfo))]
                 public string WalkRouteName { get; set; }
-                private short WalkRouteIndex;
+                [IndexProperty]
+                public short WalkRouteIndex { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT24 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT28 { get; set; }
 
                 /// <summary>
                 /// ID in ChrActivateConditionParam that affects enemy appearance conditions.
                 /// </summary>
+                [EnemyProperty]
                 [MSBParamReference(ParamName = "ChrActivateConditionParam")]
                 public int ChrActivateCondParamID { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT34 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [EnemyProperty]
                 public int BackupEventAnimID { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT3C { get; set; }
 
                 /// <summary>
                 /// Refers to SpEffectSetParam ID. Applies SpEffects to an enemy.
                 /// </summary>
+                [EnemyProperty]
                 [MSBParamReference(ParamName = "SpEffectSetParam")]
                 public int[] SpEffectSetParamID { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public float UnkT84 { get; set; }
 
                 private protected EnemyBase() : base("cXXXX_XXXX")
@@ -1624,7 +1707,7 @@ namespace WitchyFormats
                     Unk1 = new UnkStruct1();
                     Gparam = new GparamConfig();
                     Unk8 = new UnkStruct8();
-                    Unk10 = new UnkStruct10();
+                    TileLoad = new TileLoadConfig();
                     SpEffectSetParamID = new int[4];
                     ThinkParamID = -1;
                     NPCParamID = -1;
@@ -1642,7 +1725,7 @@ namespace WitchyFormats
                     enemy.Unk1 = Unk1.DeepCopy();
                     enemy.Gparam = Gparam.DeepCopy();
                     enemy.Unk8 = Unk8.DeepCopy();
-                    enemy.Unk10 = Unk10.DeepCopy();
+                    enemy.TileLoad = TileLoad.DeepCopy();
                     enemy.SpEffectSetParamID = (int[])SpEffectSetParamID.Clone();
                 }
 
@@ -1689,7 +1772,7 @@ namespace WitchyFormats
 
                 private protected override void ReadUnk8(BinaryReaderEx br) => Unk8 = new UnkStruct8(br);
 
-                private protected override void ReadUnk10(BinaryReaderEx br) => Unk10 = new UnkStruct10(br);
+                private protected override void ReadTileLoad(BinaryReaderEx br) => TileLoad = new TileLoadConfig(br);
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
@@ -1732,7 +1815,7 @@ namespace WitchyFormats
 
                 private protected override void WriteUnk8(BinaryWriterEx bw) => Unk8.Write(bw);
 
-                private protected override void WriteUnk10(BinaryWriterEx bw) => Unk10.Write(bw);
+                private protected override void WriteTileLoad(BinaryWriterEx bw) => TileLoad.Write(bw);
 
                 internal override void GetNames(MSBE msb, Entries entries)
                 {
@@ -1774,10 +1857,10 @@ namespace WitchyFormats
                 private protected override bool HasUnk2 => false;
                 private protected override bool HasGparamConfig => false;
                 private protected override bool HasSceneGparamConfig => false;
-                private protected override bool HasUnk7 => false;
+                private protected override bool HasGrassConfig => false;
                 private protected override bool HasUnk8 => true;
                 private protected override bool HasUnk9 => false;
-                private protected override bool HasUnk10 => true;
+                private protected override bool HasTileLoadConfig => true;
                 private protected override bool HasUnk11 => false;
 
                 /// <summary>
@@ -1793,11 +1876,12 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public UnkStruct10 Unk10 { get; set; }
+                public TileLoadConfig TileLoad { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int Unk00 { get; set; }
 
                 /// <summary>
@@ -1807,7 +1891,7 @@ namespace WitchyFormats
                 {
                     Unk1 = new UnkStruct1();
                     Unk8 = new UnkStruct8();
-                    Unk10 = new UnkStruct10();
+                    TileLoad = new TileLoadConfig();
                 }
 
                 private protected override void DeepCopyTo(Part part)
@@ -1815,7 +1899,7 @@ namespace WitchyFormats
                     var player = (Player)part;
                     player.Unk1 = Unk1.DeepCopy();
                     player.Unk8 = Unk8.DeepCopy();
-                    player.Unk10 = Unk10.DeepCopy();
+                    player.TileLoad = TileLoad.DeepCopy();
                 }
 
                 internal Player(BinaryReaderEx br) : base(br) { }
@@ -1830,7 +1914,7 @@ namespace WitchyFormats
 
                 private protected override void ReadUnk8(BinaryReaderEx br) => Unk8 = new UnkStruct8(br);
 
-                private protected override void ReadUnk10(BinaryReaderEx br) => Unk10 = new UnkStruct10(br);
+                private protected override void ReadTileLoad(BinaryReaderEx br) => TileLoad = new TileLoadConfig(br);
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
@@ -1842,7 +1926,7 @@ namespace WitchyFormats
 
                 private protected override void WriteUnk8(BinaryWriterEx bw) => Unk8.Write(bw);
 
-                private protected override void WriteUnk10(BinaryWriterEx bw) => Unk10.Write(bw);
+                private protected override void WriteTileLoad(BinaryWriterEx bw) => TileLoad.Write(bw);
             }
 
             /// <summary>
@@ -1865,6 +1949,7 @@ namespace WitchyFormats
                     Unk17 = 17,
                     Unk19 = 19,
                     Unk20 = 20,
+                    Unk21 = 21,
                     Unk22 = 22,
                     Unk23 = 23,
                     Unk24 = 24,
@@ -1877,10 +1962,10 @@ namespace WitchyFormats
                 private protected override bool HasUnk2 => true;
                 private protected override bool HasGparamConfig => true;
                 private protected override bool HasSceneGparamConfig => true;
-                private protected override bool HasUnk7 => false;
+                private protected override bool HasGrassConfig => false;
                 private protected override bool HasUnk8 => true;
                 private protected override bool HasUnk9 => false;
-                private protected override bool HasUnk10 => true;
+                private protected override bool HasTileLoadConfig => true;
                 private protected override bool HasUnk11 => true;
 
                 /// <summary>
@@ -1911,7 +1996,7 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public UnkStruct10 Unk10 { get; set; }
+                public TileLoadConfig TileLoad { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -1921,41 +2006,47 @@ namespace WitchyFormats
                 /// <summary>
                 /// Sets collision behavior. Fall collision, death collision, enemy-only collision, etc.
                 /// </summary>
-                public HitFilterType HitFilterID { get; set; }
+                public HitFilterType HitFilterID { get; set; } = HitFilterType.Standard;
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkT01 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkT02 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public bool UnkT03 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public float UnkT04 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public float UnkT14 { get; set; }
 
                 /// <summary>
-                /// Unknown.
+                /// ID of location text to display when stepping onto this collision.
                 /// </summary>
-                public int UnkT18 { get; set; }
+                public int LocationTextID { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT1C { get; set; }
 
                 /// <summary>
@@ -1967,26 +2058,31 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public short UnkT24 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public short UnkT26 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT30 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkT34 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkT35 { get; set; }
 
                 /// <summary>
@@ -1997,16 +2093,19 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public short UnkT3C { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public short UnkT3E { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public float UnkT40 { get; set; }
 
                 /// <summary>
@@ -2017,11 +2116,13 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public short UnkT4C { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public short UnkT4E { get; set; }
 
                 /// <summary>
@@ -2034,7 +2135,7 @@ namespace WitchyFormats
                     Gparam = new GparamConfig();
                     SceneGparam = new SceneGparamConfig();
                     Unk8 = new UnkStruct8();
-                    Unk10 = new UnkStruct10();
+                    TileLoad = new TileLoadConfig();
                     Unk11 = new UnkStruct11();
                 }
 
@@ -2046,7 +2147,7 @@ namespace WitchyFormats
                     collision.Gparam = Gparam.DeepCopy();
                     collision.SceneGparam = SceneGparam.DeepCopy();
                     collision.Unk8 = Unk8.DeepCopy();
-                    collision.Unk10 = Unk10.DeepCopy();
+                    collision.TileLoad = TileLoad.DeepCopy();
                     collision.Unk11 = Unk11.DeepCopy();
                 }
 
@@ -2063,11 +2164,11 @@ namespace WitchyFormats
                     br.AssertInt32(0);
                     br.AssertInt32(0);
                     UnkT14 = br.ReadSingle();
-                    UnkT18 = br.ReadInt32();
+                    LocationTextID = br.ReadInt32();
                     UnkT1C = br.ReadInt32();
                     PlayRegionID = br.ReadInt32();
                     UnkT24 = br.ReadInt16();
-                    UnkT26 = br.AssertInt16(0, 1);
+                    UnkT26 = br.AssertInt16([0, 1]);
                     br.AssertInt32(0);
                     br.AssertInt32(-1);
                     UnkT30 = br.ReadInt32();
@@ -2081,7 +2182,7 @@ namespace WitchyFormats
                     UnkT40 = br.ReadSingle();
                     br.AssertInt32(0);
                     EnableFastTravelEventFlagID = br.ReadUInt32();
-                    UnkT4C = br.AssertInt16(0, 1);
+                    UnkT4C = br.AssertInt16([0, 1, 2]);
                     UnkT4E = br.ReadInt16();
                 }
 
@@ -2090,7 +2191,7 @@ namespace WitchyFormats
                 private protected override void ReadGparamConfig(BinaryReaderEx br) => Gparam = new GparamConfig(br);
                 private protected override void ReadSceneGparamConfig(BinaryReaderEx br) => SceneGparam = new SceneGparamConfig(br);
                 private protected override void ReadUnk8(BinaryReaderEx br) => Unk8 = new UnkStruct8(br);
-                private protected override void ReadUnk10(BinaryReaderEx br) => Unk10 = new UnkStruct10(br);
+                private protected override void ReadTileLoad(BinaryReaderEx br) => TileLoad = new TileLoadConfig(br);
                 private protected override void ReadUnk11(BinaryReaderEx br) => Unk11 = new UnkStruct11(br);
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
@@ -2104,7 +2205,7 @@ namespace WitchyFormats
                     bw.WriteInt32(0);
                     bw.WriteInt32(0);
                     bw.WriteSingle(UnkT14);
-                    bw.WriteInt32(UnkT18);
+                    bw.WriteInt32(LocationTextID);
                     bw.WriteInt32(UnkT1C);
                     bw.WriteInt32(PlayRegionID);
                     bw.WriteInt16(UnkT24);
@@ -2131,7 +2232,7 @@ namespace WitchyFormats
                 private protected override void WriteGparamConfig(BinaryWriterEx bw) => Gparam.Write(bw);
                 private protected override void WriteSceneGparamConfig(BinaryWriterEx bw) => SceneGparam.Write(bw);
                 private protected override void WriteUnk8(BinaryWriterEx bw) => Unk8.Write(bw);
-                private protected override void WriteUnk10(BinaryWriterEx bw) => Unk10.Write(bw);
+                private protected override void WriteTileLoad(BinaryWriterEx bw) => TileLoad.Write(bw);
                 private protected override void WriteUnk11(BinaryWriterEx bw) => Unk11.Write(bw);
             }
 
@@ -2145,10 +2246,10 @@ namespace WitchyFormats
                 private protected override bool HasUnk2 => false;
                 private protected override bool HasGparamConfig => true;
                 private protected override bool HasSceneGparamConfig => false;
-                private protected override bool HasUnk7 => false;
+                private protected override bool HasGrassConfig => false;
                 private protected override bool HasUnk8 => true;
                 private protected override bool HasUnk9 => false;
-                private protected override bool HasUnk10 => true;
+                private protected override bool HasTileLoadConfig => true;
                 private protected override bool HasUnk11 => false;
 
                 /// <summary>
@@ -2169,7 +2270,7 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public UnkStruct10 Unk10 { get; set; }
+                public TileLoadConfig TileLoad { get; set; }
 
                 /// <summary>
                 /// Creates a MapPiece with default values.
@@ -2179,7 +2280,7 @@ namespace WitchyFormats
                     Unk1 = new UnkStruct1();
                     Gparam = new GparamConfig();
                     Unk8 = new UnkStruct8();
-                    Unk10 = new UnkStruct10();
+                    TileLoad = new TileLoadConfig();
                 }
 
                 private protected override void DeepCopyTo(Part part)
@@ -2188,7 +2289,7 @@ namespace WitchyFormats
                     asset.Unk1 = Unk1.DeepCopy();
                     asset.Gparam = Gparam.DeepCopy();
                     asset.Unk8 = Unk8.DeepCopy();
-                    asset.Unk10 = Unk10.DeepCopy();
+                    asset.TileLoad = TileLoad.DeepCopy();
                 }
 
                 internal DummyAsset(BinaryReaderEx br) : base(br) { }
@@ -2208,7 +2309,7 @@ namespace WitchyFormats
                 private protected override void ReadUnk1(BinaryReaderEx br) => Unk1 = new UnkStruct1(br);
                 private protected override void ReadGparamConfig(BinaryReaderEx br) => Gparam = new GparamConfig(br);
                 private protected override void ReadUnk8(BinaryReaderEx br) => Unk8 = new UnkStruct8(br);
-                private protected override void ReadUnk10(BinaryReaderEx br) => Unk10 = new UnkStruct10(br);
+                private protected override void ReadTileLoad(BinaryReaderEx br) => TileLoad = new TileLoadConfig(br);
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
@@ -2225,7 +2326,7 @@ namespace WitchyFormats
                 private protected override void WriteUnk1(BinaryWriterEx bw) => Unk1.Write(bw);
                 private protected override void WriteGparamConfig(BinaryWriterEx bw) => Gparam.Write(bw);
                 private protected override void WriteUnk8(BinaryWriterEx bw) => Unk8.Write(bw);
-                private protected override void WriteUnk10(BinaryWriterEx bw) => Unk10.Write(bw);
+                private protected override void WriteTileLoad(BinaryWriterEx bw) => TileLoad.Write(bw);
             }
 
             /// <summary>
@@ -2253,10 +2354,10 @@ namespace WitchyFormats
                 private protected override bool HasUnk2 => true;
                 private protected override bool HasGparamConfig => false;
                 private protected override bool HasSceneGparamConfig => false;
-                private protected override bool HasUnk7 => false;
+                private protected override bool HasGrassConfig => false;
                 private protected override bool HasUnk8 => true;
                 private protected override bool HasUnk9 => false;
-                private protected override bool HasUnk10 => true;
+                private protected override bool HasTileLoadConfig => true;
                 private protected override bool HasUnk11 => true;
 
                 /// <summary>
@@ -2277,7 +2378,7 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public UnkStruct10 Unk10 { get; set; }
+                public TileLoadConfig TileLoad { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -2288,8 +2389,10 @@ namespace WitchyFormats
                 /// The collision part to attach to.
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Collision))]
+                [NoRenderGroupInheritence()]
                 public string CollisionName { get; set; }
-                private int CollisionIndex;
+                [IndexProperty]
+                public int CollisionIndex { get; set; }
 
                 /// <summary>
                 /// The map to load when on this collision.
@@ -2299,21 +2402,25 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkT08 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public bool UnkT09 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkT0A { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public bool UnkT0B { get; set; }
 
                 /// <summary>
@@ -2325,7 +2432,7 @@ namespace WitchyFormats
                     Unk2 = new UnkStruct2();
                     MapID = new byte[4];
                     Unk8 = new UnkStruct8();
-                    Unk10 = new UnkStruct10();
+                    TileLoad = new TileLoadConfig();
                     Unk11 = new UnkStruct11();
                 }
 
@@ -2336,7 +2443,7 @@ namespace WitchyFormats
                     connect.Unk2 = Unk2.DeepCopy();
                     connect.MapID = (byte[])MapID.Clone();
                     connect.Unk8 = Unk8.DeepCopy();
-                    connect.Unk10 = Unk10.DeepCopy();
+                    connect.TileLoad = TileLoad.DeepCopy();
                     connect.Unk11 = Unk11.DeepCopy();
                 }
 
@@ -2356,7 +2463,7 @@ namespace WitchyFormats
                 private protected override void ReadUnk1(BinaryReaderEx br) => Unk1 = new UnkStruct1(br);
                 private protected override void ReadUnk2(BinaryReaderEx br) => Unk2 = new UnkStruct2(br);
                 private protected override void ReadUnk8(BinaryReaderEx br) => Unk8 = new UnkStruct8(br);
-                private protected override void ReadUnk10(BinaryReaderEx br) => Unk10 = new UnkStruct10(br);
+                private protected override void ReadTileLoad(BinaryReaderEx br) => TileLoad = new TileLoadConfig(br);
                 private protected override void ReadUnk11(BinaryReaderEx br) => Unk11 = new UnkStruct11(br);
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
@@ -2373,7 +2480,7 @@ namespace WitchyFormats
                 private protected override void WriteUnk1(BinaryWriterEx bw) => Unk1.Write(bw);
                 private protected override void WriteUnk2(BinaryWriterEx bw) => Unk2.Write(bw);
                 private protected override void WriteUnk8(BinaryWriterEx bw) => Unk8.Write(bw);
-                private protected override void WriteUnk10(BinaryWriterEx bw) => Unk10.Write(bw);
+                private protected override void WriteTileLoad(BinaryWriterEx bw) => TileLoad.Write(bw);
                 private protected override void WriteUnk11(BinaryWriterEx bw) => Unk11.Write(bw);
 
                 internal override void GetNames(MSBE msb, Entries entries)
@@ -2399,10 +2506,10 @@ namespace WitchyFormats
                 private protected override bool HasUnk2 => true;
                 private protected override bool HasGparamConfig => true;
                 private protected override bool HasSceneGparamConfig => false;
-                private protected override bool HasUnk7 => true;
+                private protected override bool HasGrassConfig => true;
                 private protected override bool HasUnk8 => true;
                 private protected override bool HasUnk9 => true;
-                private protected override bool HasUnk10 => true;
+                private protected override bool HasTileLoadConfig => true;
                 private protected override bool HasUnk11 => true;
 
                 /// <summary>
@@ -2423,7 +2530,7 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public UnkStruct7 Unk7 { get; set; }
+                public GrassConfig Grass { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -2438,7 +2545,7 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public UnkStruct10 Unk10 { get; set; }
+                public TileLoadConfig TileLoad { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -2448,21 +2555,25 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public short UnkT02 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkT10 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public bool UnkT11 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkT12 { get; set; }
 
                 /// <summary>
@@ -2473,26 +2584,31 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public short UnkT1E { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT24 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT28 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT30 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT34 { get; set; }
 
                 /// <summary>
@@ -2505,41 +2621,49 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public bool UnkT50 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkT51 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkT53 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT54 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [EldenRingAssetMask]
                 public int UnkModelMaskAndAnimID { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT5C { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT60 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT64 { get; set; }
 
                 /// <summary>
@@ -2550,11 +2674,13 @@ namespace WitchyFormats
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public short Unk00 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public bool Unk04 { get; set; }
 
                     /// <summary>
@@ -2565,26 +2691,31 @@ namespace WitchyFormats
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public int Unk1C { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public short Unk24 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public short Unk26 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public int Unk28 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public int Unk2C { get; set; }
 
                     /// <summary>
@@ -2657,36 +2788,43 @@ namespace WitchyFormats
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public int Unk00 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public int Unk04 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public float Unk14 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public byte Unk1C { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public byte Unk1D { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public byte Unk1E { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public byte Unk1F { get; set; }
 
                     /// <summary>
@@ -2757,41 +2895,49 @@ namespace WitchyFormats
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public int Unk00 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public float Unk04 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public byte Unk09 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public byte Unk0A { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public byte Unk0B { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public short Unk0C { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public short Unk0E { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public float Unk10 { get; set; }
 
                     /// <summary>
@@ -2802,26 +2948,31 @@ namespace WitchyFormats
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public int Unk18 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public int Unk1C { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public int Unk20 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public byte Unk24 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public bool Unk25 { get; set; }
 
                     /// <summary>
@@ -2905,21 +3056,25 @@ namespace WitchyFormats
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public bool Unk00 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public byte Unk01 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public byte Unk02 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public bool Unk03 { get; set; }
 
                     /// <summary>
@@ -3010,10 +3165,10 @@ namespace WitchyFormats
                     Unk1 = new UnkStruct1();
                     Unk2 = new UnkStruct2();
                     Gparam = new GparamConfig();
-                    Unk7 = new UnkStruct7();
+                    Grass = new GrassConfig();
                     Unk8 = new UnkStruct8();
                     Unk9 = new UnkStruct9();
-                    Unk10 = new UnkStruct10();
+                    TileLoad = new TileLoadConfig();
                     Unk11 = new UnkStruct11();
 
                     AssetUnk1 = new AssetUnkStruct1();
@@ -3030,10 +3185,10 @@ namespace WitchyFormats
                     asset.Unk1 = Unk1.DeepCopy();
                     asset.Unk2 = Unk2.DeepCopy();
                     asset.Gparam = Gparam.DeepCopy();
-                    asset.Unk7 = Unk7.DeepCopy();
+                    asset.Grass = Grass.DeepCopy();
                     asset.Unk8 = Unk8.DeepCopy();
                     asset.Unk9 = Unk9.DeepCopy();
-                    asset.Unk10 = Unk10.DeepCopy();
+                    asset.TileLoad = TileLoad.DeepCopy();
                     asset.Unk11 = Unk11.DeepCopy();
 
                     asset.AssetUnk1 = AssetUnk1.DeepCopy();
@@ -3049,7 +3204,7 @@ namespace WitchyFormats
                 private protected override void ReadTypeData(BinaryReaderEx br)
                 {
                     br.AssertInt16(0);
-                    UnkT02 = br.AssertInt16(0, 1);
+                    UnkT02 = br.AssertInt16([0, 1]);
                     br.AssertInt32(0);
                     br.AssertInt32(0);
                     br.AssertInt32(0);
@@ -3093,10 +3248,10 @@ namespace WitchyFormats
                 private protected override void ReadUnk1(BinaryReaderEx br) => Unk1 = new UnkStruct1(br);
                 private protected override void ReadUnk2(BinaryReaderEx br) => Unk2 = new UnkStruct2(br);
                 private protected override void ReadGparamConfig(BinaryReaderEx br) => Gparam = new GparamConfig(br);
-                private protected override void ReadUnk7(BinaryReaderEx br) => Unk7 = new UnkStruct7(br);
+                private protected override void ReadGrassConfig(BinaryReaderEx br) => Grass = new GrassConfig(br);
                 private protected override void ReadUnk8(BinaryReaderEx br) => Unk8 = new UnkStruct8(br);
                 private protected override void ReadUnk9(BinaryReaderEx br) => Unk9 = new UnkStruct9(br);
-                private protected override void ReadUnk10(BinaryReaderEx br) => Unk10 = new UnkStruct10(br);
+                private protected override void ReadTileLoad(BinaryReaderEx br) => TileLoad = new TileLoadConfig(br);
                 private protected override void ReadUnk11(BinaryReaderEx br) => Unk11 = new UnkStruct11(br);
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
@@ -3145,10 +3300,10 @@ namespace WitchyFormats
                 private protected override void WriteUnk1(BinaryWriterEx bw) => Unk1.Write(bw);
                 private protected override void WriteUnk2(BinaryWriterEx bw) => Unk2.Write(bw);
                 private protected override void WriteGparamConfig(BinaryWriterEx bw) => Gparam.Write(bw);
-                private protected override void WriteUnk7(BinaryWriterEx bw) => Unk7.Write(bw);
+                private protected override void WriteGrassConfig(BinaryWriterEx bw) => Grass.Write(bw);
                 private protected override void WriteUnk8(BinaryWriterEx bw) => Unk8.Write(bw);
                 private protected override void WriteUnk9(BinaryWriterEx bw) => Unk9.Write(bw);
-                private protected override void WriteUnk10(BinaryWriterEx bw) => Unk10.Write(bw);
+                private protected override void WriteTileLoad(BinaryWriterEx bw) => TileLoad.Write(bw);
                 private protected override void WriteUnk11(BinaryWriterEx bw) => Unk11.Write(bw);
 
                 internal override void GetNames(MSBE msb, Entries entries)
@@ -3160,7 +3315,7 @@ namespace WitchyFormats
                 internal override void GetIndices(MSBE msb, Entries entries)
                 {
                     base.GetIndices(msb, entries);
-                    UnkPartIndices = MSB.FindIndices(entries.Parts, UnkPartNames);
+                    UnkPartIndices = MSB.FindIndices(this, entries.Parts, UnkPartNames);
                 }
             }
         }

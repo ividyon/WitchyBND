@@ -22,6 +22,7 @@ namespace WitchyFormats
             Connection = 21,
             PatrolRoute22 = 22,
             BuddySummonPoint = 26,
+            DisableTumbleweed = 27,
             MufflingBox = 28,
             MufflingPortal = 29,
             SoundRegion = 30,
@@ -45,6 +46,8 @@ namespace WitchyFormats
             MapNameOverride = 51,
             MountJumpFall = 52,
             HorseRideOverride = 53,
+            LockedMountJump = 54,
+            LockedMountJumpFall = 55,
             Other = 0xFFFFFFFF,
         }
 
@@ -112,6 +115,11 @@ namespace WitchyFormats
             /// Unknown.
             /// </summary>
             public List<Region.BuddySummonPoint> BuddySummonPoints { get; set; }
+
+            /// <summary>
+            /// Unknown.
+            /// </summary>
+            public List<Region.DisableTumbleweed> DisableTumbleweeds { get; set; }
 
             /// <summary>
             /// Areas where sound is muffled.
@@ -230,6 +238,16 @@ namespace WitchyFormats
             public List<Region.HorseRideOverride> HorseRideOverrides { get; set; }
 
             /// <summary>
+            /// Unknown.
+            /// </summary>
+            public List<Region.LockedMountJump> LockedMountJumps { get; set; }
+
+            /// <summary>
+            /// Unknown.
+            /// </summary>
+            public List<Region.LockedMountJumpFall> LockedMountJumpFalls { get; set; }
+
+            /// <summary>
             /// Most likely a dumping ground for unused regions.
             /// </summary>
             public List<Region.Other> Others { get; set; }
@@ -251,6 +269,7 @@ namespace WitchyFormats
                 Connections = new List<Region.Connection>();
                 PatrolRoute22s = new List<Region.PatrolRoute22>();
                 BuddySummonPoints = new List<Region.BuddySummonPoint>();
+                DisableTumbleweeds = new List<Region.DisableTumbleweed>();
                 MufflingBoxes = new List<Region.MufflingBox>();
                 MufflingPortals = new List<Region.MufflingPortal>();
                 SoundRegions = new List<Region.SoundRegion>();
@@ -274,6 +293,8 @@ namespace WitchyFormats
                 MapNameOverrides = new List<Region.MapNameOverride>();
                 MountJumpFalls = new List<Region.MountJumpFall>();
                 HorseRideOverrides = new List<Region.HorseRideOverride>();
+                LockedMountJumps = new List<Region.LockedMountJump>();
+                LockedMountJumpFalls = new List<Region.LockedMountJumpFall>();
                 Others = new List<Region.Other>();
             }
 
@@ -319,6 +340,9 @@ namespace WitchyFormats
                     case Region.MapNameOverride r: MapNameOverrides.Add(r); break;
                     case Region.MountJumpFall r: MountJumpFalls.Add(r); break;
                     case Region.HorseRideOverride r: HorseRideOverrides.Add(r); break;
+                    case Region.LockedMountJump r: LockedMountJumps.Add(r); break;
+                    case Region.LockedMountJumpFall r: LockedMountJumpFalls.Add(r); break;
+                    case Region.DisableTumbleweed r: DisableTumbleweeds.Add(r); break;
                     case Region.Other r: Others.Add(r); break;
 
                     default:
@@ -336,13 +360,13 @@ namespace WitchyFormats
                 return SFUtil.ConcatAll<Region>(
                     InvasionPoints, EnvironmentMapPoints, Sounds, SFX, WindSFX,
                     SpawnPoints, Messages, EnvironmentMapEffectBoxes, WindAreas,
-                    Connections, PatrolRoute22s, BuddySummonPoints, MufflingBoxes,
+                    Connections, PatrolRoute22s, BuddySummonPoints, DisableTumbleweeds, MufflingBoxes,
                     MufflingPortals, SoundRegions, MufflingPlanes, PatrolRoutes,
                     MapPoints, WeatherOverrides, AutoDrawGroupPoints, GroupDefeatRewards,
                     MapPointDiscoveryOverrides, MapPointParticipationOverrides, Hitsets,
                     FastTravelRestriction, WeatherCreateAssetPoints, PlayAreas, EnvironmentMapOutputs,
                     MountJumps, Dummies, FallPreventionRemovals, NavmeshCuttings, MapNameOverrides,
-                    MountJumpFalls, HorseRideOverrides, Others);
+                    MountJumpFalls, HorseRideOverrides, LockedMountJumps, LockedMountJumpFalls, Others);
             }
             IReadOnlyList<IMsbRegion> IMsbParam<IMsbRegion>.GetEntries() => GetEntries();
 
@@ -386,6 +410,9 @@ namespace WitchyFormats
 
                     case RegionType.BuddySummonPoint:
                         return BuddySummonPoints.EchoAdd(new Region.BuddySummonPoint(br));
+
+                    case RegionType.DisableTumbleweed:
+                        return DisableTumbleweeds.EchoAdd(new Region.DisableTumbleweed(br));
 
                     case RegionType.MufflingBox:
                         return MufflingBoxes.EchoAdd(new Region.MufflingBox(br));
@@ -456,6 +483,12 @@ namespace WitchyFormats
                     case RegionType.HorseRideOverride:
                         return HorseRideOverrides.EchoAdd(new Region.HorseRideOverride(br));
 
+                    case RegionType.LockedMountJump:
+                        return LockedMountJumps.EchoAdd(new Region.LockedMountJump(br));
+
+                    case RegionType.LockedMountJumpFall:
+                        return LockedMountJumpFalls.EchoAdd(new Region.LockedMountJumpFall(br));
+
                     case RegionType.Other:
                         return Others.EchoAdd(new Region.Other(br));
 
@@ -481,17 +514,19 @@ namespace WitchyFormats
             /// <summary>
             /// The location of the region.
             /// </summary>
+            [PositionProperty]
             public Vector3 Position { get; set; }
 
             /// <summary>
             /// The rotiation of the region, in degrees.
             /// </summary>
+            [RotationProperty]
             public Vector3 Rotation { get; set; }
 
             /// <summary>
-            /// Unknown.
+            /// Presumed ID for regions. Unique per map / incremented per region.
             /// </summary>
-            public int Unk2C { get; set; }
+            public int RegionID { get; set; }
 
             /// <summary>
             /// Unknown.
@@ -538,7 +573,8 @@ namespace WitchyFormats
             /// </summary>
             [MSBReference(ReferenceType = typeof(Part))]
             public string ActivationPartName { get; set; }
-            private int ActivationPartIndex;
+            [IndexProperty]
+            public int ActivationPartIndex { get; set; }
 
             /// <summary>
             /// Identifies the region in event scripts.
@@ -580,7 +616,7 @@ namespace WitchyFormats
                 MSB.ShapeType shapeType = br.ReadEnum32<MSB.ShapeType>();
                 Position = br.ReadVector3();
                 Rotation = br.ReadVector3();
-                Unk2C = br.ReadInt32();
+                RegionID = br.ReadInt32();
                 long baseDataOffset1 = br.ReadInt64();
                 long baseDataOffset2 = br.ReadInt64();
                 Unk40 = br.ReadInt32();
@@ -663,7 +699,7 @@ namespace WitchyFormats
                 bw.WriteUInt32((uint)Shape.Type);
                 bw.WriteVector3(Position);
                 bw.WriteVector3(Rotation);
-                bw.WriteInt32(Unk2C);
+                bw.WriteInt32(RegionID);
                 bw.ReserveInt64("BaseDataOffset1");
                 bw.ReserveInt64("BaseDataOffset2");
                 bw.WriteInt32(Unk40);
@@ -950,7 +986,7 @@ namespace WitchyFormats
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Region))]
                 public string[] ChildRegionNames { get; set; }
-                private int[] ChildRegionIndices;
+                public int[] ChildRegionIndices;
 
                 /// <summary>
                 /// Unknown.
@@ -1004,7 +1040,7 @@ namespace WitchyFormats
                 internal override void GetIndices(Entries entries)
                 {
                     base.GetIndices(entries);
-                    ChildRegionIndices = MSB.FindIndices(entries.Regions, ChildRegionNames);
+                    ChildRegionIndices = MSB.FindIndices(this, entries.Regions, ChildRegionNames);
                 }
             }
 
@@ -1064,7 +1100,8 @@ namespace WitchyFormats
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Region))]
                 public string WindAreaName { get; set; }
-                private int WindAreaIndex;
+                [IndexProperty]
+                public int WindAreaIndex { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -1168,7 +1205,7 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public int UnkT0C { get; set; }
+                public int MessageSfxID { get; set; }
 
                 /// <summary>
                 /// Event Flag required to be ON for the message to appear.
@@ -1211,9 +1248,9 @@ namespace WitchyFormats
                 {
                     MessageID = br.ReadInt16();
                     UnkT02 = br.ReadInt16();
-                    Hidden = br.AssertInt32(0, 1) == 1;
+                    Hidden = br.AssertInt32([0, 1]) == 1;
                     UnkT08 = br.ReadInt32();
-                    UnkT0C = br.ReadInt32();
+                    MessageSfxID = br.ReadInt32();
                     EnableEventFlagID = br.ReadUInt32();
                     CharacterModelName = br.ReadInt32();
                     NPCParamID = br.ReadInt32();
@@ -1227,7 +1264,7 @@ namespace WitchyFormats
                     bw.WriteInt16(UnkT02);
                     bw.WriteInt32(Hidden ? 1 : 0);
                     bw.WriteInt32(UnkT08);
-                    bw.WriteInt32(UnkT0C);
+                    bw.WriteInt32(MessageSfxID);
                     bw.WriteUInt32(EnableEventFlagID);
                     bw.WriteInt32(CharacterModelName);
                     bw.WriteInt32(NPCParamID);
@@ -1859,7 +1896,7 @@ namespace WitchyFormats
                 {
                     WeatherLotParamID = br.ReadInt32();
                     br.AssertInt32(-1);
-                    br.AssertInt32(0);
+                    br.AssertInt32(0x0, 0xFFFFFF, 0x1FFFF);
                     br.AssertInt32(0);
                     br.AssertInt32(0);
                     br.AssertInt32(0);
@@ -1953,7 +1990,7 @@ namespace WitchyFormats
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Part))]
                 public string[] PartNames { get; set; }
-                private int[] PartIndices;
+                public int[] PartIndices;
 
                 /// <summary>
                 /// Unknown.
@@ -2041,7 +2078,7 @@ namespace WitchyFormats
                 internal override void GetIndices(Entries entries)
                 {
                     base.GetIndices(entries);
-                    PartIndices = MSB.FindIndices(entries.Parts, PartNames);
+                    PartIndices = MSB.FindIndices(this, entries.Parts, PartNames);
                 }
             }
 
@@ -2178,7 +2215,8 @@ namespace WitchyFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public int UnkT00 { get; set; }
+                [MSBParamReference(ParamName = "PlayRegionParam")]
+                public int PlayRegionID { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -2194,13 +2232,13 @@ namespace WitchyFormats
 
                 private protected override void ReadTypeData(BinaryReaderEx br)
                 {
-                    UnkT00 = br.ReadInt32();
+                    PlayRegionID = br.ReadInt32();
                     UnkT04 = br.ReadInt32();
                 }
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
-                    bw.WriteInt32(UnkT00);
+                    bw.WriteInt32(PlayRegionID);
                     bw.WriteInt32(UnkT04);
                 }
             }
@@ -2357,9 +2395,9 @@ namespace WitchyFormats
                 private protected override bool HasTypeData => true;
 
                 /// <summary>
-                /// Unknown.
+                /// FMG id to use for popup titlecards. Negative values apply when entering, Positive values apply on map load.
                 /// </summary>
-                public int UnkT00 { get; set; }
+                public int TextID { get; set; }
 
                 /// <summary>
                 /// Creates a MapNameOverride with default values.
@@ -2370,13 +2408,13 @@ namespace WitchyFormats
 
                 private protected override void ReadTypeData(BinaryReaderEx br)
                 {
-                    UnkT00 = br.ReadInt32();
+                    TextID = br.ReadInt32();
                     br.AssertInt32(0);
                 }
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
-                    bw.WriteInt32(UnkT00);
+                    bw.WriteInt32(TextID);
                     bw.WriteInt32(0);
                 }
             }
@@ -2430,7 +2468,7 @@ namespace WitchyFormats
                 /// <summary>
                 /// 1 = Forbid riding torrent, 2 = Permit riding torrent
                 /// </summary>
-                public HorseRideOverrideType OverrideType { get; set; }
+                public HorseRideOverrideType OverrideType { get; set; } = HorseRideOverrideType.PreventRiding;
 
                 /// <summary>
                 /// Creates a HorseRideOverride with default values.
@@ -2451,6 +2489,119 @@ namespace WitchyFormats
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
                     bw.WriteUInt32((uint)OverrideType);
+                    bw.WriteInt32(0);
+                }
+            }
+
+            /// <summary>
+            /// Unknown.
+            /// </summary>
+            public class LockedMountJump : Region
+            {
+                private protected override RegionType Type => RegionType.LockedMountJump;
+                private protected override bool HasTypeData => true;
+
+                /// <summary>
+                /// Height the player will move upwards when activating a MountJump.
+                /// </summary>
+                public float JumpHeight { get; set; }
+
+                /// <summary>
+                /// Unknown.
+                /// </summary>
+                public int UnkT04 { get; set; }
+
+                /// <summary>
+                /// Probably event flag to enable.
+                /// </summary>
+                public int UnkT08 { get; set; }
+
+                /// <summary>
+                /// Creates a LockedMountJump with default values.
+                /// </summary>
+                public LockedMountJump() : base($"{nameof(Region)}: {nameof(LockedMountJump)}") { }
+
+                internal LockedMountJump(BinaryReaderEx br) : base(br) { }
+
+                private protected override void ReadTypeData(BinaryReaderEx br)
+                {
+                    JumpHeight = br.ReadSingle();
+                    UnkT04 = br.ReadInt32();
+                    UnkT08 = br.ReadInt32();
+                    br.AssertInt32(-1);
+                }
+
+                private protected override void WriteTypeData(BinaryWriterEx bw)
+                {
+                    bw.WriteSingle(JumpHeight);
+                    bw.WriteInt32(UnkT04);
+                    bw.WriteInt32(UnkT08);
+                    bw.WriteInt32(-1);
+                }
+            }
+
+            /// <summary>
+            /// Unknown.
+            /// </summary>
+            public class LockedMountJumpFall : Region
+            {
+                private protected override RegionType Type => RegionType.LockedMountJumpFall;
+                private protected override bool HasTypeData => true;
+
+                /// <summary>
+                /// Probably event flag to enable.
+                /// </summary>
+                public int UnkT08 { get; set; }
+
+                /// <summary>
+                /// Creates a LockedMountJumpFall with default values.
+                /// </summary>
+                public LockedMountJumpFall() : base($"{nameof(Region)}: {nameof(LockedMountJumpFall)}") { }
+
+                internal LockedMountJumpFall(BinaryReaderEx br) : base(br) { }
+
+                private protected override void ReadTypeData(BinaryReaderEx br)
+                {
+                    br.AssertInt32(-1);
+                    br.AssertInt32(0);
+                    UnkT08 = br.ReadInt32();
+                }
+
+                private protected override void WriteTypeData(BinaryWriterEx bw)
+                {
+                    bw.WriteInt32(-1);
+                    bw.WriteInt32(0);
+                    bw.WriteInt32(UnkT08);
+                }
+
+            }
+
+            /// <summary>
+            /// Unknown.
+            /// </summary>
+            public class DisableTumbleweed : Region
+            {
+                private protected override RegionType Type => RegionType.DisableTumbleweed;
+                private protected override bool HasTypeData => true;
+
+                /// <summary>
+                /// Creates a DisableTumbleweed with default values.
+                /// </summary>
+                public DisableTumbleweed() : base($"{nameof(Region)}: {nameof(DisableTumbleweed)}") { }
+
+                internal DisableTumbleweed(BinaryReaderEx br) : base(br) { }
+
+                private protected override void ReadTypeData(BinaryReaderEx br)
+                {
+                    br.AssertInt32(-1);
+                    br.AssertInt32(0);
+                    br.AssertInt32(0);
+                }
+
+                private protected override void WriteTypeData(BinaryWriterEx bw)
+                {
+                    bw.WriteInt32(-1);
+                    bw.WriteInt32(0);
                     bw.WriteInt32(0);
                 }
             }

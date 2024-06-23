@@ -45,18 +45,18 @@ namespace WitchyFormats
             bw.WriteByte(0xFF);
         }
 
-        internal static void DisambiguateNames<T>(List<T> entries) where T : IMsbEntry
+        internal static void DisambiguateNames<T>(List<T> entries, string className = "") where T : IMsbEntry
         {
             bool ambiguous;
             do
             {
                 ambiguous = false;
                 var nameCounts = new Dictionary<string, int>();
-                
+
                 // Some entries have blank names but are referenced, which means they all must be
                 // disambiguated.
                 nameCounts[""] = 0;
-                
+
                 foreach (IMsbEntry entry in entries)
                 {
                     string name = entry.Name;
@@ -68,7 +68,7 @@ namespace WitchyFormats
                     {
                         ambiguous = true;
                         nameCounts[name]++;
-                        entry.Name = $"{name} {{{nameCounts[name]}}}";
+                        entry.Name = $"{className}{name} {{{nameCounts[name]}}}";
                     }
                 }
             }
@@ -84,11 +84,21 @@ namespace WitchyFormats
         {
             if (index == -1)
                 return null;
+            else if (index >= list.Count)
+                return null;
             else
                 return list[index].Name;
         }
 
         internal static string[] FindNames<T>(List<T> list, int[] indices) where T : IMsbEntry
+        {
+            var names = new string[indices.Length];
+            for (int i = 0; i < indices.Length; i++)
+                names[i] = FindName(list, indices[i]);
+            return names;
+        }
+
+        internal static string[] FindNames<T>(List<T> list, short[] indices) where T : IMsbEntry
         {
             var names = new string[indices.Length];
             for (int i = 0; i < indices.Length; i++)
@@ -138,6 +148,22 @@ namespace WitchyFormats
             var indices = new int[names.Length];
             for (int i = 0; i < names.Length; i++)
                 indices[i] = FindIndex(list, names[i]);
+            return indices;
+        }
+
+        internal static int[] FindIndices<T>(IMsbEntry referrer, List<T> list, string[] names) where T : IMsbEntry
+        {
+            var indices = new int[names.Length];
+            for (int i = 0; i < names.Length; i++)
+                indices[i] = FindIndex(referrer, list, names[i]);
+            return indices;
+        }
+
+        internal static short[] FindShortIndices<T>(IMsbEntry referrer, List<T> list, string[] names) where T : IMsbEntry
+        {
+            var indices = new short[names.Length];
+            for (int i = 0; i < names.Length; i++)
+                indices[i] = (short)FindIndex(referrer, list, names[i]);
             return indices;
         }
     }
