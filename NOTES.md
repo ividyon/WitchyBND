@@ -4,5 +4,7 @@ There is a high likelihood of Witchy corrupting files or providing incomplete da
 
 These builds are primarily intended for datamining purposes.
 
+* Removed the requirement for TAE events to be contained in the correct event bank.
+  * This is kind of a janky workaround until a newer version of SoulsAssetPipeline is available.
 * Updated to latest Paramdex from Smithbox.
 * Fixed an issue where MSB serialization would have unnecessary indices.
