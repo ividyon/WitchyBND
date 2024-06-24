@@ -191,7 +191,8 @@ namespace WitchyFormats
             /// </summary>
             public string ModelName { get; set; }
             [IndexProperty]
-            public int ModelIndex { get; set; }
+            [XmlIgnore]
+            private int ModelIndex { get; set; }
 
             /// <summary>
             /// Involved with serialization.
