@@ -143,13 +143,14 @@ The error was:
 
         gameService.PopulateNames(game, paramName);
 
-        // Prepare rows
-        var rows = new List<WPARAMRow>();
         var fieldNames = paramdef.Fields.FilterByGameVersion(gameInfo.Item2).Select(field => field.InternalName)
             .ToList();
 
-        var fieldCounts = new ConcurrentDictionary<string, ConcurrentDictionary<string, int>>();
-        var fieldMaxes = new ConcurrentDictionary<string, (string, int)>();
+        var fieldCounts = new Dictionary<string, ConcurrentBag<string>>();
+        foreach (string fieldName in fieldNames)
+        {
+            fieldCounts.TryAdd(fieldName, new());
+        }
 
 
         var rowDict = new ConcurrentDictionary<long, WPARAMRow>();
@@ -187,16 +188,7 @@ The error was:
 
                 var value = CellValueToString(cell.Value);
 
-                fieldCounts.TryAdd(fieldName, new ConcurrentDictionary<string, int>());
-                fieldCounts[fieldName].TryAdd(value, 0);
-                fieldCounts[fieldName].TryGetValue(value, out int count);
-                fieldCounts[fieldName][value] = count + 1;
-
-                if (!fieldMaxes.ContainsKey(fieldName) ||
-                    count > fieldMaxes[fieldName].Item2)
-                {
-                    fieldMaxes[fieldName] = (value, count);
-                }
+                fieldCounts[fieldName].Add(value);
 
                 prepRow.Fields[fieldName] = value;
             }
@@ -216,20 +208,20 @@ The error was:
             }
         }
 
-        foreach (WPARAMRow row in rowDict.OrderBy(p => p.Key).Select(p => p.Value).ToList())
-        {
-            rows.Add(row);
-        }
+        var defaultValues = fieldCounts.ToDictionary(a => a.Key, b => {
+            var maxGroup = b.Value.GroupBy(s => s)
+                .OrderByDescending(s => s.Count())
+                .First();
 
-        int threshold = (int)(rows.Count * Configuration.Active.ParamDefaultValueThreshold);
+            return (maxGroup.Key, maxGroup.Count());
+        });
 
-        var defaultsAboveThreshold = new HashSet<string>();
-        var defaultValues = fieldCounts.OrderBy(a => a.Key).SelectMany(fc => {
-            KeyValuePair<string, int> max = fc.Value.OrderBy(d => d.Key).MaxBy(c => c.Value);
-            if (max.Value >= threshold)
-                defaultsAboveThreshold.Add(fc.Key);
-            return new[] { new KeyValuePair<string, string>(fc.Key, max.Key) };
-        }).ToDictionary(a => a.Key, b => b.Value);
+        var rows = rowDict.OrderBy(p => p.Key).Select(p => p.Value).ToList();
+
+        int threshold = int.Max((int)(rows.Count * Configuration.Active.ParamDefaultValueThreshold), 100);
+
+        var defaultValuesAboveThreshold = defaultValues.Where(a => a.Value.Item2 >= threshold)
+            .ToDictionary(a => a.Key, b => b.Value);
 
         // Field info (def & default values)
         xw.WriteStartElement("fields");
@@ -251,9 +243,11 @@ The error was:
             xw.WriteAttributeString("unkc0", field.UnkC0);
 
             // Store common "default" values
-            if (Configuration.ParamDefaultValues && defaultValues.TryGetValue(fieldName, out string? value))
+            if (Configuration.ParamDefaultValues && defaultValues.TryGetValue(fieldName, out var value))
             {
-                xw.WriteAttributeString("defaultValue", value);
+                xw.WriteAttributeString("defaultValue", value.Key);
+                if (defaultValuesAboveThreshold.TryGetValue(fieldName, out _))
+                    xw.WriteAttributeString("defaultThreshold", true.ToString());
             }
 
             xw.WriteEndElement();
@@ -283,11 +277,9 @@ The error was:
                     string fieldName = fieldPair.Key;
                     string value = fieldPair.Value;
 
-                    bool isDefaultValue = defaultValues.ContainsKey(fieldName) &&
-                                          defaultsAboveThreshold.Contains(fieldName) &&
-                                          defaultValues[fieldName] == value;
-
-                    if (!isDefaultValue)
+                    var hasDefaultValueAboveThreshold =
+                        defaultValuesAboveThreshold.TryGetValue(fieldName, out var defValuePair);
+                    if (!(hasDefaultValueAboveThreshold && defValuePair.Key == value))
                     {
                         switch (cellStyle)
                         {

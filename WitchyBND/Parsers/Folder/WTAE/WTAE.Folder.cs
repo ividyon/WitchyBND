@@ -23,7 +23,7 @@ public partial class WTAEFolder : WFolderParser
         if (templateDict.Any()) return false;
         foreach (var type in Enum.GetValues<WBUtil.GameType>().Except(new [] { WBUtil.GameType.AC6 }))
         {
-            var path = WBUtil.GetParamdexPath(type.ToString(), $"TAE.Template.{type}.xml");
+            var path = WBUtil.GetAssetsPath("Templates", $"TAE.Template.{type}.xml");
             if (File.Exists(path))
                 templateDict[type] = TAE.Template.ReadXMLFile(path);
         }

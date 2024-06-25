@@ -90,6 +90,18 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.10.0.4
+
+* Removed the requirement for TAE events to be contained in the correct event bank.
+  * This is kind of a janky workaround until a newer version of SoulsAssetPipeline is available.
+* Updated to latest Paramdex from Smithbox.
+* Optimized the PARAM parser.
+  * Default values will now not be considered "above threshold" if there's less than 100 instances.
+  * Added a boolean to fields which describes if the threshold was reached.
+  * Optimized the logic with which default values are determined, to speed up the parser and hopefully fix issues with mismatching defaults between users.
+* Fixed an issue where MSB serialization would have unnecessary indices.
+* Changed the folder structure of the Assets folder.
+
 ### 2.10.0.3
 
 * Improved MSBE serialization.

@@ -188,9 +188,19 @@ public static class WBUtil
         [Display(Name = "Armored Core VI")] AC6
     }
 
+    public static string GetAssetsPath()
+    {
+        return Path.Combine(GetExeLocation(), "Assets");
+    }
+
+    public static string GetAssetsPath(params string[] parts)
+    {
+        return Path.Combine(new[] { GetAssetsPath() }.Union(parts).ToArray());
+    }
+
     public static string GetParamdexPath()
     {
-        return $@"{GetExeLocation()}\Assets\Paramdex";
+        return Path.Combine(GetAssetsPath(), "Paramdex");
     }
 
     public static string GetParamdexPath(params string[] parts)
