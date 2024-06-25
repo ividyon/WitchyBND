@@ -25,6 +25,10 @@ public static class ParseMode
         Parsers = new List<WFileParser>
         {
             new WDCX(),
+            new WGFX(),
+            new WHKX(),
+            new WFLVER(),
+            new WLUA(),
             new WPARAMBND3(),
             new WPARAMBND4(),
             new WMATBINBND(),
@@ -48,8 +52,6 @@ public static class ParseMode
             new WMQB(),
             new WDBSUB(),
             new WENFL(),
-            new WLUA(),
-            // new WHKX(),
             new WTAEFolder(),
             new WTAEFile(),
             new WMSBEFolder(),
@@ -101,7 +103,7 @@ public static class ParseMode
                     innerParsed = errorService.Catch(() => {
                         ISoulsFile? file;
                         if ((Configuration.Active.UnpackOnly || !Configuration.Active.RepackOnly) && parser.Exists(path) &&
-                            parser.Is(path, data, out file))
+                            parser.Is(path, data, out file) && (!recursive || parser is not WDeferredFileParser))
                         {
                             Unpack(path, file, compression, parser, recursive);
                             return true;

@@ -90,6 +90,22 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.11.0.0
+
+Note: This update may reset your personal settings.
+
+* Added Deferred Format support for:
+  * FLVER, with a preset for SoulsModelTool.
+  * GFX, with a preset for JPEXS Free Flash Decompiler.
+* Updated to latest Paramdex from Smithbox.
+* Updated the MSBE serialization format.
+* Updated the behavior of Deferred Formats.
+  * Deferred Formats will no longer be processed as part of a Recursive process.
+  * Deferred Formats can now perform repacking as well as unpacking.
+  * Fixed an issue where the $path placeholder wasn't being populated in the arguments.
+  * Fixed an issue where all presets would show regardless of intended format.
+* Fixed issues that prevented the HKX and LUA deferred formats from working correctly.
+
 ### 2.10.0.4
 
 * Removed the requirement for TAE events to be contained in the correct event bank.

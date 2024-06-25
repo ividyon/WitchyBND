@@ -854,4 +854,16 @@ public static class WBUtil
         LatestKnownRegulationVersions = new();
     }
 
+    public static string GetFileNameWithoutAnyExtensions(string path)
+    {
+        return Path.GetFileName(path).Split(".").First();
+    }
+
+    public static string GetFullExtensions(string path)
+    {
+        var split = Path.GetFileName(path).Split(".");
+        if (split.Length > 1)
+            return "." + string.Join(".", Path.GetFileName(path).Split(".").Skip(1));
+        return "";
+    }
 }

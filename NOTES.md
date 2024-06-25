@@ -1,15 +1,15 @@
-Important: These next releases continue to improve early support for Shadow of the Erdtree. However, you are advised to NOT do any modding work on existing projects while things are in flux.
+Things are looking good, so I'm tentatively calling WitchyBND ready for Shadow of the Erdtree modding. Of course, issues may still pop up, but so far none have been detected.
 
-There is a high likelihood of Witchy corrupting files or providing incomplete data, which in turn can irrevocably damage edited files.
+Note: This update may reset your personal settings.
 
-These builds are primarily intended for datamining purposes.
-
-* Removed the requirement for TAE events to be contained in the correct event bank.
-  * This is kind of a janky workaround until a newer version of SoulsAssetPipeline is available.
+* Added Deferred Format support for:
+  * FLVER, with a preset for SoulsModelTool.
+  * GFX, with a preset for JPEXS Free Flash Decompiler.
 * Updated to latest Paramdex from Smithbox.
-* Optimized the PARAM parser.
-  * Default values will now not be considered "above threshold" if there's less than 100 instances.
-  * Added a boolean to fields which describes if the threshold was reached.
-  * Optimized the logic with which default values are determined, to speed up the parser and hopefully fix issues with mismatching defaults between users.
-* Fixed an issue where MSB serialization would have unnecessary indices.
-* Changed the folder structure of the Assets folder.
+* Updated the MSBE serialization format.
+* Updated the behavior of Deferred Formats.
+  * Deferred Formats will no longer be processed as part of a Recursive process.
+  * Deferred Formats can now perform repacking as well as unpacking.
+  * Fixed an issue where the $path placeholder wasn't being populated in the arguments.
+  * Fixed an issue where all presets would show regardless of intended format.
+* Fixed issues that prevented the HKX and LUA deferred formats from working correctly.

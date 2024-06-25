@@ -24,7 +24,7 @@ public interface IStoredConfig
     public bool Offline { get; set; }
 
     public bool TaeFolder { get; set; }
-    public Dictionary<DeferFormat, DeferFormatConfiguration> DeferTools { get; set; }
+    public Dictionary<DeferFormat, DeferConfig> DeferTools { get; set; }
 
     public bool Flexible { get; set; }
 }
@@ -77,7 +77,7 @@ public static class Configuration
         public bool Offline { get; set; }
 
         public bool TaeFolder { get; set; }
-        public Dictionary<DeferFormat, DeferFormatConfiguration> DeferTools { get; set; } = new();
+        public Dictionary<DeferFormat, DeferConfig> DeferTools { get; set; } = new();
 
         public bool Flexible { get; set; }
 
@@ -101,7 +101,7 @@ public static class Configuration
         public bool Expert { get; set; }
         public bool Offline { get; set; }
         public bool TaeFolder { get; set; }
-        public Dictionary<DeferFormat, DeferFormatConfiguration> DeferTools { get; set; }
+        public Dictionary<DeferFormat, DeferConfig> DeferTools { get; set; }
         public bool Flexible { get; set; }
 
         // The following are args-only or otherwise temporary

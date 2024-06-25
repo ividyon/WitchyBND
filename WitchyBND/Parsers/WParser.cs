@@ -6,6 +6,7 @@ using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
 using WitchyBND.Services;
+using WitchyLib;
 using ServiceProvider = WitchyBND.Services.ServiceProvider;
 
 namespace WitchyBND.Parsers;
@@ -168,6 +169,51 @@ public abstract class WSingleFileParser : WFileParser
     public override bool ExistsUnpacked(string path)
     {
         return File.Exists(path);
+    }
+}
+
+public abstract class WDeferredFileParser : WSingleFileParser
+{
+    public abstract string[] UnpackExtensions { get; }
+    public abstract string[] RepackExtensions { get; }
+    public abstract DeferFormat DeferFormat { get; }
+    public override bool Is(string path, byte[]? data, out ISoulsFile? file)
+    {
+        file = null;
+        var extension = WBUtil.GetFullExtensions(path).ToLower();
+        var cond = UnpackExtensions.Contains(extension);
+        if (cond && !Configuration.Active.DeferTools.ContainsKey(DeferFormat))
+            throw new DeferToolPathException(DeferFormat);
+        return cond;
+    }
+
+    public override bool IsUnpacked(string path)
+    {
+        var extension = WBUtil.GetFullExtensions(path).ToLower();
+        var cond = RepackExtensions.Contains(extension);
+        if (cond && !Configuration.Active.DeferTools.ContainsKey(DeferFormat))
+            throw new DeferToolPathException(DeferFormat);
+        return cond && !string.IsNullOrWhiteSpace(Configuration.Active.DeferTools[DeferFormat].RepackArgs);
+    }
+
+    public override string GetUnpackDestPath(string srcPath)
+    {
+        throw new NotSupportedException();
+    }
+
+    public override void Unpack(string srcPath, ISoulsFile? file)
+    {
+        DeferredFormatHandling.Unpack(DeferFormat, srcPath);
+    }
+
+    public override void Repack(string srcPath)
+    {
+        DeferredFormatHandling.Repack(DeferFormat, srcPath);
+    }
+
+    public override string GetRepackDestPath(string srcPath, XElement xml)
+    {
+        throw new NotSupportedException();
     }
 }
 

@@ -3,17 +3,21 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using NativeFileDialogSharp;
+using PPlus.Controls;
 using WitchyBND.Services;
 using WitchyLib;
 
 namespace WitchyBND.CliModes;
+
 public static class DeferredFormatMode
 {
     private static readonly IOutputService output;
+
     static DeferredFormatMode()
     {
         output = ServiceProvider.GetService<IOutputService>();
     }
+
     public static void Run(CliOptions opt)
     {
         using (output.EscapeColorTokens())
@@ -61,22 +65,30 @@ Cancel the dialog to reset the configuration for that format.");
                 }
 
 
-                var argsSelect = output.Select<string>("Select the arguments provided to the tool")
-                    .AddItems(DeferredFormatHandling.DefaultDeferToolArguments.SelectMany(a => a.Value)
-                        .Select(a => a.Item1).Union(new List<string>
-                        {
-                            "Default",
-                            "Custom..."
-                        }))
-                    .Run();
+                IControlSelect<string> argsSelect = output.Select<string>("Select the arguments provided to the tool");
 
-                if (argsSelect.IsAborted) continue;
+                var hasDefArgs =
+                    DeferredFormatHandling.DefaultDeferToolArguments.TryGetValue(format, out var defArgs);
+                if (hasDefArgs)
+                {
+                    argsSelect.AddItems(defArgs.Select(a => a.Name));
+                }
+
+                argsSelect.AddItems(new List<string>
+                {
+                    "Default",
+                    "Custom..."
+                });
+                var argsVal = argsSelect.Run();
+
+                if (argsVal.IsAborted) continue;
 
                 bool breakOut = false;
-                switch (argsSelect.Value)
+                switch (argsVal.Value)
                 {
                     case "Custom...":
-                            output.WriteLine(@"Please input your custom arguments for the program being called.
+                        output.WriteLine(
+                            @"Please input your custom arguments for the unpacking the format with your program.
 Available placeholders:
 
 $path - Full path of file being processed
@@ -84,27 +96,40 @@ $dirname - Directory path of file being processed
 $filename - Filename (without extension) of file being processed
 $fileext - Extension of file being processed (starts with .)");
 
-                            var customArgsInput = output.Input("Enter custom arguments").Run();
-                            if (customArgsInput.IsAborted)
-                            {
-                                breakOut = true;
-                                break;
-                            }
-
-                            Configuration.Stored.DeferTools[format] = new DeferFormatConfiguration(openDialog.Path, customArgsInput.Value);
+                        var unpackArgsInput = output.Input("Enter custom unpack arguments").Run();
+                        if (unpackArgsInput.IsAborted)
+                        {
+                            breakOut = true;
                             break;
+                        }
+
+                        output.WriteLine(
+                            @"Please input your custom arguments for the repacking the format with your program.
+
+Press the Esc key if your program does not support repacking.
+
+Available placeholders:
+
+$path - Full path of file being processed
+$dirname - Directory path of file being processed
+$filename - Filename (without extension) of file being processed
+$fileext - Extension of file being processed (starts with .)");
+                        var repackArgsInput = output.Input("Enter custom repack arguments").Run();
+
+                        string? repackArgs = !repackArgsInput.IsAborted ? repackArgsInput.Value : null;
+
+                        Configuration.Stored.DeferTools[format] = new DeferConfig(
+                            Path.GetFileNameWithoutExtension(openDialog.Path), openDialog.Path, unpackArgsInput.Value,
+                            repackArgs);
+                        break;
                     case "Default":
-                        Configuration.Stored.DeferTools[format] = new DeferFormatConfiguration(openDialog.Path);
+                        Configuration.Stored.DeferTools[format] =
+                            new DeferConfig(Path.GetFileNameWithoutExtension(openDialog.Path), openDialog.Path);
                         break;
                     default:
-                        foreach ((string selName, string args) in DeferredFormatHandling.DefaultDeferToolArguments[format])
-                        {
-                            if (argsSelect.Value == selName)
-                            {
-                                Configuration.Stored.DeferTools[format] = new DeferFormatConfiguration(openDialog.Path, args);
-                                break;
-                            }
-                        }
+                        var myArgs = defArgs!.First(a => a.Name == argsVal.Value);
+                        Configuration.Stored.DeferTools[format] = new DeferConfig(myArgs.Name, openDialog.Path,
+                            myArgs.UnpackArgs, myArgs.RepackArgs);
                         break;
                 }
 

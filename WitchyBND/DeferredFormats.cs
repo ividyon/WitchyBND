@@ -11,25 +11,22 @@ public enum DeferFormat
 {
     [Display(Name = "Lua/HKS")] Lua,
     [Display(Name = "HKX")] Hkx,
+
     // [Display(Name = "ESD")] Esd,
-    // [Display(Name = "FLVER")] Flver
+    [Display(Name = "FLVER")] Flver,
+    [Display(Name = "GFX")] Gfx
 }
 
-public class DeferFormatConfiguration
+public class DeferArgs(string name, string unpackArgs = "$path", string? repackArgs = null)
 {
-    public string Path { get; set; }
-    public string Arguments { get; set; }
+    public string Name { get; private set; } = name;
+    public string UnpackArgs { get; private set; } = unpackArgs;
+    public string? RepackArgs { get; private set; } = repackArgs;
+}
 
-    public DeferFormatConfiguration(string path, string? args = null)
-    {
-        args ??= "$path";
-        Path = path;
-        Arguments = args;
-    }
-
-    public DeferFormatConfiguration()
-    {
-    }
+public class DeferConfig(string name, string path, string unpackArgs = "$path", string? repackArgs = null) : DeferArgs(name, unpackArgs, repackArgs)
+{
+    public string Path { get; private set; } = path;
 }
 
 public class DeferToolPathException : Exception
@@ -59,42 +56,74 @@ public class DeferToolExecutionException : Exception
 public static class DeferredFormatHandling
 {
     private static readonly IOutputService output;
+
     static DeferredFormatHandling()
     {
         output = ServiceProvider.GetService<IOutputService>();
     }
 
 
-    public static Dictionary<DeferFormat, List<(string, string)>> DefaultDeferToolArguments = new()
+    public static Dictionary<DeferFormat, List<DeferArgs>> DefaultDeferToolArguments = new()
     {
         {
-            DeferFormat.Lua, new()
+            DeferFormat.Lua,
+            new()
             {
-                ("DSLuaDecompiler", "-o \"$dirname\\$filename.dec.$fileext\" \"$path\"")
+                new DeferArgs("DSLuaDecompiler", "-o \"$dirname\\$filename.dec$fileext\" \"$path\"", null)
+            }
+        },
+        {
+            DeferFormat.Flver,
+            new()
+            {
+                new DeferArgs("SoulsModelTool (ELDEN RING)", "-tofbx -meshnameismatname -transformmesh \"$path\"", null)
+            }
+        },
+        {
+            DeferFormat.Gfx,
+            new()
+            {
+                new DeferArgs("JPEXS Free Flash Decompiler (to XML)", "-swf2xml \"$path\" \"$dirname\\$filename.gfx.xml\"", "-xml2swf \"$path\" \"$dirname\\$filename.gfx\"")
             }
         }
     };
 
-    public static string BuildArgs(DeferFormat format, string srcPath)
+    public static string BuildArgs(string args, string srcPath)
     {
-        var conf = Configuration.Active.DeferTools[format];
         var dirname = Path.GetDirectoryName(srcPath);
-        var filename = Path.GetFileNameWithoutExtension(srcPath);
-        var fileext = Path.GetExtension(srcPath);
-        return conf.Arguments.Replace("$dirname", dirname).Replace("$filename", filename).Replace("$fileext", fileext);
+        var filename = WBUtil.GetFileNameWithoutAnyExtensions(srcPath);
+        var fileext = WBUtil.GetFullExtensions(srcPath);
+        return args
+            .Replace("$dirname", dirname)
+            .Replace("$filename", filename)
+            .Replace("$fileext", fileext)
+            .Replace("$path", srcPath);
     }
-
-    public static int CallDeferredTool(DeferFormat format, string srcPath, out string output, out string error)
+    public static void Unpack(DeferFormat format, string srcPath)
     {
         var conf = Configuration.Active.DeferTools[format];
-        var args = BuildArgs(format, srcPath);
-        return ProcessHandling.RunProcess(conf.Path, out output,
-            out error, args, Path.GetDirectoryName(srcPath));
-    }
+        var args = BuildArgs(conf.UnpackArgs, srcPath);
 
-    public static void Process(DeferFormat format, string srcPath)
+        output.WriteLine($"Running deferred tool: \"{conf.Path} {args}\"");
+        var process = ProcessHandling.RunProcess(conf.Path, out var text,
+            out var error, args, Path.GetDirectoryName(srcPath));
+        output.WriteLine(text);
+
+        if (process != 0)
+        {
+            throw new DeferToolExecutionException(format, process, error);
+        }
+    }
+    public static void Repack(DeferFormat format, string srcPath)
     {
-        var process = CallDeferredTool(format, srcPath, out string text, out string error);
+        var conf = Configuration.Active.DeferTools[format];
+        if (string.IsNullOrWhiteSpace(conf.RepackArgs)) return;
+
+        var args = BuildArgs(conf.RepackArgs, srcPath);
+
+        output.WriteLine($"Running deferred tool: \"{conf.Path} {args}\"");
+        var process = ProcessHandling.RunProcess(conf.Path, out var text,
+            out var error, args, Path.GetDirectoryName(srcPath));
         output.WriteLine(text);
 
         if (process != 0)
