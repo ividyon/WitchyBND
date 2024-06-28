@@ -154,7 +154,7 @@ public static class Shell
         var name = "PATH";
         var scope = EnvironmentVariableTarget.User;
         var oldValue = Environment.GetEnvironmentVariable(name, scope);
-        var newValue  = oldValue + @$";{exePath}\\";
+        var newValue  = oldValue + $";{exePath}";
         Environment.SetEnvironmentVariable(name, newValue, scope);
     }
 
@@ -163,7 +163,7 @@ public static class Shell
         var name = "PATH";
         var scope = EnvironmentVariableTarget.User;
         var oldValue = Environment.GetEnvironmentVariable(name, scope);
-        var newValue = oldValue.Replace(@$";{exePath}\\", "");
+        var newValue = oldValue.Replace($";{exePath}", "");
         Environment.SetEnvironmentVariable(name, newValue, scope);
     }
 

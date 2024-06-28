@@ -190,6 +190,17 @@ public class UpdateService : IUpdateService
                 Configuration.Active.Flexible = false;
             }
 
+            // 2.11.0.1: Fix old PATH
+            if (Configuration.Stored.LastLaunchedVersion < new Version(2, 11, 0, 1))
+            {
+                var exePath = Path.GetDirectoryName(AppContext.BaseDirectory)!;
+                var name = "PATH";
+                var scope = EnvironmentVariableTarget.User;
+                var oldValue = Environment.GetEnvironmentVariable(name, scope);
+                var newValue = oldValue.Replace(@$";{exePath}\\", $";{exePath}");
+                Environment.SetEnvironmentVariable(name, newValue, scope);
+            }
+
             if (Configuration.Stored.LastLaunchedVersion < version)
             {
                 var exePath = WBUtil.GetExecutablePath();
