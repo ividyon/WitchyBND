@@ -6,7 +6,6 @@ using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
 using WitchyLib;
-using MQB = WitchyFormats.MQB;
 using Enum = System.Enum;
 namespace WitchyBND.Parsers;
 

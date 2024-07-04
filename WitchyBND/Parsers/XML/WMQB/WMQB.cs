@@ -1,5 +1,4 @@
 ﻿using SoulsFormats;
-using MQB = WitchyFormats.MQB;
 
 namespace WitchyBND.Parsers;
 

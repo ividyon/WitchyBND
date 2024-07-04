@@ -4,7 +4,6 @@ using System.Numerics;
 using System.Xml;
 using SoulsFormats;
 using WitchyLib;
-using MQB = WitchyFormats.MQB;
 
 namespace WitchyBND.Parsers;
 

@@ -44,8 +44,8 @@
       },
       "Microsoft.NETCore.Platforms": {
         "type": "Transitive",
-        "resolved": "1.1.0",
-        "contentHash": "kz0PEW2lhqygehI/d6XsPCQzD7ff7gUJaVGPVETX611eadGsA3A877GdSlU0LRVMCTH/+P3o2iDTak+S08V2+A=="
+        "resolved": "3.1.0",
+        "contentHash": "z7aeg8oHln2CuNulfhiLYxCVMPEwBl3rzicjvIX+4sUuCwvXw5oXQEtbiU2c0z4qYL5L3Kmx0mMA/+t/SbY67w=="
       },
       "Microsoft.NETCore.Targets": {
         "type": "Transitive",
@@ -90,8 +90,11 @@
       },
       "System.Text.Encoding.CodePages": {
         "type": "Transitive",
-        "resolved": "7.0.0",
-        "contentHash": "LSyCblMpvOe0N3E+8e0skHcrIhgV2huaNcjUUEa8hRtgEAm36aGkRoC8Jxlb6Ra6GSfF29ftduPNywin8XolzQ=="
+        "resolved": "4.7.0",
+        "contentHash": "aeu4FlaUTemuT1qOd1MyU4T516QR4Fy+9yDbwWMPHOHy7U8FD6SgTzdZFO7gHcfAPHtECqInbwklVvUK4RHcNg==",
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "3.1.0"
+        }
       },
       "System.Text.Encodings.Web": {
         "type": "Transitive",
@@ -130,7 +133,7 @@
         "type": "Project",
         "dependencies": {
           "BouncyCastle.Cryptography": "[2.2.0, )",
-          "System.Text.Encoding.CodePages": "[7.0.0, )",
+          "System.Text.Encoding.CodePages": "[4.7.0, )",
           "System.ValueTuple": "[4.5.0, )",
           "ZstdNet": "[1.4.5, )"
         }

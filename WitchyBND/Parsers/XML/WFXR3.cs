@@ -3,7 +3,6 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using SoulsFormats;
-using WitchyFormats;
 using WitchyLib;
 
 namespace WitchyBND.Parsers;
@@ -15,18 +14,18 @@ public class WFXR3 : WXMLParser
 
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
-        return IsRead<RSFXR>(path, data, out file);
+        return IsRead<FXR3>(path, data, out file);
     }
 
     public override void Unpack(string srcPath, ISoulsFile? file)
     {
-        var fxr = (file as RSFXR)!;
+        var fxr = (file as FXR3)!;
 
         XDocument xDoc = new XDocument();
 
         using (var xmlWriter = xDoc.CreateWriter())
         {
-            var thing = new XmlSerializer(typeof(RSFXR));
+            var thing = new XmlSerializer(typeof(FXR3));
             thing.Serialize(xmlWriter, fxr);
         }
 
@@ -42,10 +41,10 @@ public class WFXR3 : WXMLParser
 
         XElement xml = LoadXml(srcPath);
 
-        XmlSerializer serializer = new XmlSerializer(typeof(RSFXR));
+        XmlSerializer serializer = new XmlSerializer(typeof(FXR3));
         XmlReader xmlReader = xml.CreateReader();
 
-        var fxr = (RSFXR)serializer.Deserialize(xmlReader);
+        var fxr = (FXR3)serializer.Deserialize(xmlReader);
         if (fxr == null)
             throw new Exception();
 

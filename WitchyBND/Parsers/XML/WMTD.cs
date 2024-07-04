@@ -2,7 +2,6 @@
 using System.Xml.Linq;
 using SoulsFormats;
 using WitchyLib;
-using MTD = WitchyFormats.MTD;
 
 namespace WitchyBND.Parsers;
 

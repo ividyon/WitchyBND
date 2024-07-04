@@ -9,7 +9,6 @@ using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
 using WitchyLib;
-using GPARAM = WitchyFormats.GPARAM;
 
 namespace WitchyBND.Parsers;
 

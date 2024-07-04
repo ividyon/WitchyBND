@@ -5,9 +5,7 @@ using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
 using WitchyBND.Errors;
-using WitchyFormats.Utils;
 using WitchyLib;
-using TPF = WitchyFormats.TPF;
 
 namespace WitchyBND.Parsers;
 
@@ -65,7 +63,7 @@ public class WTPF : WFolderParser
             catch (EndOfStreamException)
             {
                 File.WriteAllBytes($"{destDir}\\{WBUtil.SanitizeFilename(texture.Name)}.dds",
-                    SecretHeaderizer.SecretHeaderize(texture));
+                    SecretHeaderizer.Headerize(texture));
             }
 
             textures.Add(texElement);

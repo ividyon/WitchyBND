@@ -47,7 +47,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\SoulsFormats\SoulsFormats.csproj" />
+        <ProjectReference Include="..\SoulsFormats\SoulsFormats\SoulsFormats.csproj" />
         <ProjectReference Include="..\SoulsOodleLib\SoulsOodleLib.csproj" />
         <ProjectReference Include="..\WitchyFormats\WitchyFormats.csproj" />
         <ProjectReference Include="..\WitchyLib\WitchyLib.csproj" />
