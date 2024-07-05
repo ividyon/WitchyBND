@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Xml;
+using System.IO;
 using SoulsFormats;
 
 namespace WitchyFormats
@@ -672,6 +671,15 @@ namespace WitchyFormats
             for (int i = 0; i < Animations.Count; i++)
             {
                 Animation anim = Animations[i];
+                foreach (Event animEvent in anim.Events)
+                {
+                    if (animEvent.Group == null)
+                        throw new InvalidDataException($"Event {i} {animEvent.Type} is missing group");
+                    if (!anim.EventGroups.Contains(animEvent.Group))
+                    {
+                        throw new InvalidDataException($"Group of event {animEvent.Type} is not included in the TAE");
+                    }
+                }
                 anim.WriteAnimFile(bw, i, Format);
                 Dictionary<float, long> timeOffsets = anim.WriteTimes(bw, i, Format);
                 List<long> eventHeaderOffsets = anim.WriteEventHeaders(bw, i, timeOffsets, Format);
