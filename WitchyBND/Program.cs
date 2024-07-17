@@ -79,11 +79,13 @@ internal static class Program
                         if (opt.Dcx)
                             Configuration.Active.Dcx = opt.Dcx;
                         if (opt.Bnd)
-                            Configuration.Active.Bnd = opt.Bnd;
+                            Configuration.Active.Bnd = false;
                         if (opt.Recursive)
                             Configuration.Active.Recursive = opt.Recursive;
                         if (opt.Parallel)
                             Configuration.Active.Parallel = opt.Parallel;
+                        if (opt.Flexible)
+                            Configuration.Active.Flexible = opt.Flexible;
 
                         // Arg-only configuration
                         if (opt.RepackOnly)
@@ -236,7 +238,8 @@ internal static class Program
             { "DCX decompression only", Configuration.Active.Dcx.ToString() },
             { "Store PARAM field default values", Configuration.ParamDefaultValues.ToString() },
             { "Recursive binder processing", Configuration.Active.Recursive.ToString() },
-            { "Parallel processing", Configuration.Active.Parallel.ToString() }
+            { "Parallel processing", Configuration.Active.Parallel.ToString() },
+            { "Flexible extraction", Configuration.Active.Flexible.ToString() }
         };
 
         if (Configuration.Active.Passive)

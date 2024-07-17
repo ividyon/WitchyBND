@@ -217,6 +217,10 @@ public class CliOptions
         HelpText = "Perform basic unpacking of BND instead of using special Witchy methods, where present")]
     public bool Bnd { get; set; }
 
+    [Option('f', "flexible",
+        HelpText = "Ignore assertions and other issues while unpacking, to counteract file tampering")]
+    public bool Flexible { get; set; }
+
     [Option('r', "repack", HelpText = "Only perform repack processing, no unpacking.", SetName = "pack")]
     public bool RepackOnly { get; set; }
 
