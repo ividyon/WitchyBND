@@ -383,6 +383,8 @@ Enter 0, or leave it empty, to use the latest available paramdef.");
         foreach (string name in names)
         {
             var splitted = name.Trim().Split(' ', 2);
+            if (splitted.Length != 2)
+                continue;
             try
             {
                 var result = nameDict.TryAdd(int.Parse(splitted[0]), splitted[1]);
@@ -393,7 +395,7 @@ Enter 0, or leave it empty, to use the latest available paramdef.");
             }
             catch (Exception e)
             {
-                throw new InvalidDataException($"There was something wrong with the Paramdex names at \"{name}\"",
+                throw new InvalidDataException($"There was something wrong with the Paramdex names at \"{name}\" in {Path.GetFileNameWithoutExtension(namePath)}",
                     e);
             }
         }
