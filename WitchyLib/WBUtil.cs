@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
@@ -147,6 +149,9 @@ public static class WBUtil
         }
     }
 
+    [DllImport("kernel32.dll")]
+    public static extern IntPtr GetConsoleWindow();
+
     public static string GetExeLocation(params string[]? parts)
     {
         if (parts != null && parts.Any())
@@ -258,7 +263,7 @@ public static class WBUtil
             game = GameType.ER;
             return SFUtil.DecryptERRegulation(path);
         }
-        catch (InvalidDataException e)
+        catch (Exception e) when (e is InvalidDataException or CryptographicException)
         {
             try
             {

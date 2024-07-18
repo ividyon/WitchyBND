@@ -58,12 +58,23 @@ public class WTPF : WFolderParser
 
             try
             {
-                File.WriteAllBytes($"{destDir}\\{WBUtil.SanitizeFilename(texture.Name)}.dds", texture.Headerize());
+                if (!Directory.Exists($"{destDir}\\Headerizer"))
+                    Directory.CreateDirectory($"{destDir}\\Headerizer");
+                File.WriteAllBytes($"{destDir}\\Headerizer\\{WBUtil.SanitizeFilename(texture.Name)}.dds", texture.Headerize());
             }
-            catch (EndOfStreamException)
+            catch (Exception)
             {
-                File.WriteAllBytes($"{destDir}\\{WBUtil.SanitizeFilename(texture.Name)}.dds",
-                    SecretHeaderizer.Headerize(texture));
+                //
+            }
+            try
+            {
+                if (!Directory.Exists($"{destDir}\\SecretHeaderizer"))
+                    Directory.CreateDirectory($"{destDir}\\SecretHeaderizer");
+                File.WriteAllBytes($"{destDir}\\SecretHeaderizer\\{WBUtil.SanitizeFilename(texture.Name)}.dds", texture.Headerize());
+            }
+            catch (Exception)
+            {
+                //
             }
 
             textures.Add(texElement);

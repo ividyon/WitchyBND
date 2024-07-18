@@ -2,6 +2,7 @@
 using System.Globalization;
 using PPlus;
 using PPlus.Controls;
+using WitchyLib;
 
 namespace WitchyBND.Services;
 
@@ -43,7 +44,8 @@ public class OutputService : IOutputService
 {
     public OutputService()
     {
-        PromptPlus.Config.DefaultCulture = new CultureInfo("en-us");
+        if (WBUtil.GetConsoleWindow() != IntPtr.Zero)
+            PromptPlus.Config.DefaultCulture = new CultureInfo("en-us");
     }
 
     public object ConsoleWriterLock => new();

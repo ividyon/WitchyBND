@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
@@ -24,17 +25,13 @@ internal static class Program
 {
     public static int ProcessedItems = 0;
 
-    private static readonly IErrorService errorService;
-    private static readonly IUpdateService updateService;
-    private static readonly IOutputService output;
+    private static IErrorService _errorService;
+    private static IUpdateService _updateService;
+    private static IOutputService _output;
 
 
     static Program()
     {
-        ServiceProvider.InitializeProvider();
-        errorService = ServiceProvider.GetService<IErrorService>();
-        updateService = ServiceProvider.GetService<IUpdateService>();
-        output = ServiceProvider.GetService<IOutputService>();
     }
 
     [STAThread]
@@ -54,6 +51,18 @@ internal static class Program
         parserResult.WithParsed(opt => {
                 try
                 {
+                    if (opt.Silent)
+                    {
+                        Configuration.Active.Silent = opt.Silent;
+                        Configuration.Active.Passive = opt.Silent;
+                    }
+
+                    RuntimeHelpers.RunClassConstructor(typeof(Configuration).TypeHandle);
+                    ServiceProvider.InitializeProvider();
+                    _errorService = ServiceProvider.GetService<IErrorService>();
+                    _updateService = ServiceProvider.GetService<IUpdateService>();
+                    _output = ServiceProvider.GetService<IOutputService>();
+
                     // Override configuration
                     if (opt.Help)
                     {
@@ -64,7 +73,7 @@ internal static class Program
                     if (opt.Version)
                     {
                         var assembly = Assembly.GetExecutingAssembly();
-                        output.WriteLine($"{assembly.GetName().Name} v{assembly.GetName().Version.ToString()}"
+                        _output.WriteLine($"{assembly.GetName().Name} v{assembly.GetName().Version.ToString()}"
                             .PromptPlusEscape());
                         return;
                     }
@@ -94,17 +103,12 @@ internal static class Program
                             Configuration.Active.UnpackOnly = opt.UnpackOnly;
                         if (opt.Passive)
                             Configuration.Active.Passive = opt.Passive;
-                        if (opt.Silent)
-                        {
-                            Configuration.Active.Silent = opt.Silent;
-                            Configuration.Active.Passive = opt.Silent;
-                        }
 
                         if (Configuration.Active.Flexible)
                             BinaryReaderEx.IsFlexible = true;
                     }
 
-                    output.DoubleDash($"{assembly.GetName().Name} {assembly.GetName().Version}");
+                    _output.DoubleDash($"{assembly.GetName().Name} {assembly.GetName().Version}");
 
                     if (!string.IsNullOrWhiteSpace(opt.Location))
                     {
@@ -113,7 +117,7 @@ internal static class Program
                         {
                             if (Configuration.Active.Passive)
                                 throw new Exception("Cannot supply both \"passive\" and \"location\" options.");
-                            output.WriteLine("Prompting user for target directory...");
+                            _output.WriteLine("Prompting user for target directory...");
 
                             DialogResult dialogResult =
                                 Dialog.FolderPicker();
@@ -121,8 +125,8 @@ internal static class Program
                             if (dialogResult.IsOk && !string.IsNullOrWhiteSpace(dialogResult.Path))
                             {
                                 location = dialogResult.Path;
-                                output.WriteLine($"Target directory set to: {location}");
-                                output.WriteLine("");
+                                _output.WriteLine($"Target directory set to: {location}");
+                                _output.WriteLine("");
                             }
                             else
                             {
@@ -144,8 +148,8 @@ internal static class Program
                     }
 
                     if (!Configuration.Active.Passive)
-                        updateService.CheckForUpdates(args);
-                    updateService.PostUpdateActions();
+                        _updateService.CheckForUpdates(args);
+                    _updateService.PostUpdateActions();
 
                     // Execute
                     switch (mode)
@@ -161,14 +165,14 @@ internal static class Program
                             watch.Stop();
 
                             int pause = Configuration.Active.EndDelay;
-                            if (Configuration.Active.PauseOnError && errorService.AccruedErrorCount > 0)
+                            if (Configuration.Active.PauseOnError && _errorService.AccruedErrorCount > 0)
                                 pause = -1;
                             var completedString = ProcessedItems == 1
                                 ? $"Operation completed on 1 item in {watch.Elapsed:hh\\:mm\\:ss}."
                                 : $"Operation completed on {ProcessedItems} items in {watch.Elapsed:hh\\:mm\\:ss}.";
-                            output.WriteLine("");
-                            output.WriteLine(string.Concat(Enumerable.Repeat("-", completedString.Length)));
-                            output.WriteLine(completedString);
+                            _output.WriteLine("");
+                            _output.WriteLine(string.Concat(Enumerable.Repeat("-", completedString.Length)));
+                            _output.WriteLine(completedString);
 
                             PrintIssues();
                             PrintFinale(pause);
@@ -192,7 +196,7 @@ internal static class Program
                     if (Configuration.IsTest || Configuration.IsDebug)
                         throw;
 
-                    errorService.RegisterException(e);
+                    _errorService.RegisterException(e);
                     PrintIssues();
                     PrintFinale(-1);
                 }
@@ -204,7 +208,7 @@ internal static class Program
     {
         if (ProcessedItems > 5)
         {
-            errorService.PrintIssues();
+            _errorService.PrintIssues();
         }
     }
 
@@ -213,16 +217,16 @@ internal static class Program
         pause ??= Configuration.Active.EndDelay;
         if (!Configuration.Active.Passive)
         {
-            output.WriteLine("");
+            _output.WriteLine("");
             if (pause == -1)
             {
-                output.KeyPress(Constants.PressAnyKey).Run();
+                _output.KeyPress(Constants.PressAnyKey).Run();
                 return;
             }
 
             if (pause > 0)
             {
-                output.WriteLine(
+                _output.WriteLine(
                     $"Closing in {TimeSpan.FromMilliseconds(pause.Value).TotalSeconds} second(s)...");
                 Thread.Sleep(pause.Value);
             }
@@ -253,14 +257,14 @@ internal static class Program
 
         var longest = infoTable.Keys.MaxBy(s => s.Length).Length;
 
-        output.SingleDash("Configuration");
+        _output.SingleDash("Configuration");
         foreach ((string name, string value) in infoTable)
         {
-            output.WriteLine($"{name.PadLeft(longest)}: {value}");
+            _output.WriteLine($"{name.PadLeft(longest)}: {value}");
         }
 
-        output.WriteLine("-------------");
-        output.WriteLine("");
+        _output.WriteLine("-------------");
+        _output.WriteLine("");
     }
 
     public static void DisplayHelp(ParserResult<CliOptions> result = null, IEnumerable<Error> errors = null)
@@ -286,6 +290,6 @@ internal static class Program
             return HelpText.DefaultParsingErrorsHandler(result, h);
         }, e => e);
 
-        output.WriteLine(helpText.ToString().PromptPlusEscape());
+        _output.WriteLine(helpText.ToString().PromptPlusEscape());
     }
 }
