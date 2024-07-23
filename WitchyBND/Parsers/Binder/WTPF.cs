@@ -56,16 +56,7 @@ public class WTPF : WFolderParser
                 texElement.Add(floatStruct);
             }
 
-            try
-            {
-                File.WriteAllBytes($"{destDir}\\{WBUtil.SanitizeFilename(texture.Name)}.dds", texture.Headerize());
-            }
-            catch (EndOfStreamException)
-            {
-                File.WriteAllBytes($"{destDir}\\{WBUtil.SanitizeFilename(texture.Name)}.dds",
-                    SecretHeaderizer.Headerize(texture));
-            }
-
+            File.WriteAllBytes($"{destDir}\\{WBUtil.SanitizeFilename(texture.Name)}.dds", texture.Headerize());
             textures.Add(texElement);
         }
 
@@ -129,7 +120,7 @@ public class WTPF : WFolderParser
             }
 
             byte[] bytes = File.ReadAllBytes($"{srcPath}\\{outName}.dds");
-            var texture = new TPF.Texture(inName, format, flags1, bytes);
+            var texture = new TPF.Texture(inName, format, flags1, bytes, platform);
             texture.FloatStruct = floatStruct;
             tpf.Textures.Add(texture);
         }
@@ -138,16 +129,6 @@ public class WTPF : WFolderParser
         WBUtil.Backup(outPath);
 
         WarnAboutKrak(compression, tpf.Textures.Count);
-        try
-        {
-            tpf.TryWriteSoulsFile(outPath);
-        }
-        catch (Exception e) when (e is not NoOodleFoundException)
-        {
-            if (platform == TPF.TPFPlatform.PC) throw;
-            errorService.RegisterError(new WitchyError(
-                "WitchyBND only officially supports repacking PC TPFs at the moment. Repacking console TPFs is not supported.",
-                srcPath));
-        }
+        tpf.TryWriteSoulsFile(outPath);
     }
 }

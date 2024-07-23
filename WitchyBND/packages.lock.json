@@ -81,8 +81,13 @@
       },
       "BouncyCastle.Cryptography": {
         "type": "Transitive",
-        "resolved": "2.2.0",
-        "contentHash": "TEhtnfEnxppBM7u3t8hysLwdaWjGEK+IF6Gy6yI69oLT7nlYdyPlgoLaHAq+HqY+ycq58YtCVetAzXtHjqRytQ=="
+        "resolved": "2.4.0",
+        "contentHash": "SwXsAV3sMvAU/Nn31pbjhWurYSjJ+/giI/0n6tCrYoupEK34iIHCuk3STAd9fx8yudM85KkLSVdn951vTng/vQ=="
+      },
+      "DrSwizzler": {
+        "type": "Transitive",
+        "resolved": "1.0.6",
+        "contentHash": "o5vS3ZRUoxr9LuCTMSxHRe+F7tXo74zMnf/m4s5C20BfWH6BIfDSigbQZS0r5LG6vBu/B+rNhJYWzfqH2Rd9qw=="
       },
       "EastAsianWidthDotNet": {
         "type": "Transitive",
@@ -294,7 +299,8 @@
       "soulsformats": {
         "type": "Project",
         "dependencies": {
-          "BouncyCastle.Cryptography": "[2.2.0, )",
+          "BouncyCastle.Cryptography": "[2.4.0, )",
+          "DrSwizzler": "[1.0.6, )",
           "System.Text.Encoding.CodePages": "[4.7.0, )",
           "System.ValueTuple": "[4.5.0, )",
           "ZstdNet": "[1.4.5, )"
@@ -303,7 +309,7 @@
       "soulsoodlelib": {
         "type": "Project",
         "dependencies": {
-          "BouncyCastle.Cryptography": "[2.2.0, )",
+          "BouncyCastle.Cryptography": "[2.4.0, )",
           "NativeFileDialogSharp": "[0.6.0-alpha, )",
           "SoulsFormats": "[2.12.0, )"
         }

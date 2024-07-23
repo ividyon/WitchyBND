@@ -68,10 +68,11 @@ It is originally based on [Yabber](https://github.com/JKAnderson/Yabber) by TKGP
 * *Meowmaritus* - initial FXR serialization, SoulsAssetPipeline TAE class
 * *NamelessHoodie* - initial FXR serialization
 * *Avocado* - YabberAvocado additions
-* *NatsuDragneelTheFireDragon* - MQB support
+* *NatsuDragneelTheFireDragon* - MQB support (SoulsFormatsNEXT)
 * *Vawser* - Paramdex, Smithbox additions
 * *CCCode* - FXR research
 * *ClayAmore* - ZSTD Decompression
+* *Shadowth117*: Console TPF handling (SoulsFormatsNEXT)
 * *ivi* - WitchyBND maintainer
 
 Special thanks to Nordgaren, The12thAvenger, philiquaz, TKGP, thefifthmatt, Kirnifr, Rayan and many more for various assistance during development.
