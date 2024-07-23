@@ -133,17 +133,13 @@ namespace WitchyBND.Services
         public bool Catch(Func<bool> callback, out bool error, string? source = null)
         {
             error = false;
-            if (Configuration.IsDebug)
-                return callback();
             try
             {
                 return callback();
             }
-            catch (ProcessUserInputException e)
+            catch (ProcessUserInputException e) when (!Configuration.IsTest && !Configuration.IsDebug)
             {
                 error = true;
-                if (Configuration.IsTest)
-                    throw;
                 RegisterError(new WitchyError($@"The external process ""{e.ProcessName}"" was waiting for user input.
 
 Process output:
@@ -153,34 +149,28 @@ Process error output:
 {e.Error}", source,
                     WitchyErrorType.Generic));
             }
-            catch (GameUnsupportedException e)
+            catch (GameUnsupportedException e) when (!Configuration.IsTest && !Configuration.IsDebug)
             {
                 error = true;
-                if (Configuration.IsTest)
-                    throw;
                 RegisterError(new WitchyError($"The parser does not support the game {e.Game}.", source,
                     WitchyErrorType.Generic));
             }
-            catch (DeferToolExecutionException e)
+            catch (DeferToolExecutionException e) when (!Configuration.IsTest && !Configuration.IsDebug)
             {
                 error = true;
-                if (Configuration.IsTest)
-                    throw;
                 RegisterError(new WitchyError(
                     @$"The {e.Format.GetAttribute<DisplayAttribute>().Name} tool located at ""{Configuration.Active.DeferTools[e.Format].Path}"" exited with code {e.ExitCode} with the following error message:
 
 {e.Error}", source, WitchyErrorType.Generic));
             }
-            catch (DeferToolPathException e)
+            catch (DeferToolPathException e) when (!Configuration.IsTest && !Configuration.IsDebug)
             {
                 error = true;
-                if (Configuration.IsTest)
-                    throw;
                 RegisterError(new WitchyError(
                     $"No tool is configured for the deferred format \"{e.Format.GetAttribute<DisplayAttribute>().Name}\". Please configure it in WitchyBND before attempting to process files of this type.",
                     source, WitchyErrorType.Generic));
             }
-            catch (Exception e) when (e.Message.Contains("oo2core_6_win64.dll") ||
+            catch (Exception e) when (!Configuration.IsTest && !Configuration.IsDebug && e.Message.Contains("oo2core_6_win64.dll") ||
                                       e.Message.Contains("oo2core_8_win64.dll") || e is NoOodleFoundException)
             {
                 error = true;
@@ -191,39 +181,31 @@ Process error output:
                     "ERROR: Oodle DLL not found. Please copy oo2core_6_win64.dll or oo2core_8_win64.dll from the game directory to WitchyBND's directory.",
                     WitchyErrorType.NoOodle));
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException) when (!Configuration.IsTest && !Configuration.IsDebug)
             {
                 error = true;
-                if (Configuration.IsTest)
-                    throw;
 
                 RegisterError(new WitchyError(
                     "WitchyBND had no access to perform this action; perhaps try Administrator Mode?", source,
                     WitchyErrorType.NoAccess));
             }
-            catch (IOException e) when (e.GetType().Name == "IOException")
+            catch (IOException e) when (!Configuration.IsTest && !Configuration.IsDebug)
             {
                 error = true;
-                if (Configuration.IsTest)
-                    throw;
 
                 RegisterError(new WitchyError(
-                    "WitchyBND could not operate on the file as it was being used by another process.", source,
+                    $"WitchyBND could not operate on the file as it is locked by another process: {e.Message}", source,
                     WitchyErrorType.InUse));
             }
-            catch (FriendlyException e)
+            catch (FriendlyException e) when (!Configuration.IsTest)
             {
                 error = true;
-                if (Configuration.IsTest)
-                    throw;
 
                 RegisterError(new WitchyError(e.Message, source));
             }
-            catch (Exception e)
+            catch (Exception e) when (!Configuration.IsTest && !Configuration.IsDebug)
             {
                 error = true;
-                if (Configuration.IsTest)
-                    throw;
 
                 RegisterException(e, source);
             }
