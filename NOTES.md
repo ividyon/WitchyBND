@@ -8,4 +8,5 @@
     
     This should allow usage of WitchyBND for console modding in place of DesBNDBuild.
   * Malformed ELDEN RING cubemap DDS data will now be correctly parsed into readable DDS.
-  * Made some internal changes to error catching.
+* Refactored "silent mode"; it will now avoid any output to PromptPlus, hopefully avoiding some issues.
+* Made some internal changes to error catching.
