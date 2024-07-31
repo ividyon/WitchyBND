@@ -91,6 +91,28 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.13.0.1
+
+* Updated Paramdex to the latest from Smithbox.
+* Updated SoulsFormatsNEXT to the latest (fixes for console TPF support)
+
+### 2.13.0.0
+
+* Updated WitchyBND to the latest version of SoulsFormatsNEXT, with several improvements courtesy of Shadowth117:
+  * TPF platform support is now extended to:
+    * PC: ✅ Unpack ✅ Repack
+    * Xbox 360: ✅ Unpack ❌ Repack
+    * PS3: ✅ Unpack ✅ Repack
+    * PS4: ✅ Unpack ✅ Repack
+    * PS5: ✅ Unpack ❌ Repack
+
+    This should allow usage of WitchyBND for console modding in place of DesBNDBuild.
+  * Malformed ELDEN RING cubemap DDS data will now be correctly parsed into readable DDS.
+  * (Re-)Added a new texture type for texture arrays from Armored Core 6.
+* Refactored "silent mode"; it will now avoid any output to PromptPlus, hopefully avoiding some issues.
+* Updated Paramdex to the latest from Smithbox.
+* Made some internal changes to error catching.
+
 ### 2.12.0.0
 
 * Migrated WitchyBND to use [SoulsFormatsNEXT](https://github.com/soulsmods/SoulsFormatsNEXT).
