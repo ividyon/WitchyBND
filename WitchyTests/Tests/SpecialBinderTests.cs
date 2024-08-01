@@ -117,6 +117,45 @@ public class SpecialBinderTests : TestBase
         }
     }
 
+    [Test]
+    public void ANIBND4()
+    {
+        IEnumerable<string> paths = GetSamples("ANIBND4");
+
+        var parser = new WANIBND4();
+
+        foreach (string path in paths.Select(GetCopiedPath))
+        {
+            SetLocation(path);
+            Assert.That(parser.Exists(path));
+            Assert.That(parser.Is(path, null, out var outFile));
+
+            var bnd = BND4.Read(path);
+
+            parser.Unpack(path, outFile);
+            string? destPath = parser.GetUnpackDestPath(path);
+
+            File.Delete(path);
+
+            Assert.That(Directory.Exists(destPath));
+            Assert.That(parser.ExistsUnpacked(destPath));
+            Assert.That(parser.IsUnpacked(destPath));
+
+            var root = WBUtil.FindCommonRootPath(bnd.Files.Select(a => a.Name));
+            foreach (BinderFile file in bnd.Files)
+            {
+                string name = Path.Combine(destPath,
+                    !string.IsNullOrEmpty(root) ? Path.GetRelativePath(root, file.Name) : file.Name);
+                Assert.That(File.Exists(name));
+            }
+
+            parser.Repack(destPath);
+            var xml = WFileParser.LoadXml(parser.GetFolderXmlPath(destPath));
+
+            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
+        }
+    }
+
     public SpecialBinderTests(bool a, bool b) : base(a, b)
     {
     }

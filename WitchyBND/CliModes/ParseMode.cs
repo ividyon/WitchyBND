@@ -14,7 +14,17 @@ namespace WitchyBND.CliModes;
 public static class ParseMode
 {
     private static readonly IErrorService errorService;
-    public static List<WFileParser> Parsers;
+    private static List<WFileParser> _parsers;
+    public static List<WFileParser> GetParsers(bool recursive)
+    {
+        return !recursive ? _parsers : _parsers.Where(p => p.AppliesRecursively).ToList();
+    }
+
+    public static T GetParser<T>() where T : WFileParser
+    {
+        return _parsers.OfType<T>().First();
+    }
+
     private static readonly IOutputService output;
 
     static ParseMode()
@@ -22,7 +32,7 @@ public static class ParseMode
         output = ServiceProvider.GetService<IOutputService>();
         errorService = ServiceProvider.GetService<IErrorService>();
 
-        Parsers = new List<WFileParser>
+        _parsers = new List<WFileParser>
         {
             new WDCX(),
             new WGFX(),
@@ -34,6 +44,7 @@ public static class ParseMode
             new WMATBINBND(),
             new WMTDBND(),
             new WFFXBNDModern(),
+            new WANIBND4(),
             new WBND3(),
             new WBND4(),
             new WBXF3(),
@@ -68,6 +79,8 @@ public static class ParseMode
 
     public static void ParseFiles(IEnumerable<string> paths, bool recursive = false)
     {
+        var parsers = GetParsers(recursive);
+
         void Callback(string path)
         {
             if (!File.Exists(path) && !Directory.Exists(path))
@@ -98,12 +111,12 @@ public static class ParseMode
                     }
                 }
 
-                foreach (WFileParser parser in Parsers)
+                foreach (WFileParser parser in parsers)
                 {
                     innerParsed = errorService.Catch(() => {
                         ISoulsFile? file;
                         if ((Configuration.Active.UnpackOnly || !Configuration.Active.RepackOnly) && parser.Exists(path) &&
-                            parser.Is(path, data, out file) && (!recursive || parser is not WDeferredFileParser))
+                            parser.Is(path, data, out file))
                         {
                             Unpack(path, file, compression, parser, recursive);
                             return true;
@@ -126,7 +139,7 @@ public static class ParseMode
                 // If no other parser present but file is a DCX, at least un-DCX it
                 if (!innerParsed && !error && isDcx && !Configuration.Active.RepackOnly)
                 {
-                    WDCX dcxParser = Parsers.OfType<WDCX>().First();
+                    WDCX dcxParser = _parsers.OfType<WDCX>().First();
                     innerParsed = errorService.Catch(() => {
                         Unpack(path, null, compression, dcxParser, false);
                         return true;
@@ -141,7 +154,7 @@ public static class ParseMode
 
         IEnumerable<string> pathsList = paths.ToList();
 
-        foreach (WFileParser parser in Parsers.Where(p => p.HasPreprocess))
+        foreach (WFileParser parser in parsers.Where(p => p.HasPreprocess))
         {
             foreach (string path in pathsList)
             {

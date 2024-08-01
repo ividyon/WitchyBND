@@ -245,7 +245,7 @@ Press any key to continue to the configuration screen...");
                     break;
                 case ConfigMenuItem.Formats:
                     output.WriteLine(
-                        $"WitchyBND supports the following formats:\n{string.Join(", ", ParseMode.Parsers.Where(p => p.IncludeInList).Select(p => p.Name))}");
+                        $"WitchyBND supports the following formats:\n{string.Join(", ", ParseMode.GetParsers(false).Where(p => p.IncludeInList).Select(p => p.Name))}");
                     output.KeyPress(Constants.PressAnyKeyConfiguration).Run();
                     break;
                 case ConfigMenuItem.Help:

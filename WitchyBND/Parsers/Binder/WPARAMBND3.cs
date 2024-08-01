@@ -75,11 +75,11 @@ public class WPARAMBND3 : WBinderParser
         else
             throw new InvalidDataException($"Could not determine param type for {Path.GetFileName(srcPath)}.");
 
-        ParseMode.Parsers.OfType<WBND3>().First().Unpack(srcPath, file, game);
+        ParseMode.GetParser<WBND3>().Unpack(srcPath, file, game);
     }
 
     public override void Repack(string srcPath)
     {
-        ParseMode.Parsers.OfType<WBND3>().First().Repack(srcPath);
+        ParseMode.GetParser<WBND3>().Repack(srcPath);
     }
 }

@@ -121,7 +121,7 @@ public abstract class WBinderParser : WFolderParser
 
     protected static void RecursiveRepackFile(string path)
     {
-        RecursiveRepackFile(path, ParseMode.Parsers);
+        RecursiveRepackFile(path, ParseMode.GetParsers(true));
     }
 
     protected static void RecursiveRepackFile(string path, WFileParser parser)

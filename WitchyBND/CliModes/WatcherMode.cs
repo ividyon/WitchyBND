@@ -78,7 +78,7 @@ public static class WatcherMode
         Dictionary<string, WFileParser> repack = new();
         Dictionary<string, (WFileParser, ISoulsFile)> unpack = new();
         paths.ForEach(p => {
-            foreach (WFileParser parser in ParseMode.Parsers)
+            foreach (WFileParser parser in ParseMode.GetParsers(true))
             {
                 if (parser.Exists(p) && parser.Is(p, null, out ISoulsFile? file))
                 {

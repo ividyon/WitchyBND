@@ -43,7 +43,7 @@ public class WFFXBNDModern : WBinderParser
         if (rootFile == null)
             throw new FriendlyException("FFXBND has invalid structure; expected \\sfx\\ path.");
         var rootPath = rootFile.Name.Substring(0, rootFile.Name.IndexOf("\\sfx\\", StringComparison.Ordinal) + 5);
-        var xml = new XElement("ffxbnd",
+        var xml = new XElement(XmlTag,
             filename,
             new XElement("compression", bnd.Compression.ToString()),
             new XElement("version", bnd.Version),
@@ -198,7 +198,7 @@ Consider tidying up the unpacked archive folder.");
 
         string rootPath = xml.Element("root")!.Value;
 
-        WFileParser effectParser = ParseMode.Parsers.OfType<WFXR3>().First();
+        WFileParser effectParser = ParseMode.GetParser<WFXR3>();
 
         void effectCallback()
         {

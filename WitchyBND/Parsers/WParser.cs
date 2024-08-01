@@ -33,6 +33,7 @@ public abstract class WFileParser
 
     public virtual WFileParserVerb Verb => WFileParserVerb.Unpack;
     public virtual bool IncludeInList => true;
+    public virtual bool AppliesRecursively => true;
     public abstract string Name { get; }
     public virtual string ListName => Name;
 
@@ -177,6 +178,7 @@ public abstract class WDeferredFileParser : WSingleFileParser
     public abstract string[] UnpackExtensions { get; }
     public abstract string[] RepackExtensions { get; }
     public abstract DeferFormat DeferFormat { get; }
+    public override bool AppliesRecursively => false;
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
         file = null;

@@ -243,7 +243,7 @@ public class XMLTests : TestBase
     {
         IEnumerable<string> paths = GetSamples("PARAM");
 
-        var parser = ParseMode.Parsers.OfType<WPARAM>().First();
+        var parser = ParseMode.GetParser<WPARAM>();
 
         foreach (string path in paths.Select(GetCopiedPath))
         {
