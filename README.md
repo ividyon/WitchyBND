@@ -91,6 +91,10 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.13.0.2
+
+* Fixed an issue with the specialized FFXBND handler where the resulting DDS textures would not be headerized for console.
+
 ### 2.13.0.1
 
 * Updated Paramdex to the latest from Smithbox.

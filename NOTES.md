@@ -1,2 +1,1 @@
-* Updated Paramdex to the latest from Smithbox.
-* Updated SoulsFormatsNEXT to the latest (fixes for console TPF support)
+* Fixed an issue with the specialized FFXBND handler where the resulting DDS textures would not be headerized for console.

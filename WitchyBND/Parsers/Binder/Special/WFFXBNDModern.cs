@@ -107,7 +107,7 @@ public class WFFXBNDModern : WBinderParser
                     break;
                 case ".tpf":
                     var tpf = TPF.Read(bytes);
-                    bytes = tpf.Textures[0].Bytes;
+                    bytes = tpf.Textures[0].Headerize();
                     fileTargetName = $"{Path.GetFileName(tpf.Textures[0].Name)}.dds";
                     fileTargetDir = textureTargetDir;
                     break;
