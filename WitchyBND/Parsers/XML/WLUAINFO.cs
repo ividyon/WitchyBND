@@ -16,12 +16,12 @@ public class WLUAINFO : WXMLParser
         return IsRead<LUAINFO>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, string? recursiveOriginPath)
     {
         var info = (file as LUAINFO)!;
         XmlWriterSettings xws = new XmlWriterSettings();
         xws.Indent = true;
-        XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath), xws);
+        XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath, recursiveOriginPath), xws);
         xw.WriteStartElement("luainfo");
 
         xw.WriteElementString("filename", Path.GetFileName(srcPath));
@@ -49,7 +49,7 @@ public class WLUAINFO : WXMLParser
         xw.Close();
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, string? recursiveOriginPath)
     {
         LUAINFO info = new LUAINFO();
         XElement xml = LoadXml(srcPath);

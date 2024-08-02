@@ -23,7 +23,7 @@ public class WDCX : WSingleFileParser
         return Configuration.Active.Dcx && DCX.Is(path);
     }
 
-    public override string GetUnpackDestPath(string srcPath)
+    public override string GetUnpackDestPath(string srcPath, string? recursiveOriginPath)
     {
         string sourceDir = new FileInfo(srcPath).Directory?.FullName!;
         string? location = Configuration.Active.Location;
@@ -51,9 +51,9 @@ public class WDCX : WSingleFileParser
         return srcPath + ".dcx";
     }
 
-    public string GetXmlPath(string path, bool repack = false)
+    public string GetXmlPath(string path, string? recursiveOriginPath, bool repack = false)
     {
-        var innerPath = repack ? path : GetUnpackDestPath(path);
+        var innerPath = repack ? path : GetUnpackDestPath(path, recursiveOriginPath);
         return $"{innerPath}-wbinder-dcx.xml";
     }
 
@@ -73,16 +73,16 @@ public class WDCX : WSingleFileParser
         return File.Exists(xmlPath);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? _)
+    public override void Unpack(string srcPath, ISoulsFile? _, string? recursiveOriginPath)
     {
-        string outPath = GetUnpackDestPath(srcPath);
+        string outPath = GetUnpackDestPath(srcPath, recursiveOriginPath);
 
         byte[] bytes = DCX.Decompress(srcPath, out DCX.Type comp);
         File.WriteAllBytes(outPath, bytes);
 
         XmlWriterSettings xws = new XmlWriterSettings();
         xws.Indent = true;
-        XmlWriter xw = XmlWriter.Create(GetXmlPath(srcPath), xws);
+        XmlWriter xw = XmlWriter.Create(GetXmlPath(srcPath, recursiveOriginPath), xws);
 
         xw.WriteStartElement("dcx");
 
@@ -95,9 +95,9 @@ public class WDCX : WSingleFileParser
         xw.Close();
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, string? recursiveOriginPath)
     {
-        string xmlPath = GetXmlPath(srcPath, true);
+        string xmlPath = GetXmlPath(srcPath, recursiveOriginPath, true);
         XElement xml = LoadXml(xmlPath);
 
         DCX.Type compression = (DCX.Type)Enum.Parse(typeof(DCX.Type), xml.Element("compression").Value);

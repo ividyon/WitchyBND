@@ -10,7 +10,7 @@ public partial class WMSBEFolder : WFolderParser
     public override bool HasPreprocess => true;
     public override WFileParserVerb Verb => WFileParserVerb.Serialize;
     public override int Version => WBUtil.WitchyVersionToInt("2.8.0.1");
-    public override bool Preprocess(string srcPath, ref Dictionary<string, (WFileParser, ISoulsFile)> files)
+    public override bool Preprocess(string srcPath, string? recursiveOriginPath, ref Dictionary<string, (WFileParser, ISoulsFile)> files)
     {
         // Preprocess purely to call WarnAboutMSBs
 

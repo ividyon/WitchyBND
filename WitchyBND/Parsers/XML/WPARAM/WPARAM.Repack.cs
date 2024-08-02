@@ -14,7 +14,7 @@ namespace WitchyBND.Parsers;
 
 public partial class WPARAM
 {
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, string? recursiveOriginPath)
     {
             var param = new FsParam();
 

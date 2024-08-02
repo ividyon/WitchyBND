@@ -16,7 +16,7 @@ public partial class WTAEFile : WXMLParser
     public override WFileParserVerb Verb => WFileParserVerb.Serialize;
 
     private static readonly Dictionary<WBUtil.GameType, TAE.Template> templateDict = new();
-    public override bool Preprocess(string srcPath, ref Dictionary<string, (WFileParser, ISoulsFile)> files)
+    public override bool Preprocess(string srcPath, string? recursiveOriginPath, ref Dictionary<string, (WFileParser, ISoulsFile)> files)
     {
         if (Path.GetExtension(srcPath) != ".tae") return false;
         gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.Other);

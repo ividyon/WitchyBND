@@ -20,7 +20,7 @@ public partial class WMSBEFolder
         return false;
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, string? recursiveOriginPath)
     {
         var msb = new MSBE();
 
@@ -89,7 +89,7 @@ public partial class WMSBEFolder
 
         msb.Layers.Version = Convert.ToInt32(xml.Element("layers")!.Attribute("version")!.Value);
 
-        string outPath = GetRepackDestPath(srcPath, xml);
+        string outPath = GetRepackDestPath(srcPath, recursiveOriginPath, xml);
         WBUtil.Backup(outPath);
         msb.Write(outPath);
     }

@@ -21,7 +21,7 @@ public partial class WTAEFile
         return false;
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, string? recursiveOriginPath)
     {
         var tae = new TAE();
 

@@ -24,18 +24,18 @@ public class SpecialBinderTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var file));
 
-            parser.Unpack(path, file);
-            string? destPath = parser.GetUnpackDestPath(path);
+            parser.Unpack(path, file, null);
+            string? destPath = parser.GetUnpackDestPath(path, null);
 
             File.Delete(path);
 
             Assert.That(Directory.Exists(destPath));
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
-            parser.Repack(destPath);
+            parser.Repack(destPath, null);
             var xml = WFileParser.LoadXml(parser.GetFolderXmlPath(destPath));
 
-            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
+            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, null, xml)));
         }
     }
 
@@ -54,8 +54,8 @@ public class SpecialBinderTests : TestBase
 
             var bnd = BND4.Read(path);
 
-            parser.Unpack(path, outFile);
-            string? destPath = parser.GetUnpackDestPath(path);
+            parser.Unpack(path, outFile, null);
+            string? destPath = parser.GetUnpackDestPath(path, null);
 
             File.Delete(path);
 
@@ -71,10 +71,10 @@ public class SpecialBinderTests : TestBase
                 Assert.That(File.Exists(name));
             }
 
-            parser.Repack(destPath);
+            parser.Repack(destPath, null);
             var xml = WFileParser.LoadXml(parser.GetFolderXmlPath(destPath));
 
-            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
+            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, null, xml)));
         }
     }
 
@@ -93,8 +93,8 @@ public class SpecialBinderTests : TestBase
 
             var bnd = BND4.Read(path);
 
-            parser.Unpack(path, outFile);
-            string? destPath = parser.GetUnpackDestPath(path);
+            parser.Unpack(path, outFile, null);
+            string? destPath = parser.GetUnpackDestPath(path, null);
 
             File.Delete(path);
 
@@ -110,10 +110,10 @@ public class SpecialBinderTests : TestBase
                 Assert.That(File.Exists(name));
             }
 
-            parser.Repack(destPath);
+            parser.Repack(destPath, null);
             var xml = WFileParser.LoadXml(parser.GetFolderXmlPath(destPath));
 
-            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
+            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, null, xml)));
         }
     }
 
@@ -132,8 +132,8 @@ public class SpecialBinderTests : TestBase
 
             var bnd = BND4.Read(path);
 
-            parser.Unpack(path, outFile);
-            string? destPath = parser.GetUnpackDestPath(path);
+            parser.Unpack(path, outFile, null);
+            string? destPath = parser.GetUnpackDestPath(path, null);
 
             File.Delete(path);
 
@@ -149,10 +149,10 @@ public class SpecialBinderTests : TestBase
                 Assert.That(File.Exists(name));
             }
 
-            parser.Repack(destPath);
+            parser.Repack(destPath, null);
             var xml = WFileParser.LoadXml(parser.GetFolderXmlPath(destPath));
 
-            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
+            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, null, xml)));
         }
     }
 

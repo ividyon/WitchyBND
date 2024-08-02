@@ -112,7 +112,7 @@ public static class WatcherMode
         foreach ((string path, var (parser, file)) in filesToUnpack)
         {
             bool parsed = errorService.Catch(() => {
-                    ParseMode.Unpack(path, file, file.Compression, parser, false);
+                    ParseMode.Unpack(path, file, file.Compression, parser, null);
                     return true;
                 },
                 out bool error, path);
@@ -136,7 +136,7 @@ public static class WatcherMode
         foreach ((string path, WFileParser parser) in filesToRepack)
         {
             bool parsed = errorService.Catch(() => {
-                    ParseMode.Repack(path, parser, false);
+                    ParseMode.Repack(path, parser, null);
                     return true;
                 },
                 out bool error, path);
@@ -204,7 +204,7 @@ public static class WatcherMode
         Thread.Sleep(ProcessDelay);
         output.WriteLine($"[{DateTime.Now:T}] Detected change in {e.Name}.".PromptPlusEscape());
         bool parsed = errorService.Catch(() => {
-                ParseMode.Unpack(e.FullPath, file!.File, file.File.Compression, file.Parser, false);
+                ParseMode.Unpack(e.FullPath, file!.File, file.File.Compression, file.Parser, null);
                 return true;
             },
             out bool error, e.FullPath);
@@ -221,7 +221,7 @@ public static class WatcherMode
         Thread.Sleep(ProcessDelay);
         output.WriteLine($"[{DateTime.Now:T}] Detected change in {e.Name}.".PromptPlusEscape());
         bool parsed = errorService.Catch(() => {
-            ParseMode.Repack(e.FullPath, file.Parser, false);
+            ParseMode.Repack(e.FullPath, file.Parser, null);
             return true;
         }, out bool error, e.FullPath);
         ParseMode.PrintParseSuccess(file.Path, parsed, error, false);
@@ -242,7 +242,7 @@ public static class WatcherMode
         output.WriteLine($"[{DateTime.Now:T}] Detected change in {e.FullPath.Replace(Path.GetDirectoryName(file.Path) + "\\", "")}."
             .PromptPlusEscape());
         bool parsed = errorService.Catch(() => {
-            ParseMode.Repack(file.Path, file.Parser, false);
+            ParseMode.Repack(file.Path, file.Parser, null);
             return true;
         }, out bool error, e.FullPath);
         ParseMode.PrintParseSuccess(file.Path, parsed, error, false);

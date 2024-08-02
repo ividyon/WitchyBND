@@ -18,7 +18,7 @@ public class WBXF3 : WBinderParser
         return BXF3.IsBHD(path) || BXF3.IsBDT(path);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? _)
+    public override void Unpack(string srcPath, ISoulsFile? _, string? recursiveOriginPath)
     {
         string bdtPath;
         string bdtName;
@@ -26,7 +26,7 @@ public class WBXF3 : WBinderParser
         string bhdName;
         string srcDirPath = Path.GetDirectoryName(srcPath);
         string nameWithoutExt = Path.GetFileNameWithoutExtension(srcPath);
-        string destDir = GetUnpackDestPath(srcPath);
+        string destDir = GetUnpackDestPath(srcPath, recursiveOriginPath);
 
         if (BXF3.IsBHD(srcPath))
         {
@@ -56,7 +56,7 @@ public class WBXF3 : WBinderParser
             root = WBUtil.FindCommonRootPath(bxf.Files.Select(bxfFile => bxfFile.Name));
         }
 
-        XElement files = WriteBinderFiles(bxf, destDir, root);
+        XElement files = WriteBinderFiles(bxf, srcPath, destDir, root);
 
         var bdtFilename = new XElement("bdt_filename", bdtName);
         var xml =
@@ -85,7 +85,7 @@ public class WBXF3 : WBinderParser
         xw.Close();
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, string? recursiveOriginPath)
     {
         var bxf = new BXF3();
 
@@ -99,10 +99,10 @@ public class WBXF3 : WBinderParser
         bxf.BitBigEndian = bool.Parse(xml.Element("bitbigendian")!.Value);
 
         if (xml.Element("files") != null)
-            ReadBinderFiles(bxf, xml.Element("files")!, srcPath, root);
+            ReadBinderFiles(bxf, xml.Element("files")!, srcPath, recursiveOriginPath, root);
 
-        var bhdDestPath = GetRepackDestPath(srcPath, xml, "bhd_filename");
-        var bdtDestPath = GetRepackDestPath(srcPath, xml, "bdt_filename");
+        var bhdDestPath = GetRepackDestPath(srcPath, recursiveOriginPath, xml, "bhd_filename");
+        var bdtDestPath = GetRepackDestPath(srcPath,  recursiveOriginPath, xml, "bdt_filename");
         WBUtil.Backup(bhdDestPath);
         WBUtil.Backup(bdtDestPath);
         bxf.Write(bhdDestPath, bdtDestPath);

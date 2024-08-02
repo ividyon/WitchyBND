@@ -16,12 +16,12 @@ namespace WitchyBND.Parsers;
 
 public partial class WPARAM
 {
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, string? recursiveOriginPath)
     {
-        Unpack(srcPath, file, false);
+        Unpack(srcPath, file, recursiveOriginPath, false);
     }
 
-    public void Unpack(string srcPath, ISoulsFile? file, bool dry, (WBUtil.GameType, ulong)? passedGameInfo = null)
+    public void Unpack(string srcPath, ISoulsFile? file, string? recursiveOriginPath, bool dry, (WBUtil.GameType, ulong)? passedGameInfo = null)
     {
         if (dry && file == null)
         {
@@ -106,7 +106,7 @@ The error was:
         // Begin writing the XML
         var xws = new XmlWriterSettings();
         xws.Indent = true;
-        XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath), xws);
+        XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath, recursiveOriginPath), xws);
         xw.WriteStartElement(XmlTag);
         if (Version > 0) xw.WriteAttributeString(VersionAttributeName, Version.ToString());
 

@@ -14,10 +14,10 @@ public class WMTD : WXMLParser
         return IsRead<MTD>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, string? recursiveOriginPath)
     {
         MTD mtd = MTD.Read(srcPath);
-        string targetFile = GetUnpackDestPath(srcPath);
+        string targetFile = GetUnpackDestPath(srcPath, recursiveOriginPath);
 
         if (File.Exists(targetFile)) WBUtil.Backup(targetFile);
 
@@ -25,7 +25,7 @@ public class WMTD : WXMLParser
         AddLocationToXml(targetFile, srcPath);
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, string? recursiveOriginPath)
     {
         XElement xml = LoadXml(srcPath);
         string outPath = GetRepackDestPath(srcPath, xml);

@@ -18,13 +18,13 @@ namespace WitchyBND.Parsers
             return IsRead<DBSUB>(path, data, out file) && Path.GetExtension(filename) == ".bin" && (filename.StartsWith("chapter_") || filename.EndsWith("_b0.bin") || filename.EndsWith("_d0.bin"));
         }
 
-        public override void Unpack(string srcPath, ISoulsFile? file)
+        public override void Unpack(string srcPath, ISoulsFile? file, string? recursiveOriginPath)
         {
             var dbs = (file as DBSUB)!;
             XmlWriterSettings xws = new XmlWriterSettings();
             xws.Indent = true;
             xws.NewLineHandling = NewLineHandling.None; // Prevent \n from being turned into \r\n automatically
-            XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath), xws);
+            XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath, recursiveOriginPath), xws);
             xw.WriteStartElement(XmlTag);
             xw.WriteElementString(nameof(dbs.Compression), dbs.Compression.ToString());
             xw.WriteElementString(nameof(dbs.EventID), dbs.EventID.ToString());
@@ -62,7 +62,7 @@ namespace WitchyBND.Parsers
             xw.Close();
         }
 
-        public override void Repack(string srcPath)
+        public override void Repack(string srcPath, string? recursiveOriginPath)
         {
             DBSUB dbs = new DBSUB();
 
@@ -124,6 +124,7 @@ namespace WitchyBND.Parsers
                 }
             }
 
+            // TODO: Recursive/Location support?
             string outPath = srcPath.Replace(".xml", "");
             WBUtil.Backup(outPath);
             dbs.TryWriteSoulsFile(outPath);

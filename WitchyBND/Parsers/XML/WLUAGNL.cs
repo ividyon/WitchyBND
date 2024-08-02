@@ -17,12 +17,12 @@ public class WLUAGNL : WXMLParser
         return Path.GetExtension(path).ToLower() == ".luagnl";
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? _)
+    public override void Unpack(string srcPath, ISoulsFile? _, string? recursiveOriginPath)
     {
         LUAGNL gnl = LUAGNL.Read(srcPath);
         XmlWriterSettings xws = new XmlWriterSettings();
         xws.Indent = true;
-        XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath), xws);
+        XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath, recursiveOriginPath), xws);
         xw.WriteStartElement("luagnl");
 
         xw.WriteElementString("filename", Path.GetFileName(srcPath));
@@ -43,7 +43,7 @@ public class WLUAGNL : WXMLParser
         xw.Close();
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, string? recursiveOriginPath)
     {
         LUAGNL gnl = new LUAGNL();
         XElement xml = LoadXml(srcPath);

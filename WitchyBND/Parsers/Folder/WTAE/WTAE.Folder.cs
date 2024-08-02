@@ -15,7 +15,7 @@ public partial class WTAEFolder : WFolderParser
     public override WFileParserVerb Verb => WFileParserVerb.Serialize;
 
     public override bool HasPreprocess => true;
-    public override bool Preprocess(string srcPath, ref Dictionary<string, (WFileParser, ISoulsFile)> files)
+    public override bool Preprocess(string srcPath, string? recursiveOriginPath, ref Dictionary<string, (WFileParser, ISoulsFile)> files)
     {
         ISoulsFile? file = null;
         if (!(ExistsUnpacked(srcPath) && IsUnpacked(srcPath)) &&

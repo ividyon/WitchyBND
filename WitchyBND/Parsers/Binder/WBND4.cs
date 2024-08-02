@@ -20,16 +20,16 @@ public class WBND4 : WBinderParser
         return IsRead<BND4>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, string? recursiveOriginPath)
     {
-        Unpack(srcPath, file, null);
+        Unpack(srcPath, file, recursiveOriginPath, null);
     }
 
-    public void Unpack(string srcPath, ISoulsFile? file, WBUtil.GameType? game)
+    public void Unpack(string srcPath, ISoulsFile? file, string? recursiveOriginPath, WBUtil.GameType? game)
     {
         BND4 bnd = (file as BND4)!;
         string srcName = Path.GetFileName(srcPath);
-        string destDir = GetUnpackDestPath(srcPath);
+        string destDir = GetUnpackDestPath(srcPath, recursiveOriginPath);
         Directory.CreateDirectory(destDir);
 
         var root = "";
@@ -39,7 +39,7 @@ public class WBND4 : WBinderParser
         }
 
         XElement filename = new XElement("filename", srcName);
-        XElement files = WriteBinderFiles(bnd, destDir, root);
+        XElement files = WriteBinderFiles(bnd, srcPath, destDir, root);
 
         var xml =
             new XElement(XmlTag,
@@ -75,7 +75,7 @@ public class WBND4 : WBinderParser
         xw.Close();
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, string? recursiveOriginPath)
     {
         var bnd = new BND4();
 
@@ -96,9 +96,9 @@ public class WBND4 : WBinderParser
         bnd.Unk05 = bool.Parse(xml.Element("unk05")!.Value);
 
         if (xml.Element("files") != null)
-            ReadBinderFiles(bnd, xml.Element("files")!, srcPath, root);
+            ReadBinderFiles(bnd, xml.Element("files")!, srcPath, recursiveOriginPath, root);
 
-        var destPath = GetRepackDestPath(srcPath, xml);
+        var destPath = GetRepackDestPath(srcPath, recursiveOriginPath, xml);
 
         WBUtil.Backup(destPath);
 

@@ -16,11 +16,11 @@ public abstract class WBND4Unsorted : WUnsortedBinderParser
         return Configuration.Active.Bnd && EndsInExtension(path) && IsRead<BND4>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, string? recursiveOriginPath)
     {
         var bnd = (file as BND4)!;
         string srcName = Path.GetFileName(srcPath);
-        string destDir = GetUnpackDestPath(srcPath);
+        string destDir = GetUnpackDestPath(srcPath, recursiveOriginPath);
         Directory.CreateDirectory(destDir);
 
         var root = "";
@@ -30,7 +30,7 @@ public abstract class WBND4Unsorted : WUnsortedBinderParser
         }
 
         XElement filename = new XElement("filename", srcName);
-        WriteBinderFiles(bnd, destDir, root);
+        WriteBinderFiles(bnd, srcPath, destDir, root);
 
         var xml =
             new XElement(XmlTag,
@@ -62,7 +62,7 @@ public abstract class WBND4Unsorted : WUnsortedBinderParser
         xw.Close();
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, string? recursiveOriginPath)
     {
         var bnd = new BND4();
 
@@ -82,9 +82,9 @@ public abstract class WBND4Unsorted : WUnsortedBinderParser
         bnd.Unk04 = bool.Parse(xml.Element("unk04")!.Value);
         bnd.Unk05 = bool.Parse(xml.Element("unk05")!.Value);
 
-        ReadUnsortedBinderFiles(bnd, srcPath, root);
+        ReadUnsortedBinderFiles(bnd, srcPath, recursiveOriginPath, root);
 
-        var destPath = GetRepackDestPath(srcPath, xml);
+        var destPath = GetRepackDestPath(srcPath, recursiveOriginPath, xml);
 
         WBUtil.Backup(destPath);
 
@@ -93,8 +93,8 @@ public abstract class WBND4Unsorted : WUnsortedBinderParser
         bnd.Write(destPath);
     }
 
-    public override string GetUnpackDestPath(string srcPath)
+    public override string GetUnpackDestPath(string srcPath, string? recursiveOriginPath)
     {
-        return $"{base.GetUnpackDestPath(srcPath)}-w{XmlTag.ToLower()}";
+        return $"{base.GetUnpackDestPath(srcPath, recursiveOriginPath)}-w{XmlTag.ToLower()}";
     }
 }

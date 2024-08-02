@@ -67,7 +67,7 @@ public abstract class WFileParser
 
     public virtual bool HasPreprocess => false;
 
-    public virtual bool Preprocess(string srcPath, ref Dictionary<string, (WFileParser, ISoulsFile)> files)
+    public virtual bool Preprocess(string srcPath, string? recursiveOriginPath, ref Dictionary<string, (WFileParser, ISoulsFile)> files)
     {
         return false;
     }
@@ -77,7 +77,7 @@ public abstract class WFileParser
     public abstract bool ExistsUnpacked(string path);
     public abstract bool IsUnpacked(string path);
 
-    public abstract string GetUnpackDestPath(string srcPath);
+    public abstract string GetUnpackDestPath(string srcPath, string? recursiveOriginPath);
 
     public virtual int GetUnpackedVersion(string path)
     {
@@ -95,8 +95,8 @@ public abstract class WFileParser
         return true;
     }
 
-    public abstract void Unpack(string srcPath, ISoulsFile? file);
-    public abstract void Repack(string srcPath);
+    public abstract void Unpack(string srcPath, ISoulsFile? file, string? recursiveOriginPath);
+    public abstract void Repack(string srcPath, string? recursiveOriginPath);
     public static void AddLocationToXml(string path, string srcPath)
     {
         XDocument xml = XDocument.Load(path);
@@ -198,17 +198,17 @@ public abstract class WDeferredFileParser : WSingleFileParser
         return cond && !string.IsNullOrWhiteSpace(Configuration.Active.DeferTools[DeferFormat].RepackArgs);
     }
 
-    public override string GetUnpackDestPath(string srcPath)
+    public override string GetUnpackDestPath(string srcPath, string? recursiveOriginPath)
     {
         throw new NotSupportedException();
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, string? recursiveOriginPath)
     {
         DeferredFormatHandling.Unpack(DeferFormat, srcPath);
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, string? recursiveOriginPath)
     {
         DeferredFormatHandling.Repack(DeferFormat, srcPath);
     }
@@ -223,19 +223,13 @@ public abstract class WXMLParser : WSingleFileParser
 {
     public override WFileParserVerb Verb => WFileParserVerb.Serialize;
 
-    public override string GetUnpackDestPath(string srcPath)
+    public override string GetUnpackDestPath(string srcPath, string? recursiveOriginPath)
     {
         string sourceDir = new FileInfo(srcPath).Directory?.FullName!;
         string? location = Configuration.Active.Location;
         if (!string.IsNullOrEmpty(location))
-        {
-            string common = WBUtil.FindCommonRootPath([srcPath, $"{location}\\test.txt"]);
-            if (!string.IsNullOrEmpty(common))
-                sourceDir = Path.GetFullPath(Path.GetDirectoryName($"{location}\\{srcPath.Substring(common.Length)}")!);
-            else
-                sourceDir = Path.GetFullPath(sourceDir);
-        }
-        return Path.Combine(sourceDir, $"{Path.GetFileNameWithoutExtension(srcPath)}.xml");
+            sourceDir = location;
+        return Path.Combine(Path.GetFullPath(sourceDir), $"{Path.GetFileName(srcPath)}.xml");
     }
 
     public override string GetRepackDestPath(string srcPath, XElement xml)

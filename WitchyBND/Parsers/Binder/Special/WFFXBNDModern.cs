@@ -28,15 +28,15 @@ public class WFFXBNDModern : WBinderParser
                path.Contains(".ffxbnd") && IsRead<BND4>(path, data, out file);
     }
 
-    public override string GetUnpackDestPath(string srcPath)
+    public override string GetUnpackDestPath(string srcPath, string? recursiveOriginPath)
     {
-        return $"{base.GetUnpackDestPath(srcPath)}-wffxbnd";
+        return $"{base.GetUnpackDestPath(srcPath, recursiveOriginPath)}-wffxbnd";
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, string? recursiveOriginPath)
     {
         BND4 bnd = (file as BND4)!;
-        var destDir = GetUnpackDestPath(srcPath);
+        var destDir = GetUnpackDestPath(srcPath, recursiveOriginPath);
         var srcName = Path.GetFileName(srcPath);
         Directory.CreateDirectory(destDir);
 
@@ -140,7 +140,7 @@ public class WFFXBNDModern : WBinderParser
             bnd.Files.ForEach(Callback);
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, string? recursiveOriginPath)
     {
         var bnd = new BND4();
 
@@ -224,7 +224,7 @@ Consider tidying up the unpacked archive folder.");
 
                 var filePath = effectPaths[i];
                 var fileName = Path.GetFileName(filePath);
-                RecursiveRepackFile(filePath, effectParser);
+                RecursiveRepackFile(filePath, srcPath, recursiveOriginPath, effectParser);
                 var bytes = File.ReadAllBytes(filePath);
                 var file = new BinderFile(Binder.FileFlags.Flag1, i, Path.Combine(basePath, fileName),
                     bytes);
@@ -398,7 +398,7 @@ Consider tidying up the unpacked archive folder.");
 
         bnd.Files = bag.OrderBy(f => f.ID).ToList();
 
-        string destPath = GetRepackDestPath(srcPath, xml);
+        string destPath = GetRepackDestPath(srcPath, recursiveOriginPath, xml);
         WBUtil.Backup(destPath);
 
         WarnAboutKrak(compression, bnd.Files.Count);

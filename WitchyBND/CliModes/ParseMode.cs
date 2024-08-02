@@ -85,8 +85,9 @@ public static class ParseMode
         ParseFiles(paths);
     }
 
-    public static void ParseFiles(IEnumerable<string> paths, bool recursive = false)
+    public static void ParseFiles(IEnumerable<string> paths, string? recursiveOriginPath = null)
     {
+        bool recursive = recursiveOriginPath != null;
         var parsers = GetParsers(recursive);
 
         IEnumerable<string> pathsList = paths.ToList();
@@ -98,7 +99,7 @@ public static class ParseMode
         {
             foreach (WFileParser parser in GetPreprocessors(recursive))
             {
-                bool toBreak = errorService.Catch(() => parser.Preprocess(path, ref preprocessedFiles), out _, path);
+                bool toBreak = errorService.Catch(() => parser.Preprocess(path, recursiveOriginPath, ref preprocessedFiles), out _, path);
                 if (toBreak)
                     break;
             }
@@ -142,14 +143,14 @@ public static class ParseMode
                                 (parser.Exists(path) &&
                                  parser.Is(path, data, out file))))
                         {
-                            Unpack(path, file, compression, parser, recursive);
+                            Unpack(path, file, compression, parser, recursiveOriginPath);
                             return true;
                         }
 
                         if ((Configuration.Active.RepackOnly || !Configuration.Active.UnpackOnly) &&
                             parser.ExistsUnpacked(path) && parser.IsUnpacked(path))
                         {
-                            Repack(path, parser, recursive);
+                            Repack(path, parser, recursiveOriginPath);
                             return true;
                         }
 
@@ -203,8 +204,9 @@ public static class ParseMode
         }
     }
 
-    public static void Unpack(string path, ISoulsFile? file, DCX.Type compression, WFileParser? parser, bool recursive)
+    public static void Unpack(string path, ISoulsFile? file, DCX.Type compression, WFileParser? parser, string? recursiveOriginPath)
     {
+        bool recursive = recursiveOriginPath != null;
         string fileName = Path.GetFileName(path);
 
         if (compression > file?.Compression)
@@ -227,11 +229,12 @@ public static class ParseMode
                 break;
         }
 
-        parser.Unpack(path, file);
+        parser.Unpack(path, file, recursiveOriginPath);
     }
 
-    public static void Repack(string path, WFileParser parser, bool recursive)
+    public static void Repack(string path, WFileParser parser, string? recursiveOriginPath)
     {
+        bool recursive = recursiveOriginPath != null;
         string fileName = Path.GetFileName(path);
 
         switch (parser.Verb)
@@ -257,6 +260,6 @@ public static class ParseMode
                 @"Parser version of unpacked file is outdated. Please repack this file using the WitchyBND version it was originally unpacked with, then unpack it using the newest version.");
         }
 
-        parser.Repack(path);
+        parser.Repack(path, recursiveOriginPath);
     }
 }

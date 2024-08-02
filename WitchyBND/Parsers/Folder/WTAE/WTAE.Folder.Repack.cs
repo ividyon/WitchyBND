@@ -22,7 +22,7 @@ public partial class WTAEFolder
         return false;
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, string? recursiveOriginPath)
     {
         var tae = new TAE();
 
@@ -67,7 +67,7 @@ public partial class WTAEFolder
 
         tae.ApplyTemplate(gameService.GetTAETemplate(game));
 
-        string outPath = GetRepackDestPath(srcPath, xml);
+        string outPath = GetRepackDestPath(srcPath, recursiveOriginPath, xml);
         WBUtil.Backup(outPath);
         tae.Write(outPath);
     }

@@ -35,10 +35,10 @@ public class WTPF : WFolderParser
         return IsRead<TPF>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, string? recursiveOriginPath)
     {
         var tpf = (file as TPF)!;
-        var destDir = GetUnpackDestPath(srcPath);
+        var destDir = GetUnpackDestPath(srcPath, recursiveOriginPath);
         var sourceName = Path.GetFileName(srcPath);
 
         if (!UnpackPlatforms.Contains(tpf.Platform))
@@ -98,7 +98,7 @@ public class WTPF : WFolderParser
         xw.Close();
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, string? recursiveOriginPath)
     {
         TPF tpf = new TPF();
         // XmlDocument xml = new XmlDocument();
@@ -148,7 +148,7 @@ public class WTPF : WFolderParser
             tpf.Textures.Add(texture);
         }
 
-        string outPath = GetRepackDestPath(srcPath, xml);
+        string outPath = GetRepackDestPath(srcPath, recursiveOriginPath, xml);
         WBUtil.Backup(outPath);
 
         WarnAboutKrak(compression, tpf.Textures.Count);

@@ -20,10 +20,10 @@ public class WZERO3 : WFolderParser
         return false;
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? _)
+    public override void Unpack(string srcPath, ISoulsFile? _, string? recursiveOriginPath)
     {
         var z3 = Zero3.Read(srcPath);
-        var targetDir = GetUnpackDestPath(srcPath);
+        var targetDir = GetUnpackDestPath(srcPath, recursiveOriginPath);
         foreach (Zero3.File file in z3.Files)
         {
             string outPath = $@"{targetDir}\{file.Name.Replace('/', '\\')}";
@@ -32,7 +32,7 @@ public class WZERO3 : WFolderParser
         }
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, string? recursiveOriginPath)
     {
         throw new NotSupportedException();
     }

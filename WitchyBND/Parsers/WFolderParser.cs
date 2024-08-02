@@ -51,7 +51,7 @@ This should not cause adverse effects in the game.");
         return true;
     }
 
-    public override string GetUnpackDestPath(string srcPath)
+    public override string GetUnpackDestPath(string srcPath, string? recursiveOriginPath)
     {
         string sourceDir = new FileInfo(srcPath).Directory?.FullName!;
         string? location = Configuration.Active.Location;
@@ -67,7 +67,7 @@ This should not cause adverse effects in the game.");
         return Path.Combine(sourceDir, fileName.Replace('.', '-'));
     }
 
-    public virtual string GetRepackDestPath(string srcDirPath, XElement xml, string filenameElement = "filename")
+    public virtual string GetRepackDestPath(string srcPath, string? recursiveOriginPath, XElement xml, string filenameElement = "filename")
     {
         var filename = xml.Element(filenameElement)?.Value;
         if (filename == null)
@@ -77,7 +77,7 @@ This should not cause adverse effects in the game.");
         {
             return $"{sourceDir}\\{filename}";
         }
-        string targetDir = new DirectoryInfo(srcDirPath).Parent?.FullName;
+        string targetDir = new DirectoryInfo(srcPath).Parent?.FullName;
         return $"{targetDir}\\{filename}";
     }
     // public virtual string GetRepackDestPath(string srcDirPath, string destFileName)
