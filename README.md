@@ -91,6 +91,11 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.14.0.1
+
+* Fixed an issue where XML parsers would no longer extract to "filename.originalextension.xml", but to just "filename.xml".
+* Fixed an issue where the Recursive option would generate a completely wrong path.
+
 ### 2.14.0.0
 
 * Added specialized BND handling for ANIBND4. Unpacking and repacking these files will not require you to manage the file list for HKX and TAE.

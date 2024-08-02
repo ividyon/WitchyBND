@@ -23,10 +23,10 @@ public class WMATBIN : WXMLParser
         return doc.Root != null && doc.Root.Name == Name;
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         var matbin = (file as MATBIN)!;
-        string targetFile = GetUnpackDestPath(srcPath);
+        string targetFile = GetUnpackDestPath(srcPath, recursive);
 
         if (File.Exists(targetFile)) WBUtil.Backup(targetFile);
 
@@ -34,7 +34,7 @@ public class WMATBIN : WXMLParser
         AddLocationToXml(targetFile, srcPath);
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
         XElement xml = LoadXml(srcPath);
         string outPath = GetRepackDestPath(srcPath, xml);

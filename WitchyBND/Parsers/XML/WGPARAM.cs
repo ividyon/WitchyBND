@@ -20,10 +20,10 @@ public class WGPARAM : WXMLParser
       return IsRead<GPARAM>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
       GPARAM gparam = (file as GPARAM)!;
-      string destPath = GetUnpackDestPath(srcPath);
+      string destPath = GetUnpackDestPath(srcPath, recursive);
       if (File.Exists(destPath))
         WBUtil.Backup(destPath);
       using (XmlWriter xw = XmlWriter.Create(destPath, new XmlWriterSettings
@@ -150,7 +150,7 @@ public class WGPARAM : WXMLParser
       }
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
       GPARAM gparam = new GPARAM();
       XmlDocument xmlDocument = new XmlDocument();

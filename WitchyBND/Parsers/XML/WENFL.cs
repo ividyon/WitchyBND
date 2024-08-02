@@ -16,7 +16,7 @@ public class WENFL : WXMLParser
         return IsRead<ENFL>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         var enfl = (file as ENFL)!;
 
@@ -28,12 +28,12 @@ public class WENFL : WXMLParser
             thing.Serialize(xmlWriter, enfl);
         }
 
-        var destPath = GetUnpackDestPath(srcPath);
+        var destPath = GetUnpackDestPath(srcPath, recursive);
         AddLocationToXml(srcPath, xDoc.Root!);
         xDoc.Save(destPath);
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
         XElement xml = LoadXml(srcPath);
 

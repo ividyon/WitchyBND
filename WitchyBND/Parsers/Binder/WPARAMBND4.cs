@@ -80,7 +80,7 @@ public class WPARAMBND4 : WBinderParser
     }
 
     public override bool HasPreprocess => true;
-    public override bool Preprocess(string srcPath, ref Dictionary<string, (WFileParser, ISoulsFile)> files)
+    public override bool Preprocess(string srcPath, bool recursive, ref Dictionary<string, (WFileParser, ISoulsFile)> files)
     {
         ISoulsFile? file = null;
         if (gameService.KnownGamePathsForParams.Any(p => srcPath.StartsWith(p.Key))) return false;
@@ -115,7 +115,7 @@ public class WPARAMBND4 : WBinderParser
         }
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? _)
+    public override void Unpack(string srcPath, ISoulsFile? _, bool recursive)
     {
         BND4? bnd = GetRegulationWithGameType(srcPath, out WBUtil.GameType? game);
         if (bnd == null)
@@ -130,14 +130,14 @@ public class WPARAMBND4 : WBinderParser
             case WBUtil.GameType.SDT:
             case WBUtil.GameType.AC6:
                 gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.PARAMBND, game, ulong.Parse(bnd.Version));
-                ParseMode.GetParser<WBND4>().Unpack(srcPath, bnd, game);
+                ParseMode.GetParser<WBND4>().Unpack(srcPath, bnd, recursive, game);
                 break;
             default:
                 throw new InvalidDataException("Could not identify game type of regulation file.");
         }
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
         var bndParser = ParseMode.GetParser<WBND4>();
         var xmlPath = GetFolderXmlPath(srcPath, "bnd4");
@@ -181,7 +181,7 @@ public class WPARAMBND4 : WBinderParser
             {
                 try
                 {
-                    paramParser.Unpack(Path.Combine(srcPath, filePath), null, true, (game, regVer));
+                    paramParser.Unpack(Path.Combine(srcPath, filePath), null, recursive, true, (game, regVer));
                 }
                 catch (Exception e)
                 {
@@ -206,17 +206,17 @@ public class WPARAMBND4 : WBinderParser
                     }
                 }
 
-                bndParser.Repack(srcPath);
+                bndParser.Repack(srcPath, recursive);
                 break;
             case WBUtil.GameType.DS3:
-                bndParser.Repack(srcPath);
+                bndParser.Repack(srcPath, recursive);
                 BND4 ds3Bnd = BND4.Read(destPath);
                 SFUtil.EncryptDS3Regulation(destPath, ds3Bnd);
                 break;
             case WBUtil.GameType.ER:
             case WBUtil.GameType.SDT:
             case WBUtil.GameType.AC6:
-                bndParser.Repack(srcPath);
+                bndParser.Repack(srcPath, recursive);
                 BND4 regBnd = BND4.Read(destPath);
                 WBUtil.EncryptRegulationBin(destPath, game, regBnd);
                 break;

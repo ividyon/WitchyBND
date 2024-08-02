@@ -18,7 +18,7 @@ public partial class WTAEFolder
         return Configuration.Active.TaeFolder && IsRead<TAE>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         TAE tae = (file as TAE)!;
 
@@ -26,7 +26,7 @@ public partial class WTAEFolder
 
         var template = gameService.GetTAETemplate(game);
         tae.ApplyTemplate(template);
-        string destDir = GetUnpackDestPath(srcPath);
+        string destDir = GetUnpackDestPath(srcPath, recursive);
         Directory.CreateDirectory(destDir);
 
         XDocument xDoc = new XDocument();

@@ -12,7 +12,7 @@ namespace WitchyBND.Parsers;
 public partial class WMQB
 {
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
 
         MQB mqb = new MQB();

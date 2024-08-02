@@ -51,19 +51,14 @@ This should not cause adverse effects in the game.");
         return true;
     }
 
-    public override string GetUnpackDestPath(string srcPath)
+    public override string GetUnpackDestPath(string srcPath, bool recursive)
     {
         string sourceDir = new FileInfo(srcPath).Directory?.FullName!;
         string? location = Configuration.Active.Location;
         string fileName = Path.GetFileName(srcPath);
-        if (!string.IsNullOrEmpty(location))
-        {
-            string common = WBUtil.FindCommonRootPath([srcPath, $"{location}\\test.txt"]);
-            if (!string.IsNullOrEmpty(common))
-                sourceDir = Path.GetFullPath(Path.GetDirectoryName($"{location}\\{srcPath.Substring(common.Length)}")!);
-            else
-                sourceDir = Path.GetFullPath(sourceDir);
-        }
+        if (!string.IsNullOrEmpty(location) && !recursive)
+            sourceDir = location;
+        sourceDir = Path.GetFullPath(sourceDir);
         return Path.Combine(sourceDir, fileName.Replace('.', '-'));
     }
 

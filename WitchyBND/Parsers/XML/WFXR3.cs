@@ -17,7 +17,7 @@ public class WFXR3 : WXMLParser
         return IsRead<FXR3>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         var fxr = (file as FXR3)!;
 
@@ -31,12 +31,12 @@ public class WFXR3 : WXMLParser
 
         if (Version > 0) xDoc.Root?.Add(new XAttribute(VersionAttributeName, Version.ToString()));
 
-        var destPath = GetUnpackDestPath(srcPath);
+        var destPath = GetUnpackDestPath(srcPath, recursive);
         AddLocationToXml(srcPath, xDoc.Root!);
         xDoc.Save(destPath);
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
 
         XElement xml = LoadXml(srcPath);

@@ -10,10 +10,10 @@ namespace WitchyBND.Parsers;
 public partial class WMQB
 {
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         var mqb = file as MQB;
-        var targetPath = GetUnpackDestPath(srcPath);
+        var targetPath = GetUnpackDestPath(srcPath, recursive);
         var filename = Path.GetFileName(srcPath);
         Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
         var xws = new XmlWriterSettings();

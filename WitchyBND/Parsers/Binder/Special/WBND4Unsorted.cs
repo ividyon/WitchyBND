@@ -16,11 +16,11 @@ public abstract class WBND4Unsorted : WUnsortedBinderParser
         return Configuration.Active.Bnd && EndsInExtension(path) && IsRead<BND4>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         var bnd = (file as BND4)!;
         string srcName = Path.GetFileName(srcPath);
-        string destDir = GetUnpackDestPath(srcPath);
+        string destDir = GetUnpackDestPath(srcPath, recursive);
         Directory.CreateDirectory(destDir);
 
         var root = "";
@@ -62,7 +62,7 @@ public abstract class WBND4Unsorted : WUnsortedBinderParser
         xw.Close();
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
         var bnd = new BND4();
 
@@ -82,7 +82,7 @@ public abstract class WBND4Unsorted : WUnsortedBinderParser
         bnd.Unk04 = bool.Parse(xml.Element("unk04")!.Value);
         bnd.Unk05 = bool.Parse(xml.Element("unk05")!.Value);
 
-        ReadUnsortedBinderFiles(bnd, srcPath, root);
+        ReadUnsortedBinderFiles(bnd, srcPath, root, recursive);
 
         var destPath = GetRepackDestPath(srcPath, xml);
 
@@ -93,8 +93,8 @@ public abstract class WBND4Unsorted : WUnsortedBinderParser
         bnd.Write(destPath);
     }
 
-    public override string GetUnpackDestPath(string srcPath)
+    public override string GetUnpackDestPath(string srcPath, bool recursive)
     {
-        return $"{base.GetUnpackDestPath(srcPath)}-w{XmlTag.ToLower()}";
+        return $"{base.GetUnpackDestPath(srcPath, recursive)}-w{XmlTag.ToLower()}";
     }
 }

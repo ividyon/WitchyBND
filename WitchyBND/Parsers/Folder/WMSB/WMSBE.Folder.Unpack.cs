@@ -18,11 +18,11 @@ public partial class WMSBEFolder
         return IsRead<MSBE>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         MSBE msb = (file as MSBE)!;
 
-        string destDir = GetUnpackDestPath(srcPath);
+        string destDir = GetUnpackDestPath(srcPath, recursive);
         Directory.CreateDirectory(destDir);
 
         XDocument xDoc = new XDocument();

@@ -60,7 +60,7 @@ public class WPARAMBND3 : WBinderParser
         return doc.Root != null && doc.Root.Name == "bnd3" && doc.Root.Element("game") != null;
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         BND3 bnd = (file as BND3)!;
         WBUtil.GameType game;
@@ -75,11 +75,11 @@ public class WPARAMBND3 : WBinderParser
         else
             throw new InvalidDataException($"Could not determine param type for {Path.GetFileName(srcPath)}.");
 
-        ParseMode.GetParser<WBND3>().Unpack(srcPath, file, game);
+        ParseMode.GetParser<WBND3>().Unpack(srcPath, file, recursive, game);
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
-        ParseMode.GetParser<WBND3>().Repack(srcPath);
+        ParseMode.GetParser<WBND3>().Repack(srcPath, recursive);
     }
 }

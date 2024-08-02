@@ -18,7 +18,7 @@ public class WFMG : WXMLParser
         return Path.GetExtension(path).ToLower() == ".fmg";
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? _)
+    public override void Unpack(string srcPath, ISoulsFile? _, bool recursive)
     {
         FMG fmg = FMG.Read(srcPath);
         XmlWriterSettings xws = new XmlWriterSettings();
@@ -26,7 +26,7 @@ public class WFMG : WXMLParser
         xws.Indent = true;
         // But don't actually indent so there's more room for the text
         xws.IndentChars = "";
-        XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath), xws);
+        XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath, recursive), xws);
         xw.WriteStartElement("fmg");
 
         xw.WriteElementString("filename", Path.GetFileName(srcPath));
@@ -52,7 +52,7 @@ public class WFMG : WXMLParser
         xw.Close();
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
         FMG fmg = new FMG();
 

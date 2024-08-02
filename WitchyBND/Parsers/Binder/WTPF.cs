@@ -35,10 +35,10 @@ public class WTPF : WFolderParser
         return IsRead<TPF>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         var tpf = (file as TPF)!;
-        var destDir = GetUnpackDestPath(srcPath);
+        var destDir = GetUnpackDestPath(srcPath, recursive);
         var sourceName = Path.GetFileName(srcPath);
 
         if (!UnpackPlatforms.Contains(tpf.Platform))
@@ -98,7 +98,7 @@ public class WTPF : WFolderParser
         xw.Close();
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
         TPF tpf = new TPF();
         // XmlDocument xml = new XmlDocument();

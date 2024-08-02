@@ -33,15 +33,15 @@ public class WANIBND4 : WBinderParser
                path.Contains(".anibnd") && IsRead<BND4>(path, data, out file);
     }
 
-    public override string GetUnpackDestPath(string srcPath)
+    public override string GetUnpackDestPath(string srcPath, bool recursive)
     {
-        return $"{base.GetUnpackDestPath(srcPath)}-wanibnd";
+        return $"{base.GetUnpackDestPath(srcPath, recursive)}-wanibnd";
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         BND4 bnd = (file as BND4)!;
-        var destDir = GetUnpackDestPath(srcPath);
+        var destDir = GetUnpackDestPath(srcPath, recursive);
         var srcName = Path.GetFileName(srcPath);
         Directory.CreateDirectory(destDir);
 
@@ -124,7 +124,7 @@ public class WANIBND4 : WBinderParser
         }
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
         var bnd = new BND4();
 
@@ -146,7 +146,7 @@ public class WANIBND4 : WBinderParser
 
         var filesElement = xml.Element("files");
         if (filesElement != null)
-            ReadBinderFiles(bnd, filesElement, srcPath, root);
+            ReadBinderFiles(bnd, filesElement, srcPath, root, recursive);
         var pathsToSkip = filesElement != null
             ? filesElement.Elements("file").Select(file => Path.Combine(root, file.Element("path")!.Value)).ToList()
             : new List<string>();
@@ -158,7 +158,7 @@ public class WANIBND4 : WBinderParser
             var pathDir = filePath.Substring(srcPath.Length + 1);
             var binderPath = Path.Combine(root, pathDir);
             if (pathsToSkip.Contains(binderPath)) return;
-            RecursiveRepackFile(filePath);
+            RecursiveRepackFile(filePath, recursive);
 
             string fileName = Path.GetFileNameWithoutExtension(filePath);
             bool isPlayer = pathDir.Contains("c0000");

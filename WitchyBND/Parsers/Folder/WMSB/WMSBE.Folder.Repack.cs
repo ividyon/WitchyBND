@@ -20,7 +20,7 @@ public partial class WMSBEFolder
         return false;
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
         var msb = new MSBE();
 

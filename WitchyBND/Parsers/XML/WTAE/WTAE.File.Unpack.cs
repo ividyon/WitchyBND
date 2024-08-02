@@ -19,7 +19,7 @@ public partial class WTAEFile
         return !Configuration.Active.TaeFolder && IsRead<TAE>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         TAE tae = (file as TAE)!;
 
@@ -73,7 +73,7 @@ public partial class WTAEFile
         }
 
 
-        var destPath = GetUnpackDestPath(srcPath);
+        var destPath = GetUnpackDestPath(srcPath, recursive);
         AddLocationToXml(srcPath, root);
         xDoc.Save(destPath);
     }

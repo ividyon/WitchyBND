@@ -20,16 +20,16 @@ public class WBND4 : WBinderParser
         return IsRead<BND4>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
-        Unpack(srcPath, file, null);
+        Unpack(srcPath, file, recursive, null);
     }
 
-    public void Unpack(string srcPath, ISoulsFile? file, WBUtil.GameType? game)
+    public void Unpack(string srcPath, ISoulsFile? file, bool recursive, WBUtil.GameType? game)
     {
         BND4 bnd = (file as BND4)!;
         string srcName = Path.GetFileName(srcPath);
-        string destDir = GetUnpackDestPath(srcPath);
+        string destDir = GetUnpackDestPath(srcPath, recursive);
         Directory.CreateDirectory(destDir);
 
         var root = "";
@@ -75,7 +75,7 @@ public class WBND4 : WBinderParser
         xw.Close();
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
         var bnd = new BND4();
 
@@ -96,7 +96,7 @@ public class WBND4 : WBinderParser
         bnd.Unk05 = bool.Parse(xml.Element("unk05")!.Value);
 
         if (xml.Element("files") != null)
-            ReadBinderFiles(bnd, xml.Element("files")!, srcPath, root);
+            ReadBinderFiles(bnd, xml.Element("files")!, srcPath, root, recursive);
 
         var destPath = GetRepackDestPath(srcPath, xml);
 

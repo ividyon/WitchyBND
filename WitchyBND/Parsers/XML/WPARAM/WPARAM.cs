@@ -66,7 +66,7 @@ If DSMapStudio does not yet support this game or regulation version, an experime
 
     public override bool HasPreprocess => true;
 
-    public override bool Preprocess(string srcPath, ref Dictionary<string, (WFileParser, ISoulsFile)> files)
+    public override bool Preprocess(string srcPath, bool recursive, ref Dictionary<string, (WFileParser, ISoulsFile)> files)
     {
         ISoulsFile? file = null;
         if (gameService.KnownGamePathsForParams.Any(p => srcPath.StartsWith(p.Key))) return false;

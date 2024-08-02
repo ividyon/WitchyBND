@@ -13,16 +13,16 @@ public class WFFXDLSE : WXMLParser
         return IsRead<FFXDLSE>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         var ffx = (file as FFXDLSE)!;
-        var xmlPath = GetUnpackDestPath(srcPath);
+        var xmlPath = GetUnpackDestPath(srcPath, recursive);
         using (var sw = new StreamWriter(xmlPath))
             ffx.XmlSerialize(sw);
         AddLocationToXml(xmlPath, srcPath);
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
         FFXDLSE ffx;
         using (var sr = new StreamReader(srcPath))

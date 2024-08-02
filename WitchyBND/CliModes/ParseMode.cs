@@ -82,10 +82,10 @@ public static class ParseMode
 
         paths = WBUtil.ProcessPathGlobs(paths).ToList();
 
-        ParseFiles(paths);
+        ParseFiles(paths, false);
     }
 
-    public static void ParseFiles(IEnumerable<string> paths, bool recursive = false)
+    public static void ParseFiles(IEnumerable<string> paths, bool recursive)
     {
         var parsers = GetParsers(recursive);
 
@@ -93,14 +93,18 @@ public static class ParseMode
 
         Dictionary<string, (WFileParser, ISoulsFile)> preprocessedFiles = new();
 
-        output.WriteLine($"Preprocessing...");
-        foreach (string path in pathsList.Except(preprocessedFiles.Select(p => p.Key)))
+        if (!recursive)
         {
-            foreach (WFileParser parser in GetPreprocessors(recursive))
+            output.WriteLine($"Preprocessing...");
+            foreach (string path in pathsList.Except(preprocessedFiles.Select(p => p.Key)))
             {
-                bool toBreak = errorService.Catch(() => parser.Preprocess(path, ref preprocessedFiles), out _, path);
-                if (toBreak)
-                    break;
+                foreach (WFileParser parser in GetPreprocessors(recursive))
+                {
+                    bool toBreak = errorService.Catch(() => parser.Preprocess(path, recursive, ref preprocessedFiles),
+                        out _, path);
+                    if (toBreak)
+                        break;
+                }
             }
         }
 
@@ -227,7 +231,7 @@ public static class ParseMode
                 break;
         }
 
-        parser.Unpack(path, file);
+        parser.Unpack(path, file, recursive);
     }
 
     public static void Repack(string path, WFileParser parser, bool recursive)
@@ -257,6 +261,6 @@ public static class ParseMode
                 @"Parser version of unpacked file is outdated. Please repack this file using the WitchyBND version it was originally unpacked with, then unpack it using the newest version.");
         }
 
-        parser.Repack(path);
+        parser.Repack(path, recursive);
     }
 }

@@ -23,19 +23,14 @@ public class WDCX : WSingleFileParser
         return Configuration.Active.Dcx && DCX.Is(path);
     }
 
-    public override string GetUnpackDestPath(string srcPath)
+    public override string GetUnpackDestPath(string srcPath, bool recursive)
     {
         string sourceDir = new FileInfo(srcPath).Directory?.FullName!;
         string? location = Configuration.Active.Location;
         string fileName = Path.GetFileName(srcPath);
-        if (!string.IsNullOrEmpty(location))
-        {
-            string common = WBUtil.FindCommonRootPath([srcPath, $"{location}\\test.txt"]);
-            if (!string.IsNullOrEmpty(common))
-                sourceDir = Path.GetFullPath(Path.GetDirectoryName($"{location}\\{srcPath.Substring(common.Length)}")!);
-            else
-                sourceDir = Path.GetFullPath(sourceDir);
-        }
+        if (!string.IsNullOrEmpty(location) && !recursive)
+            sourceDir = location;
+        sourceDir = Path.GetFullPath(sourceDir);
         if (srcPath.ToLower().EndsWith(".dcx"))
             return $"{sourceDir}\\{Path.GetFileNameWithoutExtension(srcPath)}";
         return $"{sourceDir}\\{fileName}.undcx";
@@ -51,9 +46,9 @@ public class WDCX : WSingleFileParser
         return srcPath + ".dcx";
     }
 
-    public string GetXmlPath(string path, bool repack = false)
+    public string GetXmlPath(string path, bool recursive, bool repack = false)
     {
-        var innerPath = repack ? path : GetUnpackDestPath(path);
+        var innerPath = repack ? path : GetUnpackDestPath(path, recursive);
         return $"{innerPath}-wbinder-dcx.xml";
     }
 
@@ -73,16 +68,16 @@ public class WDCX : WSingleFileParser
         return File.Exists(xmlPath);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? _)
+    public override void Unpack(string srcPath, ISoulsFile? _, bool recursive)
     {
-        string outPath = GetUnpackDestPath(srcPath);
+        string outPath = GetUnpackDestPath(srcPath, recursive);
 
         byte[] bytes = DCX.Decompress(srcPath, out DCX.Type comp);
         File.WriteAllBytes(outPath, bytes);
 
         XmlWriterSettings xws = new XmlWriterSettings();
         xws.Indent = true;
-        XmlWriter xw = XmlWriter.Create(GetXmlPath(srcPath), xws);
+        XmlWriter xw = XmlWriter.Create(GetXmlPath(srcPath, recursive), xws);
 
         xw.WriteStartElement("dcx");
 
@@ -95,7 +90,7 @@ public class WDCX : WSingleFileParser
         xw.Close();
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
         string xmlPath = GetXmlPath(srcPath, true);
         XElement xml = LoadXml(xmlPath);
