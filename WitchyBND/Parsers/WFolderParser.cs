@@ -70,10 +70,10 @@ This should not cause adverse effects in the game.");
         var sourceDir = xml.Element("sourcePath")?.Value;
         if (sourceDir != null)
         {
-            return $"{sourceDir}\\{filename}";
+            return Path.GetFullPath(Path.Combine(srcDirPath, "..", sourceDir, filename));
         }
-        string targetDir = new DirectoryInfo(srcDirPath).Parent?.FullName;
-        return $"{targetDir}\\{filename}";
+        string targetDir = new DirectoryInfo(srcDirPath).Parent?.FullName!;
+        return Path.GetFullPath(Path.Combine(targetDir, filename));
     }
     // public virtual string GetRepackDestPath(string srcDirPath, string destFileName)
     // {

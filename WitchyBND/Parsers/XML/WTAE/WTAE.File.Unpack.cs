@@ -74,7 +74,7 @@ public partial class WTAEFile
 
 
         var destPath = GetUnpackDestPath(srcPath, recursive);
-        AddLocationToXml(srcPath, root);
+        AddLocationToXml(srcPath, recursive, root);
         xDoc.Save(destPath);
     }
 

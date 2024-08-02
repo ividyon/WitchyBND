@@ -25,9 +25,7 @@ public class WLUAGNL : WXMLParser
         XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath, recursive), xws);
         xw.WriteStartElement("luagnl");
 
-        xw.WriteElementString("filename", Path.GetFileName(srcPath));
-        if (!string.IsNullOrEmpty(Configuration.Active.Location))
-            xw.WriteElementString("sourcePath", Path.GetDirectoryName(srcPath));
+        AddLocationToXml(srcPath, recursive, xw);
 
         xw.WriteElementString("bigendian", gnl.BigEndian.ToString());
         xw.WriteElementString("longformat", gnl.LongFormat.ToString());

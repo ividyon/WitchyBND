@@ -98,7 +98,7 @@ public partial class WMSBEFolder
 
 
         var destPath = GetFolderXmlPath(destDir);
-        AddLocationToXml(srcPath, root);
+        AddLocationToXml(srcPath, recursive, root);
         xDoc.Save(destPath);
     }
 

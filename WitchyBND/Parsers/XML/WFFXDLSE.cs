@@ -19,7 +19,7 @@ public class WFFXDLSE : WXMLParser
         var xmlPath = GetUnpackDestPath(srcPath, recursive);
         using (var sw = new StreamWriter(xmlPath))
             ffx.XmlSerialize(sw);
-        AddLocationToXml(xmlPath, srcPath);
+        AddLocationToXml(xmlPath, srcPath, recursive);
     }
 
     public override void Repack(string srcPath, bool recursive)

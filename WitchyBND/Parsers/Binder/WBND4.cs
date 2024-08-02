@@ -28,7 +28,6 @@ public class WBND4 : WBinderParser
     public void Unpack(string srcPath, ISoulsFile? file, bool recursive, WBUtil.GameType? game)
     {
         BND4 bnd = (file as BND4)!;
-        string srcName = Path.GetFileName(srcPath);
         string destDir = GetUnpackDestPath(srcPath, recursive);
         Directory.CreateDirectory(destDir);
 
@@ -38,12 +37,10 @@ public class WBND4 : WBinderParser
             root = WBUtil.FindCommonRootPath(bnd.Files.Select(bndFile => bndFile.Name));
         }
 
-        XElement filename = new XElement("filename", srcName);
         XElement files = WriteBinderFiles(bnd, destDir, root);
 
         var xml =
             new XElement(XmlTag,
-                filename,
                 new XElement("compression", bnd.Compression.ToString()),
                 new XElement("version", bnd.Version),
                 new XElement("format", bnd.Format.ToString()),
@@ -55,14 +52,13 @@ public class WBND4 : WBinderParser
                 new XElement("unk05", bnd.Unk05.ToString()),
                 files);
 
-        if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
+        AddLocationToXml(srcPath, recursive, xml);
 
-        if (!string.IsNullOrEmpty(Configuration.Active.Location))
-            filename.AddAfterSelf(new XElement("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath))));
+        if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
 
         if (game != null)
         {
-            filename.AddAfterSelf(new XElement("game", game.ToString()));
+            xml.AddFirst(new XElement("game", game.ToString()));
         }
         if (!string.IsNullOrEmpty(root))
             files.AddBeforeSelf(new XElement("root", root));

@@ -37,10 +37,8 @@ public class WFFXBNDModern : WBinderParser
     {
         BND4 bnd = (file as BND4)!;
         var destDir = GetUnpackDestPath(srcPath, recursive);
-        var srcName = Path.GetFileName(srcPath);
         Directory.CreateDirectory(destDir);
 
-        var filename = new XElement("filename", srcName);
         if (!bnd.Files.Any())
             throw new FriendlyException("FFXBND is empty, no need to unpack.");
 
@@ -49,7 +47,6 @@ public class WFFXBNDModern : WBinderParser
             throw new FriendlyException("FFXBND has invalid structure; expected \\sfx\\ path.");
         var rootPath = rootFile.Name.Substring(0, rootFile.Name.IndexOf("\\sfx\\", StringComparison.Ordinal) + 5);
         var xml = new XElement(XmlTag,
-            filename,
             new XElement("compression", bnd.Compression.ToString()),
             new XElement("version", bnd.Version),
             new XElement("format", bnd.Format.ToString()),
@@ -61,11 +58,9 @@ public class WFFXBNDModern : WBinderParser
             new XElement("unk05", bnd.Unk05.ToString()),
             new XElement("root", rootPath)
         );
+        AddLocationToXml(srcPath, recursive, xml);
 
         if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
-
-        if (!string.IsNullOrEmpty(Configuration.Active.Location))
-            filename.AddAfterSelf(new XElement("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath))));
 
         // Files
         var firstEffect = bnd.Files.FirstOrDefault(f => f.Name.EndsWith(".fxr"));

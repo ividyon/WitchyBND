@@ -39,7 +39,6 @@ public class WTPF : WFolderParser
     {
         var tpf = (file as TPF)!;
         var destDir = GetUnpackDestPath(srcPath, recursive);
-        var sourceName = Path.GetFileName(srcPath);
 
         if (!UnpackPlatforms.Contains(tpf.Platform))
         {
@@ -75,20 +74,16 @@ public class WTPF : WFolderParser
             textures.Add(texElement);
         }
 
-        var filename = new XElement("filename", sourceName);
         var xml = new XElement(XmlTag,
-            filename,
             new XElement("compression", tpf.Compression.ToString()),
             new XElement("encoding", $"0x{tpf.Encoding:X2}"),
             new XElement("flag2", $"0x{tpf.Flag2:X2}"),
             new XElement("platform", tpf.Platform.ToString()),
             textures
         );
+        AddLocationToXml(srcPath, recursive, xml);
 
         if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
-
-        if (!string.IsNullOrEmpty(Configuration.Active.Location))
-            filename.AddAfterSelf(new XElement("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath))));
 
         using var xw = XmlWriter.Create(GetFolderXmlPath(destDir), new XmlWriterSettings
         {

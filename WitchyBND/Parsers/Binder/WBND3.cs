@@ -26,7 +26,6 @@ public class WBND3 : WBinderParser
     public void Unpack(string srcPath, ISoulsFile? file, bool recursive, WBUtil.GameType? game)
     {
         BND3 bnd = (file as BND3)!;
-        string srcName = Path.GetFileName(srcPath);
         string destDir = GetUnpackDestPath(srcPath, recursive);
         Directory.CreateDirectory(destDir);
 
@@ -38,11 +37,8 @@ public class WBND3 : WBinderParser
 
         XElement files = WriteBinderFiles(bnd, destDir, root);
 
-        var filename = new XElement("filename", srcName);
-
         var xml =
             new XElement(XmlTag,
-                filename,
                 new XElement("compression", bnd.Compression.ToString()),
                 new XElement("version", bnd.Version),
                 new XElement("format", bnd.Format.ToString()),
@@ -51,14 +47,13 @@ public class WBND3 : WBinderParser
                 new XElement("unk18", bnd.Unk18.ToString()),
                 files);
 
-        if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
+        AddLocationToXml(srcPath, recursive, xml);
 
-        if (!string.IsNullOrEmpty(Configuration.Active.Location))
-            filename.AddAfterSelf(new XElement("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath))));
+        if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
 
         if (game != null)
         {
-            filename.AddAfterSelf(new XElement("game", game.ToString()));
+            xml.AddFirst(new XElement("game", game.ToString()));
         }
 
         if (!string.IsNullOrEmpty(root))

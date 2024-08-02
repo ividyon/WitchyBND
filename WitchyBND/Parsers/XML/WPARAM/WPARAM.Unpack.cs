@@ -111,14 +111,12 @@ The error was:
         if (Version > 0) xw.WriteAttributeString(VersionAttributeName, Version.ToString());
 
         // Meta data
-        xw.WriteElementString("fileName", Path.GetFileName(srcPath));
+        AddLocationToXml(srcPath, recursive, xw);
         if (!string.IsNullOrEmpty(param.ParamType))
             xw.WriteElementString("type", param.ParamType);
 
         xw.WriteElementString("game", game.ToString());
 
-        if (!string.IsNullOrEmpty(Configuration.Active.Location))
-            xw.WriteElementString("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath)));
 
         xw.WriteElementString("cellStyle", ((int)cellStyle).ToString());
         xw.WriteElementString("compression", param.Compression.ToString());

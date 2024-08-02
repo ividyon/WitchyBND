@@ -63,7 +63,7 @@ public partial class WTAEFolder
 
 
         var destPath = GetFolderXmlPath(destDir);
-        AddLocationToXml(srcPath, root);
+        AddLocationToXml(srcPath, recursive, root);
         xDoc.Save(destPath);
     }
 

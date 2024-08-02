@@ -29,9 +29,7 @@ public class WFMG : WXMLParser
         XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath, recursive), xws);
         xw.WriteStartElement("fmg");
 
-        xw.WriteElementString("filename", Path.GetFileName(srcPath));
-        if (!string.IsNullOrEmpty(Configuration.Active.Location))
-            xw.WriteElementString("sourcePath", Path.GetDirectoryName(srcPath));
+        AddLocationToXml(srcPath, recursive, xw);
 
         xw.WriteElementString("compression", fmg.Compression.ToString());
         xw.WriteElementString("version", fmg.Version.ToString());

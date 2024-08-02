@@ -32,9 +32,7 @@ public class WGPARAM : WXMLParser
       }))
       {
         xw.WriteStartElement(XmlTag);
-        xw.WriteElementString("filename", Path.GetFileName(srcPath));
-        if (!string.IsNullOrEmpty(Configuration.Active.Location))
-          xw.WriteElementString("sourcePath", Path.GetDirectoryName(srcPath));
+        AddLocationToXml(srcPath, recursive, xw);
 
         xw.WriteElementString("compression", gparam.Compression.ToString());
         xw.WriteElementString("game", gparam.Game.ToString());

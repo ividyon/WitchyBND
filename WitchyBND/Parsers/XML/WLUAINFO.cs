@@ -24,9 +24,7 @@ public class WLUAINFO : WXMLParser
         XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath, recursive), xws);
         xw.WriteStartElement("luainfo");
 
-        xw.WriteElementString("filename", Path.GetFileName(srcPath));
-        if (!string.IsNullOrEmpty(Configuration.Active.Location))
-            xw.WriteElementString("sourcePath", Path.GetDirectoryName(srcPath));
+        AddLocationToXml(srcPath, recursive, xw);
 
         xw.WriteElementString("bigendian", info.BigEndian.ToString());
         xw.WriteElementString("longformat", info.LongFormat.ToString());

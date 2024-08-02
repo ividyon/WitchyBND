@@ -97,10 +97,10 @@ public abstract class WFileParser
 
     public abstract void Unpack(string srcPath, ISoulsFile? file, bool recursive);
     public abstract void Repack(string srcPath, bool recursive);
-    public static void AddLocationToXml(string path, string srcPath)
+    public static void AddLocationToXml(string path, string srcPath, bool recursive)
     {
         XDocument xml = XDocument.Load(path);
-        AddLocationToXml(srcPath, xml.Root!);
+        AddLocationToXml(srcPath, recursive, xml.Root!);
         xml.Save(path);
     }
 
@@ -110,11 +110,32 @@ public abstract class WFileParser
         xml.Element("sourcePath")?.Remove();
         return xml;
     }
-    public static void AddLocationToXml(string path, XElement xml)
+
+    public static void AddLocationToXml(string path, bool recursive, XmlWriter xw, bool skipFilename = false)
     {
-        if (!string.IsNullOrEmpty(Configuration.Active.Location))
-            xml.AddFirst(new XElement("sourcePath", Path.GetDirectoryName(path)));
-        xml.AddFirst(new XElement("filename", Path.GetFileName(path)));
+        string? location = Configuration.Active.Location;
+        if (!string.IsNullOrEmpty(location) && !recursive)
+        {
+            string srcPath = Path.GetDirectoryName(path)!;
+            if (location.StartsWith(srcPath))
+                srcPath = Path.GetRelativePath(location, srcPath);
+            xw.WriteElementString("sourcePath", srcPath);
+        }
+        if (!skipFilename)
+            xw.WriteElementString("filename",  Path.GetFileName(path));
+    }
+    public static void AddLocationToXml(string path, bool recursive, XElement xml, bool skipFilename = false)
+    {
+        string? location = Configuration.Active.Location;
+        if (!string.IsNullOrEmpty(location) && !recursive)
+        {
+            string srcPath = Path.GetDirectoryName(path)!;
+            if (location.StartsWith(srcPath))
+                srcPath = Path.GetRelativePath(location, srcPath);
+            xml.AddFirst(new XElement("sourcePath", srcPath));
+        }
+        if (!skipFilename)
+            xml.AddFirst(new XElement("filename", Path.GetFileName(path)));
     }
     public static XElement LoadXml(string path)
     {

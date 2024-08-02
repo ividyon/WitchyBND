@@ -45,7 +45,6 @@ public class WANIBND4 : WBinderParser
         var srcName = Path.GetFileName(srcPath);
         Directory.CreateDirectory(destDir);
 
-        var filename = new XElement("filename", srcName);
         if (!bnd.Files.Any())
             throw new FriendlyException("ANIBND is empty, no need to unpack.");
 
@@ -56,7 +55,6 @@ public class WANIBND4 : WBinderParser
         }
 
         var xml = new XElement(XmlTag,
-            filename,
             new XElement("compression", bnd.Compression.ToString()),
             new XElement("version", bnd.Version),
             new XElement("format", bnd.Format.ToString()),
@@ -68,10 +66,10 @@ public class WANIBND4 : WBinderParser
             new XElement("unk05", bnd.Unk05.ToString())
         );
 
+        AddLocationToXml(srcPath, recursive, xml);
+
         if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
 
-        if (!string.IsNullOrEmpty(Configuration.Active.Location))
-            filename.AddAfterSelf(new XElement("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath))));
 
         if (!string.IsNullOrEmpty(root))
             xml.Add(new XElement("root", root));

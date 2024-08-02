@@ -14,23 +14,24 @@ using WitchyLib;
 
 namespace WitchyBND.Parsers;
 
-
-
 public abstract class WBinderParser : WFolderParser
 {
     public override bool HasPreprocess => Configuration.Active.Recursive;
-    public override bool Preprocess(string srcPath, bool recursive, ref Dictionary<string, (WFileParser, ISoulsFile)> files)
+
+    public override bool Preprocess(string srcPath, bool recursive,
+        ref Dictionary<string, (WFileParser, ISoulsFile)> files)
     {
         ISoulsFile? file = null;
-        bool unpacked = Exists(srcPath) && Is(srcPath, null, out file);
-        bool packed = ExistsUnpacked(srcPath) && IsUnpacked(srcPath);
+        bool unpacked = ExistsUnpacked(srcPath) && IsUnpacked(srcPath);
+        bool packed = !unpacked && Exists(srcPath) && Is(srcPath, null, out file);
         if (file != null)
             files.TryAdd(srcPath, (this, file));
         if (!unpacked && !packed) return false;
-        if (unpacked && file != null && file is IBinder bnd)
+        if (!Configuration.Active.Recursive) return true;
+        var parsers = ParseMode.GetPreprocessors(true);
+        if (packed && file != null && file is IBinder bnd)
         {
             string destDir = GetUnpackDestPath(srcPath, recursive);
-            var parsers = ParseMode.GetPreprocessors(true);
             foreach (var bndFile in bnd.Files)
             {
                 string path = GetBinderFilePath(bnd, bndFile, null);
@@ -44,8 +45,22 @@ public abstract class WBinderParser : WFolderParser
                 }
             }
         }
+        else if (unpacked)
+        {
+            foreach (string insidePath in Directory.EnumerateFiles(srcPath, "*", SearchOption.AllDirectories))
+            {
+                foreach (var parser in parsers)
+                {
+                    bool toBreak = parser.Preprocess(insidePath, recursive, ref files);
+                    if (toBreak)
+                        break;
+                }
+            }
+        }
+
         return true;
     }
+
     protected static string GetBinderFilePath(IBinder bnd, BinderFile file, string? root)
     {
         root ??= WBUtil.FindCommonRootPath(bnd.Files.Select(bndFile => bndFile.Name));
@@ -65,6 +80,7 @@ public abstract class WBinderParser : WFolderParser
 
         return path;
     }
+
     protected static XElement WriteBinderFiles(IBinder bnd, string destDirPath, string? root)
     {
         var bag = new ConcurrentDictionary<string, XElement>();
@@ -159,12 +175,15 @@ public abstract class WBinderParser : WFolderParser
         RecursiveRepackFile(path, recursive, new[] { parser });
     }
 
-    protected static void ReadBinderFiles(IBinder bnd, XElement filesElement, string srcDirPath, string root, bool recursive)
+    protected static void ReadBinderFiles(IBinder bnd, XElement filesElement, string srcDirPath, string root,
+        bool recursive)
     {
         var bag = new ConcurrentDictionary<string, BinderFile>();
-        var nameList = filesElement.Elements("file").Select(file => Path.Combine(root, file.Element("path")!.Value)).ToList();
+        var nameList = filesElement.Elements("file").Select(file => Path.Combine(root, file.Element("path")!.Value))
+            .ToList();
 
-        void Callback(XElement file) {
+        void Callback(XElement file)
+        {
             if (file.Element("path") == null)
                 throw new FriendlyException("File node missing path tag.");
 
@@ -200,6 +219,7 @@ public abstract class WBinderParser : WFolderParser
                 CompressionType = compressionType
             });
         }
+
         if (Configuration.Active.Parallel)
             Parallel.ForEach(filesElement.Elements("file"), Callback);
         else
@@ -232,6 +252,7 @@ public class UnsortedFileFormat
         Compression = compression;
     }
 }
+
 public abstract class WUnsortedBinderParser : WBinderParser
 {
     public abstract string Extension { get; }
@@ -239,7 +260,8 @@ public abstract class WUnsortedBinderParser : WBinderParser
 
     public virtual bool EndsInExtension(string path)
     {
-        return path.ToLower().EndsWith($".{Extension.ToLower()}") || path.ToLower().EndsWith($".{Extension.ToLower()}.dcx");
+        return path.ToLower().EndsWith($".{Extension.ToLower()}") ||
+               path.ToLower().EndsWith($".{Extension.ToLower()}.dcx");
     }
 
     protected virtual void ReadUnsortedBinderFiles(IBinder bnd, string srcDirPath, string root, bool recursive)
@@ -254,7 +276,9 @@ public abstract class WUnsortedBinderParser : WBinderParser
             if (format == null)
                 throw new InvalidDataException(
                     $"File {filename} passed pattern checks, but was not found among formats.");
-            string name = !string.IsNullOrEmpty(root) ? Path.Combine(root, Path.GetRelativePath(srcDirPath, filePath)) : filePath;
+            string name = !string.IsNullOrEmpty(root)
+                ? Path.Combine(root, Path.GetRelativePath(srcDirPath, filePath))
+                : filePath;
 
             RecursiveRepackFile(filePath, recursive);
 

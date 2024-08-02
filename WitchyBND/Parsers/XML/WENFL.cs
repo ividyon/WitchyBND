@@ -29,7 +29,7 @@ public class WENFL : WXMLParser
         }
 
         var destPath = GetUnpackDestPath(srcPath, recursive);
-        AddLocationToXml(srcPath, xDoc.Root!);
+        AddLocationToXml(srcPath, recursive, xDoc.Root!);
         xDoc.Save(destPath);
     }
 

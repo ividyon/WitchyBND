@@ -24,8 +24,7 @@ public partial class WMQB
 
         xw.WriteElementString("Name", mqb.Name);
 
-        if (!string.IsNullOrEmpty(Configuration.Active.Location))
-            xw.WriteElementString("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath)));
+        AddLocationToXml(srcPath, recursive, xw, true);
 
         xw.WriteElementString("Version", mqb.Version.ToString());
         xw.WriteElementString("Filename", filename);
