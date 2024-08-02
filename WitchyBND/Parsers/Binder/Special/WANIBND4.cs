@@ -75,7 +75,6 @@ public class WANIBND4 : WBinderParser
 
         if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
 
-
         if (!string.IsNullOrEmpty(root))
             xml.Add(new XElement("root", root));
 

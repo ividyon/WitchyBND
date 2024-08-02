@@ -91,6 +91,10 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.14.0.3
+
+* Further bugfixes for the preprocess process for recursive repacking.
+
 ### 2.14.0.2
 
 * Refined the Preprocess process further, eliminating duplicate work to speed it up.

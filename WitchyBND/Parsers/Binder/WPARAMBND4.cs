@@ -84,7 +84,7 @@ public class WPARAMBND4 : WBinderParser
     {
         ISoulsFile? file = null;
         if (gameService.KnownGamePathsForParams.Any(p => srcPath.StartsWith(p.Key))) return false;
-        if (!(Exists(srcPath) && IsSimpleFirst(srcPath, null, out file)) && !(ExistsUnpacked(srcPath) && IsUnpacked(srcPath))) return false;
+        if (!((recursive || Exists(srcPath)) && IsSimpleFirst(srcPath, null, out file)) && !((recursive || ExistsUnpacked(srcPath)) && IsUnpacked(srcPath))) return false;
 
         gameService.UnpackParamdex();
         if (file != null)

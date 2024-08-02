@@ -23,7 +23,7 @@ public abstract class WBinderParser : WFolderParser
     {
         ISoulsFile? file = null;
         bool unpacked = ExistsUnpacked(srcPath) && IsUnpacked(srcPath);
-        bool packed = !unpacked && Exists(srcPath) && Is(srcPath, null, out file);
+        bool packed = !unpacked && Exists(srcPath) && IsSimpleFirst(srcPath, null, out file);
         if (file != null)
             files.TryAdd(srcPath, (this, file));
         if (!unpacked && !packed) return false;
@@ -39,7 +39,7 @@ public abstract class WBinderParser : WFolderParser
                     $@"{destDir}\{Path.GetDirectoryName(path)}\{Path.GetFileNameWithoutExtension(path)}{Path.GetExtension(path)}";
                 foreach (var parser in parsers)
                 {
-                    bool toBreak = parser.Preprocess(estFilePath, recursive, ref files);
+                    bool toBreak = parser.Preprocess(estFilePath, true, ref files);
                     if (toBreak)
                         break;
                 }
@@ -51,7 +51,7 @@ public abstract class WBinderParser : WFolderParser
             {
                 foreach (var parser in parsers)
                 {
-                    bool toBreak = parser.Preprocess(insidePath, recursive, ref files);
+                    bool toBreak = parser.Preprocess(insidePath, true, ref files);
                     if (toBreak)
                         break;
                 }

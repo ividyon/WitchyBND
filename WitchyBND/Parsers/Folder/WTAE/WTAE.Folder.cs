@@ -18,8 +18,8 @@ public partial class WTAEFolder : WFolderParser
     public override bool Preprocess(string srcPath, bool recursive, ref Dictionary<string, (WFileParser, ISoulsFile)> files)
     {
         ISoulsFile? file = null;
-        if (!(ExistsUnpacked(srcPath) && IsUnpacked(srcPath)) &&
-            !(Exists(srcPath) && IsSimpleFirst(srcPath, null, out file)))
+        if (!((recursive || ExistsUnpacked(srcPath)) && IsUnpacked(srcPath)) &&
+            !((recursive || Exists(srcPath)) && IsSimpleFirst(srcPath, null, out file)))
         {
             return false;
         }

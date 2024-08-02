@@ -15,7 +15,7 @@ public partial class WMSBEFolder : WFolderParser
         // Preprocess purely to call WarnAboutMSBs
 
         ISoulsFile? file = null;
-        if (!(Exists(srcPath) && IsSimpleFirst(srcPath, null, out file)) && !(ExistsUnpacked(srcPath) && IsUnpacked(srcPath))) return false;
+        if (!((recursive || Exists(srcPath)) && IsSimpleFirst(srcPath, null, out file)) && !((recursive || ExistsUnpacked(srcPath)) && IsUnpacked(srcPath))) return false;
         if (file != null)
             files.TryAdd(srcPath, (this, file));
 
