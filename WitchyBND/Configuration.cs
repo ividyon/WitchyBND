@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using CommandLine;
@@ -51,16 +52,7 @@ public static class Configuration
 {
     public static bool IsTest { get; set; }
 
-    public static bool IsDebug
-    {
-        get
-        {
-#if (DEBUG)
-            return true;
-#endif
-            return false;
-        }
-    }
+    public static bool IsDebug => Debugger.IsAttached;
 
     public class StoredConfig : IStoredConfig, IStoredOnlyConfig
     {
@@ -215,7 +207,11 @@ public class CliOptions
 
     [Option('b', "bnd",
         HelpText = "Perform basic unpacking of BND instead of using special Witchy methods, where present")]
-    public bool Bnd { get; set; }
+    public bool BasicBnd { get; set; }
+
+    [Option('a', "special",
+        HelpText = "Force special Witchy methods of unpacking BND, where present")]
+    public bool SpecializedBnd { get; set; }
 
     [Option('f', "flexible",
         HelpText = "Ignore assertions and other issues while unpacking, to counteract file tampering")]

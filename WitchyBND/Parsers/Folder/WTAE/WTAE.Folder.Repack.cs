@@ -29,10 +29,7 @@ public partial class WTAEFolder
         XElement xml = LoadXml(GetFolderXmlPath(srcPath));
 
         var game = Enum.Parse<WBUtil.GameType>(xml.Element("game")!.Value);
-        if (!templateDict.ContainsKey(game))
-            throw new GameUnsupportedException(game);
-
-        TAE.Template template = templateDict[game];
+        TAE.Template template = gameService.GetTAETemplate(game);
 
         DCX.Type compression = Enum.Parse<DCX.Type>(xml.Element("compression")?.Value ?? "None");
         tae.Compression = compression;
@@ -68,7 +65,7 @@ public partial class WTAEFolder
 
         tae.Animations = bag.OrderBy(a => a.ID).ToList();
 
-        tae.ApplyTemplate(templateDict[game]);
+        tae.ApplyTemplate(gameService.GetTAETemplate(game));
 
         string outPath = GetRepackDestPath(srcPath, xml);
         WBUtil.Backup(outPath);
@@ -132,7 +129,7 @@ public partial class WTAEFolder
                         var unk04 = int.Parse(evEl.Element("unk04")!.Value);
                         var startTime = float.Parse(evEl.Element("startTime")!.Value);
                         var endTime = float.Parse(evEl.Element("endTime")!.Value);
-                        var isUnk = bool.Parse(evEl.Element("isUnk")?.Value ?? "false");
+                        var isUnk = bool.Parse(evEl.Element("isUnk")?.Value ?? "False");
                         var hasTemplate = template.Any(t => t.Value.ContainsKey(evType));
                         if (!hasTemplate)
                             errorService.RegisterNotice($"Missing template for TAE event type {evType}.");

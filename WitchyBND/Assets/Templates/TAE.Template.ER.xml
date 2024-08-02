@@ -354,6 +354,12 @@
       <s32/>
       <s32 assert="0"/>
     </event>
+    <event id="113" name="Unk113">
+      <s32 />
+      <s32 />
+      <s32 />
+      <s32 />
+    </event>
     <!-- Like 115 but this one can be spawned multiple times during anim -->
     <event id="114" name="SpawnFFX_GoodsAndMagic">
       <s32 name="FFXID_Deprecated"/>
@@ -676,26 +682,26 @@
       <s16/>
       <s16 assert="0"/>
     </event>
-    <event id="150" name="SetLockCamParam">
+    <event id="150" name="SetLockCamParam_Self">
       <s32 name="LockCamParamID"/>
       <s32 assert="0"/>
       <s32 assert="0"/>
       <s32 assert="0"/>
     </event>
-    <event id="151" name="SetLockCamParam_Boss">
-      <s32 name="LockCamParamID"/>
+    <event id="151" name="SetCameraFollow_DummyPoly">
+      <s32 name="DummyPolyID"/>
       <s32 assert="0"/>
       <s32 assert="0"/>
       <s32 assert="0"/>
     </event>
-    <event id="152" name="Event152">
+    <event id="152" name="CameraZoomOut">
       <f32/>
       <f32/>
       <f32/>
       <f32/>
       <u8 name="Type">
-        <entry value="0" name="0: Type0"/>
-        <entry value="1" name="1: Type1"/>
+        <entry name="0: Type0" value="0"/>
+        <entry name="1: Type1" value="1"/>
       </u8>
       <b/>
       <s16 assert="0"/>
@@ -703,18 +709,21 @@
       <s32 assert="0"/>
       <s32 assert="0"/>
     </event>
-    <event id="153" name="UnkCam">
-      <s32/>
-      <s32/>
+    <event id="153" name="ForceCameraDirection">
+      <s32 name="VerticalAngle"/>
+      <s32 name="HorizontalAngle"/>
       <s32 name="MethodType">
-        <entry value="0" name="0: Unknown0"/>
-        <entry value="1" name="1: Unknown1"/>
-        <entry value="2" name="2: Unknown2"/>
+        <entry name="0: Rotate Closest" value="0"/>
+        <entry name="1: Rotate Counterclockwise" value="1"/>
+        <entry name="2: Rotate Clockwise" value="2"/>
       </s32>
-      <u8/>
-      <u8/>
+      <u8 name="VerticalEnabled"/>
+      <u8 name="HorizontalEnabled"/>
       <u8 assert="0"/>
       <u8 assert="0"/>
+    </event>
+    <event id="155" name="SetLockCamParam_Target">
+      <u16 name="LockCamParamID" />
     </event>
     <!-- Startbit 33 -->
     <event id="160" name="[DS3]SekiroCode4">
@@ -1115,7 +1124,7 @@
       <s32 assert="0"/>
     </event>
     <event id="341" name="ChrSlotSys_341">
-      <s32 assert="0"/>
+      <s32/>
       <s32 assert="0"/>
       <s32 assert="0"/>
       <s32 assert="0"/>

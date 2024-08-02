@@ -53,11 +53,18 @@ This should not cause adverse effects in the game.");
 
     public override string GetUnpackDestPath(string srcPath)
     {
-        string sourceDir = new FileInfo(srcPath).Directory?.FullName;
-        if (!string.IsNullOrEmpty(Configuration.Active.Location))
-            sourceDir = Configuration.Active.Location;
+        string sourceDir = new FileInfo(srcPath).Directory?.FullName!;
+        string? location = Configuration.Active.Location;
         string fileName = Path.GetFileName(srcPath);
-        return $"{sourceDir}\\{fileName.Replace('.', '-')}";
+        if (!string.IsNullOrEmpty(location))
+        {
+            string common = WBUtil.FindCommonRootPath([srcPath, $"{location}\\test.txt"]);
+            if (!string.IsNullOrEmpty(common))
+                sourceDir = Path.GetFullPath(Path.GetDirectoryName($"{location}\\{srcPath.Substring(common.Length)}")!);
+            else
+                sourceDir = Path.GetFullPath(sourceDir);
+        }
+        return Path.Combine(sourceDir, fileName.Replace('.', '-'));
     }
 
     public virtual string GetRepackDestPath(string srcDirPath, XElement xml, string filenameElement = "filename")

@@ -8,6 +8,8 @@ using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
 using WitchyBND.CliModes;
+using WitchyBND.Services;
+using WitchyFormats;
 using WitchyLib;
 
 namespace WitchyBND.Parsers;
@@ -33,9 +35,7 @@ public class WANIBND4 : WBinderParser
 
     public override string GetUnpackDestPath(string srcPath)
     {
-        string sourceDir = new FileInfo(srcPath).Directory?.FullName;
-        string fileName = Path.GetFileName(srcPath);
-        return $"{sourceDir}\\{fileName.Replace('.', '-')}-wanibnd";
+        return $"{base.GetUnpackDestPath(srcPath)}-wanibnd";
     }
 
     public override void Unpack(string srcPath, ISoulsFile? file)
@@ -82,7 +82,9 @@ public class WANIBND4 : WBinderParser
         void Callback(BinderFile bndFile)
         {
             if (!ProcessedExtensions.Contains(Path.GetExtension(bndFile.Name)) ||
-                bndFile.ID >= 7000000 && bndFile.ID <= 7999999 // BB behaviors
+                bndFile.ID >= 7000000 && bndFile.ID <= 7999999 || // BB behaviors
+                bndFile.Name.ToLower().EndsWith("skeleton.hkx") ||
+                (bndFile.Name.EndsWith(".tae") && Path.GetFileName(bndFile.Name).StartsWith("c"))
                )
             {
                 newFiles.Add(bndFile);
@@ -122,19 +124,6 @@ public class WANIBND4 : WBinderParser
         }
     }
 
-    public override bool HasPreprocess => true;
-
-    public override bool Preprocess(string srcPath)
-    {
-        if (gameService.KnownGamePathsForParams.Any(p => srcPath.StartsWith(p.Key))) return false;
-        if (!(Exists(srcPath) && Is(srcPath, null, out ISoulsFile? _)) &&
-            !(ExistsUnpacked(srcPath) && IsUnpacked(srcPath))) return false;
-
-        gameService.UnpackParamdex();
-
-        return false; // Preprocess them all to perform WarnAboutParams
-    }
-
     public override void Repack(string srcPath)
     {
         var bnd = new BND4();
@@ -169,15 +158,16 @@ public class WANIBND4 : WBinderParser
             var pathDir = filePath.Substring(srcPath.Length + 1);
             var binderPath = Path.Combine(root, pathDir);
             if (pathsToSkip.Contains(binderPath)) return;
+            RecursiveRepackFile(filePath);
 
             string fileName = Path.GetFileNameWithoutExtension(filePath);
-            bool isPlayer = pathDir.Contains("chr\\c0000\\");
+            bool isPlayer = pathDir.Contains("c0000");
             if (ext == ".hkx")
             {
                 int baseHkxId = 1000000000;
                 if (fileName.ToLower() == "skeleton")
                 {
-                    fileBag.Add(new BinderFile(Binder.FileFlags.Flag1, isPlayer ? 4000000 : 1000000, binderPath,
+                    fileBag.Add(new BinderFile(Binder.FileFlags.Flag1, isPlayer ? 1000000 : 4000000, binderPath,
                         File.ReadAllBytes(filePath)));
                 }
                 else

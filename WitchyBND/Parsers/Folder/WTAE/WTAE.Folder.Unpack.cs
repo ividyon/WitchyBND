@@ -23,12 +23,8 @@ public partial class WTAEFolder
         TAE tae = (file as TAE)!;
 
         var game = gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.Other).Item1;
-        if (!templateDict.ContainsKey(game))
-        {
-            throw new GameUnsupportedException(game);
-        }
 
-        var template = templateDict[game];
+        var template = gameService.GetTAETemplate(game);
         tae.ApplyTemplate(template);
         string destDir = GetUnpackDestPath(srcPath);
         Directory.CreateDirectory(destDir);
@@ -123,7 +119,7 @@ public partial class WTAEFolder
                     else
                     {
                         errorService.RegisterNotice($"Missing template for TAE event type {ev.Type}.");
-                        eventEl.AddE("isUnk", true);
+                        eventEl.AddE("isUnk", "True");
                         eventEl.AddE("unkParams", string.Join(",", ev.GetParameterBytes(tae.BigEndian)));
                     }
                     return eventEl;

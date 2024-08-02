@@ -1,5 +1,6 @@
 ﻿using System.Xml;
 using System.Xml.Linq;
+using SoulsFormats;
 using WitchyBND;
 using WitchyBND.CliModes;
 using WitchyBND.Parsers;
@@ -61,7 +62,7 @@ public class RegulationTests : TestBase
     {
         IEnumerable<string> paths = GetSamples("PARAMBND4\\Correct");
 
-        var parser = new WPARAMBND4();
+        var parser = ParseMode.GetParser<WPARAMBND4>();
 
         foreach (string path in paths.Select(GetCopiedPath))
         {
@@ -90,7 +91,9 @@ public class RegulationTests : TestBase
             _gameService.DetermineGameType(destPath, IGameService.GameDeterminationType.PARAMBND, dirGame);
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
-            parser.Preprocess(destPath);
+            var files = new Dictionary<string, (WFileParser, ISoulsFile)>();
+            if (parser.HasPreprocess)
+                parser.Preprocess(destPath, ref files);
             parser.Repack(destPath);
 
             Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)), Is.True);

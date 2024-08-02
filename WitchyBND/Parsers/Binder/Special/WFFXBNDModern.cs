@@ -28,6 +28,11 @@ public class WFFXBNDModern : WBinderParser
                path.Contains(".ffxbnd") && IsRead<BND4>(path, data, out file);
     }
 
+    public override string GetUnpackDestPath(string srcPath)
+    {
+        return $"{base.GetUnpackDestPath(srcPath)}-wffxbnd";
+    }
+
     public override void Unpack(string srcPath, ISoulsFile? file)
     {
         BND4 bnd = (file as BND4)!;
@@ -399,12 +404,5 @@ Consider tidying up the unpacked archive folder.");
         WarnAboutKrak(compression, bnd.Files.Count);
 
         bnd.Write(destPath);
-    }
-
-    public override string GetUnpackDestPath(string srcPath)
-    {
-        string sourceDir = new FileInfo(srcPath).Directory?.FullName;
-        string fileName = Path.GetFileName(srcPath);
-        return $"{sourceDir}\\{fileName.Replace('.', '-')}-wffxbnd";
     }
 }

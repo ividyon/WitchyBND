@@ -67,10 +67,10 @@ public abstract class WFileParser
 
     public virtual bool HasPreprocess => false;
 
-    protected readonly HashSet<string> PreprocessedPaths = new();
-
-    public virtual bool Preprocess(string srcPath)
-    { return false; }
+    public virtual bool Preprocess(string srcPath, ref Dictionary<string, (WFileParser, ISoulsFile)> files)
+    {
+        return false;
+    }
 
     public abstract bool Is(string path, byte[]? data, out ISoulsFile? file);
     public abstract bool Exists(string path);
@@ -225,9 +225,17 @@ public abstract class WXMLParser : WSingleFileParser
 
     public override string GetUnpackDestPath(string srcPath)
     {
-        if (string.IsNullOrEmpty(Configuration.Active.Location))
-            return $"{srcPath}.xml";
-        return $"{Configuration.Active.Location}\\{Path.GetFileName(srcPath)}.xml";
+        string sourceDir = new FileInfo(srcPath).Directory?.FullName!;
+        string? location = Configuration.Active.Location;
+        if (!string.IsNullOrEmpty(location))
+        {
+            string common = WBUtil.FindCommonRootPath([srcPath, $"{location}\\test.txt"]);
+            if (!string.IsNullOrEmpty(common))
+                sourceDir = Path.GetFullPath(Path.GetDirectoryName($"{location}\\{srcPath.Substring(common.Length)}")!);
+            else
+                sourceDir = Path.GetFullPath(sourceDir);
+        }
+        return Path.Combine(sourceDir, $"{Path.GetFileNameWithoutExtension(srcPath)}.xml");
     }
 
     public override string GetRepackDestPath(string srcPath, XElement xml)

@@ -87,8 +87,10 @@ internal static class Program
                     {
                         if (opt.Dcx)
                             Configuration.Active.Dcx = opt.Dcx;
-                        if (opt.Bnd)
+                        if (opt.BasicBnd)
                             Configuration.Active.Bnd = false;
+                        else if (opt.SpecializedBnd)
+                            Configuration.Active.Bnd = true;
                         if (opt.Recursive)
                             Configuration.Active.Recursive = opt.Recursive;
                         if (opt.Parallel)
@@ -140,7 +142,7 @@ internal static class Program
 
                             if (!Directory.Exists(location))
                             {
-                                throw new DirectoryNotFoundException($"Location {location} is invalid.");
+                                Directory.CreateDirectory(location);
                             }
 
                             Configuration.Active.Location = location;

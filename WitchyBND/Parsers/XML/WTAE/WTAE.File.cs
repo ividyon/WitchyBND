@@ -16,18 +16,12 @@ public partial class WTAEFile : WXMLParser
     public override WFileParserVerb Verb => WFileParserVerb.Serialize;
 
     private static readonly Dictionary<WBUtil.GameType, TAE.Template> templateDict = new();
-    public override bool Preprocess(string srcPath)
+    public override bool Preprocess(string srcPath, ref Dictionary<string, (WFileParser, ISoulsFile)> files)
     {
-        if (!(ExistsUnpacked(srcPath) && IsUnpacked(srcPath)) && !(Exists(srcPath) && Is(srcPath, null, out ISoulsFile? _))) return false;
+        if (Path.GetExtension(srcPath) != ".tae") return false;
         gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.Other);
-        if (templateDict.Any()) return false;
-        foreach (var type in Enum.GetValues<WBUtil.GameType>().Except(new [] { WBUtil.GameType.AC6 }))
-        {
-            var path = WBUtil.GetAssetsPath("Templates", $"TAE.Template.{type}.xml");
-            if (File.Exists(path))
-                templateDict[type] = TAE.Template.ReadXMLFile(path);
-        }
-        return false; // Preprocess them all to perform WarnAboutTAEs
+        gameService.PopulateTAETemplates();
+        return true;
     }
 
     private static WBUtil.GameType FormatToGame(TAE.TAEFormat format)

@@ -95,8 +95,6 @@ public abstract class WBND4Unsorted : WUnsortedBinderParser
 
     public override string GetUnpackDestPath(string srcPath)
     {
-        string sourceDir = new FileInfo(srcPath).Directory?.FullName;
-        string fileName = Path.GetFileName(srcPath);
-        return $"{sourceDir}\\{fileName.Replace('.', '-')}-w{XmlTag.ToLower()}";
+        return $"{base.GetUnpackDestPath(srcPath)}-w{XmlTag.ToLower()}";
     }
 }

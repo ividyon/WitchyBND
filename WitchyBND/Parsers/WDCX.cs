@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
@@ -15,7 +16,6 @@ namespace WitchyBND.Parsers;
 public class WDCX : WSingleFileParser
 {
     public override string Name => "DCX";
-    public override bool HasPreprocess => true;
 
     public override bool Is(string path, byte[] _, out ISoulsFile? file)
     {
@@ -25,10 +25,20 @@ public class WDCX : WSingleFileParser
 
     public override string GetUnpackDestPath(string srcPath)
     {
-        string sourceDir = new FileInfo(srcPath).Directory?.FullName;
+        string sourceDir = new FileInfo(srcPath).Directory?.FullName!;
+        string? location = Configuration.Active.Location;
+        string fileName = Path.GetFileName(srcPath);
+        if (!string.IsNullOrEmpty(location))
+        {
+            string common = WBUtil.FindCommonRootPath([srcPath, $"{location}\\test.txt"]);
+            if (!string.IsNullOrEmpty(common))
+                sourceDir = Path.GetFullPath(Path.GetDirectoryName($"{location}\\{srcPath.Substring(common.Length)}")!);
+            else
+                sourceDir = Path.GetFullPath(sourceDir);
+        }
         if (srcPath.ToLower().EndsWith(".dcx"))
             return $"{sourceDir}\\{Path.GetFileNameWithoutExtension(srcPath)}";
-        return $"{srcPath}.undcx";
+        return $"{sourceDir}\\{fileName}.undcx";
     }
 
     public override string GetRepackDestPath(string srcPath, XElement xml)

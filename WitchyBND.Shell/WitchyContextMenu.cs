@@ -72,7 +72,7 @@ namespace WitchyBND.Shell
 
             if (!show) return menu;
 
-            bool bnd = SelectedItemPaths.Any(p => p.Contains(".matbinbnd") || p.Contains(".mtdbnd") || p.Contains(".ffxbnd"));
+            bool bnd = SelectedItemPaths.Any(p => p.Contains(".matbinbnd") || p.Contains(".mtdbnd") || p.Contains(".ffxbnd") || p.Contains(".anibnd"));
             bool dcx = SelectedItemPaths.Any(p => p.Contains(".dcx"));
 
             witchyShortcut.Click += ProcessMenuItemOnClick;

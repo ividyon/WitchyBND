@@ -6,8 +6,10 @@ using System.IO.Enumeration;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using PPlus;
 using SoulsFormats;
 using WitchyBND.CliModes;
+using WitchyBND.Services;
 using WitchyLib;
 
 namespace WitchyBND.Parsers;
@@ -16,7 +18,59 @@ namespace WitchyBND.Parsers;
 
 public abstract class WBinderParser : WFolderParser
 {
-    protected static XElement WriteBinderFiles(IBinder bnd, string destDirPath, string root)
+    public override bool HasPreprocess => Configuration.Active.Recursive;
+    public override bool Preprocess(string srcPath, ref Dictionary<string, (WFileParser, ISoulsFile)> files)
+    {
+        ISoulsFile? file = null;
+        bool unpacked = Exists(srcPath) && Is(srcPath, null, out file);
+        bool packed = ExistsUnpacked(srcPath) && IsUnpacked(srcPath);
+        if (file != null)
+            files.TryAdd(srcPath, (this, file));
+        if (!unpacked && !packed) return false;
+        if (unpacked && file != null && file is IBinder bnd)
+        {
+            string destDir = GetUnpackDestPath(srcPath);
+            var parsers = ParseMode.GetPreprocessors(true);
+            output.WriteLine($"Recursive processing enabled; preprocessing {bnd.Files.Count} files contained in binder {srcPath}.");
+            foreach (var bndFile in bnd.Files)
+            {
+                string path = GetBinderFilePath(bnd, bndFile, null);
+                string estFilePath =
+                    $@"{destDir}\{Path.GetDirectoryName(path)}\{Path.GetFileNameWithoutExtension(path)}{Path.GetExtension(path)}";
+                foreach (var parser in parsers)
+                {
+                    bool toBreak = parser.Preprocess(estFilePath, ref files);
+                    if (toBreak)
+                        break;
+                }
+            }
+        }
+
+        gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.Other);
+        gameService.PopulateTAETemplates();
+
+        return true;
+    }
+    protected static string GetBinderFilePath(IBinder bnd, BinderFile file, string? root)
+    {
+        root ??= WBUtil.FindCommonRootPath(bnd.Files.Select(bndFile => bndFile.Name));
+        string path;
+        if (Binder.HasNames(bnd.Format))
+        {
+            path = WBUtil.UnrootBNDPath(file.Name, root);
+        }
+        else if (Binder.HasIDs(bnd.Format))
+        {
+            path = file.ID.ToString();
+        }
+        else
+        {
+            path = bnd.Files.IndexOf(file).ToString();
+        }
+
+        return path;
+    }
+    protected static XElement WriteBinderFiles(IBinder bnd, string destDirPath, string? root)
     {
         var bag = new ConcurrentDictionary<string, XElement>();
 
@@ -24,25 +78,9 @@ public abstract class WBinderParser : WFolderParser
         var pathCounts = new ConcurrentDictionary<string, int>();
         var resultingPaths = new ConcurrentStack<string>();
 
-        void ParallelCallback(BinderFile file, ParallelLoopState state, long i)
+        void Callback(BinderFile file)
         {
-            Callback(file, i);
-        }
-
-        void Callback(BinderFile file, long i) {
-            string path;
-            if (Binder.HasNames(bnd.Format))
-            {
-                path = WBUtil.UnrootBNDPath(file.Name, root);
-            }
-            else if (Binder.HasIDs(bnd.Format))
-            {
-                path = file.ID.ToString();
-            }
-            else
-            {
-                path = i.ToString();
-            }
+            string path = GetBinderFilePath(bnd, file, root);
 
             var fileElement = new XElement("file",
                 new XElement("flags", file.Flags.ToString()));
@@ -81,13 +119,10 @@ public abstract class WBinderParser : WFolderParser
         }
 
         if (Configuration.Active.Parallel)
-            Parallel.ForEach(bnd.Files, ParallelCallback);
+            Parallel.ForEach(bnd.Files, Callback);
         else
         {
-            for (var i = 0; i < bnd.Files.Count; i++)
-            {
-                Callback(bnd.Files[i], i);
-            }
+            bnd.Files.ForEach(Callback);
         }
 
         // Spill the bag

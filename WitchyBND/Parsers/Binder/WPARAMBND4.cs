@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -79,14 +80,17 @@ public class WPARAMBND4 : WBinderParser
     }
 
     public override bool HasPreprocess => true;
-    public override bool Preprocess(string srcPath)
+    public override bool Preprocess(string srcPath, ref Dictionary<string, (WFileParser, ISoulsFile)> files)
     {
+        ISoulsFile? file = null;
         if (gameService.KnownGamePathsForParams.Any(p => srcPath.StartsWith(p.Key))) return false;
-        if (!(Exists(srcPath) && Is(srcPath, null, out ISoulsFile? _)) && !(ExistsUnpacked(srcPath) && IsUnpacked(srcPath))) return false;
+        if (!(Exists(srcPath) && Is(srcPath, null, out file)) && !(ExistsUnpacked(srcPath) && IsUnpacked(srcPath))) return false;
 
         gameService.UnpackParamdex();
+        if (file != null)
+            files.TryAdd(srcPath, (this, file));
 
-        return false; // Preprocess them all to perform WarnAboutParams
+        return true;
     }
 
     public override bool Is(string path, byte[]? _, out ISoulsFile? file)

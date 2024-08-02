@@ -40,6 +40,8 @@ public interface IGameService
         ulong regVer = 0);
 
     void PopulateParamdex(WBUtil.GameType game);
+    void PopulateTAETemplates();
+    TAE.Template GetTAETemplate(WBUtil.GameType game);
     void UnpackParamdex();
     void PopulateNames(WBUtil.GameType game, string paramName);
 }
@@ -204,7 +206,7 @@ public class GameService : IGameService
             output.WriteError("Could not determine param game version.");
             if (!Configuration.Active.Passive)
             {
-                var select = PromptPlus
+                var select = output
                     .Select<WBUtil.GameType>("Please select the Paramdex of one of the following games")
                     .Run();
                 if (select.IsAborted)
@@ -358,6 +360,27 @@ Enter 0, or leave it empty, to use the latest available paramdef.");
 
             ParamdefStorage[game][paramdef.ParamType] = paramdef;
         }
+    }
+
+    private static readonly Dictionary<WBUtil.GameType, TAE.Template> templateDict = new();
+    public void PopulateTAETemplates()
+    {
+        if (templateDict.Any()) return;
+        foreach (var type in Enum.GetValues<WBUtil.GameType>().Except(new [] { WBUtil.GameType.AC6 }))
+        {
+            var path = WBUtil.GetAssetsPath("Templates", $"TAE.Template.{type}.xml");
+            if (File.Exists(path))
+                templateDict[type] = TAE.Template.ReadXMLFile(path);
+        }
+    }
+
+    public TAE.Template GetTAETemplate(WBUtil.GameType game)
+    {
+        if (templateDict.ContainsKey(game)) return templateDict[game];
+        PopulateTAETemplates();
+        if (!templateDict.ContainsKey(game))
+            throw new GameUnsupportedException(game);
+        return templateDict[game];
     }
 
     public void PopulateNames(WBUtil.GameType game, string paramName)
