@@ -73,6 +73,14 @@ public abstract class WFileParser
     }
 
     public abstract bool Is(string path, byte[]? data, out ISoulsFile? file);
+    public abstract bool? IsSimple(string path);
+
+    public virtual bool IsSimpleFirst(string path, byte[]? data, out ISoulsFile? file)
+    {
+        file = null;
+        return IsSimple(path) ?? Is(path, data, out file);
+    }
+
     public abstract bool Exists(string path);
     public abstract bool ExistsUnpacked(string path);
     public abstract bool IsUnpacked(string path);
@@ -200,7 +208,7 @@ public abstract class WDeferredFileParser : WSingleFileParser
     public abstract string[] RepackExtensions { get; }
     public abstract DeferFormat DeferFormat { get; }
     public override bool AppliesRecursively => false;
-    public override bool Is(string path, byte[]? data, out ISoulsFile? file)
+    public override bool Is(string path, byte[]? _, out ISoulsFile? file)
     {
         file = null;
         var extension = WBUtil.GetFullExtensions(path).ToLower();
@@ -208,6 +216,11 @@ public abstract class WDeferredFileParser : WSingleFileParser
         if (cond && !Configuration.Active.DeferTools.ContainsKey(DeferFormat))
             throw new DeferToolPathException(DeferFormat);
         return cond;
+    }
+
+    public override bool? IsSimple(string path)
+    {
+        return Is(path, null, out _);
     }
 
     public override bool IsUnpacked(string path)

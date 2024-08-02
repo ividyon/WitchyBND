@@ -18,6 +18,12 @@ public partial class WTAEFolder
         return Configuration.Active.TaeFolder && IsRead<TAE>(path, data, out file);
     }
 
+    public override bool? IsSimple(string path)
+    {
+        string filename = Path.GetFileName(path).ToLower();
+        return Configuration.Active.TaeFolder && filename.EndsWith(".tae");
+    }
+
     public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         TAE tae = (file as TAE)!;

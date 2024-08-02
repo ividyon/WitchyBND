@@ -49,6 +49,11 @@ public class WPARAMBND3 : WBinderParser
         return IsDSRParamBND(bnd) || IsPTDEParamBND(bnd) || IsAC4Regulation(bnd) || IsACFARegulation(bnd) || IsACFABoot(bnd);
     }
 
+    public override bool? IsSimple(string path)
+    {
+        return null;
+    }
+
     public override bool IsUnpacked(string path)
     {
         if (!Directory.Exists(path)) return false;

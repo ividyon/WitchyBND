@@ -28,6 +28,12 @@ public class WFFXBNDModern : WBinderParser
                path.Contains(".ffxbnd") && IsRead<BND4>(path, data, out file);
     }
 
+    public override bool? IsSimple(string path)
+    {
+        string filename = Path.GetFileName(path).ToLower();
+        return filename.EndsWith(".ffxbnd") || filename.EndsWith(".ffxbnd.dcx");
+    }
+
     public override string GetUnpackDestPath(string srcPath, bool recursive)
     {
         return $"{base.GetUnpackDestPath(srcPath, recursive)}-wffxbnd";

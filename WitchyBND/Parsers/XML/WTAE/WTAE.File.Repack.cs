@@ -28,10 +28,7 @@ public partial class WTAEFile
         XElement xml = LoadXml(srcPath);
 
         var game = Enum.Parse<WBUtil.GameType>(xml.Element("game")!.Value);
-        if (!templateDict.ContainsKey(game))
-            throw new GameUnsupportedException(game);
-
-        TAE.Template template = templateDict[game];
+        TAE.Template template = gameService.GetTAETemplate(game);
 
         DCX.Type compression = Enum.Parse<DCX.Type>(xml.Element("compression")?.Value ?? "None");
         tae.Compression = compression;
@@ -70,7 +67,7 @@ public partial class WTAEFile
             tae.Animations = bag.OrderBy(a => a.ID).ToList();
         }
 
-        tae.ApplyTemplate(templateDict[game]);
+        tae.ApplyTemplate(template);
 
         string outPath = GetRepackDestPath(srcPath, xml);
         WBUtil.Backup(outPath);

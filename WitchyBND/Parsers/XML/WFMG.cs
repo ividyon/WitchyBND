@@ -18,6 +18,11 @@ public class WFMG : WXMLParser
         return Path.GetExtension(path).ToLower() == ".fmg";
     }
 
+    public override bool? IsSimple(string path)
+    {
+        return Is(path, null, out _);
+    }
+
     public override void Unpack(string srcPath, ISoulsFile? _, bool recursive)
     {
         FMG fmg = FMG.Read(srcPath);

@@ -23,6 +23,11 @@ public class WDCX : WSingleFileParser
         return Configuration.Active.Dcx && DCX.Is(path);
     }
 
+    public override bool? IsSimple(string path)
+    {
+        return Configuration.Active.Dcx && path.EndsWith(".dcx");
+    }
+
     public override string GetUnpackDestPath(string srcPath, bool recursive)
     {
         string sourceDir = new FileInfo(srcPath).Directory?.FullName!;

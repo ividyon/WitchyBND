@@ -20,6 +20,11 @@ public class WBND4 : WBinderParser
         return IsRead<BND4>(path, data, out file);
     }
 
+    public override bool? IsSimple(string path)
+    {
+        return null;
+    }
+
     public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         Unpack(srcPath, file, recursive, null);

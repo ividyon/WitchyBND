@@ -20,6 +20,12 @@ public class WGPARAM : WXMLParser
       return IsRead<GPARAM>(path, data, out file);
     }
 
+    public override bool? IsSimple(string path)
+    {
+      string filename = Path.GetFileName(path).ToLower();
+      return filename.EndsWith(".gparam") || filename.EndsWith(".gparam.dcx");
+    }
+
     public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
       GPARAM gparam = (file as GPARAM)!;

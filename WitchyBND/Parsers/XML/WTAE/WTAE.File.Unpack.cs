@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -19,17 +20,18 @@ public partial class WTAEFile
         return !Configuration.Active.TaeFolder && IsRead<TAE>(path, data, out file);
     }
 
+    public override bool? IsSimple(string path)
+    {
+        string filename = Path.GetFileName(path).ToLower();
+        return !Configuration.Active.TaeFolder && filename.EndsWith(".tae");
+    }
+
     public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         TAE tae = (file as TAE)!;
 
         var game = gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.Other).Item1;
-        if (!templateDict.ContainsKey(game))
-        {
-            throw new GameUnsupportedException(game);
-        }
-
-        var template = templateDict[game];
+        var template = gameService.GetTAETemplate(game);
         tae.ApplyTemplate(template);
 
         XDocument xDoc = new XDocument();

@@ -18,6 +18,11 @@ public class WBXF4 : WBinderParser
         return BXF4.IsBHD(path) || BXF4.IsBDT(path);
     }
 
+    public override bool? IsSimple(string path)
+    {
+        return null;
+    }
+
     public override void Unpack(string srcPath, ISoulsFile? _, bool recursive)
     {
         string bdtPath;

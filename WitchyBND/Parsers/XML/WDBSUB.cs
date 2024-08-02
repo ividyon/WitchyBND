@@ -14,8 +14,15 @@ namespace WitchyBND.Parsers
 
         public override bool Is(string path, byte[]? data, out ISoulsFile? file)
         {
+            return IsRead<DBSUB>(path, data, out file) && (IsSimple(path) ?? false);
+        }
+
+        public override bool? IsSimple(string path)
+        {
             var filename = Path.GetFileName(path).ToLower();
-            return IsRead<DBSUB>(path, data, out file) && Path.GetExtension(filename) == ".bin" && (filename.StartsWith("chapter_") || filename.EndsWith("_b0.bin") || filename.EndsWith("_d0.bin"));
+            return Path.GetExtension(filename) == ".bin" && (filename.StartsWith("chapter_") ||
+                                                             filename.EndsWith("_b0.bin") ||
+                                                             filename.EndsWith("_d0.bin"));
         }
 
         public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)

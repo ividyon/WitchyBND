@@ -71,7 +71,7 @@ If DSMapStudio does not yet support this game or regulation version, an experime
         ISoulsFile? file = null;
         if (gameService.KnownGamePathsForParams.Any(p => srcPath.StartsWith(p.Key))) return false;
 
-        if (!Is(srcPath, null, out file)) return false;
+        if (!IsSimpleFirst(srcPath, null, out file)) return false;
 
         gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.PARAM);
 
@@ -83,7 +83,7 @@ If DSMapStudio does not yet support this game or regulation version, an experime
 
     public override bool Is(string path, byte[]? _, out ISoulsFile? file)
     {
-        if (Path.GetExtension(path) != ".param")
+        if (!IsSimple(path) ?? false)
         {
             file = null;
             return false;
@@ -103,6 +103,12 @@ If DSMapStudio does not yet support this game or regulation version, an experime
 
         file = param;
         return true;
+    }
+
+    public override bool? IsSimple(string path)
+    {
+        string filename = Path.GetFileName(path).ToLower();
+        return filename.EndsWith(".param");
     }
 
     public static Byte[] Dummy8Read(string dummy8, int expectedLength)

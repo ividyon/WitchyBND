@@ -14,13 +14,19 @@ public partial class WTAEFile : WXMLParser
     public override string XmlTag => "taeFile";
     public override bool HasPreprocess => true;
     public override WFileParserVerb Verb => WFileParserVerb.Serialize;
-
-    private static readonly Dictionary<WBUtil.GameType, TAE.Template> templateDict = new();
     public override bool Preprocess(string srcPath, bool recursive, ref Dictionary<string, (WFileParser, ISoulsFile)> files)
     {
-        if (Path.GetExtension(srcPath) != ".tae") return false;
+        ISoulsFile? file = null;
+        if (!(ExistsUnpacked(srcPath) && IsUnpacked(srcPath)) &&
+            !(Exists(srcPath) && IsSimpleFirst(srcPath, null, out file)))
+        {
+            return false;
+        }
         gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.Other);
         gameService.PopulateTAETemplates();
+        if (file != null)
+            files.TryAdd(srcPath, (this, file));
+
         return true;
     }
 

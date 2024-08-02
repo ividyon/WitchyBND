@@ -33,6 +33,11 @@ public class WANIBND4 : WBinderParser
                path.Contains(".anibnd") && IsRead<BND4>(path, data, out file);
     }
 
+    public override bool? IsSimple(string path)
+    {
+        return null;
+    }
+
     public override string GetUnpackDestPath(string srcPath, bool recursive)
     {
         return $"{base.GetUnpackDestPath(srcPath, recursive)}-wanibnd";

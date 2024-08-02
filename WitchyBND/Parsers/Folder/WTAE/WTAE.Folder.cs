@@ -19,7 +19,7 @@ public partial class WTAEFolder : WFolderParser
     {
         ISoulsFile? file = null;
         if (!(ExistsUnpacked(srcPath) && IsUnpacked(srcPath)) &&
-            !(Exists(srcPath) && Is(srcPath, null, out file)))
+            !(Exists(srcPath) && IsSimpleFirst(srcPath, null, out file)))
         {
             return false;
         }

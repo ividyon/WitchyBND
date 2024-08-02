@@ -17,6 +17,11 @@ public class WLUAGNL : WXMLParser
         return Path.GetExtension(path).ToLower() == ".luagnl";
     }
 
+    public override bool? IsSimple(string path)
+    {
+        return Is(path, null, out _);
+    }
+
     public override void Unpack(string srcPath, ISoulsFile? _, bool recursive)
     {
         LUAGNL gnl = LUAGNL.Read(srcPath);

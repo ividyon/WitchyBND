@@ -13,4 +13,9 @@ public partial class WMQB : WXMLParser
     {
         return IsRead<MQB>(path, data, out file);
     }
+
+    public override bool? IsSimple(string path)
+    {
+        return null;
+    }
 }

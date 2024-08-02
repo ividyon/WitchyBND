@@ -16,6 +16,11 @@ public abstract class WBND4Unsorted : WUnsortedBinderParser
         return Configuration.Active.Bnd && EndsInExtension(path) && IsRead<BND4>(path, data, out file);
     }
 
+    public override bool? IsSimple(string path)
+    {
+        return Configuration.Active.Bnd && EndsInExtension(path);
+    }
+
     public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         var bnd = (file as BND4)!;

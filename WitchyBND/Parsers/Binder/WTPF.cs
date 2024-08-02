@@ -35,6 +35,12 @@ public class WTPF : WFolderParser
         return IsRead<TPF>(path, data, out file);
     }
 
+    public override bool? IsSimple(string path)
+    {
+        string filename = Path.GetFileName(path).ToLower();
+        return filename.EndsWith(".tpf") || filename.EndsWith(".tpf.dcx");
+    }
+
     public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         var tpf = (file as TPF)!;

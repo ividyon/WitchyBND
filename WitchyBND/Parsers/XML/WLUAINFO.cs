@@ -16,6 +16,12 @@ public class WLUAINFO : WXMLParser
         return IsRead<LUAINFO>(path, data, out file);
     }
 
+    public override bool? IsSimple(string path)
+    {
+        string filename = Path.GetFileName(path);
+        return filename.EndsWith(".luainfo");
+    }
+
     public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         var info = (file as LUAINFO)!;

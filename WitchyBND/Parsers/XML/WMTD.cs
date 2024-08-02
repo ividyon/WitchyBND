@@ -14,6 +14,12 @@ public class WMTD : WXMLParser
         return IsRead<MTD>(path, data, out file);
     }
 
+    public override bool? IsSimple(string path)
+    {
+        string filename = Path.GetFileName(path);
+        return filename.EndsWith(".mtd") || filename.EndsWith(".mtd.dcx");
+    }
+
     public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         MTD mtd = MTD.Read(srcPath);

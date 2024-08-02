@@ -15,6 +15,11 @@ public class WZERO3 : WFolderParser
         return Zero3.Is(path);
     }
 
+    public override bool? IsSimple(string path)
+    {
+        return null;
+    }
+
     public override bool IsUnpacked(string path)
     {
         return false;

@@ -13,6 +13,11 @@ public class WFFXDLSE : WXMLParser
         return IsRead<FFXDLSE>(path, data, out file);
     }
 
+    public override bool? IsSimple(string path)
+    {
+        return null;
+    }
+
     public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         var ffx = (file as FFXDLSE)!;

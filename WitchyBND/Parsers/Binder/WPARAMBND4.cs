@@ -84,7 +84,7 @@ public class WPARAMBND4 : WBinderParser
     {
         ISoulsFile? file = null;
         if (gameService.KnownGamePathsForParams.Any(p => srcPath.StartsWith(p.Key))) return false;
-        if (!(Exists(srcPath) && Is(srcPath, null, out file)) && !(ExistsUnpacked(srcPath) && IsUnpacked(srcPath))) return false;
+        if (!(Exists(srcPath) && IsSimpleFirst(srcPath, null, out file)) && !(ExistsUnpacked(srcPath) && IsUnpacked(srcPath))) return false;
 
         gameService.UnpackParamdex();
         if (file != null)
@@ -93,10 +93,15 @@ public class WPARAMBND4 : WBinderParser
         return true;
     }
 
-    public override bool Is(string path, byte[]? _, out ISoulsFile? file)
+    public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
         file = null;
         return FilenameIsPARAMBND4(path);
+    }
+
+    public override bool? IsSimple(string path)
+    {
+        return Is(path, null, out _);
     }
 
     public override bool IsUnpacked(string path)

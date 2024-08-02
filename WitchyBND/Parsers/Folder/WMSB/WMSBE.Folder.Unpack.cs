@@ -18,6 +18,11 @@ public partial class WMSBEFolder
         return IsRead<MSBE>(path, data, out file);
     }
 
+    public override bool? IsSimple(string path)
+    {
+        return null;
+    }
+
     public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         MSBE msb = (file as MSBE)!;

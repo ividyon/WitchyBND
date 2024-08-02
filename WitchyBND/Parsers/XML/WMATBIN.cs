@@ -14,6 +14,12 @@ public class WMATBIN : WXMLParser
         return IsRead<MATBIN>(path, data, out file);
     }
 
+    public override bool? IsSimple(string path)
+    {
+        string filename = Path.GetFileName(path).ToLower();
+        return filename.EndsWith(".matbin") || filename.EndsWith(".matbin.dcx");
+    }
+
     public override bool IsUnpacked(string path)
     {
         if (Path.GetExtension(path) != ".xml")

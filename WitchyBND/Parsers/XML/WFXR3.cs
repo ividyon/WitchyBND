@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
@@ -15,6 +16,12 @@ public class WFXR3 : WXMLParser
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
         return IsRead<FXR3>(path, data, out file);
+    }
+
+    public override bool? IsSimple(string path)
+    {
+        string filename = Path.GetFileName(path).ToLower();
+        return filename.EndsWith(".fxr") ;
     }
 
     public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
