@@ -219,7 +219,7 @@ public class UpdateService : IUpdateService
     {
         var exePath = WBUtil.GetExecutablePath();
         var tempPath = exePath.Replace(".exe", ".exe.tmp");
-        var hasContextMenu = !dry && Shell.ComplexContextMenuIsRegistered(WBUtil.GetExeLocation());
+        var hasContextMenu = !dry && Shell.ComplexContextMenuIsRegistered();
 
         (Version, string) getOnlineVersion()
         {

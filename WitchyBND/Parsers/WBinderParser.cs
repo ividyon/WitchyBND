@@ -31,7 +31,6 @@ public abstract class WBinderParser : WFolderParser
         {
             string destDir = GetUnpackDestPath(srcPath);
             var parsers = ParseMode.GetPreprocessors(true);
-            output.WriteLine($"Recursive processing enabled; preprocessing {bnd.Files.Count} files contained in binder {srcPath}.");
             foreach (var bndFile in bnd.Files)
             {
                 string path = GetBinderFilePath(bnd, bndFile, null);

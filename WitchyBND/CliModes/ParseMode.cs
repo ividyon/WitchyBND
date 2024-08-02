@@ -93,6 +93,7 @@ public static class ParseMode
 
         Dictionary<string, (WFileParser, ISoulsFile)> preprocessedFiles = new();
 
+        output.WriteLine($"Preprocessing...");
         foreach (string path in pathsList.Except(preprocessedFiles.Select(p => p.Key)))
         {
             foreach (WFileParser parser in GetPreprocessors(recursive))
@@ -118,7 +119,6 @@ public static class ParseMode
                 return;
             }
 
-            string fileName = Path.GetFileName(path);
             var parsed = false;
             var error = false;
 
@@ -130,7 +130,6 @@ public static class ParseMode
                 ISoulsFile? file = null;
                 if (preprocessedFiles.ContainsKey(path))
                 {
-                    output.WriteLine($"Reused preprocessed file for {path}!");
                     parsers = [preprocessedFiles[path].Item1];
                     file = preprocessedFiles[path].Item2;
                     compression = file.Compression;

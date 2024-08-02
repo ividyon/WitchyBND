@@ -33,7 +33,7 @@ public static class Shell
         if (path != null)
             path = $"file:///{path.Replace(Path.DirectorySeparatorChar, '/').TrimEnd('/')}/WitchyBND.Shell.dll";
         var probeKey = string.Join(Path.DirectorySeparatorChar, [ClsidRegistryKey, ComplexMenuGuid, "InprocServer32"]);
-        var key = Root.OpenSubKey(probeKey);
+        RegistryKey key = Root.OpenSubKey(probeKey);
         return path != null ? (string)key?.GetValue("CodeBase") == path : key != null;
     }
 

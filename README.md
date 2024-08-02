@@ -91,6 +91,15 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.14.0.0
+
+* Added specialized BND handling for ANIBND4. Unpacking and repacking these files will not require you to manage the file list for HKX and TAE.
+  * This is well-tested for ELDEN RING, and lightly tested with BB. Testing in other games is welcome.
+  * As a reminder, specialized binder handling can be turned off in the configuration, or via commandline.
+* Fixed many issues with the Recursive and Preprocess systems. Recursive operations should now overall be more reliable.
+* Fixed issues that occurred when using the Recursive and Location options together.
+* Attempted a fix for an updater issue with WitchyBND.Shell.dll.
+
 ### 2.13.0.2
 
 * Fixed an issue with the specialized FFXBND handler where the resulting DDS textures would not be headerized for console.
