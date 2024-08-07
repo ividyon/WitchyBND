@@ -130,6 +130,7 @@ public static class ParseMode
 
             parsed = errorService.Catch(() => {
                 var innerParsed = false;
+                var innerError = false;
                 DCX.Type compression = DCX.Type.None;
                 ISoulsFile? file = null;
                 if (preprocessedFiles.ContainsKey(path))
@@ -141,11 +142,14 @@ public static class ParseMode
 
                 foreach (WFileParser parser in parsers)
                 {
+                    bool innerMatch = false;
+
                     innerParsed = errorService.Catch(() => {
                         if ((Configuration.Active.UnpackOnly || !Configuration.Active.RepackOnly) && (file != null ||
                                 (parser.Exists(path) &&
                                  parser.Is(path, data, out file))))
                         {
+                            innerMatch = true;
                             Unpack(path, file, compression, parser, recursive);
                             return true;
                         }
@@ -153,14 +157,15 @@ public static class ParseMode
                         if ((Configuration.Active.RepackOnly || !Configuration.Active.UnpackOnly) &&
                             parser.ExistsUnpacked(path) && parser.IsUnpacked(path))
                         {
+                            innerMatch = true;
                             Repack(path, parser, recursive);
                             return true;
                         }
 
                         return false;
-                    }, out error, path);
+                    }, out innerError, path);
 
-                    if (innerParsed)
+                    if (innerMatch)
                         break;
                 }
 
