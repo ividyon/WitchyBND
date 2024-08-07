@@ -1,1 +1,1 @@
-* Further bugfixes for the preprocess process for recursive repacking.
+* When missing FFXRESLIST entries, the FFXBND parser will no longer print the full list of IDs, only the amount.

@@ -181,15 +181,11 @@ public class WFFXBNDModern : WBinderParser
                 string[] diff2 = resNames.Except(effectNames).ToArray();
                 if (missingReslists.Any())
                 {
-                    errorService.RegisterNotice(@$"Following FXRs are missing reslists:
-
-{string.Join("\n", missingReslists)}
-
-WitchyBND will create empty reslist files to compensate.");
+                    errorService.RegisterNotice(@$"{missingReslists.Count} FXRs are missing reslists. WitchyBND will create empty reslist files to compensate.");
                 }
                 if (diff2.Any())
                 {
-                    errorService.RegisterNotice(@$"Following reslists are missing FXRs:
+                    errorService.RegisterNotice(@$"{diff2.Length} reslists are missing FXRs:
 
 {string.Join("\n", diff2)}
 
