@@ -50,9 +50,6 @@ public class WANIBND4 : WBinderParser
         var srcName = Path.GetFileName(srcPath);
         Directory.CreateDirectory(destDir);
 
-        if (!bnd.Files.Any())
-            throw new FriendlyException("ANIBND is empty, no need to unpack.");
-
         var root = "";
         if (Binder.HasNames(bnd.Format))
         {
@@ -77,6 +74,18 @@ public class WANIBND4 : WBinderParser
 
         if (!string.IsNullOrEmpty(root))
             xml.Add(new XElement("root", root));
+
+        using var xw = XmlWriter.Create($"{destDir}\\{GetFolderXmlFilename()}", new XmlWriterSettings
+        {
+            Indent = true,
+        });
+
+        if (!bnd.Files.Any())
+        {
+            xml.WriteTo(xw);
+            xw.Close();
+            return;
+        }
 
         var newFiles = new ConcurrentBag<BinderFile>();
         var resultingPaths = new ConcurrentStack<string>();
@@ -112,11 +121,6 @@ public class WANIBND4 : WBinderParser
 
         XElement files = WriteBinderFiles(bnd, destDir, root);
         xml.Add(files);
-
-        using var xw = XmlWriter.Create($"{destDir}\\{GetFolderXmlFilename()}", new XmlWriterSettings
-        {
-            Indent = true,
-        });
         xml.WriteTo(xw);
         xw.Close();
 

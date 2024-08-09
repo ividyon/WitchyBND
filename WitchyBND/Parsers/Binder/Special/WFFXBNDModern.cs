@@ -45,13 +45,6 @@ public class WFFXBNDModern : WBinderParser
         var destDir = GetUnpackDestPath(srcPath, recursive);
         Directory.CreateDirectory(destDir);
 
-        if (!bnd.Files.Any())
-            throw new FriendlyException("FFXBND is empty, no need to unpack.");
-
-        var rootFile = bnd.Files.FirstOrDefault(f => f.Name.Contains("\\sfx\\"));
-        if (rootFile == null)
-            throw new FriendlyException("FFXBND has invalid structure; expected \\sfx\\ path.");
-        var rootPath = rootFile.Name.Substring(0, rootFile.Name.IndexOf("\\sfx\\", StringComparison.Ordinal) + 5);
         var xml = new XElement(XmlTag,
             new XElement("compression", bnd.Compression.ToString()),
             new XElement("version", bnd.Version),
@@ -61,14 +54,31 @@ public class WFFXBNDModern : WBinderParser
             new XElement("unicode", bnd.Unicode.ToString()),
             new XElement("extended", $"0x{bnd.Extended:X2}"),
             new XElement("unk04", bnd.Unk04.ToString()),
-            new XElement("unk05", bnd.Unk05.ToString()),
-            new XElement("root", rootPath)
+            new XElement("unk05", bnd.Unk05.ToString())
         );
         AddLocationToXml(srcPath, recursive, xml);
 
         if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
 
+        using var xw = XmlWriter.Create($"{destDir}\\{GetFolderXmlFilename()}", new XmlWriterSettings
+        {
+            Indent = true,
+        });
+
         // Files
+        if (!bnd.Files.Any())
+        {
+            xml.WriteTo(xw);
+            xw.Close();
+            return;
+        }
+
+        var rootFile = bnd.Files.FirstOrDefault(f => f.Name.Contains("\\sfx\\"));
+        if (rootFile == null)
+            throw new FriendlyException("FFXBND has invalid structure; expected \\sfx\\ path.");
+        var rootPath = rootFile.Name.Substring(0, rootFile.Name.IndexOf("\\sfx\\", StringComparison.Ordinal) + 5);
+        xml.Add(new XElement("root", rootPath));
+
         var firstEffect = bnd.Files.FirstOrDefault(f => f.Name.EndsWith(".fxr"));
         var effectDir = firstEffect != null ? new DirectoryInfo(Path.GetDirectoryName(firstEffect.Name)!).Name : "effect";
         if (firstEffect != null) xml.Add(new XElement("effectDir", effectDir));
@@ -94,10 +104,6 @@ public class WFFXBNDModern : WBinderParser
         if (firstRes != null) xml.Add(new XElement("resDir", resDir));
         var resTargetDir = $@"{destDir}\{resDir}";
 
-        using var xw = XmlWriter.Create($"{destDir}\\{GetFolderXmlFilename()}", new XmlWriterSettings
-        {
-            Indent = true,
-        });
         xml.WriteTo(xw);
         xw.Close();
 
@@ -198,7 +204,7 @@ Consider tidying up the unpacked archive folder.");
 
         ConcurrentBag<BinderFile> bag = new();
 
-        string rootPath = xml.Element("root")!.Value;
+        string rootPath = xml.Element("root")?.Value ?? "";
 
         WFileParser effectParser = ParseMode.GetParser<WFXR3>();
 
@@ -206,7 +212,7 @@ Consider tidying up the unpacked archive folder.");
         {
             if (!effectPaths.Any()) return;
 
-            var dir = xml.Element("effectDir")!.Value;
+            string dir = xml.Element("effectDir")?.Value ?? "";
             string basePath = Path.Combine(rootPath, dir);
 
             if (Configuration.Active.Parallel)
@@ -233,7 +239,7 @@ Consider tidying up the unpacked archive folder.");
         {
             if (!texturePaths.Any()) return;
 
-            var dir = xml.Element("textureDir")!.Value;
+            string dir = xml.Element("textureDir")?.Value ?? "";
             string basePath = Path.Combine(rootPath, dir);
 
             if (Configuration.Active.Parallel)
@@ -283,7 +289,7 @@ Consider tidying up the unpacked archive folder.");
         {
             if (!modelPaths.Any()) return;
 
-            var dir = xml.Element("modelDir")!.Value;
+            string dir = xml.Element("modelDir")?.Value ?? "";
             string basePath = Path.Combine(rootPath, dir);
 
             if (Configuration.Active.Parallel)
@@ -309,7 +315,7 @@ Consider tidying up the unpacked archive folder.");
         {
             if (!animPaths.Any()) return;
 
-            var dir = xml.Element("animDir")!.Value;
+            string dir = xml.Element("animDir")?.Value ?? "";
             string basePath = Path.Combine(rootPath, dir);
 
             if (Configuration.Active.Parallel)
@@ -335,7 +341,7 @@ Consider tidying up the unpacked archive folder.");
         {
             if (!resPaths.Any()) return;
 
-            var dir = xml.Element("resDir")!.Value;
+            string dir = xml.Element("resDir")?.Value ?? "";
             string basePath = Path.Combine(rootPath, dir);
 
             if (Configuration.Active.Parallel)
@@ -361,7 +367,7 @@ Consider tidying up the unpacked archive folder.");
         {
             if (!missingReslists.Any()) return;
 
-            var dir = xml.Element("resDir")!.Value;
+            string dir = xml.Element("resDir")?.Value ?? "";
             string basePath = Path.Combine(rootPath, dir);
 
             if (Configuration.Active.Parallel)
