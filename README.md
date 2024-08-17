@@ -91,6 +91,17 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.14.2.0
+
+* Now supports ZSTD compression.
+
+### 2.14.1.0
+
+* Updated to latest Paramdex, including support for 1.13.2.
+* When missing FFXRESLIST entries, the FFXBND parser will no longer print the full list of IDs, only the amount.
+* Improved handling for completely empty FFXBNDs.
+* Fixed an issue where Witchy would keep going through available parsers if an error occurred inside of one, even though the file matched a parser.
+
 ### 2.14.0.3
 
 * Further bugfixes for the preprocess process for recursive repacking.

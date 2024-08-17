@@ -260,11 +260,6 @@ public class WANIBND4 : WBinderParser
 
         WarnAboutKrak(compression, bnd.Files.Count);
 
-        if (WarnAboutZstd(compression))
-        {
-            bnd.Compression = DCX.Type.DCX_DFLT_11000_44_9;
-        }
-
         bnd.Write(destPath);
     }
 }

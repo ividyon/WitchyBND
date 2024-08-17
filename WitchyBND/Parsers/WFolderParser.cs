@@ -38,19 +38,6 @@ Simply replace the compression level in the {GetFolderXmlFilename()} file to thi
         WarnedAboutKrak = true;
     }
 
-    protected bool WarnAboutZstd(DCX.Type compression)
-    {
-        if (compression is not DCX.Type.DCX_ZSTD) return false;
-        if (WarnedAboutZstd) return true;
-
-        errorService.RegisterNotice(@$"DCX compression is set to DCX_ZSTD.
-Zstd compression is currently not supported. The file will be compressed using Deflate compression.
-This should not cause adverse effects in the game.");
-
-        WarnedAboutZstd = true;
-        return true;
-    }
-
     public override string GetUnpackDestPath(string srcPath, bool recursive)
     {
         string sourceDir = new FileInfo(srcPath).Directory?.FullName!;
