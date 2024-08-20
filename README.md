@@ -91,6 +91,11 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.14.2.1
+
+* Updated ZSTD compression to the default compression level (15).
+* Fixed an issue with unpacking DCX files.
+
 ### 2.14.2.0
 
 * Now supports ZSTD compression.

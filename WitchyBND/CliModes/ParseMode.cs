@@ -41,7 +41,7 @@ public static class ParseMode
 
         _parsers = new List<WFileParser>
         {
-            new WDCX(),
+            new WDCX(true),
             new WGFX(),
             new WHKX(),
             new WFLVER(),
@@ -73,6 +73,7 @@ public static class ParseMode
             new WTAEFolder(),
             new WTAEFile(),
             new WMSBEFolder(),
+            new WDCX(false)
         };
     }
 

@@ -17,15 +17,25 @@ public class WDCX : WSingleFileParser
 {
     public override string Name => "DCX";
 
+    private bool _dcxConfig;
+    public WDCX(bool dcxConfig)
+    {
+        _dcxConfig = dcxConfig;
+    }
+
     public override bool Is(string path, byte[] _, out ISoulsFile? file)
     {
         file = null;
-        return Configuration.Active.Dcx && DCX.Is(path);
+        if (_dcxConfig)
+            return Configuration.Active.Dcx && DCX.Is(path);
+        return DCX.Is(path);
     }
 
     public override bool? IsSimple(string path)
     {
-        return Configuration.Active.Dcx && path.EndsWith(".dcx");
+        if (_dcxConfig)
+            return Configuration.Active.Dcx && path.EndsWith(".dcx");
+        return path.EndsWith(".dcx");
     }
 
     public override string GetUnpackDestPath(string srcPath, bool recursive)
@@ -41,9 +51,9 @@ public class WDCX : WSingleFileParser
         return $"{sourceDir}\\{fileName}.undcx";
     }
 
-    public override string GetRepackDestPath(string srcPath, XElement xml)
+    public override string GetRepackDestPath(string srcPath, XElement? xml)
     {
-        var path = xml.Element("sourcePath")?.Value;
+        var path = xml?.Element("sourcePath")?.Value;
         if (path != null)
             srcPath = $"{path}\\{Path.GetFileName(srcPath)}";
         if (srcPath.ToLower().EndsWith(".undcx"))
@@ -51,10 +61,16 @@ public class WDCX : WSingleFileParser
         return srcPath + ".dcx";
     }
 
-    public string GetXmlPath(string path, bool recursive, bool repack = false)
+    public string GetXmlPath(string path, bool recursive)
     {
-        var innerPath = repack ? path : GetUnpackDestPath(path, recursive);
+        var innerPath = GetUnpackDestPath(path, recursive);
         return $"{innerPath}-wbinder-dcx.xml";
+    }
+
+    public string GetRepackXmlPath(string path, XElement? xml)
+    {
+        var innerPath = GetRepackDestPath(path, xml);
+        return $"{innerPath.Replace(".dcx", "")}-wbinder-dcx.xml";
     }
 
     public override bool Exists(string path)
@@ -95,7 +111,7 @@ public class WDCX : WSingleFileParser
 
     public override void Repack(string srcPath, bool recursive)
     {
-        string xmlPath = GetXmlPath(srcPath, true);
+        string xmlPath = GetRepackXmlPath(srcPath, null);
         XElement xml = LoadXml(xmlPath);
 
         DCX.Type compression = (DCX.Type)Enum.Parse(typeof(DCX.Type), xml.Element("compression").Value);
