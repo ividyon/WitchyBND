@@ -15,7 +15,7 @@ public class BinderTests : TestBase
 
         IEnumerable<string> paths = GetSamples("DCX");
 
-        var parser = new WDCX();
+        var parser = new WDCX(false);
 
         foreach (string path in paths.Select(GetCopiedPath))
         {
