@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -352,11 +353,16 @@ Consider tidying up the unpacked archive folder.");
 
             void inResCallback(string path)
             {
-                var i = resPaths!.IndexOf(path);
+                var name = Path.GetFileNameWithoutExtension(path);
+                var i = effectPaths.IndexOf(effectPaths.FirstOrDefault(a => a.Contains(name)));
+                if (i == -1)
+                {
+                    errorService.RegisterNotice($"Missing effect for reslist {name}");
+                    return;
+                }
 
-                var filePath = resPaths[i];
-                var fileName = Path.GetFileName(filePath);
-                var bytes = File.ReadAllBytes(filePath);
+                var fileName = Path.GetFileName(path);
+                var bytes = File.ReadAllBytes(path);
                 var file = new BinderFile(Binder.FileFlags.Flag1, 400000 + i, Path.Combine(basePath, fileName),
                     bytes);
                 bag.Add(file);
@@ -367,7 +373,7 @@ Consider tidying up the unpacked archive folder.");
         {
             if (!missingReslists.Any()) return;
 
-            string dir = xml.Element("resDir")?.Value ?? "";
+            string dir = xml.Element("resDir")?.Value ?? "ResourceList";
             string basePath = Path.Combine(rootPath, dir);
 
             if (Configuration.Active.Parallel)
@@ -380,7 +386,7 @@ Consider tidying up the unpacked archive folder.");
             {
                 var fileName = $"{effectName}.ffxreslist";
                 var effect = effectPaths.First(f => f.ToLower().EndsWith($"{effectName.ToLower()}.fxr"));
-                var file = new BinderFile(Binder.FileFlags.Flag1, 400000 + effectPaths.IndexOf(effect), Path.Combine(basePath, fileName), Array.Empty<byte>());
+                var file = new BinderFile(Binder.FileFlags.Flag1, 400000 + effectPaths.IndexOf(effect), Path.Combine(basePath, fileName), "\n"u8.ToArray());
                 bag.Add(file);
             }
         }
