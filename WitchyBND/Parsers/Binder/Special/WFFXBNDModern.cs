@@ -177,7 +177,7 @@ public class WFFXBNDModern : WBinderParser
         // Every FXR must have a matching reslist with the exact same name and vice versa
         // therefore there must also be the same amount of FXRs as reslists
         List<string> missingReslists = new();
-        if (effectPaths.Count > 0 && resPaths.Count > 0)
+        if (effectPaths.Count > 0)
         {
             var effectNames = new SortedSet<string>(effectPaths.Select(p => Path.GetFileNameWithoutExtension(p)));
             var resNames = new SortedSet<string>(resPaths.Select(p => Path.GetFileNameWithoutExtension(p)));
