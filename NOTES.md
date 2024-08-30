@@ -6,3 +6,4 @@
 * Added a toggle for whether Witchy should still perform backups for files that are inside a valid Git repository.
 * Fixed an issue where FFXBND would not generate empty FFXRESLIST entries if the FFXBND folder does not have any FFXRESLISTs at all.
 * Fixed an issue where FFXBND would crash if the FFXBND folder does not have FFXRESLISTs at all.
+* Fixed an issue where PS3 TPFs written by Witchy would cause Demon's Souls to crash.
