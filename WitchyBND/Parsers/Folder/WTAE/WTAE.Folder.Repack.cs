@@ -68,7 +68,7 @@ public partial class WTAEFolder
         tae.ApplyTemplate(gameService.GetTAETemplate(game));
 
         string outPath = GetRepackDestPath(srcPath, xml);
-        WBUtil.Backup(outPath);
+        Backup(outPath);
         tae.Write(outPath);
     }
 

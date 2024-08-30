@@ -117,7 +117,7 @@ public class WDCX : WSingleFileParser
         DCX.Type compression = (DCX.Type)Enum.Parse(typeof(DCX.Type), xml.Element("compression").Value);
 
         var outPath = GetRepackDestPath(srcPath, xml);
-        WBUtil.Backup(outPath);
+        Backup(outPath);
 
         DCX.Compress(File.ReadAllBytes(srcPath), compression, outPath);
     }

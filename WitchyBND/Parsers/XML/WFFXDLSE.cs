@@ -36,7 +36,7 @@ public class WFFXDLSE : WXMLParser
         XElement xml = LoadXml(srcPath);
 
         string outPath = GetRepackDestPath(srcPath, xml);
-        WBUtil.Backup(outPath);
+        Backup(outPath);
         ffx.TryWriteSoulsFile(outPath);
     }
 }

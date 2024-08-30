@@ -90,7 +90,7 @@ public partial class WMSBEFolder
         msb.Layers.Version = Convert.ToInt32(xml.Element("layers")!.Attribute("version")!.Value);
 
         string outPath = GetRepackDestPath(srcPath, xml);
-        WBUtil.Backup(outPath);
+        Backup(outPath);
         msb.Write(outPath);
     }
 

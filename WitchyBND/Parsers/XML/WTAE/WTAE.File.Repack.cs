@@ -70,7 +70,7 @@ public partial class WTAEFile
         tae.ApplyTemplate(template);
 
         string outPath = GetRepackDestPath(srcPath, xml);
-        WBUtil.Backup(outPath);
+        Backup(outPath);
         tae.Write(outPath);
     }
 

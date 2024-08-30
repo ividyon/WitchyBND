@@ -34,7 +34,7 @@ public class WMATBIN : WXMLParser
         var matbin = (file as MATBIN)!;
         string targetFile = GetUnpackDestPath(srcPath, recursive);
 
-        if (File.Exists(targetFile)) WBUtil.Backup(targetFile);
+        if (File.Exists(targetFile)) Backup(targetFile);
 
         WBUtil.XmlSerialize<MATBIN>(matbin, targetFile);
         AddLocationToXml(targetFile, srcPath, recursive);
@@ -45,7 +45,7 @@ public class WMATBIN : WXMLParser
         XElement xml = LoadXml(srcPath);
         string outPath = GetRepackDestPath(srcPath, xml);
 
-        if (File.Exists(outPath)) WBUtil.Backup(outPath);
+        if (File.Exists(outPath)) Backup(outPath);
 
         WBUtil.XmlDeserialize<MATBIN>(srcPath).TryWriteSoulsFile(outPath);
     }

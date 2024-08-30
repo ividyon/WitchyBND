@@ -63,6 +63,14 @@ public static class ConfigMode
             Description = @"Determines how fields are written and read in PARAM XML serialization.")]
         ParamCellStyle,
 
+        [Display(Name = "Set backup method",
+            Description = @"Determines how WitchyBND handles backups.")]
+        BackupBehavior,
+
+        [Display(Name = "Perform backups inside Git repository",
+            Description = @"Whether or not WitchyBND performs backups for files inside a valid Git repository.")]
+        ToggleGitBackup,
+
         [Display(Name = "Configure deferred tools")]
         DeferredFormats,
 
@@ -132,6 +140,9 @@ Press any key to continue to the configuration screen...");
                         case ConfigMenuItem.ToggleFlexible:
                             toggled = Configuration.Stored.Flexible;
                             break;
+                        case ConfigMenuItem.ToggleGitBackup:
+                            toggled = Configuration.Stored.GitBackup;
+                            break;
                         case ConfigMenuItem.ParamDefaultThreshold:
                             var val = Configuration.Stored.ParamDefaultValueThreshold > 0f
                                 ? Configuration.Stored.ParamDefaultValueThreshold.ToString()
@@ -139,6 +150,8 @@ Press any key to continue to the configuration screen...");
                             return $"{name} ({val})";
                         case ConfigMenuItem.ParamCellStyle:
                             return $"{name} ({Configuration.Stored.ParamCellStyle.ToString()})";
+                        case ConfigMenuItem.BackupBehavior:
+                            return $"{name} ({Configuration.Stored.BackupMethod.ToString()})";
                         case ConfigMenuItem.ConfigureDelay:
                             return $"{name} ({Configuration.Stored.EndDelay}ms)";
                     }
@@ -224,6 +237,18 @@ Press any key to continue to the configuration screen...");
                         Configuration.Stored.ParamCellStyle = cellSelect.Value;
                         updateConfig();
                     }
+                    break;
+                case ConfigMenuItem.BackupBehavior:
+                    var backupSelect = output.Select<WBUtil.BackupMethod>("Select backup method").Run();
+                    if (!backupSelect.IsAborted)
+                    {
+                        Configuration.Stored.BackupMethod = backupSelect.Value;
+                        updateConfig();
+                    }
+                    break;
+                case ConfigMenuItem.ToggleGitBackup:
+                    Configuration.Stored.GitBackup = !Configuration.Stored.GitBackup;
+                    updateConfig();
                     break;
                 case ConfigMenuItem.DeferredFormats:
                     DeferredFormatMode.Run(opt);

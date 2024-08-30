@@ -408,7 +408,7 @@ Consider tidying up the unpacked archive folder.");
         bnd.Files = bag.OrderBy(f => f.ID).ToList();
 
         string destPath = GetRepackDestPath(srcPath, xml);
-        WBUtil.Backup(destPath);
+        Backup(destPath);
 
         WarnAboutKrak(compression, bnd.Files.Count);
 

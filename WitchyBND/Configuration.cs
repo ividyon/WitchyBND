@@ -28,6 +28,8 @@ public interface IStoredConfig
     public Dictionary<DeferFormat, DeferConfig> DeferTools { get; set; }
 
     public bool Flexible { get; set; }
+
+    public WBUtil.BackupMethod BackupMethod { get; set; }
 }
 
 public interface IStoredOnlyConfig
@@ -78,6 +80,10 @@ public static class Configuration
         public Version SkipUpdateVersion { get; set; }
 
         public Version LastLaunchedVersion { get; set; }
+
+        public WBUtil.BackupMethod BackupMethod { get; set; }
+
+        public bool GitBackup { get; set; }
     }
 
     public class ActiveConfig : IStoredConfig, ITempConfig
@@ -102,6 +108,9 @@ public static class Configuration
         public bool Passive { get; set; }
         public bool Silent { get; set; }
         public string? Location { get; set; }
+        public WBUtil.BackupMethod BackupMethod { get; set; }
+
+        public bool GitBackup { get; set; }
     }
 
     public static StoredConfig Stored;
@@ -161,6 +170,8 @@ public static class Configuration
         Active.TaeFolder = stored.TaeFolder;
         Active.DeferTools = stored.DeferTools;
         Active.Flexible = stored.Flexible;
+        Active.BackupMethod = stored.BackupMethod;
+        Active.GitBackup = stored.GitBackup;
     }
 }
 

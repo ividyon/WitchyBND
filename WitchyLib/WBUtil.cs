@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
+using LibGit2Sharp;
 using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Win32;
 using Newtonsoft.Json;
@@ -427,10 +428,43 @@ public static class WBUtil
         return path;
     }
 
-    public static void Backup(string path)
+    public static bool IsInGit(string path)
     {
-        if (File.Exists(path) && !File.Exists(path + ".bak"))
-            File.Move(path, path + ".bak");
+        if (!Directory.Exists(path))
+            path = Path.GetDirectoryName(path)!;
+
+        return Repository.IsValid(path);
+    }
+    public enum BackupMethod
+    {
+        WriteOnce,
+        OverwriteAlways,
+        CreateCopies,
+        None
+    }
+    public static void Backup(string path, BackupMethod method)
+    {
+        if (method == BackupMethod.None) return;
+        if (!File.Exists(path)) return;
+        switch (method)
+        {
+            case BackupMethod.WriteOnce:
+                if (!File.Exists(path + ".bak"))
+                    File.Move(path, path + ".bak");
+                return;
+            case BackupMethod.OverwriteAlways:
+                if (File.Exists(path + ".bak"))
+                    File.Delete(path + ".bak");
+                File.Move(path, path + ".bak");
+                return;
+            case BackupMethod.CreateCopies:
+                var dest = NextAvailableFilename(path + ".bak");
+                File.Move(path, dest);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(method), method, null);
+        }
+
     }
 
     private static byte[] ds2RegulationKey =

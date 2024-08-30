@@ -52,7 +52,7 @@ public class WENFL : WXMLParser
             throw new Exception();
 
         string outPath = GetRepackDestPath(srcPath, xml);
-        WBUtil.Backup(outPath);
+        Backup(outPath);
         enfl.Write(outPath);
     }
 }

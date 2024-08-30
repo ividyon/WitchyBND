@@ -86,7 +86,7 @@ public abstract class WBND4Unsorted : WUnsortedBinderParser
 
         var destPath = GetRepackDestPath(srcPath, xml);
 
-        WBUtil.Backup(destPath);
+        Backup(destPath);
 
         WarnAboutKrak(compression, bnd.Files.Count);
 

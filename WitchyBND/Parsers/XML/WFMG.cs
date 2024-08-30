@@ -77,7 +77,7 @@ public class WFMG : WXMLParser
         }
 
         string outPath = GetRepackDestPath(srcPath, xml);
-        WBUtil.Backup(outPath);
+        Backup(outPath);
         fmg.TryWriteSoulsFile(outPath);
     }
 }

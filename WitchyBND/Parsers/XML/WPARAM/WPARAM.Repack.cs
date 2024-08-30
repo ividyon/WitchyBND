@@ -174,7 +174,7 @@ public partial class WPARAM
 
             XElement xelem = LoadXml(srcPath);
             string outPath = GetRepackDestPath(srcPath, xelem);
-            WBUtil.Backup(outPath);
+            Backup(outPath);
             param.TryWriteSoulsFile(outPath);
     }
 }

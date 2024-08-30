@@ -31,7 +31,7 @@ public class WGPARAM : WXMLParser
       GPARAM gparam = (file as GPARAM)!;
       string destPath = GetUnpackDestPath(srcPath, recursive);
       if (File.Exists(destPath))
-        WBUtil.Backup(destPath);
+        Backup(destPath);
       using (XmlWriter xw = XmlWriter.Create(destPath, new XmlWriterSettings
              {
         Indent = true
@@ -268,7 +268,7 @@ public class WGPARAM : WXMLParser
       XElement xml = LoadXml(srcPath);
       string path = GetRepackDestPath(srcPath, xml);
       if (File.Exists(path))
-        WBUtil.Backup(path);
+        Backup(path);
       gparam.TryWriteSoulsFile(path);
     }
 }

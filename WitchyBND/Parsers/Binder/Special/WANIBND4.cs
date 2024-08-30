@@ -256,7 +256,7 @@ public class WANIBND4 : WBinderParser
 
         var destPath = GetRepackDestPath(srcPath, xml);
 
-        WBUtil.Backup(destPath);
+        Backup(destPath);
 
         WarnAboutKrak(compression, bnd.Files.Count);
 

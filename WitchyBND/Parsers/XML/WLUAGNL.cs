@@ -59,7 +59,7 @@ public class WLUAGNL : WXMLParser
         }
 
         string outPath = GetRepackDestPath(srcPath, xml);
-        WBUtil.Backup(outPath);
+        Backup(outPath);
         gnl.TryWriteSoulsFile(outPath);
     }
 }

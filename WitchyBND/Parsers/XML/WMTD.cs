@@ -25,7 +25,7 @@ public class WMTD : WXMLParser
         MTD mtd = MTD.Read(srcPath);
         string targetFile = GetUnpackDestPath(srcPath, recursive);
 
-        if (File.Exists(targetFile)) WBUtil.Backup(targetFile);
+        if (File.Exists(targetFile)) Backup(targetFile);
 
         WBUtil.XmlSerialize<MTD>(mtd, targetFile);
         AddLocationToXml(targetFile, srcPath, recursive);
@@ -36,7 +36,7 @@ public class WMTD : WXMLParser
         XElement xml = LoadXml(srcPath);
         string outPath = GetRepackDestPath(srcPath, xml);
 
-        if (File.Exists(outPath)) WBUtil.Backup(outPath);
+        if (File.Exists(outPath)) Backup(outPath);
 
         WBUtil.XmlDeserialize<MTD>(srcPath).TryWriteSoulsFile(outPath);
     }

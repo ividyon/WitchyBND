@@ -151,6 +151,14 @@ public abstract class WFileParser
         if (doc.Root == null) throw new XmlException("XML has no root");
         return doc.Root;
     }
+
+    public static void Backup(string path)
+    {
+        if (Configuration.Active.BackupMethod == WBUtil.BackupMethod.None) return;
+        if (!Configuration.Active.GitBackup && WBUtil.IsInGit(path)) return;
+        WBUtil.Backup(path, Configuration.Active.BackupMethod);
+    }
+
     private static bool IsRead<TFormat>(string path, out ISoulsFile? file) where TFormat : SoulsFile<TFormat>, new()
     {
         if (SoulsFile<TFormat>.IsRead(path, out TFormat format))

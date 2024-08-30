@@ -116,8 +116,8 @@ public class WBXF4 : WBinderParser
 
         var bhdDestPath = GetRepackDestPath(srcPath, xml, "bhd_filename");
         var bdtDestPath = GetRepackDestPath(srcPath, xml, "bdt_filename");
-        WBUtil.Backup(bhdDestPath);
-        WBUtil.Backup(bdtDestPath);
+        Backup(bhdDestPath);
+        Backup(bdtDestPath);
         bxf.Write(bhdDestPath, bdtDestPath);
     }
 }

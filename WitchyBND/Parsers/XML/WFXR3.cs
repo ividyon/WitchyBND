@@ -56,7 +56,7 @@ public class WFXR3 : WXMLParser
             throw new Exception();
 
         string outPath = GetRepackDestPath(srcPath, xml);
-        WBUtil.Backup(outPath);
+        Backup(outPath);
         fxr.Write(outPath);
     }
 }

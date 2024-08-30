@@ -150,7 +150,7 @@ public class WTPF : WFolderParser
         }
 
         string outPath = GetRepackDestPath(srcPath, xml);
-        WBUtil.Backup(outPath);
+        Backup(outPath);
 
         WarnAboutKrak(compression, tpf.Textures.Count);
         tpf.TryWriteSoulsFile(outPath);
