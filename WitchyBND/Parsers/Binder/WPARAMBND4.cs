@@ -24,6 +24,7 @@ public class WPARAMBND4 : WBinderParser
         // var filename = Path.GetFileName(path);
         // return filename.Contains("enc_regulation") && (filename.EndsWith(".bnd.dcx") || filename.EndsWith(".bnd"));
     }
+
     private static bool FilenameIsDS2SRegulation(string path)
     {
         var filename = Path.GetFileName(path).ToLower();
@@ -80,11 +81,14 @@ public class WPARAMBND4 : WBinderParser
     }
 
     public override bool HasPreprocess => true;
-    public override bool Preprocess(string srcPath, bool recursive, ref Dictionary<string, (WFileParser, ISoulsFile)> files)
+
+    public override bool Preprocess(string srcPath, bool recursive,
+        ref Dictionary<string, (WFileParser, ISoulsFile)> files)
     {
         ISoulsFile? file = null;
         if (gameService.KnownGamePathsForParams.Any(p => srcPath.StartsWith(p.Key))) return false;
-        if (!((recursive || Exists(srcPath)) && IsSimpleFirst(srcPath, null, out file)) && !((recursive || ExistsUnpacked(srcPath)) && IsUnpacked(srcPath))) return false;
+        if (!((recursive || Exists(srcPath)) && IsSimpleFirst(srcPath, null, out file)) &&
+            !((recursive || ExistsUnpacked(srcPath)) && IsUnpacked(srcPath))) return false;
 
         gameService.UnpackParamdex();
         if (file != null)
@@ -106,18 +110,13 @@ public class WPARAMBND4 : WBinderParser
 
     public override bool IsUnpacked(string path)
     {
-        return innerIsUnpacked() && WPARAM.WarnAboutParams();
+        if (!Directory.Exists(path)) return false;
 
-        bool innerIsUnpacked()
-        {
-            if (!Directory.Exists(path)) return false;
+        string xmlPath = Path.Combine(path, GetFolderXmlFilename("bnd4"));
+        if (!File.Exists(xmlPath)) return false;
 
-            string xmlPath = Path.Combine(path, GetFolderXmlFilename("bnd4"));
-            if (!File.Exists(xmlPath)) return false;
-
-            var doc = XDocument.Load(xmlPath);
-            return doc.Root != null && doc.Root.Name.ToString().ToLower() == "bnd4" && doc.Root.Element("game") != null;
-        }
+        var doc = XDocument.Load(xmlPath);
+        return doc.Root != null && doc.Root.Name.ToString().ToLower() == "bnd4" && doc.Root.Element("game") != null;
     }
 
     public override void Unpack(string srcPath, ISoulsFile? _, bool recursive)
@@ -134,7 +133,8 @@ public class WPARAMBND4 : WBinderParser
             case WBUtil.GameType.ER:
             case WBUtil.GameType.SDT:
             case WBUtil.GameType.AC6:
-                gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.PARAMBND, game, ulong.Parse(bnd.Version));
+                gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.PARAMBND, game,
+                    ulong.Parse(bnd.Version));
                 ParseMode.GetParser<WBND4>().Unpack(srcPath, bnd, recursive, game);
                 break;
             default:
@@ -144,6 +144,8 @@ public class WPARAMBND4 : WBinderParser
 
     public override void Repack(string srcPath, bool recursive)
     {
+        if (!WPARAM.WarnAboutParams()) return;
+
         var bndParser = ParseMode.GetParser<WBND4>();
         var xmlPath = GetFolderXmlPath(srcPath, "bnd4");
         var doc = XDocument.Load(xmlPath);
@@ -163,7 +165,8 @@ public class WPARAMBND4 : WBinderParser
         ulong? latestVer = WBUtil.GetLatestKnownRegulationVersion(game);
         if (latestVer < regVer)
         {
-            throw new RegulationOutOfBoundsException(@"Regulation version exceeds latest known Paramdex regulation version.");
+            throw new RegulationOutOfBoundsException(
+                @"Regulation version exceeds latest known Paramdex regulation version.");
         }
 
         var destPath = bndParser.GetRepackDestPath(srcPath, xml);
@@ -171,7 +174,8 @@ public class WPARAMBND4 : WBinderParser
         // Sanity check PARAMs
         XElement? filesElement = xml.Element("files");
         if (filesElement == null) throw new XmlException("XML has no Files element");
-        var files = filesElement.Elements("file").Where(f => f.Element("path") != null && f.Element("path")!.Value.ToLower().EndsWith(".param")).ToList();
+        var files = filesElement.Elements("file")
+            .Where(f => f.Element("path") != null && f.Element("path")!.Value.ToLower().EndsWith(".param")).ToList();
         if (files.Any())
         {
             var paramParser = ParseMode.GetParser<WPARAM>();
@@ -190,7 +194,9 @@ public class WPARAMBND4 : WBinderParser
                 }
                 catch (Exception e)
                 {
-                    throw new MalformedBinderException(@$"The regulation binder is malformed: {Path.GetFileNameWithoutExtension(filePath)} has thrown an exception during read.", e);
+                    throw new MalformedBinderException(
+                        @$"The regulation binder is malformed: {Path.GetFileNameWithoutExtension(filePath)} has thrown an exception during read.",
+                        e);
                 }
             }
         }

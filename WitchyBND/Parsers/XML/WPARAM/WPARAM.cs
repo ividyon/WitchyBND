@@ -7,6 +7,7 @@ using SoulsFormats;
 using WitchyBND.Services;
 using WitchyFormats;
 using WitchyLib;
+using PARAM = WitchyFormats.PARAM;
 using PARAMDEF = WitchyFormats.PARAMDEF;
 
 namespace WitchyBND.Parsers;
@@ -14,11 +15,12 @@ namespace WitchyBND.Parsers;
 public partial class WPARAM : WXMLParser
 {
 
-    private static bool WarnedAboutParams { get; set; }
+    public static bool? WarnedAboutParams { get; set; }
 
     public static bool WarnAboutParams()
     {
-        if (Configuration.Active.Expert || WarnedAboutParams || Configuration.Active.Passive) return true;
+        if (Configuration.Active.Expert || Configuration.Active.Passive) return true;
+        if (WarnedAboutParams != null) return WarnedAboutParams.Value;
 
         List<string> lines = new()
         {

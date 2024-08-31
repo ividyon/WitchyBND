@@ -84,11 +84,31 @@ Cancel the dialog to reset the configuration for that format.");
                 if (argsVal.IsAborted) continue;
 
                 bool breakOut = false;
+                string unpackArgsDefault = "";
+                string repackArgsDefault = "";
+                bool hasRepack = true;
                 switch (argsVal.Value)
                 {
                     case "Custom...":
-                        output.WriteLine(
-                            @"Please input your custom arguments for the unpacking the format with your program.
+                        break;
+                    case "Default":
+                        Configuration.Stored.DeferTools[format] =
+                            new DeferConfig(Path.GetFileNameWithoutExtension(openDialog.Path), openDialog.Path);
+                        break;
+                    default:
+                        var myArgs = defArgs!.First(a => a.Name == argsVal.Value);
+                        unpackArgsDefault = myArgs.UnpackArgs;
+                        if (myArgs.RepackArgs == null)
+                            hasRepack = false;
+                        else
+                            repackArgsDefault = myArgs.RepackArgs;
+                        Configuration.Stored.DeferTools[format] = new DeferConfig(myArgs.Name, openDialog.Path,
+                            myArgs.UnpackArgs, myArgs.RepackArgs);
+                        break;
+                }
+
+                output.WriteLine(
+                    @"Please input the arguments provided to the program when unpacking the format.
 Available placeholders:
 
 $path - Full path of file being processed
@@ -96,15 +116,20 @@ $dirname - Directory path of file being processed
 $filename - Filename (without extension) of file being processed
 $fileext - Extension of file being processed (starts with .)");
 
-                        var unpackArgsInput = output.Input("Enter custom unpack arguments").Run();
-                        if (unpackArgsInput.IsAborted)
-                        {
-                            breakOut = true;
-                            break;
-                        }
+                var unpackArgsInput = output.Input("Enter custom unpack arguments")
+                    .Default(unpackArgsDefault)
+                    .Run();
+                if (unpackArgsInput.IsAborted)
+                {
+                    breakOut = true;
+                    break;
+                }
 
-                        output.WriteLine(
-                            @"Please input your custom arguments for the repacking the format with your program.
+                string? repackArgs = null;
+                if (hasRepack)
+                {
+                    output.WriteLine(
+                        @"Please input the arguments provided to the program when repacking the format.
 
 Press the Esc key if your program does not support repacking.
 
@@ -114,24 +139,16 @@ $path - Full path of file being processed
 $dirname - Directory path of file being processed
 $filename - Filename (without extension) of file being processed
 $fileext - Extension of file being processed (starts with .)");
-                        var repackArgsInput = output.Input("Enter custom repack arguments").Run();
+                    var repackArgsInput = output.Input("Enter custom repack arguments")
+                        .Default(repackArgsDefault)
+                        .Run();
 
-                        string? repackArgs = !repackArgsInput.IsAborted ? repackArgsInput.Value : null;
-
-                        Configuration.Stored.DeferTools[format] = new DeferConfig(
-                            Path.GetFileNameWithoutExtension(openDialog.Path), openDialog.Path, unpackArgsInput.Value,
-                            repackArgs);
-                        break;
-                    case "Default":
-                        Configuration.Stored.DeferTools[format] =
-                            new DeferConfig(Path.GetFileNameWithoutExtension(openDialog.Path), openDialog.Path);
-                        break;
-                    default:
-                        var myArgs = defArgs!.First(a => a.Name == argsVal.Value);
-                        Configuration.Stored.DeferTools[format] = new DeferConfig(myArgs.Name, openDialog.Path,
-                            myArgs.UnpackArgs, myArgs.RepackArgs);
-                        break;
+                    repackArgs = !repackArgsInput.IsAborted ? repackArgsInput.Value : null;
                 }
+
+                Configuration.Stored.DeferTools[format] = new DeferConfig(
+                    Path.GetFileNameWithoutExtension(openDialog.Path), openDialog.Path, unpackArgsInput.Value,
+                    repackArgs);
 
                 if (breakOut) continue;
                 Configuration.SaveConfiguration();

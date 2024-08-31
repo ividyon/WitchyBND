@@ -193,11 +193,8 @@ internal static class Program
                             throw new ArgumentOutOfRangeException();
                     }
                 }
-                catch (Exception e)
+                catch (Exception e) when (!Configuration.IsTest && !Configuration.IsDebug)
                 {
-                    if (Configuration.IsTest || Configuration.IsDebug)
-                        throw;
-
                     _errorService.RegisterException(e);
                     PrintIssues();
                     PrintFinale(-1);

@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
@@ -437,9 +438,13 @@ public static class WBUtil
     }
     public enum BackupMethod
     {
+        [Display(Name = "Write once")]
         WriteOnce,
+        [Display(Name = "Always overwrite")]
         OverwriteAlways,
+        [Display(Name = "Create copies")]
         CreateCopies,
+        [Display(Name = "None")]
         None
     }
     public static void Backup(string path, BackupMethod method)
@@ -822,7 +827,9 @@ public static class WBUtil
             PromptPlus.ClearLine();
             PromptPlus.SetCursorPosition(cursor.Left, cursor.Top);
             PromptPlus.WriteLine("");
-            PromptPlus.KeyPress("Please read carefully, then press any key...").Run();
+            PromptPlus.KeyPress("Please read carefully, then press any key...")
+                .Config(a => a.EnabledAbortKey(false))
+                .Run();
             PromptPlus.ClearLine();
             PromptPlus.SetCursorPosition(cursor.Left, cursor.Top);
         }

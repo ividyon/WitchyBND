@@ -102,7 +102,6 @@ public abstract class WFileParser
             return false;
         return true;
     }
-
     public abstract void Unpack(string srcPath, ISoulsFile? file, bool recursive);
     public abstract void Repack(string srcPath, bool recursive);
     public static void AddLocationToXml(string path, string srcPath, bool recursive)

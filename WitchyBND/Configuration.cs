@@ -138,11 +138,15 @@ public static class Configuration
 
     public static void LoadConfiguration()
     {
-        IConfigurationRoot config = new ConfigurationBuilder()
-            .AddJsonFile(WBUtil.GetExeLocation("appsettings.json"), true)
-            .AddJsonFile(Path.Combine(AppDataDirectory, "appsettings.user.json"), true)
-            .AddJsonFile(WBUtil.GetExeLocation("appsettings.override.json"), true)
-            .Build();
+        var builder = new ConfigurationBuilder();
+        builder.AddJsonFile(WBUtil.GetExeLocation("appsettings.json"), true);
+
+        if (!IsDebug && !IsTest)
+            builder.AddJsonFile(Path.Combine(AppDataDirectory, "appsettings.user.json"), true);
+
+        builder.AddJsonFile(WBUtil.GetExeLocation("appsettings.override.json"), true);
+
+        IConfigurationRoot config = builder.Build();
 
         Stored = config.Get<StoredConfig>() ?? new StoredConfig();
         ActivateStoredConfiguration();

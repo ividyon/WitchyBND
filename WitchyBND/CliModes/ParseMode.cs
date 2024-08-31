@@ -146,10 +146,12 @@ public static class ParseMode
                     bool innerMatch = false;
 
                     innerParsed = errorService.Catch(() => {
+                        ISoulsFile? parsedFile = null;
                         if ((Configuration.Active.UnpackOnly || !Configuration.Active.RepackOnly) && (file != null ||
                                 (parser.Exists(path) &&
-                                 parser.Is(path, data, out file))))
+                                 parser.Is(path, data, out parsedFile))))
                         {
+                            file ??= parsedFile;
                             innerMatch = true;
                             Unpack(path, file, compression, parser, recursive);
                             return true;
