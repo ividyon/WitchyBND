@@ -91,6 +91,11 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.14.3.1
+
+* Updated Paramdex to the latest from Smithbox, credits to Vawser.
+* Fixed some TPF issues with Bloodborne, credits to Shadowth117.
+
 ### 2.14.3.0
 
 * Added customization of Witchy's backup method between the following choices:
