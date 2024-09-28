@@ -22,7 +22,21 @@ public class WANIBND4 : WBinderParser
     public string[] ProcessedExtensions =
     [
         ".hkx",
-        ".tae"
+        ".tae",
+        ".nsa",
+        ".mba",
+        ".asa",
+        ".qsa",
+        ".nmb"
+    ];
+
+    public string[] MorphemeExtensions =
+    [
+        ".nsa",
+        ".mba",
+        ".asa",
+        ".qsa",
+        ".nmb"
     ];
 
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)
@@ -92,7 +106,8 @@ public class WANIBND4 : WBinderParser
 
         void Callback(BinderFile bndFile)
         {
-            if (!ProcessedExtensions.Contains(Path.GetExtension(bndFile.Name)) ||
+            var ext = Path.GetExtension(bndFile.Name);
+            if (!ProcessedExtensions.Contains(ext) ||
                 bndFile.ID >= 7000000 && bndFile.ID <= 7999999 || // BB behaviors
                 bndFile.Name.ToLower().EndsWith("skeleton.hkx") ||
                 (bndFile.Name.EndsWith(".tae") && Path.GetFileName(bndFile.Name).StartsWith("c"))
@@ -168,7 +183,11 @@ public class WANIBND4 : WBinderParser
 
             string fileName = Path.GetFileNameWithoutExtension(filePath);
             bool isPlayer = pathDir.Contains("c0000");
-            if (ext == ".hkx")
+            if (MorphemeExtensions.Contains(ext))
+            {
+                fileBag.Add(new BinderFile(Binder.FileFlags.Flag1, -1, binderPath, File.ReadAllBytes(filePath)));
+            }
+            else if (ext == ".hkx")
             {
                 int baseHkxId = 1000000000;
                 if (fileName.ToLower() == "skeleton")
@@ -252,7 +271,18 @@ public class WANIBND4 : WBinderParser
             }
         }
 
-        bnd.Files = bnd.Files.Union(fileBag.ToList()).OrderBy(a => a.ID).ToList();
+        bnd.Files = bnd.Files.Union(fileBag.ToList()).ToList();
+        var takenIds = bnd.Files.Select(a => a.ID).ToList();
+
+        // Properly add unsorted files
+        foreach (BinderFile unsortedFile in bnd.Files.Where(a => a.ID == -1))
+        {
+            int firstAvailable = takenIds.NextAvailable()!.Value;
+            unsortedFile.ID = firstAvailable;
+            takenIds.Add(firstAvailable);
+        }
+
+        bnd.Files = bnd.Files.OrderBy(a => a.ID).ToList();
 
         var destPath = GetRepackDestPath(srcPath, xml);
 

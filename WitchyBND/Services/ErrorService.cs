@@ -189,14 +189,6 @@ Process error output:
                     "WitchyBND had no access to perform this action; perhaps try Administrator Mode?", source,
                     WitchyErrorType.NoAccess));
             }
-            catch (IOException e) when (!Configuration.IsTest && !Configuration.IsDebug)
-            {
-                error = true;
-
-                RegisterError(new WitchyError(
-                    $"WitchyBND could not operate on the file as it is locked by another process: {e.Message}", source,
-                    WitchyErrorType.InUse));
-            }
             catch (FriendlyException e) when (!Configuration.IsTest)
             {
                 error = true;

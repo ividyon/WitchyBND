@@ -94,19 +94,6 @@
         "resolved": "1.0.1",
         "contentHash": "vCn17XpsjpqAQvWCa5oUh81d/AVytUcBG9frXoDa+f66iuAiq9T4kDcqQnyp3dbN9cJ0cJA6ML98glpf315haQ=="
       },
-      "LibGit2Sharp": {
-        "type": "Transitive",
-        "resolved": "0.30.0",
-        "contentHash": "1cBg/7nz6q+yzvComhqQaTS4nbXloLp/x29ZgY/Rr82ohpkuaWT8ZYzsPLFvs1zmCh/4xQbVt5sQxazGblgRig==",
-        "dependencies": {
-          "LibGit2Sharp.NativeBinaries": "[2.0.322]"
-        }
-      },
-      "LibGit2Sharp.NativeBinaries": {
-        "type": "Transitive",
-        "resolved": "2.0.322",
-        "contentHash": "EWQaEevzc8uS1ZGS6T83jqUPBY//2WUSCHwbZHBoHOjlfSehqr30nm/VAhJPzjam/69sv7nlLKVcho9t2XuR/Q=="
-      },
       "Microsoft.Extensions.Configuration": {
         "type": "Transitive",
         "resolved": "8.0.0-preview.7.23375.6",
@@ -324,7 +311,7 @@
         "dependencies": {
           "BouncyCastle.Cryptography": "[2.4.0, )",
           "NativeFileDialogSharp": "[0.6.0-alpha, )",
-          "SoulsFormats": "[2.14.3.1, )"
+          "SoulsFormats": "[2.14.4, )"
         }
       },
       "studioutils": {
@@ -333,19 +320,18 @@
       "witchyformats": {
         "type": "Project",
         "dependencies": {
-          "SoulsFormats": "[2.14.3.1, )",
-          "StudioUtils": "[2.14.3.1, )"
+          "SoulsFormats": "[2.14.4, )",
+          "StudioUtils": "[2.14.4, )"
         }
       },
       "witchylib": {
         "type": "Project",
         "dependencies": {
-          "LibGit2Sharp": "[0.30.0, )",
           "Microsoft.CSharp": "[4.7.0, )",
           "Microsoft.Extensions.FileSystemGlobbing": "[8.0.0-preview.2.23128.3, )",
           "Newtonsoft.Json": "[13.0.3, )",
           "PromptPlus": "[4.2.0, )",
-          "WitchyFormats": "[2.14.3.1, )"
+          "WitchyFormats": "[2.14.4, )"
         }
       }
     },
@@ -355,11 +341,6 @@
         "requested": "[0.6.0-alpha, )",
         "resolved": "0.6.0-alpha",
         "contentHash": "2JvfxgAMWEGA9rIuYw+/vcj8eisBJbb4fzviJU47urU72z7m6BW2SykaMRtQorr06Xh3ZxG+gykiqV3D4crfLA=="
-      },
-      "LibGit2Sharp.NativeBinaries": {
-        "type": "Transitive",
-        "resolved": "2.0.322",
-        "contentHash": "EWQaEevzc8uS1ZGS6T83jqUPBY//2WUSCHwbZHBoHOjlfSehqr30nm/VAhJPzjam/69sv7nlLKVcho9t2XuR/Q=="
       },
       "runtime.any.System.IO": {
         "type": "Transitive",

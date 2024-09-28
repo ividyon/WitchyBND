@@ -153,6 +153,7 @@ public abstract class WFileParser
 
     public static void Backup(string path)
     {
+        Configuration.Active.GitBackup = false;
         if (Configuration.Active.BackupMethod == WBUtil.BackupMethod.None) return;
         if (!Configuration.Active.GitBackup && WBUtil.IsInGit(path)) return;
         WBUtil.Backup(path, Configuration.Active.BackupMethod);

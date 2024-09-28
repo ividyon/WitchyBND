@@ -2,15 +2,6 @@
   "version": 1,
   "dependencies": {
     "net8.0-windows7.0": {
-      "LibGit2Sharp": {
-        "type": "Direct",
-        "requested": "[0.30.0, )",
-        "resolved": "0.30.0",
-        "contentHash": "1cBg/7nz6q+yzvComhqQaTS4nbXloLp/x29ZgY/Rr82ohpkuaWT8ZYzsPLFvs1zmCh/4xQbVt5sQxazGblgRig==",
-        "dependencies": {
-          "LibGit2Sharp.NativeBinaries": "[2.0.322]"
-        }
-      },
       "Microsoft.CSharp": {
         "type": "Direct",
         "requested": "[4.7.0, )",
@@ -55,11 +46,6 @@
         "type": "Transitive",
         "resolved": "1.0.1",
         "contentHash": "vCn17XpsjpqAQvWCa5oUh81d/AVytUcBG9frXoDa+f66iuAiq9T4kDcqQnyp3dbN9cJ0cJA6ML98glpf315haQ=="
-      },
-      "LibGit2Sharp.NativeBinaries": {
-        "type": "Transitive",
-        "resolved": "2.0.322",
-        "contentHash": "EWQaEevzc8uS1ZGS6T83jqUPBY//2WUSCHwbZHBoHOjlfSehqr30nm/VAhJPzjam/69sv7nlLKVcho9t2XuR/Q=="
       },
       "Microsoft.NETCore.Platforms": {
         "type": "Transitive",
@@ -164,8 +150,8 @@
       "witchyformats": {
         "type": "Project",
         "dependencies": {
-          "SoulsFormats": "[2.14.3.1, )",
-          "StudioUtils": "[2.14.3.1, )"
+          "SoulsFormats": "[2.14.4, )",
+          "StudioUtils": "[2.14.4, )"
         }
       }
     }

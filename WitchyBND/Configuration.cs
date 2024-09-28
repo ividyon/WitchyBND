@@ -5,8 +5,10 @@ using System.IO;
 using System.Text.Json;
 using CommandLine;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using WitchyBND.Parsers;
 using WitchyLib;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace WitchyBND;
 
@@ -50,6 +52,7 @@ public interface ITempConfig
     public bool Silent { get; set; }
     public string? Location { get; set; }
 }
+
 public static class Configuration
 {
     public static bool IsTest { get; set; }
@@ -116,7 +119,8 @@ public static class Configuration
     public static StoredConfig Stored;
     public static ActiveConfig Active;
 
-    public static string AppDataDirectory = Path.Combine(Environment.ExpandEnvironmentVariables("%AppData%"), "WitchyBND");
+    public static string AppDataDirectory =
+        Path.Combine(Environment.ExpandEnvironmentVariables("%AppData%"), "WitchyBND");
 
     public static bool ParamDefaultValues => Active.ParamDefaultValueThreshold > 0f;
 
@@ -139,17 +143,32 @@ public static class Configuration
     public static void LoadConfiguration()
     {
         var builder = new ConfigurationBuilder();
-        builder.AddJsonFile(WBUtil.GetExeLocation("appsettings.json"), true);
+        bool breakOut = false;
+        string userSettingsPath = Path.Combine(AppDataDirectory, "appsettings.user.json");
+        while (!breakOut)
+        {
+            try
+            {
+                IConfigurationRoot config;
+                builder.AddJsonFile(WBUtil.GetExeLocation("appsettings.json"), true);
 
-        if (!IsDebug && !IsTest)
-            builder.AddJsonFile(Path.Combine(AppDataDirectory, "appsettings.user.json"), true);
+                if (!IsDebug && !IsTest)
+                    builder.AddJsonFile(userSettingsPath, true);
 
-        builder.AddJsonFile(WBUtil.GetExeLocation("appsettings.override.json"), true);
+                builder.AddJsonFile(WBUtil.GetExeLocation("appsettings.override.json"), true);
 
-        IConfigurationRoot config = builder.Build();
-
-        Stored = config.Get<StoredConfig>() ?? new StoredConfig();
-        ActivateStoredConfiguration();
+                breakOut = true;
+                config = builder.Build();
+                Stored = config.Get<StoredConfig>() ?? new StoredConfig();
+                ActivateStoredConfiguration();
+            }
+            catch (JsonReaderException e)
+            {
+                if (File.Exists(userSettingsPath))
+                    File.Delete(userSettingsPath);
+                breakOut = false;
+            }
+        }
     }
 
     public static void SaveConfiguration()
@@ -201,7 +220,8 @@ public class CliOptions
     [Option('e', "parallel", HelpText = "Runs operations parallelized")]
     public bool Parallel { get; set; }
 
-    [Option('m', "mode", HelpText = "Toggle the mode to use. Options are \"Parse\", \"Watch\" and \"Config\".", Default = CliMode.Parse)]
+    [Option('m', "mode", HelpText = "Toggle the mode to use. Options are \"Parse\", \"Watch\" and \"Config\".",
+        Default = CliMode.Parse)]
     public CliMode Mode { get; set; }
 
     [Option('p', "passive",

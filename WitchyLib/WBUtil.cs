@@ -11,12 +11,10 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
-using LibGit2Sharp;
 using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using PPlus;
-using PPlus.Controls;
 using SoulsFormats;
 using PARAMDEF = WitchyFormats.PARAMDEF;
 
@@ -404,7 +402,7 @@ public static class WBUtil
         }
 
         if (string.IsNullOrWhiteSpace(root))
-            return path;
+            return RemoveLeadingBackslashes(path);
 
         Match traversal = TraversalRx.Match(path);
         if (traversal.Success)
@@ -429,12 +427,21 @@ public static class WBUtil
         return path;
     }
 
-    public static bool IsInGit(string path)
+    public static bool IsInGit(string? path)
     {
         if (!Directory.Exists(path))
             path = Path.GetDirectoryName(path)!;
 
-        return Repository.IsValid(path);
+        // return Repository.IsValid(path);
+
+        while (!string.IsNullOrEmpty(path))
+        {
+            if (Directory.Exists(Path.Combine(path, ".git")))
+                return true;
+            path = Path.GetDirectoryName(path);
+        }
+
+        return false;
     }
     public enum BackupMethod
     {
