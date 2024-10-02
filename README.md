@@ -91,6 +91,10 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.14.4.1
+
+* Hotfix for supporting 1.15 PARAMs.
+
 ### 2.14.4.0
 
 * Added support for Morpheme files in the ANIBND4 parser. They no longer need to be tracked in the _witchy-anibnd4.xml manifest file.

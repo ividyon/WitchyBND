@@ -311,7 +311,7 @@
         "dependencies": {
           "BouncyCastle.Cryptography": "[2.4.0, )",
           "NativeFileDialogSharp": "[0.6.0-alpha, )",
-          "SoulsFormats": "[2.14.4, )"
+          "SoulsFormats": "[2.14.4.1, )"
         }
       },
       "studioutils": {
@@ -320,8 +320,8 @@
       "witchyformats": {
         "type": "Project",
         "dependencies": {
-          "SoulsFormats": "[2.14.4, )",
-          "StudioUtils": "[2.14.4, )"
+          "SoulsFormats": "[2.14.4.1, )",
+          "StudioUtils": "[2.14.4.1, )"
         }
       },
       "witchylib": {
@@ -331,7 +331,7 @@
           "Microsoft.Extensions.FileSystemGlobbing": "[8.0.0-preview.2.23128.3, )",
           "Newtonsoft.Json": "[13.0.3, )",
           "PromptPlus": "[4.2.0, )",
-          "WitchyFormats": "[2.14.4, )"
+          "WitchyFormats": "[2.14.4.1, )"
         }
       }
     },
