@@ -72,7 +72,10 @@ It is originally based on [Yabber](https://github.com/JKAnderson/Yabber) by TKGP
 * *Vawser* - Paramdex, Smithbox additions
 * *CCCode* - FXR research
 * *ClayAmore* - ZSTD Decompression
+* *The12thAvenger*: FLVER improvements (SoulsFormatsNEXT)
 * *Shadowth117*: Console TPF handling (SoulsFormatsNEXT)
+* All SoulsFormatsNEXT contributors
+* All Paramdex contributors
 * *ivi* - WitchyBND maintainer
 
 Special thanks to Nordgaren, The12thAvenger, philiquaz, TKGP, thefifthmatt, Kirnifr, Rayan and many more for various assistance during development.
@@ -91,6 +94,11 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.14.4.2
+
+* Updated SoulsFormatsNEXT.
+* Updated Paramdex.
+
 ### 2.14.4.1
 
 * Hotfix for supporting 1.15 PARAMs.
@@ -105,8 +113,8 @@ WitchyBND is built using the following licensed works:
 
 ### 2.14.3.1
 
-* Updated Paramdex to the latest from Smithbox, credits to Vawser.
-* Fixed some TPF issues with Bloodborne, credits to Shadowth117.
+* Updated SoulsFormatsNEXT.
+* Updated Paramdex.
 
 ### 2.14.3.0
 

@@ -1,1 +1,2 @@
-* Hotfix for supporting 1.15 PARAMs.
+* Updated SoulsFormatsNEXT.
+* Updated Paramdex.
