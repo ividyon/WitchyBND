@@ -94,6 +94,11 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.14.4.3
+
+* Hotfix for supporting 1.16 PARAMs.
+* Updated SoulsFormatsNEXT to fix a MQB bug.
+
 ### 2.14.4.2
 
 * Updated SoulsFormatsNEXT.
