@@ -3,10 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
-using PPlus;
 using SoulsFormats;
 using WitchyBND.Errors;
 using WitchyBND.Services;
@@ -18,19 +16,19 @@ namespace WitchyBND.Parsers;
 
 public partial class WPARAM
 {
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
-        Unpack(srcPath, file, false);
+        Unpack(srcPath, file, recursive, false);
     }
 
-    public void Unpack(string srcPath, ISoulsFile? file, bool dry, (WBUtil.GameType, ulong)? passedGameInfo = null)
+    public void Unpack(string srcPath, ISoulsFile? file, bool recursive, bool dry, (WBUtil.GameType, ulong)? passedGameInfo = null)
     {
         if (dry && file == null)
         {
             Is(srcPath, null, out file);
         }
 
-        var gameInfo = passedGameInfo ?? gameService.DetermineGameType(srcPath, true);
+        var gameInfo = passedGameInfo ?? gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.PARAM);
         var game = gameInfo.Item1;
         var regVer = gameInfo.Item2;
 
@@ -39,7 +37,7 @@ public partial class WPARAM
         string paramName = Path.GetFileNameWithoutExtension(srcPath);
 
         // Fixed cell style for now.
-        CellStyle cellStyle = Configuration.ParamCellStyle;
+        CellStyle cellStyle = Configuration.Active.ParamCellStyle;
 
         if (game == WBUtil.GameType.AC6 && string.IsNullOrWhiteSpace(paramTypeToParamdef))
         {
@@ -108,18 +106,17 @@ The error was:
         // Begin writing the XML
         var xws = new XmlWriterSettings();
         xws.Indent = true;
-        XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath), xws);
-        xw.WriteStartElement("param");
+        XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath, recursive), xws);
+        xw.WriteStartElement(XmlTag);
+        if (Version > 0) xw.WriteAttributeString(VersionAttributeName, Version.ToString());
 
         // Meta data
-        xw.WriteElementString("fileName", Path.GetFileName(srcPath));
+        AddLocationToXml(srcPath, recursive, xw);
         if (!string.IsNullOrEmpty(param.ParamType))
             xw.WriteElementString("type", param.ParamType);
 
         xw.WriteElementString("game", game.ToString());
 
-        if (!string.IsNullOrEmpty(Configuration.Args.Location))
-            xw.WriteElementString("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath)));
 
         xw.WriteElementString("cellStyle", ((int)cellStyle).ToString());
         xw.WriteElementString("compression", param.Compression.ToString());
@@ -144,13 +141,14 @@ The error was:
 
         gameService.PopulateNames(game, paramName);
 
-        // Prepare rows
-        var rows = new List<WPARAMRow>();
         var fieldNames = paramdef.Fields.FilterByGameVersion(gameInfo.Item2).Select(field => field.InternalName)
             .ToList();
 
-        var fieldCounts = new ConcurrentDictionary<string, ConcurrentDictionary<string, int>>();
-        var fieldMaxes = new ConcurrentDictionary<string, (string, int)>();
+        var fieldCounts = new Dictionary<string, ConcurrentBag<string>>();
+        foreach (string fieldName in fieldNames)
+        {
+            fieldCounts.TryAdd(fieldName, new());
+        }
 
 
         var rowDict = new ConcurrentDictionary<long, WPARAMRow>();
@@ -171,7 +169,7 @@ The error was:
                     paramdexName = gameService.NameStorage[game][paramName][id];
             }
 
-            var prepRow = new WPARAMRow()
+            var prepRow = new WPARAMRow
             {
                 ID = id,
                 Name = name,
@@ -188,16 +186,7 @@ The error was:
 
                 var value = CellValueToString(cell.Value);
 
-                fieldCounts.TryAdd(fieldName, new ConcurrentDictionary<string, int>());
-                fieldCounts[fieldName].TryAdd(value, 0);
-                fieldCounts[fieldName].TryGetValue(value, out int count);
-                fieldCounts[fieldName][value] = count + 1;
-
-                if (!fieldMaxes.ContainsKey(fieldName) ||
-                    count > fieldMaxes[fieldName].Item2)
-                {
-                    fieldMaxes[fieldName] = (value, count);
-                }
+                fieldCounts[fieldName].Add(value);
 
                 prepRow.Fields[fieldName] = value;
             }
@@ -205,7 +194,7 @@ The error was:
             rowDict.TryAdd(i, prepRow);
         }
 
-        if (Configuration.Parallel)
+        if (Configuration.Active.Parallel)
         {
             Parallel.ForEach(param.Rows, ParallelCallback);
         }
@@ -217,19 +206,20 @@ The error was:
             }
         }
 
-        foreach (WPARAMRow row in rowDict.OrderBy(p => p.Key).Select(p => p.Value).ToList())
-        {
-            rows.Add(row);
-        }
+        var defaultValues = fieldCounts.ToDictionary(a => a.Key, b => {
+            var maxGroup = b.Value.GroupBy(s => s)
+                .OrderByDescending(s => s.Count())
+                .First();
 
-        int threshold = (int)(rows.Count * Configuration.ParamDefaultValueThreshold);
+            return (maxGroup.Key, maxGroup.Count());
+        });
 
-        var defaultValues = fieldCounts.SelectMany(fc => {
-            KeyValuePair<string, int> max = fc.Value.MaxBy(c => c.Value);
-            if (max.Value >= threshold)
-                return new[] { new KeyValuePair<string, string>(fc.Key, max.Key) };
-            return Array.Empty<KeyValuePair<string, string>>();
-        }).ToDictionary(a => a.Key, b => b.Value);
+        var rows = rowDict.OrderBy(p => p.Key).Select(p => p.Value).ToList();
+
+        int threshold = int.Max((int)(rows.Count * Configuration.Active.ParamDefaultValueThreshold), 100);
+
+        var defaultValuesAboveThreshold = defaultValues.Where(a => a.Value.Item2 >= threshold)
+            .ToDictionary(a => a.Key, b => b.Value);
 
         // Field info (def & default values)
         xw.WriteStartElement("fields");
@@ -251,9 +241,11 @@ The error was:
             xw.WriteAttributeString("unkc0", field.UnkC0);
 
             // Store common "default" values
-            if (Configuration.ParamDefaultValues && defaultValues.TryGetValue(fieldName, out string? value))
+            if (Configuration.ParamDefaultValues && defaultValues.TryGetValue(fieldName, out var value))
             {
-                xw.WriteAttributeString("defaultValue", value);
+                xw.WriteAttributeString("defaultValue", value.Key);
+                if (defaultValuesAboveThreshold.TryGetValue(fieldName, out _))
+                    xw.WriteAttributeString("defaultThreshold", true.ToString());
             }
 
             xw.WriteEndElement();
@@ -283,10 +275,9 @@ The error was:
                     string fieldName = fieldPair.Key;
                     string value = fieldPair.Value;
 
-                    bool isDefaultValue = defaultValues.ContainsKey(fieldName) &&
-                                          defaultValues[fieldName] == value;
-
-                    if (!isDefaultValue)
+                    var hasDefaultValueAboveThreshold =
+                        defaultValuesAboveThreshold.TryGetValue(fieldName, out var defValuePair);
+                    if (!(hasDefaultValueAboveThreshold && defValuePair.Key == value))
                     {
                         switch (cellStyle)
                         {

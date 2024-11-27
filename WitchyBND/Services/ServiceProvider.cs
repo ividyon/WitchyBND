@@ -14,7 +14,7 @@ public static class ServiceProvider
 
     public static IServiceProvider CreateProvider()
     {
-        var output = new OutputService();
+        IOutputService output = Configuration.Active.Silent ? new SilentOutputService() : new OutputService();
         var error = new ErrorService(output);
         var game = new GameService(error, output);
         var update = new UpdateService(error, output);
@@ -27,6 +27,8 @@ public static class ServiceProvider
 
         return collection.BuildServiceProvider();
     }
+
+
 
     public static void ChangeProvider(IServiceProvider provider)
     {

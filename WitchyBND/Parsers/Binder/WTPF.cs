@@ -3,13 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using System.Xml.Linq;
-using PPlus;
 using SoulsFormats;
 using WitchyBND.Errors;
-using WitchyBND.Services;
-using WitchyFormats.Utils;
 using WitchyLib;
-using TPF = WitchyFormats.TPF;
 
 namespace WitchyBND.Parsers;
 
@@ -17,23 +13,43 @@ public class WTPF : WFolderParser
 {
     public override string Name => "TPF";
 
-    static List<TPF.TPFPlatform> supportedPlatforms =
-        new() { TPF.TPFPlatform.PC, TPF.TPFPlatform.PS3, TPF.TPFPlatform.PS4 };
+
+    private static readonly List<TPF.TPFPlatform> UnpackPlatforms = new()
+    {
+        TPF.TPFPlatform.PC,
+        TPF.TPFPlatform.Xbox360,
+        TPF.TPFPlatform.PS3,
+        TPF.TPFPlatform.PS4,
+        TPF.TPFPlatform.PS5
+    };
+
+    private static readonly List<TPF.TPFPlatform> RepackPlatforms = new()
+    {
+        TPF.TPFPlatform.PC,
+        TPF.TPFPlatform.PS3,
+        TPF.TPFPlatform.PS4
+    };
 
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
         return IsRead<TPF>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override bool? IsSimple(string path)
+    {
+        string filename = Path.GetFileName(path).ToLower();
+        return filename.EndsWith(".tpf") || filename.EndsWith(".tpf.dcx");
+    }
+
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         var tpf = (file as TPF)!;
-        var destDir = GetUnpackDestPath(srcPath);
-        var sourceName = Path.GetFileName(srcPath);
-        if (!supportedPlatforms.Contains(tpf.Platform))
+        var destDir = GetUnpackDestPath(srcPath, recursive);
+
+        if (!UnpackPlatforms.Contains(tpf.Platform))
         {
             errorService.RegisterError(new WitchyError(
-                "WitchyBND currently only supports unpacking PC, PS3 and PS4 TPFs. There may be issues with other console TPFs.",
+                $"WitchyBND currently only supports unpacking TPFs for the following platforms: {string.Join(", ", UnpackPlatforms)}. The selected TPF is {tpf.Platform}. Expect issues to occur during the process.",
                 srcPath));
         }
 
@@ -60,31 +76,20 @@ public class WTPF : WFolderParser
                 texElement.Add(floatStruct);
             }
 
-            try
-            {
-                File.WriteAllBytes($"{destDir}\\{WBUtil.SanitizeFilename(texture.Name)}.dds", texture.Headerize());
-            }
-            catch (EndOfStreamException)
-            {
-                File.WriteAllBytes($"{destDir}\\{WBUtil.SanitizeFilename(texture.Name)}.dds",
-                    SecretHeaderizer.SecretHeaderize(texture));
-            }
-
+            File.WriteAllBytes($"{destDir}\\{WBUtil.SanitizeFilename(texture.Name)}.dds", texture.Headerize());
             textures.Add(texElement);
         }
 
-        var filename = new XElement("filename", sourceName);
         var xml = new XElement(XmlTag,
-            filename,
             new XElement("compression", tpf.Compression.ToString()),
             new XElement("encoding", $"0x{tpf.Encoding:X2}"),
             new XElement("flag2", $"0x{tpf.Flag2:X2}"),
             new XElement("platform", tpf.Platform.ToString()),
             textures
         );
+        AddLocationToXml(srcPath, recursive, xml);
 
-        if (!string.IsNullOrEmpty(Configuration.Args.Location))
-            filename.AddAfterSelf(new XElement("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath))));
+        if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
 
         using var xw = XmlWriter.Create(GetFolderXmlPath(destDir), new XmlWriterSettings
         {
@@ -94,7 +99,7 @@ public class WTPF : WFolderParser
         xw.Close();
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
         TPF tpf = new TPF();
         // XmlDocument xml = new XmlDocument();
@@ -106,6 +111,14 @@ public class WTPF : WFolderParser
 
         Enum.TryParse(xml.Element("platform")?.Value ?? "None", out TPF.TPFPlatform platform);
         tpf.Platform = platform;
+
+
+        if (!RepackPlatforms.Contains(platform))
+        {
+            errorService.RegisterError(new WitchyError(
+                $"WitchyBND currently only supports repacking TPFs for the following platforms: {string.Join(", ", RepackPlatforms)}. The selected TPF is {platform}. Expect issues to occur during the process.",
+                srcPath));
+        }
 
         Enum.TryParse(xml.Element("compression")?.Value ?? "None", out DCX.Type compression);
         tpf.Compression = compression;
@@ -131,25 +144,15 @@ public class WTPF : WFolderParser
             }
 
             byte[] bytes = File.ReadAllBytes($"{srcPath}\\{outName}.dds");
-            var texture = new TPF.Texture(inName, format, flags1, bytes);
+            var texture = new TPF.Texture(inName, format, flags1, bytes, platform);
             texture.FloatStruct = floatStruct;
             tpf.Textures.Add(texture);
         }
 
         string outPath = GetRepackDestPath(srcPath, xml);
-        WBUtil.Backup(outPath);
+        Backup(outPath);
 
         WarnAboutKrak(compression, tpf.Textures.Count);
-        try
-        {
-            tpf.TryWriteSoulsFile(outPath);
-        }
-        catch (Exception e) when (e is not NoOodleFoundException)
-        {
-            if (platform == TPF.TPFPlatform.PC) throw;
-            errorService.RegisterError(new WitchyError(
-                "WitchyBND only officially supports repacking PC TPFs at the moment. Repacking console TPFs is not supported.",
-                srcPath));
-        }
+        tpf.TryWriteSoulsFile(outPath);
     }
 }

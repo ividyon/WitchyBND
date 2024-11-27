@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using Com = System.Runtime.InteropServices.ComTypes;
+
+namespace WitchyLib;
 
 /**
  * Code by Vanco Pavlevski
@@ -13,7 +14,7 @@ using Com = System.Runtime.InteropServices.ComTypes;
 public struct RM_UNIQUE_PROCESS
 {
     public int dwProcessId;
-    public Com.FILETIME ProcessStartTime;
+    public System.Runtime.InteropServices.ComTypes.FILETIME ProcessStartTime;
 }
 
 [Flags]
@@ -45,8 +46,8 @@ public class Win32Api
     protected static extern int RmRestart(IntPtr pSessionHandle, int dwRestartFlags, RM_WRITE_STATUS_CALLBACK fnStatus);
 
     [DllImport("kernel32.dll")]
-    protected static extern bool GetProcessTimes(IntPtr hProcess, out Com.FILETIME lpCreationTime,
-        out Com.FILETIME lpExitTime, out Com.FILETIME lpKernelTime, out Com.FILETIME lpUserTime);
+    protected static extern bool GetProcessTimes(IntPtr hProcess, out System.Runtime.InteropServices.ComTypes.FILETIME lpCreationTime,
+        out System.Runtime.InteropServices.ComTypes.FILETIME lpExitTime, out System.Runtime.InteropServices.ComTypes.FILETIME lpKernelTime, out System.Runtime.InteropServices.ComTypes.FILETIME lpUserTime);
 }
 
 public class RestartExplorer : Win32Api
@@ -102,7 +103,7 @@ public class RestartExplorer : Win32Api
         {
             RM_UNIQUE_PROCESS rp = new RM_UNIQUE_PROCESS();
             rp.dwProcessId = p.Id;
-            Com.FILETIME creationTime, exitTime, kernelTime, userTime;
+            System.Runtime.InteropServices.ComTypes.FILETIME creationTime, exitTime, kernelTime, userTime;
             GetProcessTimes(p.Handle, out creationTime, out exitTime, out kernelTime, out userTime);
             rp.ProcessStartTime = creationTime;
             lst.Add(rp);

@@ -20,7 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SoulsFormats\SoulsFormats.csproj" />
+    <ProjectReference Include="..\SoulsFormats\SoulsFormats\SoulsFormats.csproj" />
     <ProjectReference Include="..\StudioUtils\StudioUtils.csproj" />
   </ItemGroup>
 </Project>

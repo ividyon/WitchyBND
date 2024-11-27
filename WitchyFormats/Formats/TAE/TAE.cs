@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Xml;
-
+using System.IO;
 using SoulsFormats;
 
 namespace WitchyFormats
@@ -22,27 +20,33 @@ namespace WitchyFormats
             /// Dark Souls 1.
             /// </summary>
             DS1 = 0,
+
             /// <summary>
             /// Dark Souls II: Scholar of the First Sin. 
             /// Does not support 32-bit original Dark Souls II release.
             /// </summary>
             SOTFS = 1,
+
             /// <summary>
             /// Dark Souls III. Same value as Bloodborne.
             /// </summary>
             DS3 = 2,
+
             /// <summary>
             /// Bloodborne. Same value as Dark Souls III.
             /// </summary>
             BB = 2,
+
             /// <summary>
             /// Sekiro: Shadows Die Twice
             /// </summary>
             SDT = 3,
+
             /// <summary>
             /// Demon's Souls
             /// </summary>
             DES = 4,
+
             /// <summary>
             /// Demon's Souls Remastered
             /// </summary>
@@ -118,19 +122,12 @@ namespace WitchyFormats
             if (template.Game != Format)
                 throw new InvalidOperationException($"Template is for {template.Game} but this TAE is for {Format}.");
 
-            if (template.ContainsKey(EventBank))
+            foreach (var anim in Animations)
             {
-                foreach (var anim in Animations)
+                for (int i = 0; i < anim.Events.Count; i++)
                 {
-                    for (int i = 0; i < anim.Events.Count; i++)
-                    {
-                        anim.Events[i].ApplyTemplate(this, template, anim.ID, i, anim.Events[i].Type);
-                    }
+                    anim.Events[i].ApplyTemplate(this, template, anim.ID, i, anim.Events[i].Type);
                 }
-            }
-            else
-            {
-                throw new InvalidOperationException($"This TAE uses event bank {EventBank} but no such bank exists in the template.");
             }
 
             AppliedTemplate = template;
@@ -147,19 +144,12 @@ namespace WitchyFormats
             if (bank >= 0)
                 EventBank = bank;
 
-            if (template.ContainsKey(EventBank))
+            foreach (var anim in Animations)
             {
-                foreach (var anim in Animations)
+                for (int i = 0; i < anim.Events.Count; i++)
                 {
-                    for (int i = 0; i < anim.Events.Count; i++)
-                    {
-                        anim.Events[i].ChangeTemplateAfterLoading(this, template, anim.ID, i, anim.Events[i].Type);
-                    }
+                    anim.Events[i].ChangeTemplateAfterLoading(this, template, anim.ID, i, anim.Events[i].Type);
                 }
-            }
-            else
-            {
-                throw new InvalidOperationException($"This TAE uses event bank {EventBank} but no such bank exists in the template.");
             }
 
             AppliedTemplate = template;
@@ -204,7 +194,7 @@ namespace WitchyFormats
             // 0x1000D: SDT, ER
             int version = br.AssertInt32(0x10000, 0x1000A, 0x1000B, 0x1000C, 0x1000D);
 
-            
+
             if (version == 0x1000B && !is64Bit)
             {
                 Format = TAEFormat.DS1;
@@ -235,7 +225,8 @@ namespace WitchyFormats
             }
             else if (version == 0x1000C && !is64Bit)
             {
-                throw new NotImplementedException("Dark Souls II 32-Bit original release not supported. Only Scholar of the First Sin.");
+                throw new NotImplementedException(
+                    "Dark Souls II 32-Bit original release not supported. Only Scholar of the First Sin.");
             }
             else if (version == 0x1000C && is64Bit)
             {
@@ -248,7 +239,7 @@ namespace WitchyFormats
             else
             {
                 throw new System.IO.InvalidDataException("Invalid combination of TAE header values: " +
-                    $"IsBigEndian={BigEndian}, Is64Bit={is64Bit}, Version={version}");
+                                                         $"IsBigEndian={BigEndian}, Is64Bit={is64Bit}, Version={version}");
             }
 
             if (isDESR)
@@ -265,7 +256,7 @@ namespace WitchyFormats
                 br.AssertVarint(0x80);
             else
                 br.AssertVarint(0x70);
-            
+
             if (Format is not TAEFormat.DESR)
             {
                 if (Format == TAEFormat.DS1)
@@ -303,7 +294,6 @@ namespace WitchyFormats
                 }
             }
 
-            
 
             Flags = br.ReadBytes(8);
 
@@ -337,6 +327,7 @@ namespace WitchyFormats
             {
                 AnimCount2Value = animCount2;
             }
+
             br.ReadVarint(); // First anim offset
             if (Format is TAEFormat.DS1 or TAEFormat.DES)
                 br.AssertInt32(0);
@@ -348,7 +339,6 @@ namespace WitchyFormats
             br.AssertInt32(ID);
             br.AssertVarint(Format is TAEFormat.DESR ? 0x40 : 0x50);
             br.AssertInt64(0);
-
 
 
             if (Format is TAEFormat.DES or TAEFormat.DESR)
@@ -395,7 +385,6 @@ namespace WitchyFormats
                 }
 
 
-
                 if (Format is not TAEFormat.SOTFS)
                 {
                     SkeletonName = skeletonNameOffset == 0 ? null : br.GetUTF16(skeletonNameOffset);
@@ -403,9 +392,6 @@ namespace WitchyFormats
                 }
             }
 
-           
-
-            
 
             br.StepIn(animsOffset);
             {
@@ -414,14 +400,15 @@ namespace WitchyFormats
                 long previousAnimParamStart = 0;
                 for (int i = 0; i < animCount; i++)
                 {
-                    Animations.Add(new Animation(br, Format, 
-                        out bool lastEventNeedsParamGen, 
+                    Animations.Add(new Animation(br, Format,
+                        out bool lastEventNeedsParamGen,
                         out long animFileOffset, out long lastEventParamOffset));
 
                     if (previousAnimNeedsParamGen)
                     {
                         br.StepIn(previousAnimParamStart);
-                        Animations[i - 1].Events[Animations[i - 1].Events.Count - 1].ReadParameters(br, (int)(animFileOffset - previousAnimParamStart));
+                        Animations[i - 1].Events[Animations[i - 1].Events.Count - 1]
+                            .ReadParameters(br, (int)(animFileOffset - previousAnimParamStart));
                         br.StepOut();
                     }
 
@@ -433,7 +420,8 @@ namespace WitchyFormats
                 if (previousAnimNeedsParamGen)
                 {
                     br.StepIn(previousAnimParamStart);
-                    Animations[Animations.Count - 1].Events[Animations[Animations.Count - 1].Events.Count - 1].ReadParameters(br, (int)(br.Length - previousAnimParamStart));
+                    Animations[Animations.Count - 1].Events[Animations[Animations.Count - 1].Events.Count - 1]
+                        .ReadParameters(br, (int)(br.Length - previousAnimParamStart));
                     br.StepOut();
                 }
             }
@@ -490,7 +478,6 @@ namespace WitchyFormats
 
             if (Format is not TAEFormat.DESR)
             {
-
                 if ((Format is TAEFormat.DES or TAEFormat.DS1))
                 {
                     if (IsOldDemonsSoulsFormat_0x1000A || IsOldDemonsSoulsFormat_0x10000)
@@ -594,7 +581,6 @@ namespace WitchyFormats
                 }
 
 
-
                 if (SkeletonName != null)
                 {
                     bw.FillVarint("SkeletonName", bw.Position);
@@ -626,8 +612,6 @@ namespace WitchyFormats
                 }
             }
 
-
-            
 
             Animations.Sort((a1, a2) => a1.ID.CompareTo(a2.ID));
 
@@ -665,6 +649,7 @@ namespace WitchyFormats
                     bw.Pad(0x10);
                 groupCount++;
             }
+
             bw.FillVarint("AnimGroupsCount", groupCount);
 
             if (groupCount == 0)
@@ -686,6 +671,15 @@ namespace WitchyFormats
             for (int i = 0; i < Animations.Count; i++)
             {
                 Animation anim = Animations[i];
+                foreach (Event animEvent in anim.Events)
+                {
+                    if (animEvent.Group == null)
+                        throw new InvalidDataException($"Event {i} {animEvent.Type} is missing group");
+                    if (!anim.EventGroups.Contains(animEvent.Group))
+                    {
+                        throw new InvalidDataException($"Group of event {animEvent.Type} is not included in the TAE");
+                    }
+                }
                 anim.WriteAnimFile(bw, i, Format);
                 Dictionary<float, long> timeOffsets = anim.WriteTimes(bw, i, Format);
                 List<long> eventHeaderOffsets = anim.WriteEventHeaders(bw, i, timeOffsets, Format);

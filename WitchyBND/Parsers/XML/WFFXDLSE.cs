@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
 using WitchyLib;
@@ -14,16 +13,21 @@ public class WFFXDLSE : WXMLParser
         return IsRead<FFXDLSE>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override bool? IsSimple(string path)
     {
-        var ffx = (file as FFXDLSE)!;
-        var xmlPath = GetUnpackDestPath(srcPath);
-        using (var sw = new StreamWriter(xmlPath))
-            ffx.XmlSerialize(sw);
-        AddLocationToXml(xmlPath, srcPath);
+        return null;
     }
 
-    public override void Repack(string srcPath)
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
+    {
+        var ffx = (file as FFXDLSE)!;
+        var xmlPath = GetUnpackDestPath(srcPath, recursive);
+        using (var sw = new StreamWriter(xmlPath))
+            ffx.XmlSerialize(sw);
+        AddLocationToXml(xmlPath, srcPath, recursive);
+    }
+
+    public override void Repack(string srcPath, bool recursive)
     {
         FFXDLSE ffx;
         using (var sr = new StreamReader(srcPath))
@@ -32,7 +36,7 @@ public class WFFXDLSE : WXMLParser
         XElement xml = LoadXml(srcPath);
 
         string outPath = GetRepackDestPath(srcPath, xml);
-        WBUtil.Backup(outPath);
+        Backup(outPath);
         ffx.TryWriteSoulsFile(outPath);
     }
 }

@@ -1,9 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using SoulsFormats;
-using WitchyFormats;
 using WitchyLib;
 
 namespace WitchyBND.Parsers;
@@ -17,7 +17,13 @@ public class WENFL : WXMLParser
         return IsRead<ENFL>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override bool? IsSimple(string path)
+    {
+        string filename = Path.GetFileName(path).ToLower();
+        return filename.EndsWith(".entryfilelist");
+    }
+
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         var enfl = (file as ENFL)!;
 
@@ -29,12 +35,12 @@ public class WENFL : WXMLParser
             thing.Serialize(xmlWriter, enfl);
         }
 
-        var destPath = GetUnpackDestPath(srcPath);
-        AddLocationToXml(srcPath, xDoc.Root!);
+        var destPath = GetUnpackDestPath(srcPath, recursive);
+        AddLocationToXml(srcPath, recursive, xDoc.Root!);
         xDoc.Save(destPath);
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
         XElement xml = LoadXml(srcPath);
 
@@ -46,7 +52,7 @@ public class WENFL : WXMLParser
             throw new Exception();
 
         string outPath = GetRepackDestPath(srcPath, xml);
-        WBUtil.Backup(outPath);
+        Backup(outPath);
         enfl.Write(outPath);
     }
 }

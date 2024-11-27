@@ -1,9 +1,6 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using System.Xml;
 using System.Xml.Linq;
-using PPlus;
 using SoulsFormats;
 using WitchyBND.CliModes;
 using WitchyLib;
@@ -52,6 +49,11 @@ public class WPARAMBND3 : WBinderParser
         return IsDSRParamBND(bnd) || IsPTDEParamBND(bnd) || IsAC4Regulation(bnd) || IsACFARegulation(bnd) || IsACFABoot(bnd);
     }
 
+    public override bool? IsSimple(string path)
+    {
+        return null;
+    }
+
     public override bool IsUnpacked(string path)
     {
         if (!Directory.Exists(path)) return false;
@@ -63,7 +65,7 @@ public class WPARAMBND3 : WBinderParser
         return doc.Root != null && doc.Root.Name == "bnd3" && doc.Root.Element("game") != null;
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         BND3 bnd = (file as BND3)!;
         WBUtil.GameType game;
@@ -78,11 +80,11 @@ public class WPARAMBND3 : WBinderParser
         else
             throw new InvalidDataException($"Could not determine param type for {Path.GetFileName(srcPath)}.");
 
-        ParseMode.Parsers.OfType<WBND3>().First().Unpack(srcPath, file, game);
+        ParseMode.GetParser<WBND3>().Unpack(srcPath, file, recursive, game);
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
-        ParseMode.Parsers.OfType<WBND3>().First().Repack(srcPath);
+        ParseMode.GetParser<WBND3>().Repack(srcPath, recursive);
     }
 }

@@ -5,14 +5,18 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
+using System.Text;
 using System.Threading;
 using CommandLine;
 using CommandLine.Text;
+using NativeFileDialogSharp;
 using SoulsFormats;
 using WitchyBND.CliModes;
 using WitchyBND.Services;
 using WitchyLib;
+using Oodle = SoulsOodleLib.Oodle;
 
 namespace WitchyBND;
 
@@ -21,23 +25,19 @@ internal static class Program
 {
     public static int ProcessedItems = 0;
 
-    private static readonly IErrorService errorService;
-    private static readonly IUpdateService updateService;
-    private static readonly IOutputService output;
+    private static IErrorService _errorService;
+    private static IUpdateService _updateService;
+    private static IOutputService _output;
 
 
     static Program()
     {
-        ServiceProvider.InitializeProvider();
-        errorService = ServiceProvider.GetService<IErrorService>();
-        updateService = ServiceProvider.GetService<IUpdateService>();
-        output = ServiceProvider.GetService<IOutputService>();
     }
 
     [STAThread]
     static void Main(string[] args)
     {
-        Console.OutputEncoding = System.Text.Encoding.UTF8;
+        Console.OutputEncoding = Encoding.UTF8;
         Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
         Assembly assembly = Assembly.GetExecutingAssembly();
@@ -51,6 +51,18 @@ internal static class Program
         parserResult.WithParsed(opt => {
                 try
                 {
+                    if (opt.Silent)
+                    {
+                        Configuration.Active.Silent = opt.Silent;
+                        Configuration.Active.Passive = opt.Silent;
+                    }
+
+                    RuntimeHelpers.RunClassConstructor(typeof(Configuration).TypeHandle);
+                    ServiceProvider.InitializeProvider();
+                    _errorService = ServiceProvider.GetService<IErrorService>();
+                    _updateService = ServiceProvider.GetService<IUpdateService>();
+                    _output = ServiceProvider.GetService<IOutputService>();
+
                     // Override configuration
                     if (opt.Help)
                     {
@@ -61,7 +73,7 @@ internal static class Program
                     if (opt.Version)
                     {
                         var assembly = Assembly.GetExecutingAssembly();
-                        output.WriteLine($"{assembly.GetName().Name} v{assembly.GetName().Version.ToString()}"
+                        _output.WriteLine($"{assembly.GetName().Name} v{assembly.GetName().Version.ToString()}"
                             .PromptPlusEscape());
                         return;
                     }
@@ -74,54 +86,49 @@ internal static class Program
                     if (mode != CliMode.Config)
                     {
                         if (opt.Dcx)
-                            Configuration.Dcx = opt.Dcx;
-                        if (opt.Bnd)
-                            Configuration.Bnd = opt.Bnd;
+                            Configuration.Active.Dcx = opt.Dcx;
+                        if (opt.BasicBnd)
+                            Configuration.Active.Bnd = false;
+                        else if (opt.SpecializedBnd)
+                            Configuration.Active.Bnd = true;
                         if (opt.Recursive)
-                            Configuration.Recursive = opt.Recursive;
+                            Configuration.Active.Recursive = opt.Recursive;
                         if (opt.Parallel)
-                            Configuration.Parallel = opt.Parallel;
+                            Configuration.Active.Parallel = opt.Parallel;
+                        if (opt.Flexible)
+                            Configuration.Active.Flexible = opt.Flexible;
 
                         // Arg-only configuration
                         if (opt.RepackOnly)
-                            Configuration.Args.RepackOnly = opt.RepackOnly;
-
+                            Configuration.Active.RepackOnly = opt.RepackOnly;
                         if (opt.UnpackOnly)
-                            Configuration.Args.UnpackOnly = opt.UnpackOnly;
-
+                            Configuration.Active.UnpackOnly = opt.UnpackOnly;
                         if (opt.Passive)
-                            Configuration.Args.Passive = opt.Passive;
+                            Configuration.Active.Passive = opt.Passive;
 
-                        if (opt.Silent)
-                        {
-                            Configuration.Args.Silent = opt.Silent;
-                            Configuration.Args.Passive = opt.Silent;
-                        }
-
-                        if (Configuration.Flexible)
+                        if (Configuration.Active.Flexible)
                             BinaryReaderEx.IsFlexible = true;
                     }
 
-                    output.DoubleDash($"{assembly.GetName().Name} {assembly.GetName().Version}");
-
+                    _output.DoubleDash($"{assembly.GetName().Name} {assembly.GetName().Version}");
 
                     if (!string.IsNullOrWhiteSpace(opt.Location))
                     {
                         string location = opt.Location;
                         if (opt.Location == "prompt")
                         {
-                            if (Configuration.Args.Passive)
+                            if (Configuration.Active.Passive)
                                 throw new Exception("Cannot supply both \"passive\" and \"location\" options.");
-                            output.WriteLine("Prompting user for target directory...");
+                            _output.WriteLine("Prompting user for target directory...");
 
-                            NativeFileDialogSharp.DialogResult dialogResult =
-                                NativeFileDialogSharp.Dialog.FolderPicker();
+                            DialogResult dialogResult =
+                                Dialog.FolderPicker();
 
                             if (dialogResult.IsOk && !string.IsNullOrWhiteSpace(dialogResult.Path))
                             {
                                 location = dialogResult.Path;
-                                output.WriteLine($"Target directory set to: {location}");
-                                output.WriteLine("");
+                                _output.WriteLine($"Target directory set to: {location}");
+                                _output.WriteLine("");
                             }
                             else
                             {
@@ -135,20 +142,23 @@ internal static class Program
 
                             if (!Directory.Exists(location))
                             {
-                                throw new DirectoryNotFoundException($"Location {location} is invalid.");
+                                Directory.CreateDirectory(location);
                             }
 
-                            Configuration.Args.Location = location;
+                            Configuration.Active.Location = location;
                         }
                     }
+
+                    if (!Configuration.Active.Passive)
+                        _updateService.CheckForUpdates(args);
+                    _updateService.PostUpdateActions();
 
                     // Execute
                     switch (mode)
                     {
                         case CliMode.Parse:
-                            SoulsOodleLib.Oodle.GrabOodle(_ => { }, false, true);
+                            Oodle.GrabOodle(_ => { }, false, true);
                             DisplayConfiguration(mode);
-                            updateService.CheckForUpdates();
 
                             Stopwatch watch = new Stopwatch();
 
@@ -156,41 +166,36 @@ internal static class Program
                             ParseMode.CliParseMode(opt);
                             watch.Stop();
 
-                            int pause = Configuration.EndDelay;
-                            if (Configuration.PauseOnError && errorService.AccruedErrorCount > 0)
+                            int pause = Configuration.Active.EndDelay;
+                            if (Configuration.Active.PauseOnError && _errorService.AccruedErrorCount > 0)
                                 pause = -1;
                             var completedString = ProcessedItems == 1
                                 ? $"Operation completed on 1 item in {watch.Elapsed:hh\\:mm\\:ss}."
                                 : $"Operation completed on {ProcessedItems} items in {watch.Elapsed:hh\\:mm\\:ss}.";
-                            output.WriteLine("");
-                            output.WriteLine(string.Concat(Enumerable.Repeat("-", completedString.Length)));
-                            output.WriteLine(completedString);
+                            _output.WriteLine("");
+                            _output.WriteLine(string.Concat(Enumerable.Repeat("-", completedString.Length)));
+                            _output.WriteLine(completedString);
 
                             PrintIssues();
                             PrintFinale(pause);
                             break;
                         case CliMode.Watch:
-                            SoulsOodleLib.Oodle.GrabOodle(_ => { }, false, true);
+                            Oodle.GrabOodle(_ => { }, false, true);
                             DisplayConfiguration(mode);
-                            updateService.CheckForUpdates();
                             WatcherMode.CliWatcherMode(opt);
                             PrintIssues();
                             PrintFinale();
                             break;
                         case CliMode.Config:
-                            updateService.CheckForUpdates();
                             ConfigMode.CliConfigMode(opt);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
                 }
-                catch (Exception e)
+                catch (Exception e) when (!Configuration.IsTest && !Configuration.IsDebug)
                 {
-                    if (Configuration.IsTest)
-                        throw;
-
-                    errorService.RegisterException(e);
+                    _errorService.RegisterException(e);
                     PrintIssues();
                     PrintFinale(-1);
                 }
@@ -202,25 +207,25 @@ internal static class Program
     {
         if (ProcessedItems > 5)
         {
-            errorService.PrintIssues();
+            _errorService.PrintIssues();
         }
     }
 
     private static void PrintFinale(int? pause = null)
     {
-        pause ??= Configuration.EndDelay;
-        if (!Configuration.Args.Passive)
+        pause ??= Configuration.Active.EndDelay;
+        if (!Configuration.Active.Passive)
         {
-            output.WriteLine("");
+            _output.WriteLine("");
             if (pause == -1)
             {
-                output.KeyPress(Constants.PressAnyKey).Run();
+                _output.KeyPress(Constants.PressAnyKey).Run();
                 return;
             }
 
             if (pause > 0)
             {
-                output.WriteLine(
+                _output.WriteLine(
                     $"Closing in {TimeSpan.FromMilliseconds(pause.Value).TotalSeconds} second(s)...");
                 Thread.Sleep(pause.Value);
             }
@@ -229,35 +234,36 @@ internal static class Program
 
     private static void DisplayConfiguration(CliMode mode)
     {
-        var infoTable = new Dictionary<string, string>()
+        var infoTable = new Dictionary<string, string>
         {
             { "Selected mode", mode.ToString() },
-            { "Specialized BND handling", Configuration.Bnd.ToString() },
-            { "DCX decompression only", Configuration.Dcx.ToString() },
+            { "Specialized BND handling", Configuration.Active.Bnd.ToString() },
+            { "DCX decompression only", Configuration.Active.Dcx.ToString() },
             { "Store PARAM field default values", Configuration.ParamDefaultValues.ToString() },
-            { "Recursive binder processing", Configuration.Recursive.ToString() },
-            { "Parallel processing", Configuration.Parallel.ToString() }
+            { "Recursive binder processing", Configuration.Active.Recursive.ToString() },
+            { "Parallel processing", Configuration.Active.Parallel.ToString() },
+            { "Flexible extraction", Configuration.Active.Flexible.ToString() }
         };
 
-        if (Configuration.Args.Passive)
-            infoTable.Add("Passive", Configuration.Args.Passive.ToString());
-        if (!string.IsNullOrEmpty(Configuration.Args.Location))
-            infoTable.Add("Location", Configuration.Args.Location);
-        if (Configuration.Args.RepackOnly)
-            infoTable.Add("Repack only", Configuration.Args.RepackOnly.ToString());
-        if (Configuration.Args.UnpackOnly)
-            infoTable.Add("Unpack only", Configuration.Args.UnpackOnly.ToString());
+        if (Configuration.Active.Passive)
+            infoTable.Add("Passive", Configuration.Active.Passive.ToString());
+        if (!string.IsNullOrEmpty(Configuration.Active.Location))
+            infoTable.Add("Location", Configuration.Active.Location);
+        if (Configuration.Active.RepackOnly)
+            infoTable.Add("Repack only", Configuration.Active.RepackOnly.ToString());
+        if (Configuration.Active.UnpackOnly)
+            infoTable.Add("Unpack only", Configuration.Active.UnpackOnly.ToString());
 
         var longest = infoTable.Keys.MaxBy(s => s.Length).Length;
 
-        output.SingleDash("Configuration");
+        _output.SingleDash("Configuration");
         foreach ((string name, string value) in infoTable)
         {
-            output.WriteLine($"{name.PadLeft(longest)}: {value}");
+            _output.WriteLine($"{name.PadLeft(longest)}: {value}");
         }
 
-        output.WriteLine("-------------");
-        output.WriteLine("");
+        _output.WriteLine("-------------");
+        _output.WriteLine("");
     }
 
     public static void DisplayHelp(ParserResult<CliOptions> result = null, IEnumerable<Error> errors = null)
@@ -283,6 +289,6 @@ internal static class Program
             return HelpText.DefaultParsingErrorsHandler(result, h);
         }, e => e);
 
-        output.WriteLine(helpText.ToString().PromptPlusEscape());
+        _output.WriteLine(helpText.ToString().PromptPlusEscape());
     }
 }

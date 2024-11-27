@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -22,17 +21,14 @@ public partial class WTAEFile
         return false;
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
         var tae = new TAE();
 
         XElement xml = LoadXml(srcPath);
 
         var game = Enum.Parse<WBUtil.GameType>(xml.Element("game")!.Value);
-        if (!templateDict.ContainsKey(game))
-            throw new GameUnsupportedException(game);
-
-        TAE.Template template = templateDict[game];
+        TAE.Template template = gameService.GetTAETemplate(game);
 
         DCX.Type compression = Enum.Parse<DCX.Type>(xml.Element("compression")?.Value ?? "None");
         tae.Compression = compression;
@@ -59,7 +55,7 @@ public partial class WTAEFile
                 bag.Add(RepackAnim(animEl, tae, template));
             }
 
-            if (Configuration.Parallel)
+            if (Configuration.Active.Parallel)
             {
                 Parallel.ForEach(animEls, Callback);
             }
@@ -71,10 +67,10 @@ public partial class WTAEFile
             tae.Animations = bag.OrderBy(a => a.ID).ToList();
         }
 
-        tae.ApplyTemplate(templateDict[game]);
+        tae.ApplyTemplate(template);
 
         string outPath = GetRepackDestPath(srcPath, xml);
-        WBUtil.Backup(outPath);
+        Backup(outPath);
         tae.Write(outPath);
     }
 

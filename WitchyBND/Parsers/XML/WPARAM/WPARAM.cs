@@ -1,17 +1,13 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
-using System.Runtime.InteropServices;
-using PPlus;
 using SoulsFormats;
-using WitchyBND.Errors;
 using WitchyBND.Services;
 using WitchyFormats;
 using WitchyLib;
+using PARAM = WitchyFormats.PARAM;
 using PARAMDEF = WitchyFormats.PARAMDEF;
 
 namespace WitchyBND.Parsers;
@@ -19,15 +15,12 @@ namespace WitchyBND.Parsers;
 public partial class WPARAM : WXMLParser
 {
 
-    private static bool WarnedAboutParams { get; set; }
-
-    public WPARAM()
-    {
-    }
+    public static bool? WarnedAboutParams { get; set; }
 
     public static bool WarnAboutParams()
     {
-        if (Configuration.Expert || WarnedAboutParams || Configuration.Args.Passive) return true;
+        if (Configuration.Active.Expert || Configuration.Active.Passive) return true;
+        if (WarnedAboutParams != null) return WarnedAboutParams.Value;
 
         List<string> lines = new()
         {
@@ -59,32 +52,40 @@ If DSMapStudio does not yet support this game or regulation version, an experime
     /// </summary>
     public enum CellStyle
     {
-        [Display(Name = "XML attribute")]
+        [Display(Name = "XML attribute",
+            Description = @"Each field is added to the row element as an attribute. Small file size.")]
         Attribute,
-        [Display(Name = "XML element")]
+        [Display(Name = "XML element",
+            Description = @"Each field is added to the row element as a child element. Easier to tell differences between two versions of the file.")]
         Element,
-        [Display(Name = "CSV")]
+        [Display(Name = "CSV",
+            Description = @"Stores all fields as a single delimited string. The least readable, potentially smallest file size.")]
         CSV
     }
 
     public override string Name => "PARAM";
+    public override int Version => WBUtil.WitchyVersionToInt("2.7.1.0");
 
     public override bool HasPreprocess => true;
 
-    public override bool Preprocess(string srcPath)
+    public override bool Preprocess(string srcPath, bool recursive, ref Dictionary<string, (WFileParser, ISoulsFile)> files)
     {
+        ISoulsFile? file = null;
         if (gameService.KnownGamePathsForParams.Any(p => srcPath.StartsWith(p.Key))) return false;
 
-        if (!Is(srcPath, null, out ISoulsFile? _)) return false;
+        if (!IsSimpleFirst(srcPath, null, out file)) return false;
 
-        gameService.DetermineGameType(srcPath, true);
+        gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.PARAM);
+
+        if (file != null)
+            files.TryAdd(srcPath, (this, file));
 
         return true;
     }
 
     public override bool Is(string path, byte[]? _, out ISoulsFile? file)
     {
-        if (Path.GetExtension(path) != ".param")
+        if (!IsSimple(path) ?? false)
         {
             file = null;
             return false;
@@ -104,6 +105,12 @@ If DSMapStudio does not yet support this game or regulation version, an experime
 
         file = param;
         return true;
+    }
+
+    public override bool? IsSimple(string path)
+    {
+        string filename = Path.GetFileName(path).ToLower();
+        return filename.EndsWith(".param");
     }
 
     public static Byte[] Dummy8Read(string dummy8, int expectedLength)
@@ -177,7 +184,7 @@ If DSMapStudio does not yet support this game or regulation version, an experime
     public static object StringToValue(PARAMDEF.Field def, object value)
     {
         if (value == null)
-            throw new NullReferenceException($"Cell value may not be null.");
+            throw new NullReferenceException("Cell value may not be null.");
 
         switch (def.DisplayType)
         {

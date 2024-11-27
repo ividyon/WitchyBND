@@ -16,6 +16,7 @@
         <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
         <RestorePackagesConfig>true</RestorePackagesConfig>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+        <IsPublishable>false</IsPublishable>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <PlatformTarget>AnyCPU</PlatformTarget>

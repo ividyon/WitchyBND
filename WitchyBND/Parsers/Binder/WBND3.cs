@@ -17,17 +17,21 @@ public class WBND3 : WBinderParser
         return IsRead<BND3>(path, data, out file);
     }
 
-
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override bool? IsSimple(string path)
     {
-        Unpack(srcPath, file, null);
+        return null;
     }
 
-    public void Unpack(string srcPath, ISoulsFile? file, WBUtil.GameType? game)
+
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
+    {
+        Unpack(srcPath, file, recursive , null);
+    }
+
+    public void Unpack(string srcPath, ISoulsFile? file, bool recursive, WBUtil.GameType? game)
     {
         BND3 bnd = (file as BND3)!;
-        string srcName = Path.GetFileName(srcPath);
-        string destDir = GetUnpackDestPath(srcPath);
+        string destDir = GetUnpackDestPath(srcPath, recursive);
         Directory.CreateDirectory(destDir);
 
         var root = "";
@@ -38,11 +42,8 @@ public class WBND3 : WBinderParser
 
         XElement files = WriteBinderFiles(bnd, destDir, root);
 
-        var filename = new XElement("filename", srcName);
-
         var xml =
             new XElement(XmlTag,
-                filename,
                 new XElement("compression", bnd.Compression.ToString()),
                 new XElement("version", bnd.Version),
                 new XElement("format", bnd.Format.ToString()),
@@ -51,12 +52,13 @@ public class WBND3 : WBinderParser
                 new XElement("unk18", bnd.Unk18.ToString()),
                 files);
 
-        if (!string.IsNullOrEmpty(Configuration.Args.Location))
-            filename.AddAfterSelf(new XElement("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath))));
+        AddLocationToXml(srcPath, recursive, xml);
+
+        if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
 
         if (game != null)
         {
-            filename.AddAfterSelf(new XElement("game", game.ToString()));
+            xml.AddFirst(new XElement("game", game.ToString()));
         }
 
         if (!string.IsNullOrEmpty(root))
@@ -70,7 +72,7 @@ public class WBND3 : WBinderParser
         xw.Close();
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
         var bnd = new BND3();
 
@@ -90,11 +92,11 @@ public class WBND3 : WBinderParser
         bnd.Unk18 = int.Parse(xml.Element("unk18")!.Value);
 
         if (xml.Element("files") != null)
-            ReadBinderFiles(bnd, xml.Element("files")!, srcPath, root);
+            ReadBinderFiles(bnd, xml.Element("files")!, srcPath, root, recursive);
 
         var destPath = GetRepackDestPath(srcPath, xml);
 
-        WBUtil.Backup(destPath);
+        Backup(destPath);
         bnd.Write(destPath);
     }
 }

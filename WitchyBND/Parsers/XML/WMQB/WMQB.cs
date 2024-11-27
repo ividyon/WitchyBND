@@ -1,5 +1,4 @@
 ﻿using SoulsFormats;
-using MQB = WitchyFormats.MQB;
 
 namespace WitchyBND.Parsers;
 
@@ -13,5 +12,10 @@ public partial class WMQB : WXMLParser
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
         return IsRead<MQB>(path, data, out file);
+    }
+
+    public override bool? IsSimple(string path)
+    {
+        return null;
     }
 }

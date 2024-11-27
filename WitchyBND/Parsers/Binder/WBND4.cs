@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
+using WitchyBND.CliModes;
+using WitchyBND.Services;
 using WitchyLib;
 
 namespace WitchyBND.Parsers;
@@ -17,16 +20,20 @@ public class WBND4 : WBinderParser
         return IsRead<BND4>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override bool? IsSimple(string path)
     {
-        Unpack(srcPath, file, null);
+        return null;
     }
 
-    public void Unpack(string srcPath, ISoulsFile? file, WBUtil.GameType? game)
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
+    {
+        Unpack(srcPath, file, recursive, null);
+    }
+
+    public void Unpack(string srcPath, ISoulsFile? file, bool recursive, WBUtil.GameType? game)
     {
         BND4 bnd = (file as BND4)!;
-        string srcName = Path.GetFileName(srcPath);
-        string destDir = GetUnpackDestPath(srcPath);
+        string destDir = GetUnpackDestPath(srcPath, recursive);
         Directory.CreateDirectory(destDir);
 
         var root = "";
@@ -35,12 +42,10 @@ public class WBND4 : WBinderParser
             root = WBUtil.FindCommonRootPath(bnd.Files.Select(bndFile => bndFile.Name));
         }
 
-        XElement filename = new XElement("filename", srcName);
         XElement files = WriteBinderFiles(bnd, destDir, root);
 
         var xml =
             new XElement(XmlTag,
-                filename,
                 new XElement("compression", bnd.Compression.ToString()),
                 new XElement("version", bnd.Version),
                 new XElement("format", bnd.Format.ToString()),
@@ -52,12 +57,13 @@ public class WBND4 : WBinderParser
                 new XElement("unk05", bnd.Unk05.ToString()),
                 files);
 
-        if (!string.IsNullOrEmpty(Configuration.Args.Location))
-            filename.AddAfterSelf(new XElement("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath))));
+        AddLocationToXml(srcPath, recursive, xml);
+
+        if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
 
         if (game != null)
         {
-            filename.AddAfterSelf(new XElement("game", game.ToString()));
+            xml.AddFirst(new XElement("game", game.ToString()));
         }
         if (!string.IsNullOrEmpty(root))
             files.AddBeforeSelf(new XElement("root", root));
@@ -70,7 +76,7 @@ public class WBND4 : WBinderParser
         xw.Close();
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
         var bnd = new BND4();
 
@@ -91,11 +97,11 @@ public class WBND4 : WBinderParser
         bnd.Unk05 = bool.Parse(xml.Element("unk05")!.Value);
 
         if (xml.Element("files") != null)
-            ReadBinderFiles(bnd, xml.Element("files")!, srcPath, root);
+            ReadBinderFiles(bnd, xml.Element("files")!, srcPath, root, recursive);
 
         var destPath = GetRepackDestPath(srcPath, xml);
 
-        WBUtil.Backup(destPath);
+        Backup(destPath);
 
         WarnAboutKrak(compression, bnd.Files.Count);
 

@@ -1,3 +1,5 @@
+[![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
+
 <p align="center">
   <img src="https://github.com/ividyon/WitchyBND/blob/main/public/logo.png?raw=true" />
 </p>
@@ -54,22 +56,297 @@ If you only want to remove the DCX compression from a DCX archive, use the **(DC
 ## Upgrading from Yabber
 For all intents and purposes, Witchy should be treated as a new version of Yabber. It functions mostly the same and is used for all the same purposes. All the original workflows are preserved.
 
-# Contributors
+# Credits
+
+This project is created and maintained by [ividyon](https://github.com/ividyon).
+It is originally based on [Yabber](https://github.com/JKAnderson/Yabber) by TKGP.
+
 * *TKGP* - SoulsFormats and Yabber
 * *katalash* - GPARAM support, FsParam
-* *Nordgaren* - Yabber+ additions, Armored Core VI additions, Oodle DLL location
+* *Nordgaren* - Yabber+, ACVI additions, Oodle DLL location
 * *DSMapStudio team* - Paramdex
-* *Meowmaritus, NamelessHoodie* - initial FXR serialization
+* *Meowmaritus* - initial FXR serialization, SoulsAssetPipeline TAE class
+* *NamelessHoodie* - initial FXR serialization
 * *Avocado* - YabberAvocado additions
-* *NatsuDragneelTheFireDragon* - MQB support
-* *Vawser* - preliminary Armored Core VI paramdefs, Smithbox additions
+* *NatsuDragneelTheFireDragon* - MQB support (SoulsFormatsNEXT)
+* *Vawser* - Paramdex, Smithbox additions
 * *CCCode* - FXR research
+* *ClayAmore* - ZSTD Decompression
+* *The12thAvenger*: FLVER improvements (SoulsFormatsNEXT)
+* *Shadowth117*: Console TPF handling (SoulsFormatsNEXT)
+* All SoulsFormatsNEXT contributors
+* All Paramdex contributors
 * *ivi* - WitchyBND maintainer
 
 Special thanks to Nordgaren, The12thAvenger, philiquaz, TKGP, thefifthmatt, Kirnifr, Rayan and many more for various assistance during development.
 
+# License
+
+This work is licensed under a
+[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License][cc-by-nc-sa].
+
+[![CC BY-NC-SA 4.0][cc-by-nc-sa-image]][cc-by-nc-sa]
+
+WitchyBND is built using the following licensed works:
+* [SoulsFormats](https://github.com/JKAnderson/SoulsFormats/tree/er) by JKAnderson (see [License](licenses/LICENSE-SoulsFormats.md))
+* [PromptPlus](https://github.com/FRACerqueira/PromptPlus), Copyright 2021 @ Fernando Cerqueira (see [License](licenses/LICENSE-PromptPlus.md))
+
 # Changelog
 ## WitchyBND
+
+### 2.14.4.3
+
+* Hotfix for supporting 1.16 PARAMs.
+* Updated SoulsFormatsNEXT to fix a MQB bug.
+
+### 2.14.4.2
+
+* Updated SoulsFormatsNEXT.
+* Updated Paramdex.
+
+### 2.14.4.1
+
+* Hotfix for supporting 1.15 PARAMs.
+
+### 2.14.4.0
+
+* Added support for Morpheme files in the ANIBND4 parser. They no longer need to be tracked in the _witchy-anibnd4.xml manifest file.
+* Witchy will now try to remove the user settings file if it is corrupted.
+* Fixed some issues with unpacking console TPF files (credit to Shadowth117).
+* Fixed an issue where the Git backup settings had no effect.
+* Fixed an issue where the error message for IOExceptions could be misleading.
+
+### 2.14.3.1
+
+* Updated SoulsFormatsNEXT.
+* Updated Paramdex.
+
+### 2.14.3.0
+
+* Added customization of Witchy's backup method between the following choices:
+  * Write the backup file unless one already exists. (Original behavior)
+  * Overwrite the backup file every time. (New default behavior)
+  * Create copies with unique names every time.
+  * Do not back up.
+* Added a toggle for whether Witchy should still perform backups for files that are inside a valid Git repository. This is on by default.
+  * Setting this to off (no backups within Git repository) may impact performance, as the program checks for the presence of a Git repository every time before backing up.
+* Added an opportunity to modify the arguments for a deferred tool when using an existing preset.
+* Fixed an issue where FFXBND would not generate empty FFXRESLIST entries if the FFXBND folder does not have any FFXRESLISTs at all.
+* Fixed an issue where FFXBND would crash if the FFXBND folder does not have FFXRESLISTs at all.
+* Fixed an issue where PS3 TPFs written by Witchy would cause Demon's Souls to crash.
+* Fixed an issue that caused BND3 files (and probably others) to fail to unpack.
+* Fixed an issue with the warning when trying to repack PARAM files.
+
+### 2.14.2.1
+
+* Updated ZSTD compression to the default compression level (15).
+* Fixed an issue with unpacking DCX files.
+
+### 2.14.2.0
+
+* Now supports ZSTD compression.
+
+### 2.14.1.0
+
+* Updated to latest Paramdex, including support for 1.13.2.
+* When missing FFXRESLIST entries, the FFXBND parser will no longer print the full list of IDs, only the amount.
+* Improved handling for completely empty FFXBNDs.
+* Fixed an issue where Witchy would keep going through available parsers if an error occurred inside of one, even though the file matched a parser.
+
+### 2.14.0.3
+
+* Further bugfixes for the preprocess process for recursive repacking.
+
+### 2.14.0.2
+
+* Refined the Preprocess process further, eliminating duplicate work to speed it up.
+  * Simplified the "is" check for recursive preprocess file type checks, where possible.
+* If the selected location for "Process to..." is in a subfolder of the original location, relative paths will now be used.
+* Fixed an issue where recursive repacking would not correctly preprocess the files.
+* Fixed an issue where recursively unpacked files would still write "sourcePath" in their XML manifest when using the Location option.
+
+### 2.14.0.1
+
+* Fixed an issue where XML parsers would no longer extract to "filename.originalextension.xml", but to just "filename.xml".
+* Fixed an issue where the Recursive option would generate a completely wrong path.
+
+### 2.14.0.0
+
+* Added specialized BND handling for ANIBND4. Unpacking and repacking these files will not require you to manage the file list for HKX and TAE.
+  * This is well-tested for ELDEN RING, and lightly tested with BB. Testing in other games is welcome.
+  * As a reminder, specialized binder handling can be turned off in the configuration, or via commandline.
+* Fixed many issues with the Recursive and Preprocess systems. Recursive operations should now overall be more reliable.
+* Fixed issues that occurred when using the Recursive and Location options together.
+* Attempted a fix for an updater issue with WitchyBND.Shell.dll.
+
+### 2.13.0.2
+
+* Fixed an issue with the specialized FFXBND handler where the resulting DDS textures would not be headerized for console.
+
+### 2.13.0.1
+
+* Updated Paramdex to the latest from Smithbox.
+* Updated SoulsFormatsNEXT to the latest (fixes for console TPF support)
+
+### 2.13.0.0
+
+* Updated WitchyBND to the latest version of SoulsFormatsNEXT, with several improvements courtesy of Shadowth117:
+  * TPF platform support is now extended to:
+    * PC: ✅ Unpack ✅ Repack
+    * Xbox 360: ✅ Unpack ❌ Repack
+    * PS3: ✅ Unpack ✅ Repack
+    * PS4: ✅ Unpack ✅ Repack
+    * PS5: ✅ Unpack ❌ Repack
+
+    This should allow usage of WitchyBND for console modding in place of DesBNDBuild.
+  * Malformed ELDEN RING cubemap DDS data will now be correctly parsed into readable DDS.
+  * (Re-)Added a new texture type for texture arrays from Armored Core 6.
+* Refactored "silent mode"; it will now avoid any output to PromptPlus, hopefully avoiding some issues.
+* Updated Paramdex to the latest from Smithbox.
+* Made some internal changes to error catching.
+
+### 2.12.0.0
+
+* Migrated WitchyBND to use [SoulsFormatsNEXT](https://github.com/soulsmods/SoulsFormatsNEXT).
+  * Despite not being a noticable feature for end users, this will mark this update as a major version due to the internal restructure.
+* Changed the "Flexible extraction" setting default to True. This will not apply to existing installs.
+  * As a reminder, this setting foregoes some important format integrity checks in order to counteract intentional file corruption for the means of obfuscation.
+* Updated Paramdex to the latest from Smithbox, including support for the latest regulation.
+
+
+### 2.11.0.0
+
+Note: This update may reset your personal settings.
+
+* Added Deferred Format support for:
+  * FLVER, with a preset for SoulsModelTool.
+  * GFX, with a preset for JPEXS Free Flash Decompiler.
+* Updated to latest Paramdex from Smithbox.
+* Updated the MSBE serialization format.
+* Updated the behavior of Deferred Formats.
+  * Deferred Formats will no longer be processed as part of a Recursive process.
+  * Deferred Formats can now perform repacking as well as unpacking.
+  * Fixed an issue where the $path placeholder wasn't being populated in the arguments.
+  * Fixed an issue where all presets would show regardless of intended format.
+* Fixed issues that prevented the HKX and LUA deferred formats from working correctly.
+
+### 2.10.0.4
+
+* Removed the requirement for TAE events to be contained in the correct event bank.
+  * This is kind of a janky workaround until a newer version of SoulsAssetPipeline is available.
+* Updated to latest Paramdex from Smithbox.
+* Optimized the PARAM parser.
+  * Default values will now not be considered "above threshold" if there's less than 100 instances.
+  * Added a boolean to fields which describes if the threshold was reached.
+  * Optimized the logic with which default values are determined, to speed up the parser and hopefully fix issues with mismatching defaults between users.
+* Fixed an issue where MSB serialization would have unnecessary indices.
+* Changed the folder structure of the Assets folder.
+
+### 2.10.0.3
+
+* Improved MSBE serialization.
+* Fixed an issue with the auto-updater where it would get stuck on the ZSTD library DLL.
+
+### 2.10.0.2
+
+* Set the "Flexible" feature to Off. This feature skipped important sanity checks which were abused by malicious actors like Garden of Eyes, but are once again important for working with potentially broken DLC files.
+  * It can be re-enabled in options at your own risk.
+* Fixed some issues with the MSB parser.
+* Added some failsafes for text output crashing the actual process.
+* Updated Paramdex to the latest from Smithbox.
+
+### 2.10.0.1
+
+* Fixed an issue where the 1.12 regulation.bin would not open due to a missing library file.
+* Improved the error message when unable to open a regulation.bin file.
+
+### 2.10.0.0
+
+An initial release for basic ELDEN RING 1.12 (Shadow of the Erdtree) support.
+
+* Added support for DCX ZSTD compression (used in ELDEN RING 1.12). Thanks to ClayAmore for the decompression code.
+  * This allows unpacking the 1.12 regulation.bin file.
+* Updated to the latest Paramdex from Smithbox.
+  * This includes preliminary 1.12 PARAM support.
+* Fixed an issue where unpacking a regulation.bin would needlessly ask for the PARAM version even though the archive provides it.
+* Refined the error message that appears when a FFXBND is empty.
+
+### 2.9.0.2
+
+* Fixed an issue where FXRs wouldn't appear ingame. You need a ffxreslist file for each FXR after all, but it can be empty.
+  * WitchyBND will now auto-generate an empty FFXRESLIST file for every FXR file in an FFX binder that doesn't have one.
+
+### 2.9.0.1
+
+* Replaced the error thrown when a FFXBND is missing reslist files, or has too many reslist files, with a notice.
+  * As of now, they don't have any known effect, and FXRs work fine without reslists.
+* Fixed an issue where the Offline Mode setting could not be toggled from the configuration menu.
+
+### 2.9.0.0
+
+Note: This version adds an auto-update feature. If you're using the context menu Windows integration, you'll have to unregister the context menu one last time to install this update, and then re-register the context menu. The auto-updater will handle this smoothly moving forward.
+
+* Added a self-update feature.
+  * You may now choose "Update" when notified of a new version, which will perform an automatic update and restart the application with the previous command line arguments.
+  * This also handles the annoying context menu registration process automatically.
+* Moved the user settings file to AppData. If you need settings for a specific WitchyBND instance in its own folder, you can use an "appsettings.override.json" file.
+* Moved the "DCX compression" context menu option to the main context menu, out of the "Process..." submenu, for the literal single person in the world that uses it frequently.
+* Fixed an issue where command line options and context menu options would unintentionally save those options to the user settings file permanently.
+
+### 2.8.0.0
+
+* Updated the FFXBND parser to version 2.8.0.0. Repack your FFXBNDs with the previous version of Witchy before updating, then unpack them anew.
+  * Now supports older FFXBNDs like DS3 and BB.
+  * No longer cares about the folder structure in the unpacked FFXBND folder whatsoever, so you can feel free to organize the files in your own way to keep an overview.
+  * Confirmed that the TPFs changing is caused by SoulsFormats TPF padding being very relaxed. The data is fully intact, there are no issues with it.
+* Fixed the WitchyBND format versioning system apparently never working outside of FXR.
+* Fixed an issue with the FFXBND parser where it did not correctly check for orphaned FFXRESLIST files.
+* Changed the message text for the DCX_KRAK warning.
+
+### 2.7.1.0
+
+* Improved the update notification.
+  * You may now choose to skip a version to avoid being notified about it again.
+  * You can now be directed to the release page directly, which will close Witchy.
+  * The update time is no longer stored in a separate text file.
+* Fixed an issue where the SFXBND parser would add one more backslash to paths than is necessary.
+* Added a behind-the-scenes system for performing small updates upon the first run of any given WitchyBND version.
+  * For now, this just deletes the "last-update.txt" file from before this version's update notification changes.
+* Fixed some issues with publishing the program to Nexus.
+
+### 2.7.0.0
+
+* Added MSB serialization support for ELDEN RING.
+  * This is exclusively for comparisons, and not intended to be used for serious editing in any way.
+* Updated the PARAM parser to process "default values" differently. Default values will now always be added to the field tags even if they do not meet the threshold requirement. This is to avoid versioning issues with PARAM XMLs where the default value thresholds have changed, and formerly default value-fields no longer have a default value.
+  * Updated the parser version to 2.7.1.0 due to potential breaking changes.
+* Fixed an issue where drive paths would not be removed in BNDs which do not have a shared root folder (such as a hypothetical "different network drives" case).
+* Fixed an issue where a DCX would be decompressed as a consolation prize if an error was thrown while unpacking what's inside the DCX.
+* Fixed an issue that prevented AC4/ACFA regulations from opening.
+
+### 2.6.2.1
+
+* Fixed an issue that prevented Sekiro PARAM files from opening.
+
+### 2.6.2.0
+
+* Fixed the "Reflection-based serialization has been disabled" error that has paralyzed parts of the program since switching to .NET 8.
+* Fixed an issue that caused the update check to run every single time, instead of max. once every 6 hours as intended.
+* Increased the update check threshold to max. once every 24 hours.
+* Added a description to the "PARAM Field Style" setting to explain what it does.
+* Added previously unknown "IntColor" CustomData type to MQB. (Thanks to WarpZephyr)
+* Further "encryption technology" countermeasures.
+* Updated Paramdex.
+
+### 2.6.1.1
+
+* Fixed an issue with BND3 repacking incorrectly.
+* Improved support for AC6 MQB files (thanks to WarpZephyr).
+
+### 2.6.1.0
+
+* Further work on "decrypting" some groundbreaking "encryption" "technology".
+* Fixed a small visual issue where a decompressed DCX would not be counted as a processed item.
 
 ### 2.6.0.0
 
@@ -421,3 +698,7 @@ Due to being a large rewrite, bugs are expected. Please diligently report them.
 
 ### 1.0.1
 * Fix bad BXF4 repacking
+
+[cc-by-nc-sa]: http://creativecommons.org/licenses/by-nc-sa/4.0/
+[cc-by-nc-sa-image]: https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png
+[cc-by-nc-sa-shield]: https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg

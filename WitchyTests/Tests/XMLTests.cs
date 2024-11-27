@@ -27,15 +27,15 @@ public class XMLTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var file));
 
-            parser.Unpack(path, file);
-            string? destPath = parser.GetUnpackDestPath(path);
+            parser.Unpack(path, file, false);
+            string? destPath = parser.GetUnpackDestPath(path, false);
 
             File.Delete(path);
 
             Assert.That(File.Exists(destPath));
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
-            parser.Repack(destPath);
+            parser.Repack(destPath, false);
 
             var xml = WFileParser.LoadXml(destPath);
             Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
@@ -55,15 +55,15 @@ public class XMLTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var file));
 
-            parser.Unpack(path, file);
-            string? destPath = parser.GetUnpackDestPath(path);
+            parser.Unpack(path, file, false);
+            string? destPath = parser.GetUnpackDestPath(path, false);
 
             File.Delete(path);
 
             Assert.That(File.Exists(destPath));
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
-            parser.Repack(destPath);
+            parser.Repack(destPath, false);
 
             var xml = WFileParser.LoadXml(destPath);
             Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
@@ -83,15 +83,15 @@ public class XMLTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var file));
 
-            parser.Unpack(path, file);
-            string? destPath = parser.GetUnpackDestPath(path);
+            parser.Unpack(path, file, false);
+            string? destPath = parser.GetUnpackDestPath(path, false);
 
             File.Delete(path);
 
             Assert.That(File.Exists(destPath));
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
-            parser.Repack(destPath);
+            parser.Repack(destPath, false);
 
             var xml = WFileParser.LoadXml(destPath);
             Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
@@ -111,15 +111,15 @@ public class XMLTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var file));
 
-            parser.Unpack(path, file);
-            string? destPath = parser.GetUnpackDestPath(path);
+            parser.Unpack(path, file, false);
+            string? destPath = parser.GetUnpackDestPath(path, false);
 
             File.Delete(path);
 
             Assert.That(File.Exists(destPath));
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
-            parser.Repack(destPath);
+            parser.Repack(destPath, false);
 
             var xml = WFileParser.LoadXml(destPath);
             Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
@@ -139,15 +139,15 @@ public class XMLTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var file));
 
-            parser.Unpack(path, file);
-            string? destPath = parser.GetUnpackDestPath(path);
+            parser.Unpack(path, file, false);
+            string? destPath = parser.GetUnpackDestPath(path, false);
 
             File.Delete(path);
 
             Assert.That(File.Exists(destPath));
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
-            parser.Repack(destPath);
+            parser.Repack(destPath, false);
 
             var xml = WFileParser.LoadXml(destPath);
             Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
@@ -167,15 +167,15 @@ public class XMLTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var file));
 
-            parser.Unpack(path, file);
-            string? destPath = parser.GetUnpackDestPath(path);
+            parser.Unpack(path, file, false);
+            string? destPath = parser.GetUnpackDestPath(path, false);
 
             File.Delete(path);
 
             Assert.That(File.Exists(destPath));
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
-            parser.Repack(destPath);
+            parser.Repack(destPath, false);
 
             var xml = WFileParser.LoadXml(destPath);
             Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
@@ -195,15 +195,15 @@ public class XMLTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var file));
 
-            parser.Unpack(path, file);
-            string? destPath = parser.GetUnpackDestPath(path);
+            parser.Unpack(path, file, false);
+            string? destPath = parser.GetUnpackDestPath(path, false);
 
             File.Delete(path);
 
             Assert.That(File.Exists(destPath));
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
-            parser.Repack(destPath);
+            parser.Repack(destPath, false);
 
             var xml = WFileParser.LoadXml(destPath);
             Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
@@ -223,15 +223,15 @@ public class XMLTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var file));
 
-            parser.Unpack(path, file);
-            string? destPath = parser.GetUnpackDestPath(path);
+            parser.Unpack(path, file, false);
+            string? destPath = parser.GetUnpackDestPath(path, false);
 
             File.Delete(path);
 
             Assert.That(File.Exists(destPath));
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
-            parser.Repack(destPath);
+            parser.Repack(destPath, false);
 
             var xml = WFileParser.LoadXml(destPath);
             Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
@@ -243,7 +243,7 @@ public class XMLTests : TestBase
     {
         IEnumerable<string> paths = GetSamples("PARAM");
 
-        var parser = ParseMode.Parsers.OfType<WPARAM>().First();
+        var parser = ParseMode.GetParser<WPARAM>();
 
         foreach (string path in paths.Select(GetCopiedPath))
         {
@@ -255,18 +255,18 @@ public class XMLTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var file));
 
-            _gameService.DetermineGameType(path, true, game.Item1, game.Item2);
-            parser.Unpack(path, file);
+            _gameService.DetermineGameType(path, IGameService.GameDeterminationType.PARAM, game.Item1, game.Item2);
+            parser.Unpack(path, file, false);
 
             File.Delete(path);
 
-            string destPath = parser.GetUnpackDestPath(path);
-            _gameService.DetermineGameType(destPath, true, game.Item1, game.Item2);
+            string destPath = parser.GetUnpackDestPath(path, false);
+            _gameService.DetermineGameType(destPath, IGameService.GameDeterminationType.PARAM, game.Item1, game.Item2);
             Assert.That(File.Exists(destPath));
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
 
-            parser.Repack(destPath);
+            parser.Repack(destPath, false);
 
             var xml = WFileParser.LoadXml(destPath);
             Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
@@ -286,15 +286,15 @@ public class XMLTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var file));
 
-            parser.Unpack(path, file);
-            string? destPath = parser.GetUnpackDestPath(path);
+            parser.Unpack(path, file, false);
+            string? destPath = parser.GetUnpackDestPath(path, false);
 
             File.Delete(path);
 
             Assert.That(File.Exists(destPath));
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
-            parser.Repack(destPath);
+            parser.Repack(destPath, false);
 
             var xml = WFileParser.LoadXml(destPath);
         }

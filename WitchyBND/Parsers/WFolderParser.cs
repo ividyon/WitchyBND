@@ -12,31 +12,41 @@ namespace WitchyBND.Parsers;
 public abstract class WFolderParser : WFileParser
 {
     private static bool WarnedAboutKrak { get; set; }
+    private static bool WarnedAboutZstd { get; set; }
 
     public override WFileParserVerb Verb => WFileParserVerb.Unpack;
 
+    public override int GetUnpackedVersion(string path)
+    {
+        var doc = XDocument.Load(GetFolderXmlPath(path));
+        var attr = doc.Root?.Attribute(VersionAttributeName);
+        if (attr == null) return 0;
+        return int.Parse(attr.Value);
+    }
 
     protected void WarnAboutKrak(DCX.Type compression, int count)
     {
-        if (WarnedAboutKrak) return;
         if (compression is not DCX.Type.DCX_KRAK and not DCX.Type.DCX_KRAK_MAX) return;
+        if (WarnedAboutKrak) return;
         if (count <= 10) return;
 
-        errorService.RegisterNotice(@"DCX compression is set to DCX_KRAK or DCX_KRAK_MAX.
-Kraken compression is extremely slow - taking up almost 100% of repacking time - and recommended only for for the final repack before releasing something to the public.
-During development, you may wish to switch to a faster compression such as: DCX_DFLT_11000_44_9_15
-Simply replace the compression level in the Witchy XML to this value.");
+        errorService.RegisterNotice(@$"DCX compression is set to DCX_KRAK or DCX_KRAK_MAX.
+Kraken compression is slightly more compact, but extremely slow.
+Consider switching to a faster compression such as: DCX_DFLT_11000_44_9_15
+Simply replace the compression level in the {GetFolderXmlFilename()} file to this value.");
 
         WarnedAboutKrak = true;
     }
 
-    public override string GetUnpackDestPath(string srcPath)
+    public override string GetUnpackDestPath(string srcPath, bool recursive)
     {
-        string sourceDir = new FileInfo(srcPath).Directory?.FullName;
-        if (!string.IsNullOrEmpty(Configuration.Args.Location))
-            sourceDir = Configuration.Args.Location;
+        string sourceDir = new FileInfo(srcPath).Directory?.FullName!;
+        string? location = Configuration.Active.Location;
         string fileName = Path.GetFileName(srcPath);
-        return $"{sourceDir}\\{fileName.Replace('.', '-')}";
+        if (!string.IsNullOrEmpty(location) && !recursive)
+            sourceDir = location;
+        sourceDir = Path.GetFullPath(sourceDir);
+        return Path.Combine(sourceDir, fileName.Replace('.', '-'));
     }
 
     public virtual string GetRepackDestPath(string srcDirPath, XElement xml, string filenameElement = "filename")
@@ -47,10 +57,10 @@ Simply replace the compression level in the Witchy XML to this value.");
         var sourceDir = xml.Element("sourcePath")?.Value;
         if (sourceDir != null)
         {
-            return $"{sourceDir}\\{filename}";
+            return Path.GetFullPath(Path.Combine(srcDirPath, "..", sourceDir, filename));
         }
-        string targetDir = new DirectoryInfo(srcDirPath).Parent?.FullName;
-        return $"{targetDir}\\{filename}";
+        string targetDir = new DirectoryInfo(srcDirPath).Parent?.FullName!;
+        return Path.GetFullPath(Path.Combine(targetDir, filename));
     }
     // public virtual string GetRepackDestPath(string srcDirPath, string destFileName)
     // {

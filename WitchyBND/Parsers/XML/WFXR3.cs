@@ -4,7 +4,6 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using SoulsFormats;
-using WitchyFormats;
 using WitchyLib;
 
 namespace WitchyBND.Parsers;
@@ -16,50 +15,48 @@ public class WFXR3 : WXMLParser
 
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
-        return IsRead<RSFXR>(path, data, out file);
+        return IsRead<FXR3>(path, data, out file);
     }
 
-    public override int GetUnpackedVersion(string path)
+    public override bool? IsSimple(string path)
     {
-        var doc = XDocument.Load(path);
-        var attr = doc.Root?.Attribute(VersionAttributeName);
-        if (attr == null) return 0;
-        return int.Parse(attr.Value);
+        string filename = Path.GetFileName(path).ToLower();
+        return filename.EndsWith(".fxr") ;
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
-        var fxr = (file as RSFXR)!;
+        var fxr = (file as FXR3)!;
 
         XDocument xDoc = new XDocument();
 
         using (var xmlWriter = xDoc.CreateWriter())
         {
-            var thing = new XmlSerializer(typeof(RSFXR));
+            var thing = new XmlSerializer(typeof(FXR3));
             thing.Serialize(xmlWriter, fxr);
         }
 
-        xDoc.Root?.Add(new XAttribute(VersionAttributeName, Version.ToString()));
+        if (Version > 0) xDoc.Root?.Add(new XAttribute(VersionAttributeName, Version.ToString()));
 
-        var destPath = GetUnpackDestPath(srcPath);
-        AddLocationToXml(srcPath, xDoc.Root!);
+        var destPath = GetUnpackDestPath(srcPath, recursive);
+        AddLocationToXml(srcPath, recursive, xDoc.Root!);
         xDoc.Save(destPath);
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
 
         XElement xml = LoadXml(srcPath);
 
-        XmlSerializer serializer = new XmlSerializer(typeof(RSFXR));
+        XmlSerializer serializer = new XmlSerializer(typeof(FXR3));
         XmlReader xmlReader = xml.CreateReader();
 
-        var fxr = (RSFXR)serializer.Deserialize(xmlReader);
+        var fxr = (FXR3)serializer.Deserialize(xmlReader);
         if (fxr == null)
             throw new Exception();
 
         string outPath = GetRepackDestPath(srcPath, xml);
-        WBUtil.Backup(outPath);
+        Backup(outPath);
         fxr.Write(outPath);
     }
 }

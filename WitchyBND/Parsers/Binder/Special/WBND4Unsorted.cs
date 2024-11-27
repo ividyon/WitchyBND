@@ -13,14 +13,18 @@ public abstract class WBND4Unsorted : WUnsortedBinderParser
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
         file = null;
-        return Configuration.Bnd && EndsInExtension(path) && IsRead<BND4>(path, data, out file);
+        return Configuration.Active.Bnd && EndsInExtension(path) && IsRead<BND4>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override bool? IsSimple(string path)
+    {
+        return Configuration.Active.Bnd && EndsInExtension(path);
+    }
+
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         var bnd = (file as BND4)!;
-        string srcName = Path.GetFileName(srcPath);
-        string destDir = GetUnpackDestPath(srcPath);
+        string destDir = GetUnpackDestPath(srcPath, recursive);
         Directory.CreateDirectory(destDir);
 
         var root = "";
@@ -28,13 +32,10 @@ public abstract class WBND4Unsorted : WUnsortedBinderParser
         {
             root = WBUtil.FindCommonRootPath(bnd.Files.Select(bndFile => bndFile.Name));
         }
-
-        XElement filename = new XElement("filename", srcName);
         WriteBinderFiles(bnd, destDir, root);
 
         var xml =
             new XElement(XmlTag,
-                filename,
                 new XElement("compression", bnd.Compression.ToString()),
                 new XElement("version", bnd.Version),
                 new XElement("format", bnd.Format.ToString()),
@@ -46,8 +47,9 @@ public abstract class WBND4Unsorted : WUnsortedBinderParser
                 new XElement("unk05", bnd.Unk05.ToString())
                 );
 
-        if (!string.IsNullOrEmpty(Configuration.Args.Location))
-            filename.AddAfterSelf(new XElement("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath))));
+        AddLocationToXml(srcPath, recursive, xml);
+
+        if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
 
         if (!string.IsNullOrEmpty(root))
             xml.LastNode!.AddAfterSelf(new XElement("root", root));
@@ -60,7 +62,7 @@ public abstract class WBND4Unsorted : WUnsortedBinderParser
         xw.Close();
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
         var bnd = new BND4();
 
@@ -80,21 +82,19 @@ public abstract class WBND4Unsorted : WUnsortedBinderParser
         bnd.Unk04 = bool.Parse(xml.Element("unk04")!.Value);
         bnd.Unk05 = bool.Parse(xml.Element("unk05")!.Value);
 
-        ReadUnsortedBinderFiles(bnd, srcPath, root);
+        ReadUnsortedBinderFiles(bnd, srcPath, root, recursive);
 
         var destPath = GetRepackDestPath(srcPath, xml);
 
-        WBUtil.Backup(destPath);
+        Backup(destPath);
 
         WarnAboutKrak(compression, bnd.Files.Count);
 
         bnd.Write(destPath);
     }
 
-    public override string GetUnpackDestPath(string srcPath)
+    public override string GetUnpackDestPath(string srcPath, bool recursive)
     {
-        string sourceDir = new FileInfo(srcPath).Directory?.FullName;
-        string fileName = Path.GetFileName(srcPath);
-        return $"{sourceDir}\\{fileName.Replace('.', '-')}-w{XmlTag.ToLower()}";
+        return $"{base.GetUnpackDestPath(srcPath, recursive)}-w{XmlTag.ToLower()}";
     }
 }

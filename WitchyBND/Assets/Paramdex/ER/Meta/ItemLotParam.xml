@@ -44,15 +44,15 @@
     <cumulateLotPoint06 AltName="6 - Item Accumulate Chance" Wiki="Appearance point at maximum cumulative" />
     <cumulateLotPoint07 AltName="7 - Item Accumulate Chance" Wiki="Appearance point at maximum cumulative" />
     <cumulateLotPoint08 AltName="8 - Item Accumulate Chance" Wiki="Appearance point at maximum cumulative" />
-    <getItemFlagId01 AltName="1 - Item Acquisition Flag" Wiki="Combined use of acquired flag and crunchy frame (0: common use)" />
-    <getItemFlagId02 AltName="2 - Item Acquisition Flag" Wiki="Combined use of acquired flag and crunchy frame (0: common use)" />
-    <getItemFlagId03 AltName="3 - Item Acquisition Flag" Wiki="Combined use of acquired flag and crunchy frame (0: common use)" />
-    <getItemFlagId04 AltName="4 - Item Acquisition Flag" Wiki="Combined use of acquired flag and crunchy frame (0: common use)" />
-    <getItemFlagId05 AltName="5 - Item Acquisition Flag" Wiki="Combined use of acquired flag and crunchy frame (0: common use)" />
-    <getItemFlagId06 AltName="6 - Item Acquisition Flag" Wiki="Combined use of acquired flag and crunchy frame (0: common use)" />
-    <getItemFlagId07 AltName="7 - Item Acquisition Flag" Wiki="Combined use of acquired flag and crunchy frame (0: common use)" />
-    <getItemFlagId08 AltName="8 - Item Acquisition Flag" Wiki="Combined use of acquired flag and crunchy frame (0: common use)" />
-    <getItemFlagId AltName="Item Acquisition Flag" Wiki="Combined use of acquired flag and crunchy frame (0: flag invalid)" />
+    <getItemFlagId01 AltName="1 - Item Acquisition Flag" Wiki="Combined use of acquired flag and crunchy frame (0: common use)" FlagAlias="" />
+    <getItemFlagId02 AltName="2 - Item Acquisition Flag" Wiki="Combined use of acquired flag and crunchy frame (0: common use)" FlagAlias="" />
+    <getItemFlagId03 AltName="3 - Item Acquisition Flag" Wiki="Combined use of acquired flag and crunchy frame (0: common use)" FlagAlias="" />
+    <getItemFlagId04 AltName="4 - Item Acquisition Flag" Wiki="Combined use of acquired flag and crunchy frame (0: common use)" FlagAlias="" />
+    <getItemFlagId05 AltName="5 - Item Acquisition Flag" Wiki="Combined use of acquired flag and crunchy frame (0: common use)" FlagAlias="" />
+    <getItemFlagId06 AltName="6 - Item Acquisition Flag" Wiki="Combined use of acquired flag and crunchy frame (0: common use)" FlagAlias="" />
+    <getItemFlagId07 AltName="7 - Item Acquisition Flag" Wiki="Combined use of acquired flag and crunchy frame (0: common use)" FlagAlias="" />
+    <getItemFlagId08 AltName="8 - Item Acquisition Flag" Wiki="Combined use of acquired flag and crunchy frame (0: common use)" FlagAlias="" />
+    <getItemFlagId AltName="Item Acquisition Flag" Wiki="Combined use of acquired flag and crunchy frame (0: flag invalid)" FlagAlias="" />
     <cumulateNumFlagId AltName="Item Accumulate Flag" Wiki="For saving the number of lottery (* 8 flag serial number used)" />
     <cumulateNumMax AltName="Item Accumulate Max" Wiki="Maximum number of lottery cumulative (0: no cumulative)" />
     <lotItem_Rarity AltName="Item Rarity" Wiki="Specify how valuable items are in the treasure chest. When -1, use the rarity of the equipment para without overwriting" />
@@ -83,8 +83,8 @@
     <GameClearOffset AltName="Game Clear Offset" Wiki="Offset during lap play" />
     <canExecByFriendlyGhost AltName="Can Friendly Phantom Acquire" Wiki="Do you draw lots even when you are a cooperating spirit?" IsBool="" />
     <canExecByHostileGhost AltName="Can Hostile Phantom Acquire" Wiki="Do you draw lots even when you are a hostile spirit?" IsBool="" />
-    <PAD1 AltName="Blank" Wiki="PAD1" />
-    <PAD2 AltName="Blank" Wiki="PAD2" />
+    <PAD1 IsHidden="" />
+    <PAD2 IsHidden="" />
   </Field>
   <Self Wiki="Defines item lots that can be rolled upon item pickup, enemy death or granted via script.\nWhen doing this, consecutive IDs are also rolled.\nA single result is produced by each row.\nA row will not be rolled if the flag is already set." ConsecutiveIDs="" AlternativeOrder="
 GameClearOffset,canExecByFriendlyGhost,canExecByHostileGhost,-,

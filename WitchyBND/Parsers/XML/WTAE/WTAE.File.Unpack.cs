@@ -17,20 +17,21 @@ public partial class WTAEFile
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
         file = null;
-        return !Configuration.TaeFolder && IsRead<TAE>(path, data, out file);
+        return !Configuration.Active.TaeFolder && IsRead<TAE>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override bool? IsSimple(string path)
+    {
+        string filename = Path.GetFileName(path).ToLower();
+        return !Configuration.Active.TaeFolder && filename.EndsWith(".tae");
+    }
+
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         TAE tae = (file as TAE)!;
 
-        var game = gameService.DetermineGameType(srcPath, false).Item1;
-        if (!templateDict.ContainsKey(game))
-        {
-            throw new GameUnsupportedException(game);
-        }
-
-        var template = templateDict[game];
+        var game = gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.Other).Item1;
+        var template = gameService.GetTAETemplate(game);
         tae.ApplyTemplate(template);
 
         XDocument xDoc = new XDocument();
@@ -46,6 +47,8 @@ public partial class WTAEFile
         root.AddE("flags", string.Join(",", tae.Flags));
         root.AddE("bigendian", tae.BigEndian);
 
+        if (Version > 0) root.SetAttributeValue(VersionAttributeName, Version.ToString());
+
         if (tae.Animations.Any())
         {
             var bag = new ConcurrentBag<XElement>();
@@ -56,7 +59,7 @@ public partial class WTAEFile
                 bag.Add(UnpackAnim(tae, anim));
             }
 
-            if (Configuration.Parallel)
+            if (Configuration.Active.Parallel)
             {
                 Parallel.ForEach(tae.Animations, Callback);
             }
@@ -72,8 +75,8 @@ public partial class WTAEFile
         }
 
 
-        var destPath = GetUnpackDestPath(srcPath);
-        AddLocationToXml(srcPath, root);
+        var destPath = GetUnpackDestPath(srcPath, recursive);
+        AddLocationToXml(srcPath, recursive, root);
         xDoc.Save(destPath);
     }
 

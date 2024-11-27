@@ -1,31 +1,65 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using CommandLine;
 using Microsoft.Extensions.Configuration;
-using WitchyBND.CliModes;
+using Newtonsoft.Json;
 using WitchyBND.Parsers;
 using WitchyLib;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace WitchyBND;
+
+public interface IStoredConfig
+{
+    public bool Bnd { get; set; }
+    public bool Dcx { get; set; }
+    public float ParamDefaultValueThreshold { get; set; }
+
+    public WPARAM.CellStyle ParamCellStyle { get; set; }
+    public bool Recursive { get; set; }
+    public ushort EndDelay { get; set; }
+    public bool PauseOnError { get; set; }
+    public bool Parallel { get; set; }
+    public bool Expert { get; set; }
+    public bool Offline { get; set; }
+
+    public bool TaeFolder { get; set; }
+    public Dictionary<DeferFormat, DeferConfig> DeferTools { get; set; }
+
+    public bool Flexible { get; set; }
+
+    public WBUtil.BackupMethod BackupMethod { get; set; }
+}
+
+public interface IStoredOnlyConfig
+{
+    public DateTime LastUpdateCheck { get; set; }
+
+    public Version SkipUpdateVersion { get; set; }
+
+    public Version LastLaunchedVersion { get; set; }
+}
+
+public interface ITempConfig
+{
+    public bool UnpackOnly { get; set; }
+    public bool RepackOnly { get; set; }
+    public bool Passive { get; set; }
+
+    public bool Silent { get; set; }
+    public string? Location { get; set; }
+}
 
 public static class Configuration
 {
     public static bool IsTest { get; set; }
 
-    public static bool IsDebug
-    {
-        get
-        {
-#if (DEBUG)
-            return true;
-#endif
-            return false;
-        }
-    }
+    public static bool IsDebug => Debugger.IsAttached;
 
-    public class WitchyConfigValues
+    public class StoredConfig : IStoredConfig, IStoredOnlyConfig
     {
         public bool Bnd { get; set; }
         public bool Dcx { get; set; }
@@ -40,136 +74,127 @@ public static class Configuration
         public bool Offline { get; set; }
 
         public bool TaeFolder { get; set; }
-        public Dictionary<DeferFormat, DeferFormatConfiguration> DeferTools { get; set; } = new();
+        public Dictionary<DeferFormat, DeferConfig> DeferTools { get; set; } = new();
 
         public bool Flexible { get; set; }
+
+        public DateTime LastUpdateCheck { get; set; }
+
+        public Version SkipUpdateVersion { get; set; }
+
+        public Version LastLaunchedVersion { get; set; }
+
+        public WBUtil.BackupMethod BackupMethod { get; set; }
+
+        public bool GitBackup { get; set; }
     }
 
-    public class WitchyArgValues
+    public class ActiveConfig : IStoredConfig, ITempConfig
     {
+        public bool Bnd { get; set; }
+        public bool Dcx { get; set; }
+        public float ParamDefaultValueThreshold { get; set; }
+        public WPARAM.CellStyle ParamCellStyle { get; set; }
+        public bool Recursive { get; set; }
+        public ushort EndDelay { get; set; }
+        public bool PauseOnError { get; set; }
+        public bool Parallel { get; set; }
+        public bool Expert { get; set; }
+        public bool Offline { get; set; }
+        public bool TaeFolder { get; set; }
+        public Dictionary<DeferFormat, DeferConfig> DeferTools { get; set; }
+        public bool Flexible { get; set; }
+
+        // The following are args-only or otherwise temporary
         public bool UnpackOnly { get; set; }
         public bool RepackOnly { get; set; }
         public bool Passive { get; set; }
-
         public bool Silent { get; set; }
         public string? Location { get; set; }
+        public WBUtil.BackupMethod BackupMethod { get; set; }
+
+        public bool GitBackup { get; set; }
     }
 
-    private static WitchyConfigValues _values;
+    public static StoredConfig Stored;
+    public static ActiveConfig Active;
 
-    public static WitchyArgValues Args;
+    public static string AppDataDirectory =
+        Path.Combine(Environment.ExpandEnvironmentVariables("%AppData%"), "WitchyBND");
 
-    public static bool Bnd
+    public static bool ParamDefaultValues => Active.ParamDefaultValueThreshold > 0f;
+
+    public static void SwapOutConfig(IConfigurationRoot config)
     {
-        get => _values.Bnd;
-        set => _values.Bnd = value;
-    }
-
-    public static bool Dcx
-    {
-        get => _values.Dcx;
-        set => _values.Dcx = value;
-    }
-
-    public static float ParamDefaultValueThreshold
-    {
-        get => _values.ParamDefaultValueThreshold;
-        set => _values.ParamDefaultValueThreshold = value;
-    }
-
-    public static bool ParamDefaultValues => _values.ParamDefaultValueThreshold > 0f;
-
-    public static WPARAM.CellStyle ParamCellStyle
-    {
-        get => _values.ParamCellStyle;
-        set => _values.ParamCellStyle = value;
-    }
-
-    public static bool PauseOnError
-    {
-        get => _values.PauseOnError;
-        set => _values.PauseOnError = value;
-    }
-
-    public static bool Recursive
-    {
-        get => _values.Recursive;
-        set => _values.Recursive = value;
-    }
-
-    public static bool Flexible
-    {
-        get => _values.Flexible;
-        set => _values.Flexible = value;
-    }
-
-    public static ushort EndDelay
-    {
-        get => _values.EndDelay;
-        set => _values.EndDelay = value;
-    }
-
-    public static bool Expert
-    {
-        get => _values.Expert;
-        set => _values.Expert = value;
-    }
-
-    public static bool Parallel
-    {
-        get => _values.Parallel;
-        set => _values.Parallel = value;
-    }
-
-    public static bool Offline
-    {
-        get => _values.Offline;
-        set => _values.Offline = value;
-    }
-
-    public static bool TaeFolder
-    {
-        get => _values.TaeFolder;
-        set => _values.TaeFolder = value;
-    }
-
-    public static Dictionary<DeferFormat, DeferFormatConfiguration> DeferTools
-    {
-        get => _values.DeferTools;
-        set => _values.DeferTools = value;
-    }
-
-    public static void ReplaceConfig(IConfigurationRoot config)
-    {
-        _values = config.Get<WitchyConfigValues>();
-    }
-
-    private static string GetConfigLocation(string path)
-    {
-        return WBUtil.GetExeLocation(path);
+        Stored = config.Get<StoredConfig>();
+        ActivateStoredConfiguration();
     }
 
     static Configuration()
     {
-        _values = new WitchyConfigValues();
-        Args = new WitchyArgValues();
-        IConfigurationRoot config = new ConfigurationBuilder()
-            .AddJsonFile(GetConfigLocation("appsettings.json"), true)
-            .AddJsonFile(GetConfigLocation("appsettings.user.json"), true)
-            .AddJsonFile(GetConfigLocation("appsettings.override.json"), true)
-            .Build();
-        ;
-        _values = config.Get<WitchyConfigValues>();
+        Active = new ActiveConfig();
+
+        if (!Directory.Exists(AppDataDirectory))
+            Directory.CreateDirectory(AppDataDirectory);
+
+        LoadConfiguration();
     }
 
-    public static void UpdateConfiguration()
+    public static void LoadConfiguration()
     {
-        var configuration = _values;
-        // instead of updating appsettings.json file directly I will just write the part I need to update to appsettings.MyOverrides.json
-        // .Net Core in turn will read my overrides from appsettings.MyOverrides.json file
-        const string overrideFileName = "appsettings.user.json";
-        var newConfig = JsonSerializer.Serialize(configuration, new JsonSerializerOptions { WriteIndented = true });
-        File.WriteAllText(GetConfigLocation(overrideFileName), newConfig);
+        var builder = new ConfigurationBuilder();
+        bool breakOut = false;
+        string userSettingsPath = Path.Combine(AppDataDirectory, "appsettings.user.json");
+        while (!breakOut)
+        {
+            try
+            {
+                IConfigurationRoot config;
+                builder.AddJsonFile(WBUtil.GetExeLocation("appsettings.json"), true);
+
+                if (!IsDebug && !IsTest)
+                    builder.AddJsonFile(userSettingsPath, true);
+
+                builder.AddJsonFile(WBUtil.GetExeLocation("appsettings.override.json"), true);
+
+                breakOut = true;
+                config = builder.Build();
+                Stored = config.Get<StoredConfig>() ?? new StoredConfig();
+                ActivateStoredConfiguration();
+            }
+            catch (JsonReaderException e)
+            {
+                if (File.Exists(userSettingsPath))
+                    File.Delete(userSettingsPath);
+                breakOut = false;
+            }
+        }
+    }
+
+    public static void SaveConfiguration()
+    {
+        var newStored = JsonSerializer.Serialize(Stored, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(Path.Combine(AppDataDirectory, "appsettings.user.json"), newStored);
+    }
+
+    public static void ActivateStoredConfiguration(StoredConfig? stored = null)
+    {
+        stored ??= Stored;
+        Active.Bnd = stored.Bnd;
+        Active.Dcx = stored.Dcx;
+        Active.ParamDefaultValueThreshold = stored.ParamDefaultValueThreshold;
+        Active.ParamCellStyle = stored.ParamCellStyle;
+        Active.Recursive = stored.Recursive;
+        Active.EndDelay = stored.EndDelay;
+        Active.PauseOnError = stored.PauseOnError;
+        Active.Parallel = stored.Parallel;
+        Active.Expert = stored.Expert;
+        Active.Offline = stored.Offline;
+        Active.TaeFolder = stored.TaeFolder;
+        Active.DeferTools = stored.DeferTools;
+        Active.Flexible = stored.Flexible;
+        Active.BackupMethod = stored.BackupMethod;
+        Active.GitBackup = stored.GitBackup;
     }
 }
 
@@ -195,7 +220,8 @@ public class CliOptions
     [Option('e', "parallel", HelpText = "Runs operations parallelized")]
     public bool Parallel { get; set; }
 
-    [Option('m', "mode", HelpText = "Toggle the mode to use. Options are \"Parse\", \"Watch\" and \"Config\".", Default = CliMode.Parse)]
+    [Option('m', "mode", HelpText = "Toggle the mode to use. Options are \"Parse\", \"Watch\" and \"Config\".",
+        Default = CliMode.Parse)]
     public CliMode Mode { get; set; }
 
     [Option('p', "passive",
@@ -216,7 +242,15 @@ public class CliOptions
 
     [Option('b', "bnd",
         HelpText = "Perform basic unpacking of BND instead of using special Witchy methods, where present")]
-    public bool Bnd { get; set; }
+    public bool BasicBnd { get; set; }
+
+    [Option('a', "special",
+        HelpText = "Force special Witchy methods of unpacking BND, where present")]
+    public bool SpecializedBnd { get; set; }
+
+    [Option('f', "flexible",
+        HelpText = "Ignore assertions and other issues while unpacking, to counteract file tampering")]
+    public bool Flexible { get; set; }
 
     [Option('r', "repack", HelpText = "Only perform repack processing, no unpacking.", SetName = "pack")]
     public bool RepackOnly { get; set; }

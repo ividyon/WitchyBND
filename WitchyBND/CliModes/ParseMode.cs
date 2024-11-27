@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using PPlus;
 using SoulsFormats;
 using WitchyBND.Parsers;
@@ -17,7 +15,23 @@ namespace WitchyBND.CliModes;
 public static class ParseMode
 {
     private static readonly IErrorService errorService;
-    public static List<WFileParser> Parsers;
+    private static List<WFileParser> _parsers;
+
+    public static List<WFileParser> GetParsers(bool recursive)
+    {
+        return !recursive ? _parsers : _parsers.Where(p => p.AppliesRecursively).ToList();
+    }
+
+    public static List<WFileParser> GetPreprocessors(bool recursive)
+    {
+        return GetParsers(recursive).Where(p => p.HasPreprocess).ToList();
+    }
+
+    public static T GetParser<T>() where T : WFileParser
+    {
+        return _parsers.OfType<T>().First();
+    }
+
     private static readonly IOutputService output;
 
     static ParseMode()
@@ -25,14 +39,19 @@ public static class ParseMode
         output = ServiceProvider.GetService<IOutputService>();
         errorService = ServiceProvider.GetService<IErrorService>();
 
-        Parsers = new List<WFileParser>
+        _parsers = new List<WFileParser>
         {
-            new WDCX(),
+            new WDCX(true),
+            new WGFX(),
+            new WHKX(),
+            new WFLVER(),
+            new WLUA(),
             new WPARAMBND3(),
             new WPARAMBND4(),
             new WMATBINBND(),
             new WMTDBND(),
             new WFFXBNDModern(),
+            new WANIBND4(),
             new WBND3(),
             new WBND4(),
             new WBXF3(),
@@ -51,24 +70,51 @@ public static class ParseMode
             new WMQB(),
             new WDBSUB(),
             new WENFL(),
-            new WLUA(),
-            // new WHKX(),
             new WTAEFolder(),
             new WTAEFile(),
-            //MSBE
+            new WMSBEFolder(),
+            new WDCX(false)
         };
     }
+
     internal static void CliParseMode(CliOptions opt)
     {
         var paths = opt.Paths.ToList();
 
         paths = WBUtil.ProcessPathGlobs(paths).ToList();
 
-        ParseFiles(paths);
+        ParseFiles(paths, false);
     }
 
-    public static void ParseFiles(IEnumerable<string> paths, bool recursive = false)
+    public static void ParseFiles(IEnumerable<string> paths, bool recursive)
     {
+        var parsers = GetParsers(recursive);
+
+        IEnumerable<string> pathsList = paths.ToList();
+
+        Dictionary<string, (WFileParser, ISoulsFile)> preprocessedFiles = new();
+
+        if (!recursive)
+        {
+            output.WriteLine($"Preprocessing...");
+            foreach (string path in pathsList.Except(preprocessedFiles.Select(p => p.Key)))
+            {
+                foreach (WFileParser parser in GetPreprocessors(recursive))
+                {
+                    bool toBreak = errorService.Catch(() => parser.Preprocess(path, recursive, ref preprocessedFiles),
+                        out _, path);
+                    if (toBreak)
+                        break;
+                }
+            }
+        }
+
+        if (Configuration.Active.Parallel)
+            Parallel.ForEach(pathsList, Callback);
+        else
+            pathsList.ToList().ForEach(Callback);
+        return;
+
         void Callback(string path)
         {
             if (!File.Exists(path) && !Directory.Exists(path))
@@ -78,84 +124,69 @@ public static class ParseMode
                 return;
             }
 
-            string fileName = Path.GetFileName(path);
             var parsed = false;
             var error = false;
 
             byte[] data = null;
-            bool isDcx = false;
+
             parsed = errorService.Catch(() => {
                 var innerParsed = false;
+                var innerError = false;
                 DCX.Type compression = DCX.Type.None;
-                if (File.Exists(path) && DCX.Is(path))
+                ISoulsFile? file = null;
+                if (preprocessedFiles.ContainsKey(path))
                 {
-                    if (!WPARAMBND4.FilenameIsPARAMBND4(path))
-                    {
-                        output.WriteLine($"Decompressing DCX: {fileName.PromptPlusEscape()}...");
-
-                        isDcx = true;
-                        data = DCX.Decompress(path, out DCX.Type compressionVal);
-                        compression = compressionVal;
-                    }
+                    parsers = [preprocessedFiles[path].Item1];
+                    file = preprocessedFiles[path].Item2;
+                    compression = file.Compression;
                 }
 
-                foreach (WFileParser parser in Parsers)
+                foreach (WFileParser parser in parsers)
                 {
+                    bool innerMatch = false;
+
                     innerParsed = errorService.Catch(() => {
-                        ISoulsFile? file;
-                        if ((Configuration.Args.UnpackOnly || !Configuration.Args.RepackOnly) && parser.Exists(path) &&
-                            parser.Is(path, data, out file))
+                        ISoulsFile? parsedFile = null;
+                        if ((Configuration.Active.UnpackOnly || !Configuration.Active.RepackOnly) && (file != null ||
+                                (parser.Exists(path) &&
+                                 parser.Is(path, data, out parsedFile))))
                         {
+                            file ??= parsedFile;
+                            innerMatch = true;
                             Unpack(path, file, compression, parser, recursive);
                             return true;
                         }
 
-                        if ((Configuration.Args.RepackOnly || !Configuration.Args.UnpackOnly) &&
+                        if ((Configuration.Active.RepackOnly || !Configuration.Active.UnpackOnly) &&
                             parser.ExistsUnpacked(path) && parser.IsUnpacked(path))
                         {
+                            innerMatch = true;
                             Repack(path, parser, recursive);
                             return true;
                         }
 
                         return false;
-                    }, out error, path);
+                    }, out innerError, path);
 
-                    if (innerParsed)
+                    if (innerMatch)
                         break;
                 }
 
-                // If no other parser present but file is a DCX, at least un-DCX it
-                if (!innerParsed && isDcx && !Configuration.Args.RepackOnly)
-                {
-                    WDCX dcxParser = Parsers.OfType<WDCX>().First();
-                    innerParsed = errorService.Catch(() => {
-                        Unpack(path, null, compression, dcxParser, false);
-                        return true;
-                    }, out error, path);
-                }
+                // // If no other parser present but file is a DCX, at least un-DCX it
+                // if (!innerParsed && !error && isDcx && !Configuration.Active.RepackOnly)
+                // {
+                //     WDCX dcxParser = _parsers.OfType<WDCX>().First();
+                //     innerParsed = errorService.Catch(() => {
+                //         Unpack(path, null, compression, dcxParser, false);
+                //         return true;
+                //     }, out error, path);
+                // }
 
                 return innerParsed;
             }, out error, path);
 
             PrintParseSuccess(path, parsed, error, recursive);
         }
-
-        IEnumerable<string> pathsList = paths.ToList();
-
-        foreach (WFileParser parser in Parsers.Where(p => p.HasPreprocess))
-        {
-            foreach (string path in pathsList)
-            {
-                bool toBreak = errorService.Catch(() => parser.Preprocess(path), out _, path);
-                if (toBreak)
-                    break;
-            }
-        }
-
-        if (Configuration.Parallel)
-            Parallel.ForEach(pathsList, Callback);
-        else
-            pathsList.ToList().ForEach(Callback);
     }
 
     public static void PrintParseSuccess(string path, bool parsed, bool error, bool recursive)
@@ -163,7 +194,7 @@ public static class ParseMode
         switch (parsed)
         {
             case true:
-                if (Configuration.Parallel)
+                if (Configuration.Active.Parallel)
                 {
                     string fileName = Path.GetFileName(path);
                     if (recursive)
@@ -179,6 +210,7 @@ public static class ParseMode
                 {
                     // output.WriteError($"Could not find valid parser for {path.PromptPlusEscape()}.");
                 }
+
                 break;
         }
     }
@@ -207,7 +239,7 @@ public static class ParseMode
                 break;
         }
 
-        parser.Unpack(path, file);
+        parser.Unpack(path, file, recursive);
     }
 
     public static void Repack(string path, WFileParser parser, bool recursive)
@@ -237,6 +269,6 @@ public static class ParseMode
                 @"Parser version of unpacked file is outdated. Please repack this file using the WitchyBND version it was originally unpacked with, then unpack it using the newest version.");
         }
 
-        parser.Repack(path);
+        parser.Repack(path, recursive);
     }
 }

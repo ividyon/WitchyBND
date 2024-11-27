@@ -34,42 +34,6 @@
         <Option Value="13" Name="Unknown" />
         <Option Value="14" Name="Unknown" />
     </Enum>
-    <Enum Name="WEPMOTION_CATEGORY" type="u8">
-        <Option Value="0" Name="None" />
-        <Option Value="20" Name="Dagger" />
-        <Option Value="21" Name="Torch" />
-        <Option Value="22" Name="Claw" />
-        <Option Value="23" Name="Straight Sword" />
-        <Option Value="24" Name="Twinblade" />
-        <Option Value="25" Name="Greatsword" />
-        <Option Value="26" Name="Colossal Sword" />
-        <Option Value="27" Name="Thrusting Sword" />
-        <Option Value="28" Name="Curved Sword" />
-        <Option Value="29" Name="Katana" />
-        <Option Value="30" Name="Axe" />
-        <Option Value="31" Name="Colossal Weapon" />
-        <Option Value="32" Name="Greataxe" />
-        <Option Value="33" Name="Hammer" />
-        <Option Value="34" Name="Flail" />
-        <Option Value="35" Name="Great Hammer" />
-        <Option Value="36" Name="Spear" />
-        <Option Value="37" Name="Great Spear" />
-        <Option Value="38" Name="Halberd" />
-        <Option Value="39" Name="Heavy Thrusting Sword" />
-        <Option Value="40" Name="Curved Greatsword" />
-        <Option Value="41" Name="Catalyst" />
-        <Option Value="42" Name="Fist" />
-        <Option Value="43" Name="Whip" />
-        <Option Value="44" Name="Bow" />
-        <Option Value="45" Name="Greatbow" />
-        <Option Value="46" Name="Crossbow" />
-        <Option Value="47" Name="Greatshield" />
-        <Option Value="48" Name="Small Shield" />
-        <Option Value="49" Name="Medium Shield" />
-        <Option Value="50" Name="Scythe" />
-        <Option Value="51" Name="Light Bow" />
-        <Option Value="52" Name="Ballista" />
-    </Enum>
     <Enum Name="GUARDMOTION_CATEGORY" type="u8">
         <Option Value="0" Name="Medium Shield" />
         <Option Value="1" Name="Greatshield" />
@@ -137,107 +101,6 @@
         <Option Value="172" Name="Type 172" />
         <Option Value="173" Name="Type 173" />
         <Option Value="255" Name="Type 255" />
-    </Enum>
-    <Enum Name="ATKPARAM_SPATTR_TYPE" type="u8">
-      <Option Value="0" Name="Physical" />
-      <Option Value="10" Name="Magic" />
-      <Option Value="11" Name="Fire" />
-      <Option Value="12" Name="Lightning" />
-      <Option Value="13" Name="Holy" />
-      <Option Value="20" Name="Poison" />
-      <Option Value="21" Name="Scarlet Rot" />
-      <Option Value="22" Name="Hemorrhage" />
-      <Option Value="23" Name="Frostbite" />
-      <Option Value="24" Name="Sleep" />
-      <Option Value="25" Name="Madness" />
-      <Option Value="26" Name="Blight" />
-    </Enum>
-    <Enum Name="WEPMOTION_OVERRIDE_CATEGORY" type="u16">
-        <Option Value="0" Name="None" />
-        <Option Value="100" Name="Great Knife/Ivory Sickle/Celebrant's Sickle" />
-        <Option Value="101" Name="Misericorde/Scorpion's Stinger/Glintstone Kris" />
-        <Option Value="103" Name="Erdsteel Dagger/Blade of Calling/Black Knife" />
-        <Option Value="104" Name="Wakizashi " />
-        <Option Value="110" Name="Broadsword/Cane Sword " />
-        <Option Value="111" Name="Short Sword" />
-        <Option Value="112" Name="Miquellan Knight's Sword " />
-        <Option Value="113" Name="Carian Knight's Sword/Lazuli Glintstone Sword " />
-        <Option Value="117" Name="Warhawk's Talon " />
-        <Option Value="852" Name="Ornamental Straight Sword " />
-        <Option Value="125" Name="Claymore " />
-        <Option Value="126" Name="Flamberge " />
-        <Option Value="127" Name="Sword of Milos/Death's Poker " />
-        <Option Value="128" Name="Knight's Greatsword/Banished Knight's Greatsword/Inseparable Sword " />
-        <Option Value="129" Name="Dark Moon Greatsword " />
-        <Option Value="130" Name="Marais Executioner's Sword " />
-        <Option Value="135" Name="Zweihander/Troll Knight's Sword " />
-        <Option Value="136" Name="Greatsword " />
-        <Option Value="138" Name="Ruins Greatsword " />
-        <Option Value="137" Name="Godslayer's Greatsword " />
-        <Option Value="832" Name="Starscourge Greatsword " />
-        <Option Value="145" Name="Estoc/Noble's Estoc " />
-        <Option Value="146" Name="Rogier's Rapier " />
-        <Option Value="147" Name="Frozen Needle " />
-        <Option Value="150" Name="Godskin Stitcher " />
-        <Option Value="151" Name="Great Epee " />
-        <Option Value="155" Name="Shotel/Eclipse Shotel /Nox Flowing Sword" />
-        <Option Value="156" Name="Scimitar/Shamshir" />
-        <Option Value="157" Name="Flowing Curved Sword " />
-        <Option Value="158" Name="Mantis Blade " />
-        <Option Value="159" Name="Wing of Astel " />
-        <Option Value="161" Name="Beastman's Curved Sword " />
-        <Option Value="215" Name="Zamor Curved Sword " />
-        <Option Value="216" Name="Omen Cleaver/Magma Wyrm's Scalesword" />
-        <Option Value="165" Name="Serpentbone Blade " />
-        <Option Value="166" Name="Meteoric Ore Blade " />
-        <Option Value="167" Name="Nagakiba " />
-        <Option Value="120" Name="Eleonora's Poleblade" />
-        <Option Value="121" Name="Godskin Peeler " />
-        <Option Value="180" Name="Club/Stone Club " />
-        <Option Value="181" Name="Spiked Club " />
-        <Option Value="182" Name="Morning Star/Scepter of the All-Knowing " />
-        <Option Value="183" Name="Mace " />
-        <Option Value="184" Name="Monk's Flamemace " />
-        <Option Value="170" Name="Hand Axe/Icerind Hatchet/Forked Hatchet" />
-        <Option Value="171" Name="Warped Axe/Ripple Blade" />
-        <Option Value="172" Name="Iron Cleaver/Celebrant's Cleaver " />
-        <Option Value="175" Name="Butchering Knife " />
-        <Option Value="176" Name="Pickaxe " />
-        <Option Value="177" Name="Axe of Godrick/Crescent Moon Axe" />
-        <Option Value="200" Name="Partisan/Spiked Spear/Death Ritual Spear " />
-        <Option Value="201" Name="Pike " />
-        <Option Value="202" Name="Cross-Naginata " />
-        <Option Value="203" Name="Short Spear/Cleanrot Spear " />
-        <Option Value="205" Name="Vyke's War Spear/Siluria's Tree " />
-        <Option Value="206" Name="Treespear " />
-        <Option Value="207" Name="Serpent-Hunter " />
-        <Option Value="210" Name="Halberd/Commander's Standard/Banished Knight's Halberd/Dragon Halberd" />
-        <Option Value="211" Name="Lucerne/Golden Halberd/Nightrider Glaive" />
-        <Option Value="212" Name="Guardian's Swordspear/Loretta's War Sickle" />
-        <Option Value="225" Name="Scythe" />
-        <Option Value="220" Name="Katar/Veteran's Prosthesis " />
-        <Option Value="221" Name="Caestus " />
-        <Option Value="226" Name="Urumi " />
-        <Option Value="227" Name="Raptor Talons " />
-        <Option Value="196" Name="Prelate's Inferno Crozier " />
-        <Option Value="195" Name="Great Club " />
-        <Option Value="197" Name="Giant-Crusher " />
-        <Option Value="198" Name="Golem's Halberd " />
-        <Option Value="831" Name="Axe of Godfrey " />
-        <Option Value="839" Name="Ghiza's Wheel " />
-        <Option Value="250" Name="Ghostflame Torch " />
-        <Option Value="251" Name="St. Trina's Torch " />
-        <Option Value="240" Name="Seal " />
-        <Option Value="230" Name="Albinauric Bow" />
-        <Option Value="232" Name="Harp Bow " />
-        <Option Value="233" Name="Pulley Crossbow " />
-        <Option Value="236" Name="Full Moon Crossbow" />
-    </Enum>
-    <Enum Name="ATKPARAM_ATKATTR_TYPE" type="u8">
-        <Option Value="0" Name="Slash" />
-        <Option Value="1" Name="Strike" />
-        <Option Value="2" Name="Thrust" />
-        <Option Value="3" Name="Standard" />
     </Enum>
     <Enum Name="WEP_BASE_CHANGE_CATEGORY" type="u8">
         <Option Value="0" Name="Category 0" />
@@ -364,6 +227,14 @@
         <Option Value="85" Name="Bolt" />
         <Option Value="86" Name="Ballista Bolt" />
         <Option Value="87" Name="Torch" />
+        <Option Value="88" Name="Hand-to-Hand" />
+        <Option Value="89" Name="Perfume Bottle" />
+        <Option Value="90" Name="Thrusting Shield" />
+        <Option Value="91" Name="Throwing Blade" />
+        <Option Value="92" Name="Reverse-hand Blade" />
+        <Option Value="93" Name="Light Greatsword" />
+        <Option Value="94" Name="Great Katana" />
+        <Option Value="95" Name="Beast Claw" />
     </Enum>
     <Enum Name="REINFORCE_SHOP_CATEGORY" type="u8">
       <Option Value="0" Name="No Reinforcement" />
@@ -377,14 +248,18 @@
     </Enum>
     <Enum Name="DISPLAY_CATEGORY_ID" type="u8">
       <Option Value="10" Name="Dagger - Torch - Shortbow - Arrow" />
+      <Option Value="15" Name="Throwing Blade" />
       <Option Value="20" Name="Straight Sword - Small Shield - Longbow - Great Arrow" />
+      <Option Value="25" Name="Light Greatsword" />
       <Option Value="30" Name="Greatswrod - Medium Shield - Greatbow - Bolt" />
       <Option Value="40" Name="Ultra Greatsword - Greatshield - Crossbow - Greatbolt" />
       <Option Value="50" Name="Thrusting Sword - Ballista" />
       <Option Value="60" Name="Heavy Thrusting Sword - Staff" />
       <Option Value="70" Name="Curved Sword - Seal" />
       <Option Value="80" Name="Curved Greatsword" />
+      <Option Value="85" Name="Reverse-hand Blade" />
       <Option Value="90" Name="Katana" />
+      <Option Value="95" Name="Great Katana" />
       <Option Value="100" Name="Twinblade" />
       <Option Value="110" Name="Axe" />
       <Option Value="120" Name="Greataxe" />
@@ -398,7 +273,10 @@
       <Option Value="200" Name="Scythe" />
       <Option Value="210" Name="Whip" />
       <Option Value="220" Name="Fist Weapon" />
+      <Option Value="225" Name="Hand-to-Hand" />
       <Option Value="230" Name="Claw Weapon" />
+      <Option Value="240" Name="Beast Claw" />
+      <Option Value="250" Name="Perfume Bottle" />
       <Option Value="255" Name="None" />
     </Enum>
     <Enum Name="RARITY" type="u8">
@@ -410,8 +288,8 @@
   </Enums>
   <Field>
     <disableParam_NT AltName="Disable Param - Network Test" Wiki="Parameters marked with  are excluded in the NT version package." IsBool="" />
-    <disableParamReserve1 AltName=""/>
-    <disableParamReserve2 AltName=""/>
+    <disableParamReserve1 AltName="" IsHidden=""/>
+    <disableParamReserve2 AltName="" IsHidden=""/>
     <behaviorVariationId AltName="Behavior Variation ID" Wiki="Used when determining the action parameter ID to be referenced during an attack" VRef="behaviorVariation" />
     <sortId AltName="Sort ID" Wiki="Sort ID (-1: Do not collect) (7 digits is the limit in s32 to add the enhancement level in the program)" />
     <wanderingEquipId AltName="Wandering Equip ID" Wiki="Replacement equipment ID for wandering ghosts." />
@@ -459,7 +337,7 @@
     <madnessGuardResist_MaxCorrect AltName="Max Correction: Madness Guard Resist" Wiki="Maximum value of cut rate correction value for attack power against madness (set as special effect parameter)" />
     <saWeaponDamage AltName="Poise Damage" Wiki="Super Armor Basic Attack Power" />
     <equipModelId AltName="Equip Model ID" Wiki="Equipment model number." />
-    <iconId AltName="Icon ID" Wiki="Menu icon ID." ExtRefs="hi,menu\hi\00_solo.tpfbhd,00_Solo\MENU_Knowledge_{0:D5}.tpf.dcx,MENU_Knowledge_{0:D5}.dds;low,menu\low\00_solo.tpfbhd,00_Solo\MENU_Knowledge_{0:D5}.tpf.dcx,MENU_Knowledge_{0:D5}.dds" />
+    <iconId AltName="Icon ID" Wiki="Menu icon ID." TextureRef="Direct/01_common/SB_Icon_00/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_01/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_02/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_02_A/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_02_B/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_03/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_03_A/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_04/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_05/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_06/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_07_dlc/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_07_dlc_A/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_08_dlc/iconId/MENU_ItemIcon_" /> />
     <durability AltName="Durability" Wiki="Initial durability." />
     <durabilityMax AltName="Max Durability" Wiki="New durability." />
     <attackThrowEscape AltName="Throw Escape Damage" Wiki="Basic value of throw-through attack power" />
@@ -480,13 +358,13 @@
     <equipModelCategory AltName="Equip Model Category" Wiki="Equipment model type." Enum="EQUIP_MODEL_CATEGORY" />
     <equipModelGender AltName="Equip Model Gender" Wiki="Gender of equipment model." Enum="EQUIP_MODEL_GENDER" />
     <weaponCategory AltName="Weapon Category" Wiki="Weapon category." Enum="WEAPON_CATEGORY" />
-    <wepmotionCategory AltName="Weapon Motion Category" Wiki="Weapon motion category." Enum="WEPMOTION_CATEGORY" />
+    <wepmotionCategory AltName="Weapon Motion Category" Wiki="Weapon motion category." ProjectEnum="WEPMOTION_CATEGORY" />
     <guardmotionCategory AltName="Guard Motion Category" Wiki="Guard motion category" Enum="GUARDMOTION_CATEGORY" />
     <atkMaterial AltName="Attack Material" Wiki="Attack material used from attack para" Enum="WEP_MATERIAL_ATK" />
     <defSeMaterial1 AltName="Defence SE Material [1]" Wiki="Defense SE material used from attack para 1" Enum="WEP_MATERIAL_DEF" />
     <correctType_Physics AltName="Correction Type: Physical" Wiki="Correcting physical attack power by primary parameters Determines the type of graph" Refs="CalcCorrectGraph" />
-    <spAttribute AltName="Speical Attribute" Wiki="Weapon special attribute value" Enum="ATKPARAM_SPATTR_TYPE" />
-    <spAtkcategory AltName="Special Motion Category" Wiki="Special attack category (possible from 50 to 999)" Enum="WEPMOTION_OVERRIDE_CATEGORY" />
+    <spAttribute AltName="Special Attribute" Wiki="Weapon special attribute value" ProjectEnum="ATKPARAM_SPATTR_TYPE" />
+    <spAtkcategory AltName="Special Motion Category" Wiki="Special attack category (possible from 50 to 999)" ProjectEnum="WEPMOTION_OVERRIDE_CATEGORY" />
     <wepmotionOneHandId AltName="Weapon Motion Position - 1H" Wiki="Basic motion ID when equipped with one hand." />
     <wepmotionBothHandId AltName="Weapon Motion Position - 2H" Wiki="Basic motion ID when equipped with both hands." />
     <properStrength AltName="Requirement: STR" Wiki="Equipment appropriate value." />
@@ -507,7 +385,7 @@
     <diseaseGuardResist AltName="Guard Resist: Scarlet Rot" Wiki="How much to cut the attack power (set as a special effect parameter) to make it a plague" />
     <bloodGuardResist AltName="Guard Resist: Hemorrhage" Wiki="How much to cut the attack power (set as a special effect parameter) to make bleeding" />
     <curseGuardResist AltName="Guard Resist: Blight" Wiki="How much to cut the attack power (set as a special effect parameter) to curse" />
-    <atkAttribute AltName="Attack Attribute" Wiki="Physical attribute 1" Enum="ATKPARAM_ATKATTR_TYPE" />
+    <atkAttribute AltName="Attack Attribute [1]" Wiki="Physical attribute 1" ProjectEnum="ATKPARAM_ATKATTR_TYPE" />
     <rightHandEquipable AltName="Can wield in Right Hand" Wiki="Is it possible to equip it with the right hand?" IsBool="" />
     <leftHandEquipable AltName="Can wield in Left Hand" Wiki="Is it possible to equip it with the left hand?" IsBool="" />
     <bothHandEquipable AltName="Can wield in Both Hands" Wiki="Is it possible to equip with both hands?" IsBool="" />
@@ -580,7 +458,7 @@
     <isAutoEquip AltName="Is Auto Equipped" Wiki="Only valid for arrows and bolts. Whether to automatically equip this weapon if the target equipment slot is empty when picking up this weapon" IsBool="" />
     <isEnableEmergencyStep AltName="Is Emergency Avoidance Possible" Wiki="Is it an emergency avoidable weapon? Pass it to the behavior script." IsBool="" />
     <invisibleOnRemo AltName="Is Hidden in Cutscene" Wiki="Is it hidden during cutscenes?" IsBool="" />
-    <pad2 AltName=""/>
+    <pad2 AltName="" IsHidden=""/>
     <correctType_Magic AltName="Correction Type: Magic" Wiki="Determining the type of magic attack power correction graph with primary parameters" Refs="CalcCorrectGraph" />
     <correctType_Fire AltName="Correction Type: Fire" Wiki="Determine the type of flame attack power correction graph with primary parameters" Refs="CalcCorrectGraph" />
     <correctType_Thunder AltName="Correction Type: Lightning" Wiki="Determine the type of lightning attack power correction graph with primary parameters" Refs="CalcCorrectGraph" />
@@ -591,7 +469,7 @@
     <correctType_Dark AltName="Correction Type: Holy" Wiki="Determine the type of darkness attack power correction graph with primary parameters" Refs="CalcCorrectGraph" />
     <correctType_Poison AltName="Correction Type: Poison" Wiki="Determining the type of poison attack power correction graph with primary parameters" Refs="CalcCorrectGraph" />
     <sortGroupId AltName="Sort Group ID" Wiki="Sort item type ID. In the sort Item type order, the same ID is displayed together as the same group." Enum="DISPLAY_CATEGORY_ID" />
-    <atkAttribute2 AltName="Attack Attribute [2]" Wiki="Physical attribute 2" Enum="ATKPARAM_ATKATTR_TYPE" />
+    <atkAttribute2 AltName="Attack Attribute [2]" Wiki="Physical attribute referred to in the AtkParam" ProjectEnum="ATKPARAM_ATKATTR_TYPE" />
     <sleepGuardResist AltName="Guard Resist: Sleep" Wiki="How much to cut the attack power (set as a special effect parameter) to sleep" />
     <madnessGuardResist AltName="Guard Resist: Madness" Wiki="How much to cut the attack power (set to the special effect parameter) that makes you go mad" />
     <correctType_Blood AltName="Correction Type: Hemorrhage" Wiki="Determine the type of bleeding attack power correction graph with primary parameters" Refs="CalcCorrectGraph" />
@@ -657,9 +535,9 @@
     <rarity AltName="Rarity" Wiki="Rarity used in item acquisition logs" Enum="RARITY" />
     <gemMountType AltName="Ash of War Type" Wiki="Is it possible to attach magic stones?" Enum="GEM_MOUNT_TYPE" />
     <wepRegainHp AltName="Weapon Regain HP Amount" Wiki="Weapon regain amount" />
-    <spEffectMsgId0 AltName="SpEffect Message ID [0]" Wiki="Effect text ID 00 (Weapon_Effect). Weapon-specific effect text to display in status" FmgRef="WeaponEffect" />
-    <spEffectMsgId1 AltName="SpEffect Message ID [1]" Wiki="Effect text ID 01 (Weapon_Effect). Weapon-specific effect text to display in status" FmgRef="WeaponEffect" />
-    <spEffectMsgId2 AltName="SpEffect Message ID [2]" Wiki="Effect text ID 02 (Weapon_Effect). Weapon-specific effect text to display in status" FmgRef="WeaponEffect" />
+    <spEffectMsgId0 AltName="SpEffect Message ID [0]" Wiki="Effect text ID 00 (Weapon_Effect). Weapon-specific effect text to display in status" FmgRef="Effect_Weapons" />
+    <spEffectMsgId1 AltName="SpEffect Message ID [1]" Wiki="Effect text ID 01 (Weapon_Effect). Weapon-specific effect text to display in status" FmgRef="Effect_Weapons" />
+    <spEffectMsgId2 AltName="SpEffect Message ID [2]" Wiki="Effect text ID 02 (Weapon_Effect). Weapon-specific effect text to display in status" FmgRef="Effect_Weapons" />
     <originEquipWep16 AltName="Origin Weapon +16" Wiki="This weapon's enhancement source weapon ID 16" Refs="EquipParamWeapon"/>
     <originEquipWep17 AltName="Origin Weapon +17" Wiki="This weapon's enhancement source weapon ID 17" Refs="EquipParamWeapon"/>
     <originEquipWep18 AltName="Origin Weapon +18" Wiki="This weapon's enhancement source weapon ID18" Refs="EquipParamWeapon"/>
@@ -678,7 +556,10 @@
     <stealthAtkRate AltName="Stealth Attack Multiplier" Wiki="Stealth attack power multiplier" />
     <vsPlayerDmgCorrectRate_Disease AltName="Vs. Player - Scarlet Rot Damage %" Wiki="Only attacks on the player will correct the damage done." />
     <vsPlayerDmgCorrectRate_Curse AltName="Vs. Player - Blight Damage %" Wiki="Only attacks on the player will correct the damage done." />
-    <pad AltName=""/>
+    <pad AltName="" IsHidden=""/>
+    <restrictSpecialSwordArt AltName="Restrict Special Ashes of War" Wiki="If set to true, then ashes of war in EquipParamGem with isSpecialSwordArt set to 1 cannot be applied to this weapon." IsBool="" />
+    <isArrow AltName="Is Arrow" Wiki="[DLC] Is on by default for arrows." IsBool=""/>
+    <isWeaponCatalyst AltName="Is Weapon Catalyst" Wiki="[DLC] Is on by default for Carian Sorcery Sword." IsBool="" />
   </Field>
   <Self Wiki="Defines weapon types and each affinity.\nIncludes arrows and bolts. Responsible for scaling shown on certain consumables.\nIDs not ending in a multiple of 100 are ignored.\nPermitting affinities on a weapon without affinity rows at the correct IDs will result in the nearest 10000 being used.\nSpEffects specified here can be modified by upgrades in ReinforceParamWeapon." OffsetSize="100" AlternativeOrder="sortId,trophySGradeId,-,
 behaviorVariationId,swordArtsParamId,wepmotionCategory,guardmotionCategory,wepmotionOneHandId,wepmotionBothHandId,-,
@@ -703,10 +584,10 @@ overStrength,-,
 guardBaseRepel,attackBaseRepel,guardCutCancelRate,guardLevel,-,
 rightHandEquipable,leftHandEquipable,bothHandEquipable,arrowSlotEquipable,boltSlotEquipable,-,
 enableGuard,enableParry,enableMagic,enableMiracle,enableSorcery,enableVowMagic,-,
-isDualBlade,isEnhance,-,
+isDualBlade,isEnhance,isArrow,isWeaponCatalyst,-,
 disableBaseChangeReset,disableRepair,isDarkHand,simpleModelForDlc,lanternWep,isVersusGhostWep,baseChangeCategory,isDragonSlayer,-,
 isDeposit,disableMultiDropShare,isDiscard,isDrop,isAutoEquip,-,
-showLogCondType,enableThrow,showDialogCondType,disableGemAttr,defSfxMaterial1,wepCollidableType0,wepCollidableType1,postureControlId_Right,postureControlId_Left,-,
+showLogCondType,enableThrow,showDialogCondType,disableGemAttr,restrictSpecialSwordArt,defSfxMaterial1,wepCollidableType0,wepCollidableType1,postureControlId_Right,postureControlId_Left,-,
 traceSfxId0,traceDmyIdHead0,traceDmyIdTail0,traceSfxId1,traceDmyIdHead1,traceDmyIdTail1,traceSfxId2,traceDmyIdHead2,traceDmyIdTail2,traceSfxId3,traceDmyIdHead3,traceDmyIdTail3,traceSfxId4,traceDmyIdHead4,traceDmyIdTail4,traceSfxId5,traceDmyIdHead5,traceDmyIdTail5,traceSfxId6,traceDmyIdHead6,traceDmyIdTail6,traceSfxId7,traceDmyIdHead7,traceDmyIdTail7,-,
 defSfxMaterial2,defSeMaterial2,absorpParamId,toughnessCorrectRate,isValidTough_ProtSADmg,isEnableEmergencyStep,invisibleOnRemo,pad2,sortGroupId,atkAttribute2,autoReplenishType,arrowBoltEquipId,DerivationLevelType,enchantSfxSize,-,
 residentSfxId_1,residentSfxId_2,residentSfxId_3,residentSfxId_4,residentSfx_DmyId_1,residentSfx_DmyId_2,residentSfx_DmyId_3,residentSfx_DmyId_4,-,

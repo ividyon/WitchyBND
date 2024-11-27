@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using SoulsFormats;
+using WitchyBND.Services;
 using WitchyFormats;
 using WitchyLib;
 
@@ -11,22 +12,23 @@ public partial class WTAEFolder : WFolderParser
 {
     public override string Name => "TAE (Folder)";
     public override string XmlTag => "tae";
-    public override bool HasPreprocess => true;
     public override WFileParserVerb Verb => WFileParserVerb.Serialize;
 
-    private static readonly Dictionary<WBUtil.GameType, TAE.Template> templateDict = new();
-    public override bool Preprocess(string srcPath)
+    public override bool HasPreprocess => true;
+    public override bool Preprocess(string srcPath, bool recursive, ref Dictionary<string, (WFileParser, ISoulsFile)> files)
     {
-        if (!(ExistsUnpacked(srcPath) && IsUnpacked(srcPath)) && !(Exists(srcPath) && Is(srcPath, null, out ISoulsFile? _))) return false;
-        gameService.DetermineGameType(srcPath, false);
-        if (templateDict.Any()) return false;
-        foreach (var type in Enum.GetValues<WBUtil.GameType>().Except(new [] { WBUtil.GameType.AC6 }))
+        ISoulsFile? file = null;
+        if (!((recursive || ExistsUnpacked(srcPath)) && IsUnpacked(srcPath)) &&
+            !((recursive || Exists(srcPath)) && IsSimpleFirst(srcPath, null, out file)))
         {
-            var path = WBUtil.GetParamdexPath(type.ToString(), $"TAE.Template.{type}.xml");
-            if (File.Exists(path))
-                templateDict[type] = TAE.Template.ReadXMLFile(path);
+            return false;
         }
-        return false; // Preprocess them all to perform WarnAboutTAEs
+        gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.Other);
+        gameService.PopulateTAETemplates();
+        if (file != null)
+            files.TryAdd(srcPath, (this, file));
+
+        return true;
     }
 
     private static WBUtil.GameType FormatToGame(TAE.TAEFormat format)
@@ -54,7 +56,7 @@ public partial class WTAEFolder : WFolderParser
 
     public static bool WarnAboutTAEs()
     {
-        if (Configuration.Expert || WarnedAboutTAEs || Configuration.Args.Passive) return true;
+        if (Configuration.Active.Expert || WarnedAboutTAEs || Configuration.Active.Passive) return true;
 
         List<string> lines = new()
         {

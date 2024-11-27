@@ -7,13 +7,13 @@ using System.Xml.Linq;
 using PPlus;
 using SoulsFormats;
 using WitchyBND.CliModes;
+using WitchyBND.Services;
 using WitchyLib;
 
 namespace WitchyBND.Parsers;
 
 public class WPARAMBND4 : WBinderParser
 {
-
     public override string Name => "PARAM BND4";
     public override bool IncludeInList => false;
 
@@ -24,6 +24,7 @@ public class WPARAMBND4 : WBinderParser
         // var filename = Path.GetFileName(path);
         // return filename.Contains("enc_regulation") && (filename.EndsWith(".bnd.dcx") || filename.EndsWith(".bnd"));
     }
+
     private static bool FilenameIsDS2SRegulation(string path)
     {
         var filename = Path.GetFileName(path).ToLower();
@@ -80,41 +81,50 @@ public class WPARAMBND4 : WBinderParser
     }
 
     public override bool HasPreprocess => true;
-    public override bool Preprocess(string srcPath)
+
+    public override bool Preprocess(string srcPath, bool recursive,
+        ref Dictionary<string, (WFileParser, ISoulsFile)> files)
     {
+        ISoulsFile? file = null;
         if (gameService.KnownGamePathsForParams.Any(p => srcPath.StartsWith(p.Key))) return false;
-        if (!(Exists(srcPath) && Is(srcPath, null, out ISoulsFile? _)) && !(ExistsUnpacked(srcPath) && IsUnpacked(srcPath))) return false;
+        if (!((recursive || Exists(srcPath)) && IsSimpleFirst(srcPath, null, out file)) &&
+            !((recursive || ExistsUnpacked(srcPath)) && IsUnpacked(srcPath))) return false;
 
-        gameService.DetermineGameType(srcPath, true);
+        gameService.UnpackParamdex();
+        if (file != null)
+            files.TryAdd(srcPath, (this, file));
 
-        return false; // Preprocess them all to perform WarnAboutParams
+        return true;
     }
 
-    public override bool Is(string path, byte[]? _, out ISoulsFile? file)
+    public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
         file = null;
         return FilenameIsPARAMBND4(path);
     }
 
-    public override bool IsUnpacked(string path)
+    public override bool? IsSimple(string path)
     {
-        return innerIsUnpacked() && WPARAM.WarnAboutParams();
-
-        bool innerIsUnpacked()
-        {
-            if (!Directory.Exists(path)) return false;
-
-            string xmlPath = Path.Combine(path, GetFolderXmlFilename("bnd4"));
-            if (!File.Exists(xmlPath)) return false;
-
-            var doc = XDocument.Load(xmlPath);
-            return doc.Root != null && doc.Root.Name.ToString().ToLower() == "bnd4" && doc.Root.Element("game") != null;
-        }
+        return Is(path, null, out _);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? _)
+    public override bool IsUnpacked(string path)
     {
-        var bnd = GetRegulationWithGameType(srcPath, out WBUtil.GameType? game);
+        if (!Directory.Exists(path)) return false;
+
+        string xmlPath = Path.Combine(path, GetFolderXmlFilename("bnd4"));
+        if (!File.Exists(xmlPath)) return false;
+
+        var doc = XDocument.Load(xmlPath);
+        return doc.Root != null && doc.Root.Name.ToString().ToLower() == "bnd4" && doc.Root.Element("game") != null;
+    }
+
+    public override void Unpack(string srcPath, ISoulsFile? _, bool recursive)
+    {
+        BND4? bnd = GetRegulationWithGameType(srcPath, out WBUtil.GameType? game);
+        if (bnd == null)
+            throw new InvalidDataException("Could not parse binder from regulation file.");
+
         switch (game)
         {
             case WBUtil.GameType.DS2:
@@ -123,16 +133,20 @@ public class WPARAMBND4 : WBinderParser
             case WBUtil.GameType.ER:
             case WBUtil.GameType.SDT:
             case WBUtil.GameType.AC6:
-                ParseMode.Parsers.OfType<WBND4>().First().Unpack(srcPath, bnd, game);
+                gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.PARAMBND, game,
+                    ulong.Parse(bnd.Version));
+                ParseMode.GetParser<WBND4>().Unpack(srcPath, bnd, recursive, game);
                 break;
             default:
                 throw new InvalidDataException("Could not identify game type of regulation file.");
         }
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
-        var bndParser = ParseMode.Parsers.OfType<WBND4>().First();
+        if (!WPARAM.WarnAboutParams()) return;
+
+        var bndParser = ParseMode.GetParser<WBND4>();
         var xmlPath = GetFolderXmlPath(srcPath, "bnd4");
         var doc = XDocument.Load(xmlPath);
         if (doc.Root == null) throw new XmlException("XML has no root");
@@ -146,10 +160,13 @@ public class WPARAMBND4 : WBinderParser
         if (versionElement == null) throw new XmlException("XML has no Version element");
         var regVer = Convert.ToUInt64(versionElement.Value);
 
+        gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.PARAMBND, game, regVer);
+
         ulong? latestVer = WBUtil.GetLatestKnownRegulationVersion(game);
         if (latestVer < regVer)
         {
-            throw new RegulationOutOfBoundsException(@"Regulation version exceeds latest known Paramdex regulation version.");
+            throw new RegulationOutOfBoundsException(
+                @"Regulation version exceeds latest known Paramdex regulation version.");
         }
 
         var destPath = bndParser.GetRepackDestPath(srcPath, xml);
@@ -157,10 +174,11 @@ public class WPARAMBND4 : WBinderParser
         // Sanity check PARAMs
         XElement? filesElement = xml.Element("files");
         if (filesElement == null) throw new XmlException("XML has no Files element");
-        var files = filesElement.Elements("file").Where(f => f.Element("path") != null && f.Element("path")!.Value.ToLower().EndsWith(".param")).ToList();
+        var files = filesElement.Elements("file")
+            .Where(f => f.Element("path") != null && f.Element("path")!.Value.ToLower().EndsWith(".param")).ToList();
         if (files.Any())
         {
-            var paramParser = ParseMode.Parsers.OfType<WPARAM>().First();
+            var paramParser = ParseMode.GetParser<WPARAM>();
 
             var filePaths = files.Select(file => {
                 var path = file.Element("path");
@@ -172,11 +190,13 @@ public class WPARAMBND4 : WBinderParser
             {
                 try
                 {
-                    paramParser.Unpack(Path.Combine(srcPath, filePath), null, true, (game, regVer));
+                    paramParser.Unpack(Path.Combine(srcPath, filePath), null, recursive, true, (game, regVer));
                 }
                 catch (Exception e)
                 {
-                    throw new MalformedBinderException(@$"The regulation binder is malformed: {Path.GetFileNameWithoutExtension(filePath)} has thrown an exception during read.", e);
+                    throw new MalformedBinderException(
+                        @$"The regulation binder is malformed: {Path.GetFileNameWithoutExtension(filePath)} has thrown an exception during read.",
+                        e);
                 }
             }
         }
@@ -185,7 +205,7 @@ public class WPARAMBND4 : WBinderParser
         {
             case WBUtil.GameType.DS2:
             case WBUtil.GameType.DS2S:
-                if (!Configuration.Args.Passive)
+                if (!Configuration.Active.Passive)
                 {
                     output.WriteLine(
                         "DS2 files cannot be re-encrypted, yet, so re-packing this folder might ruin your encrypted bnd.");
@@ -197,17 +217,17 @@ public class WPARAMBND4 : WBinderParser
                     }
                 }
 
-                bndParser.Repack(srcPath);
+                bndParser.Repack(srcPath, recursive);
                 break;
             case WBUtil.GameType.DS3:
-                bndParser.Repack(srcPath);
+                bndParser.Repack(srcPath, recursive);
                 BND4 ds3Bnd = BND4.Read(destPath);
                 SFUtil.EncryptDS3Regulation(destPath, ds3Bnd);
                 break;
             case WBUtil.GameType.ER:
             case WBUtil.GameType.SDT:
             case WBUtil.GameType.AC6:
-                bndParser.Repack(srcPath);
+                bndParser.Repack(srcPath, recursive);
                 BND4 regBnd = BND4.Read(destPath);
                 WBUtil.EncryptRegulationBin(destPath, game, regBnd);
                 break;

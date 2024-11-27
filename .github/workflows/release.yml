@@ -16,17 +16,19 @@ permissions:
   contents: write
 
 env:
-  DOTNET_VERSION: '8.0.201'
-  NEXUSMOD_API_KEY: ${{ secrets.NEXUSMODS_API_KEY }}
-  NEXUSMOD_COOKIE_SID_DEVELOP: ${{ secrets.NEXUSMODS_SESSION_COOKIE }}
+  DOTNET_VERSION: '8.0.204'
   NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+  NEXUSMOD_API_KEY: ${{ secrets.NEXUSMOD_API_KEY }}
+  NEXUSMOD_SESSION_COOKIE: ${{ secrets.NEXUSMOD_SESSION_COOKIE }}
 
 jobs:
   build:
     runs-on: windows-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
 
       - name: Setup cache
         uses: actions/cache@v3
@@ -72,8 +74,103 @@ jobs:
           name: 'WitchyBND-SHA${{ github.sha }}'
           path: WitchyBND-${{ github.ref_name }}.zip
 
-  release:
+  nexus:
     needs: build
+    runs-on: windows-latest
+    steps:
+      - name: Setup mod uploader
+        run: dotnet tool install -g Digitalroot.ModUploader
+
+      - name: Check mod uploader
+        run: drmu nx check
+
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: 'WitchyBND-SHA${{ github.sha }}'
+
+      - name: Upload to Elden Ring Nexus
+        run: drmu nexusmods upload
+          -f "WitchyBND"
+          -v "${{ github.ref_name }}"
+          -t Main
+          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
+          -g eldenring
+          -ddwm
+          3862 "WitchyBND-${{ github.ref_name }}.zip"
+
+      - name: Upload to ACVI Nexus
+        run: drmu nexusmods upload
+          -f "WitchyBND"
+          -v "${{ github.ref_name }}"
+          -t Main
+          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
+          -g armoredcore6firesofrubicon
+          -ddwm
+          20 "WitchyBND-${{ github.ref_name }}.zip"
+
+      - name: Upload to DS1 Nexus
+        run: drmu nexusmods upload
+          -f "WitchyBND"
+          -v "${{ github.ref_name }}"
+          -t Main
+          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
+          -g darksouls
+          -ddwm
+          1865 "WitchyBND-${{ github.ref_name }}.zip"
+
+      - name: Upload to DS1R Nexus
+        run: drmu nexusmods upload
+          -f "WitchyBND"
+          -v "${{ github.ref_name }}"
+          -t Main
+          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
+          -g darksoulsremastered
+          -ddwm
+          653 "WitchyBND-${{ github.ref_name }}.zip"
+
+      - name: Upload to DS2 Nexus
+        run: drmu nexusmods upload
+          -f "WitchyBND"
+          -v "${{ github.ref_name }}"
+          -t Main
+          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
+          -g darksouls2
+          -ddwm
+          1192 "WitchyBND-${{ github.ref_name }}.zip"
+
+      - name: Upload to DS3 Nexus
+        run: drmu nexusmods upload
+          -f "WitchyBND"
+          -v "${{ github.ref_name }}"
+          -t Main
+          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
+          -g darksouls3
+          -ddwm
+          1676 "WitchyBND-${{ github.ref_name }}.zip"
+
+      - name: Upload to Sekiro Nexus
+        run: drmu nexusmods upload
+          -f "WitchyBND"
+          -v "${{ github.ref_name }}"
+          -t Main
+          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
+          -g sekiro
+          -ddwm
+          1633 "WitchyBND-${{ github.ref_name }}.zip"
+
+      - name: Upload to Bloodborne Nexus
+        run: drmu nexusmods upload
+          -f "WitchyBND"
+          -v "${{ github.ref_name }}"
+          -t Main
+          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
+          -g bloodborne
+          -ddwm
+          20 "WitchyBND-${{ github.ref_name }}.zip"
+
+  release:
+    needs: nexus
     runs-on: windows-latest
     steps:
       - name: Checkout code
@@ -90,106 +187,3 @@ jobs:
           artifacts: 'WitchyBND-${{ github.ref_name }}.zip'
           bodyFile: "./NOTES.md"
           token: ${{ secrets.GITHUB_TOKEN }}
-
-  nexus:
-    needs: build
-    runs-on: windows-latest
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: 'WitchyBND-SHA${{ github.sha }}'
-
-      - name: Setup mod uploader
-        run: dotnet tool install -g Digitalroot.ModUploader
-
-      - name: Check mod uploader
-        run: drmu nx check
-
-      - name: Upload to Elden Ring Nexus
-        continue-on-error: true
-        run: drmu nexusmods upload
-          -f "WitchyBND"
-          -v "${{ github.ref_name }}"
-          -t Main
-          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
-          -g eldenring
-          -ddwm
-          3862 "WitchyBND-${{ github.ref_name }}.zip"
-
-      - name: Upload to ACVI Nexus
-        continue-on-error: true
-        run: drmu nexusmods upload
-          -f "WitchyBND"
-          -v "${{ github.ref_name }}"
-          -t Main
-          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
-          -g armoredcore6firesofrubicon
-          -ddwm
-          20 "WitchyBND-${{ github.ref_name }}.zip"
-
-      - name: Upload to DS1 Nexus
-        continue-on-error: true
-        run: drmu nexusmods upload
-          -f "WitchyBND"
-          -v "${{ github.ref_name }}"
-          -t Main
-          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
-          -g darksouls
-          -ddwm
-          1865 "WitchyBND-${{ github.ref_name }}.zip"
-
-      - name: Upload to DS1R Nexus
-        continue-on-error: true
-        run: drmu nexusmods upload
-          -f "WitchyBND"
-          -v "${{ github.ref_name }}"
-          -t Main
-          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
-          -g darksoulsremastered
-          -ddwm
-          653 "WitchyBND-${{ github.ref_name }}.zip"
-
-      - name: Upload to DS2 Nexus
-        continue-on-error: true
-        run: drmu nexusmods upload
-          -f "WitchyBND"
-          -v "${{ github.ref_name }}"
-          -t Main
-          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
-          -g darksouls2
-          -ddwm
-          1192 "WitchyBND-${{ github.ref_name }}.zip"
-
-      - name: Upload to DS3 Nexus
-        continue-on-error: true
-        run: drmu nexusmods upload
-          -f "WitchyBND"
-          -v "${{ github.ref_name }}"
-          -t Main
-          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
-          -g darksouls3
-          -ddwm
-          1676 "WitchyBND-${{ github.ref_name }}.zip"
-
-      - name: Upload to Sekiro Nexus
-        continue-on-error: true
-        run: drmu nexusmods upload
-          -f "WitchyBND"
-          -v "${{ github.ref_name }}"
-          -t Main
-          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
-          -g sekiro
-          -ddwm
-          1633 "WitchyBND-${{ github.ref_name }}.zip"
-
-      - name: Upload to Bloodborne Nexus
-        continue-on-error: true
-        run: drmu nexusmods upload
-          -f "WitchyBND"
-          -v "${{ github.ref_name }}"
-          -t Main
-          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
-          -g bloodborne
-          -ddwm
-          20 "WitchyBND-${{ github.ref_name }}.zip"

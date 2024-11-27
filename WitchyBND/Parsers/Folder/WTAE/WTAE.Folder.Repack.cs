@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using SoulsFormats;
 using WitchyBND.Errors;
-using WitchyBND.Services;
 using WitchyFormats;
 using WitchyLib;
 
@@ -23,17 +22,14 @@ public partial class WTAEFolder
         return false;
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
         var tae = new TAE();
 
         XElement xml = LoadXml(GetFolderXmlPath(srcPath));
 
         var game = Enum.Parse<WBUtil.GameType>(xml.Element("game")!.Value);
-        if (!templateDict.ContainsKey(game))
-            throw new GameUnsupportedException(game);
-
-        TAE.Template template = templateDict[game];
+        TAE.Template template = gameService.GetTAETemplate(game);
 
         DCX.Type compression = Enum.Parse<DCX.Type>(xml.Element("compression")?.Value ?? "None");
         tae.Compression = compression;
@@ -58,7 +54,7 @@ public partial class WTAEFolder
             bag.Add(anim);
         }
 
-        if (Configuration.Parallel)
+        if (Configuration.Active.Parallel)
         {
             Parallel.ForEach(animFiles, Callback);
         }
@@ -69,10 +65,10 @@ public partial class WTAEFolder
 
         tae.Animations = bag.OrderBy(a => a.ID).ToList();
 
-        tae.ApplyTemplate(templateDict[game]);
+        tae.ApplyTemplate(gameService.GetTAETemplate(game));
 
         string outPath = GetRepackDestPath(srcPath, xml);
-        WBUtil.Backup(outPath);
+        Backup(outPath);
         tae.Write(outPath);
     }
 
@@ -133,10 +129,13 @@ public partial class WTAEFolder
                         var unk04 = int.Parse(evEl.Element("unk04")!.Value);
                         var startTime = float.Parse(evEl.Element("startTime")!.Value);
                         var endTime = float.Parse(evEl.Element("endTime")!.Value);
-                        var isUnk = bool.Parse(evEl.Element("isUnk")?.Value ?? "false");
-                        if (!isUnk)
+                        var isUnk = bool.Parse(evEl.Element("isUnk")?.Value ?? "False");
+                        var hasTemplate = template.Any(t => t.Value.ContainsKey(evType));
+                        if (!hasTemplate)
+                            errorService.RegisterNotice($"Missing template for TAE event type {evType}.");
+                        if (!isUnk && hasTemplate)
                         {
-                            var ev = new TAE.Event(startTime, endTime, evType, unk04, tae.BigEndian, template[tae.EventBank][evType]);
+                            var ev = new TAE.Event(startTime, endTime, evType, unk04, tae.BigEndian, template.First(t => t.Value.ContainsKey(evType)).Value[evType]);
                             ev.Group = group;
 
                             var paramsEl = evEl.Element("params");

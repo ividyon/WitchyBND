@@ -18,7 +18,12 @@ public class WBXF3 : WBinderParser
         return BXF3.IsBHD(path) || BXF3.IsBDT(path);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? _)
+    public override bool? IsSimple(string path)
+    {
+        return null;
+    }
+
+    public override void Unpack(string srcPath, ISoulsFile? _, bool recursive)
     {
         string bdtPath;
         string bdtName;
@@ -26,7 +31,7 @@ public class WBXF3 : WBinderParser
         string bhdName;
         string srcDirPath = Path.GetDirectoryName(srcPath);
         string nameWithoutExt = Path.GetFileNameWithoutExtension(srcPath);
-        string destDir = GetUnpackDestPath(srcPath);
+        string destDir = GetUnpackDestPath(srcPath, recursive);
 
         if (BXF3.IsBHD(srcPath))
         {
@@ -69,8 +74,9 @@ public class WBXF3 : WBinderParser
                 new XElement("bitbigendian", bxf.BitBigEndian.ToString()),
                 files);
 
-        if (!string.IsNullOrEmpty(Configuration.Args.Location))
-            bdtFilename.AddAfterSelf(new XElement("sourcePath", Path.GetFullPath(Path.GetDirectoryName(srcPath))));
+        if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
+
+        AddLocationToXml(srcPath, recursive, xml, true);
 
         if (!string.IsNullOrEmpty(root))
             files.AddBeforeSelf(new XElement("root", root));
@@ -83,7 +89,7 @@ public class WBXF3 : WBinderParser
         xw.Close();
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
         var bxf = new BXF3();
 
@@ -97,12 +103,12 @@ public class WBXF3 : WBinderParser
         bxf.BitBigEndian = bool.Parse(xml.Element("bitbigendian")!.Value);
 
         if (xml.Element("files") != null)
-            ReadBinderFiles(bxf, xml.Element("files")!, srcPath, root);
+            ReadBinderFiles(bxf, xml.Element("files")!, srcPath, root, recursive);
 
         var bhdDestPath = GetRepackDestPath(srcPath, xml, "bhd_filename");
         var bdtDestPath = GetRepackDestPath(srcPath, xml, "bdt_filename");
-        WBUtil.Backup(bhdDestPath);
-        WBUtil.Backup(bdtDestPath);
+        Backup(bhdDestPath);
+        Backup(bdtDestPath);
         bxf.Write(bhdDestPath, bdtDestPath);
     }
 }

@@ -27,15 +27,15 @@
   </Enums>
   <Field>
     <disableParam_NT AltName="Disable Param - Network Test" Wiki="Parameters marked with  are excluded in the NT version package." IsBool="" />
-    <disableParamReserve1 AltName=""/>
-    <disableParamReserve2 AltName=""/>
-    <iconId AltName="Icon ID" Wiki="Menu icon ID" ExtRefs="hi,menu\hi\00_solo.tpfbhd,00_Solo\MENU_Knowledge_{0:D5}.tpf.dcx,MENU_Knowledge_{0:D5}.dds;low,menu\low\00_solo.tpfbhd,00_Solo\MENU_Knowledge_{0:D5}.tpf.dcx,MENU_Knowledge_{0:D5}.dds" />
+    <disableParamReserve1 AltName="" IsHidden=""/>
+    <disableParamReserve2 AltName="" IsHidden=""/>
+    <iconId AltName="Icon ID" Wiki="Menu icon ID" TextureRef="Direct/01_common/SB_Icon_00/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_01/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_02/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_02_A/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_02_B/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_03/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_03_A/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_04/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_05/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_06/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_07_dlc/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_07_dlc_A/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_08_dlc/iconId/MENU_ItemIcon_" /> />
     <rank AltName="Rank" Wiki="Magic stone rank" />
     <sortGroupId AltName="Sort Group ID" Wiki="Sort item type ID. In the sort Item type order, the same ID is displayed together as the same group." Enum="DISPLAY_CATEGORY_ID" />
     <spEffectId0 AltName="SpEffect ID [0]" Wiki="Special effect ID00" Refs="SpEffectParam" />
     <spEffectId1 AltName="SpEffect ID [1]" Wiki="Special effect ID01" Refs="SpEffectParam"/>
     <spEffectId2 AltName="SpEffect ID [2]" Wiki="Special effect ID02" Refs="SpEffectParam"/>
-    <itemGetTutorialFlagId AltName="Item Get Tutorial Flag ID" Wiki="Event flag ID for the tutorial when you first get the item. Flag ON when item is obtained." />
+    <itemGetTutorialFlagId AltName="Item Get Tutorial Flag ID" Wiki="Event flag ID for the tutorial when you first get the item. Flag ON when item is obtained." FlagAlias="" />
     <swordArtsParamId AltName="Sword Arts ID" Wiki="ID of the destination arts parameter" Refs="SwordArtsParam" />
     <mountValue AltName="Application Cost" Wiki="Installation price" />
     <sellValue AltName="Sell Value" Wiki="Sale price" />
@@ -74,9 +74,11 @@
     <disableMultiDropShare AltName="Is Drop Disabled in Multiplayer" Wiki="Is multi-drop sharing prohibited?" IsBool="" />
     <showDialogCondType AltName="Item Acquisition Dialog Condition Type" Wiki="Whether to display it in the item acquisition dialog when acquiring an item (not entered: new only)" Enum="GET_DIALOG_CONDITION_TYPE" />
     <showLogCondType AltName="Item Acquisition Show Condition Type" Wiki="Whether to display in the item acquisition log when acquiring the item (not entered: )" IsBool="" />
-    <pad AltName=""/>
-    <defaultWepAttr AltName="Default Weapon Affinity" Wiki="Default weapon attribute ID. Can be installed even with unopened weapon attributes" />
-    <pad2 AltName=""/>
+    <pad AltName="" IsHidden=""/>
+    <defaultWepAttr AltName="Default Weapon Affinity" Wiki="Default weapon attribute ID. Can be installed even with unopened weapon attributes" ProjectEnum="GEM_WEP_ATTR" />
+    <isSpecialSwordArt AltName="Is Special Ash of War" Wiki="Determines whether this Ash of War is considered 'special'. Weapons with restrictSpecialSwordArt set to 1 will be unable to slot in these ashes of war." IsBool="" />
+    
+    <pad2 AltName="" IsHidden=""/>
     <canMountWep_Dagger AltName="Available: Dagger" Wiki="Can it be attached to Weapon type: Dagger? No input becomes x" IsBool="" />
     <canMountWep_SwordNormal AltName="Available: Straight Sword" Wiki="Can it be attached to Weapon type: Straight sword? No input becomes x" IsBool="" />
     <canMountWep_SwordLarge AltName="Available: Greatsword" Wiki="Can it be attached to Weapon Type: Large Sword? No input becomes x" IsBool="" />
@@ -113,32 +115,44 @@
     <canMountWep_ShieldNormal AltName="Available: Medium Shield" Wiki="Can it be attached to Weapon Type: Middle Shield? No input becomes x" IsBool="" />
     <canMountWep_ShieldLarge AltName="Available: Greatshield" Wiki="Can it be attached to Weapon Type: Large Shield? No input becomes x" IsBool="" />
     <canMountWep_Torch AltName="Available: Torch" Wiki="Can it be attached to Weapon type: Torch? No input becomes x" IsBool="" />
-    <reserved_canMountWep AltName=""/>
-    <reserved2_canMountWep AltName=""/>
+    <canMountWep_HandToHand AltName="Available: Hand-to-Hand" Wiki="Can it be attached to Weapon type: Hand-to-Hand? No input becomes x" IsBool="" />
+    <canMountWep_PerfumeBottle AltName="Available: Perfume Bottle" Wiki="Can it be attached to Weapon type: Perfume Bottle? No input becomes x" IsBool="" />
+    <canMountWep_ThrustingShield AltName="Available: Thrusting Shield" Wiki="Can it be attached to Weapon type: Thrusting Shield? No input becomes x" IsBool="" />
+    <canMountWep_ThrowingWeapon AltName="Available: Throwing Weapon" Wiki="Can it be attached to Weapon type: Throwing Weapon? No input becomes x" IsBool="" />
+    <canMountWep_ReverseHandSword AltName="Available: Reverse-hand Sword" Wiki="Can it be attached to Weapon type: Reverse-hand Sword? No input becomes x" IsBool="" />
+    <canMountWep_LightGreatsword AltName="Available: Light Greatsword" Wiki="Can it be attached to Weapon type: Throwing Weapon? No input becomes x" IsBool="" />
+    <canMountWep_GreatKatana AltName="Available: Great Katana" Wiki="Can it be attached to Weapon type: Great Katana? No input becomes x" IsBool="" />
+    <canMountWep_BeastClaw AltName="Available: Beast Claw" Wiki="Can it be attached to Weapon type: Beast Claw? No input becomes x" IsBool="" />
+    
+    <reserved_canMountWep_0x3d_4 AltName="" IsHidden=""/>
+    <reserved2_canMountWep AltName="" IsHidden=""/>
+    
     <spEffectMsgId0 AltName="SpEffect Message ID [0]" Wiki="Effect text ID 00 (Gem_Effect). Magic stone effect text to display in status" />
     <spEffectMsgId1 AltName="SpEffect Message ID [1]" Wiki="Effect text ID 01 (Gem_Effect). Magic stone effect text to display in status" />
     <spEffectId_forAtk0 AltName="SpEffect ID - Attack Hit [0]" Wiki="Special effect parameter ID for attack hit" Refs="SpEffectParam" />
     <spEffectId_forAtk1 AltName="SpEffect ID - Attack Hit [1]" Wiki="Special effect parameter ID for attack hit" Refs="SpEffectParam" />
     <spEffectId_forAtk2 AltName="SpEffect ID - Attack Hit [2]" Wiki="Special effect parameter ID for attack hit" Refs="SpEffectParam" />
-    <mountWepTextId AltName="Mount Weapon Text ID" Wiki="Corresponding Weapon Type Overwrite Text ID (-1: Do not overwrite) [Menu Text]" />
-    <pad6 AltName=""/>
+    <mountWepTextId AltName="Mount Weapon Text ID" Wiki="Corresponding Weapon Type Overwrite Text ID (-1: Do not overwrite) [Menu Text]" FmgRef="Modern_Menu_Text" />
+    <pad6 AltName="" IsHidden=""/>
   </Field>
   <Self Wiki="Defines an Ash of War item. Determines what weapons it can be applied to and with what affinities.\nDoes not manage unique Ashes of War. Ashes of war may not immediately function on arbitrary weapons." AlternativeOrder="
 sortId,sortGroupId,rank,rarity,iconId,-,
 mountValue,sellValue,saleValue,-,
-swordArtsParamId,mountWepTextId,-,
-
-spEffectId0,spEffectId1,spEffectId2,-,
-spEffectMsgId0,spEffectMsgId1,-,
-spEffectId_forAtk0,spEffectId_forAtk1,spEffectId_forAtk2,-,
+swordArtsParamId,isSpecialSwordArt,mountWepTextId,-,
 
 defaultWepAttr,-,
+
+spEffectId0,spEffectId1,spEffectId2,-,
+spEffectId_forAtk0,spEffectId_forAtk1,spEffectId_forAtk2,-,
+spEffectMsgId0,spEffectMsgId1,-,
+
 configurableWepAttr00,configurableWepAttr01,configurableWepAttr02,configurableWepAttr03,configurableWepAttr04,configurableWepAttr05,configurableWepAttr06,configurableWepAttr07,configurableWepAttr08,configurableWepAttr09,configurableWepAttr10,configurableWepAttr11,configurableWepAttr12,configurableWepAttr13,configurableWepAttr14,configurableWepAttr15,configurableWepAttr16,configurableWepAttr17,configurableWepAttr18,configurableWepAttr19,configurableWepAttr20,configurableWepAttr21,configurableWepAttr22,configurableWepAttr23,-,
 
 canMountWep_Dagger,canMountWep_SwordNormal,canMountWep_SwordLarge,canMountWep_SwordGigantic,canMountWep_SaberNormal,canMountWep_SaberLarge,canMountWep_katana,canMountWep_SwordDoubleEdge,canMountWep_SwordPierce,canMountWep_RapierHeavy,canMountWep_AxeNormal,canMountWep_AxeLarge,canMountWep_HammerNormal,canMountWep_HammerLarge,canMountWep_Flail,canMountWep_SpearNormal,canMountWep_SpearLarge,canMountWep_SpearHeavy,canMountWep_SpearAxe,canMountWep_Sickle,canMountWep_Knuckle,canMountWep_Claw,canMountWep_Whip,canMountWep_AxhammerLarge,-,
 canMountWep_ShieldSmall,canMountWep_ShieldNormal,canMountWep_ShieldLarge,canMountWep_Torch,-,
 canMountWep_BowSmall,canMountWep_BowNormal,canMountWep_BowLarge,canMountWep_ClossBow,canMountWep_Ballista,-,
 canMountWep_Staff,canMountWep_Sorcery,canMountWep_Talisman,-,
+canMountWep_HandToHand,canMountWep_PerfumeBottle,canMountWep_ThrustingShield,canMountWep_ThrowingWeapon,canMountWep_ReverseHandSword,canMountWep_LightGreatsword,canMountWep_GreatKatana,canMountWep_BeastClaw,-,
 
 isDiscard,isDrop,isDeposit,disableMultiDropShare,-,
 

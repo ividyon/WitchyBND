@@ -17,6 +17,13 @@ namespace WitchyBND.Services;
 
 public interface IGameService
 {
+
+    public enum GameDeterminationType
+    {
+        PARAM,
+        PARAMBND,
+        Other
+    }
     ConcurrentDictionary<WBUtil.GameType, ConcurrentDictionary<string, PARAMDEF>> ParamdefStorage { get; }
 
     ConcurrentDictionary<WBUtil.GameType, ConcurrentDictionary<string, ConcurrentDictionary<int, string>>> NameStorage
@@ -29,10 +36,13 @@ public interface IGameService
     Dictionary<string, WBUtil.GameType> KnownGamePaths { get; }
     Dictionary<string, WBUtil.GameType> KnownExecutables { get; }
 
-    (WBUtil.GameType, ulong) DetermineGameType(string path, bool forParams, WBUtil.GameType? game = null,
+    (WBUtil.GameType, ulong) DetermineGameType(string path, GameDeterminationType type, WBUtil.GameType? game = null,
         ulong regVer = 0);
 
     void PopulateParamdex(WBUtil.GameType game);
+    void PopulateTAETemplates();
+    TAE.Template GetTAETemplate(WBUtil.GameType game);
+    void UnpackParamdex();
     void PopulateNames(WBUtil.GameType game, string paramName);
 }
 
@@ -107,15 +117,14 @@ public class GameService : IGameService
             }
         }
     }
-
-    public (WBUtil.GameType, ulong) DetermineGameType(string path, bool forParams,
+    public (WBUtil.GameType, ulong) DetermineGameType(string path, IGameService.GameDeterminationType type,
         WBUtil.GameType? game = null, ulong regVer = 0)
     {
         UnpackParamdex();
         string knownPath = File.Exists(path) ? Path.GetDirectoryName(path)! : path;
 
         // Determine what kind of PARAM we're dealing with here
-        if (forParams)
+        if (type == IGameService.GameDeterminationType.PARAM || type == IGameService.GameDeterminationType.PARAMBND)
         {
             var known = KnownGamePathsForParams.Keys.FirstOrDefault(p => path.StartsWith(p));
             if (known != null) return KnownGamePathsForParams[known];
@@ -125,15 +134,22 @@ public class GameService : IGameService
             {
                 XDocument xDoc = XDocument.Load(xmlPath);
 
-                if (xDoc.Root?.Element("game")?.Value != null)
+                if (game == null && xDoc.Root?.Element("game")?.Value != null)
                 {
                     Enum.TryParse(xDoc.Root!.Element("game")!.Value, out WBUtil.GameType regGame);
                     game = regGame;
                 }
 
-                if (xDoc.Root?.Element("version")?.Value != null)
+                if (regVer == 0 && xDoc.Root?.Element("version")?.Value != null)
                 {
-                    regVer = Convert.ToUInt64(xDoc.Root!.Element("version")!.Value ?? "0");
+                    try
+                    {
+                        regVer = Convert.ToUInt64(xDoc.Root!.Element("version")!.Value ?? "0");
+                    }
+                    catch
+                    {
+                        regVer = 0;
+                    }
                 }
 
                 knownPath = Path.GetDirectoryName(xmlPath);
@@ -154,9 +170,9 @@ public class GameService : IGameService
                 try
                 {
                     var json = File.ReadAllLines(pJsonPath);
-                    var type = json.Select(s =>
+                    var gameType = json.Select(s =>
                         Regex.Match(s, @"\s*?""GameType"":\s(.*?),")).FirstOrDefault(s => s.Success);
-                    var dsmsGameType = Enum.Parse<DsmsGameType>(type.Groups[1].Value);
+                    var dsmsGameType = Enum.Parse<DsmsGameType>(gameType.Groups[1].Value);
                     game = DsmsGameTypeToWitchyGameType(dsmsGameType);
                     knownPath = Path.GetDirectoryName(pJsonPath);
                 }
@@ -188,9 +204,9 @@ public class GameService : IGameService
         else
         {
             output.WriteError("Could not determine param game version.");
-            if (!Configuration.Args.Passive)
+            if (!Configuration.Active.Passive)
             {
-                var select = PromptPlus
+                var select = output
                     .Select<WBUtil.GameType>("Please select the Paramdex of one of the following games")
                     .Run();
                 if (select.IsAborted)
@@ -207,32 +223,44 @@ public class GameService : IGameService
             }
         }
 
-        if (forParams && regVer == 0)
+        if (regVer == 0)
         {
-            output.WriteError("Could not determine regulation version.");
-            if (!Configuration.Args.Passive)
+            switch (type)
             {
-                output.WriteLine(@"Please input the regulation version to use for reading the PARAM.
+                case IGameService.GameDeterminationType.PARAM:
+                    output.WriteError("Could not determine regulation version.");
+                    if (!Configuration.Active.Passive)
+                    {
+                        output.WriteLine(@"Please input the regulation version to use for reading the PARAM.
 Format examples:
 ""10210005"" for Armored Core VI 1.02.1
 ""11001000"" for Elden Ring 1.10.1
-Enter 0, or press ESC, to use the latest available paramdef.");
-                var input = output.Input("Input regulation version")
-                    .AddValidators(PromptValidators.IsTypeULong())
-                    .ValidateOnDemand()
-                    .Run();
-                if (input.IsAborted)
-                {
-                    output.WriteError("Defaulting to latest paramdef.");
-                }
-                else
-                {
-                    regVer = Convert.ToUInt64(input.Value);
-                }
-            }
-            else
-            {
-                output.WriteError("Defaulting to latest paramdef.");
+Enter 0, or leave it empty, to use the latest available paramdef.");
+                        var input = output.Input("Input regulation version")
+                            .AddValidators(PromptValidators.IsTypeULong())
+                            .ValidateOnDemand()
+                            .DefaultIfEmpty("0")
+                            .Config(config => {
+                                config.EnabledAbortKey(false);
+                            })
+                            .Run();
+                        if (input.IsAborted || input.Value == "0")
+                        {
+                            output.WriteError("Defaulting to latest paramdef.");
+                        }
+                        else
+                        {
+                            regVer = Convert.ToUInt64(input.Value);
+                        }
+                    }
+                    else
+                    {
+                        output.WriteError("Defaulting to latest paramdef.");
+                    }
+                    break;
+                // case IGameService.GameDeterminationType.PARAMBND:
+                //
+                //     break;
             }
         }
 
@@ -241,7 +269,7 @@ Enter 0, or press ESC, to use the latest available paramdef.");
         {
             PopulateTentativeAC6Types();
         }
-        if (forParams)
+        if (type == IGameService.GameDeterminationType.PARAM || type == IGameService.GameDeterminationType.PARAMBND)
         {
             KnownGamePathsForParams[knownPath] = (game.Value, regVer);
             PopulateParamdex(game.Value);
@@ -296,7 +324,8 @@ Enter 0, or press ESC, to use the latest available paramdef.");
 
         if (!Directory.Exists(paramdefPath))
         {
-            throw new Exception($"Paramdef path not found for {gameName}.");
+            _errorService.RegisterError($"Paramdef path not found for {gameName}. Errors may occur.");
+            return;
         }
 
         // Reading XML paramdefs
@@ -333,6 +362,27 @@ Enter 0, or press ESC, to use the latest available paramdef.");
         }
     }
 
+    private static readonly Dictionary<WBUtil.GameType, TAE.Template> templateDict = new();
+    public void PopulateTAETemplates()
+    {
+        if (templateDict.Any()) return;
+        foreach (var type in Enum.GetValues<WBUtil.GameType>().Except(new [] { WBUtil.GameType.AC6 }))
+        {
+            var path = WBUtil.GetAssetsPath("Templates", $"TAE.Template.{type}.xml");
+            if (File.Exists(path))
+                templateDict[type] = TAE.Template.ReadXMLFile(path);
+        }
+    }
+
+    public TAE.Template GetTAETemplate(WBUtil.GameType game)
+    {
+        if (templateDict.ContainsKey(game)) return templateDict[game];
+        PopulateTAETemplates();
+        if (!templateDict.ContainsKey(game))
+            throw new GameUnsupportedException(game);
+        return templateDict[game];
+    }
+
     public void PopulateNames(WBUtil.GameType game, string paramName)
     {
         if (NameStorage[game].ContainsKey(paramName) && NameStorage[game][paramName].Count > 0)
@@ -356,6 +406,8 @@ Enter 0, or press ESC, to use the latest available paramdef.");
         foreach (string name in names)
         {
             var splitted = name.Trim().Split(' ', 2);
+            if (splitted.Length != 2)
+                continue;
             try
             {
                 var result = nameDict.TryAdd(int.Parse(splitted[0]), splitted[1]);
@@ -366,7 +418,7 @@ Enter 0, or press ESC, to use the latest available paramdef.");
             }
             catch (Exception e)
             {
-                throw new InvalidDataException($"There was something wrong with the Paramdex names at \"{name}\"",
+                throw new InvalidDataException($"There was something wrong with the Paramdex names at \"{name}\" in {Path.GetFileNameWithoutExtension(namePath)}",
                     e);
             }
         }

@@ -1,5 +1,6 @@
 ﻿using System.Xml;
 using System.Xml.Linq;
+using SoulsFormats;
 using WitchyBND;
 using WitchyBND.CliModes;
 using WitchyBND.Parsers;
@@ -29,8 +30,8 @@ public class RegulationTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var outFile));
 
-            parser.Unpack(path, outFile);
-            string? destPath = parser.GetUnpackDestPath(path);
+            parser.Unpack(path, outFile, false);
+            string? destPath = parser.GetUnpackDestPath(path, false);
 
             var xml = WFileParser.LoadXml(parser.GetFolderXmlPath(destPath, "bnd3"));
             XElement? gameElement = xml.Element("game");
@@ -49,7 +50,7 @@ public class RegulationTests : TestBase
             Assert.That(Directory.Exists(destPath));
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
-            parser.Repack(destPath);
+            parser.Repack(destPath, false);
 
             Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)), Is.True);
         }
@@ -61,7 +62,7 @@ public class RegulationTests : TestBase
     {
         IEnumerable<string> paths = GetSamples("PARAMBND4\\Correct");
 
-        var parser = new WPARAMBND4();
+        var parser = ParseMode.GetParser<WPARAMBND4>();
 
         foreach (string path in paths.Select(GetCopiedPath))
         {
@@ -73,9 +74,8 @@ public class RegulationTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var outFile));
 
-            _gameService.DetermineGameType(path, true, dirGame);
-            parser.Unpack(path, outFile);
-            string? destPath = parser.GetUnpackDestPath(path);
+            parser.Unpack(path, outFile, false);
+            string? destPath = parser.GetUnpackDestPath(path, false);
 
             var xml = WFileParser.LoadXml(parser.GetFolderXmlPath(destPath, "bnd4"));
             XElement? gameElement = xml.Element("game");
@@ -88,11 +88,13 @@ public class RegulationTests : TestBase
             File.Delete(path);
 
             Assert.That(Directory.Exists(destPath));
-            _gameService.DetermineGameType(destPath, true, dirGame);
+            _gameService.DetermineGameType(destPath, IGameService.GameDeterminationType.PARAMBND, dirGame);
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
-            parser.Preprocess(destPath);
-            parser.Repack(destPath);
+            var files = new Dictionary<string, (WFileParser, ISoulsFile)>();
+            if (parser.HasPreprocess)
+                parser.Preprocess(destPath, false, ref files);
+            parser.Repack(destPath, false);
 
             Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)), Is.True);
         }
@@ -111,15 +113,15 @@ public class RegulationTests : TestBase
             SetLocation(path);
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var outFile));
-            parser.Unpack(path, outFile);
-            string? destPath = parser.GetUnpackDestPath(path);
+            parser.Unpack(path, outFile, false);
+            string? destPath = parser.GetUnpackDestPath(path, false);
 
             File.Delete(path);
 
             Assert.That(Directory.Exists(destPath));
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
-            Assert.Throws<RegulationOutOfBoundsException>(() => { parser.Repack(destPath); });
+            Assert.Throws<RegulationOutOfBoundsException>(() => { parser.Repack(destPath, false); });
         }
     }
 
@@ -136,15 +138,15 @@ public class RegulationTests : TestBase
             SetLocation(path);
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var outFile));
-            parser.Unpack(path, outFile);
-            string? destPath = parser.GetUnpackDestPath(path);
+            parser.Unpack(path, outFile, false);
+            string? destPath = parser.GetUnpackDestPath(path, false);
 
             File.Delete(path);
 
             Assert.That(Directory.Exists(destPath));
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
-            Assert.Throws<MalformedBinderException>(() => parser.Repack(destPath));
+            Assert.Throws<MalformedBinderException>(() => parser.Repack(destPath, false));
         }
     }
 

@@ -1,9 +1,7 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Xml.Linq;
 using SoulsFormats;
 using WitchyLib;
-using MTD = WitchyFormats.MTD;
 
 namespace WitchyBND.Parsers;
 
@@ -16,23 +14,29 @@ public class WMTD : WXMLParser
         return IsRead<MTD>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override bool? IsSimple(string path)
     {
-        MTD mtd = MTD.Read(srcPath);
-        string targetFile = GetUnpackDestPath(srcPath);
-
-        if (File.Exists(targetFile)) WBUtil.Backup(targetFile);
-
-        WBUtil.XmlSerialize<MTD>(mtd, targetFile);
-        AddLocationToXml(targetFile, srcPath);
+        string filename = Path.GetFileName(path);
+        return filename.EndsWith(".mtd") || filename.EndsWith(".mtd.dcx");
     }
 
-    public override void Repack(string srcPath)
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
+    {
+        MTD mtd = MTD.Read(srcPath);
+        string targetFile = GetUnpackDestPath(srcPath, recursive);
+
+        if (File.Exists(targetFile)) Backup(targetFile);
+
+        WBUtil.XmlSerialize<MTD>(mtd, targetFile);
+        AddLocationToXml(targetFile, srcPath, recursive);
+    }
+
+    public override void Repack(string srcPath, bool recursive)
     {
         XElement xml = LoadXml(srcPath);
         string outPath = GetRepackDestPath(srcPath, xml);
 
-        if (File.Exists(outPath)) WBUtil.Backup(outPath);
+        if (File.Exists(outPath)) Backup(outPath);
 
         WBUtil.XmlDeserialize<MTD>(srcPath).TryWriteSoulsFile(outPath);
     }

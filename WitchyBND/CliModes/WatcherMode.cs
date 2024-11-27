@@ -4,8 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Xml.Linq;
-using Microsoft.Extensions.DependencyInjection;
-using PPlus;
 using SoulsFormats;
 using WitchyBND.Parsers;
 using WitchyBND.Services;
@@ -80,7 +78,7 @@ public static class WatcherMode
         Dictionary<string, WFileParser> repack = new();
         Dictionary<string, (WFileParser, ISoulsFile)> unpack = new();
         paths.ForEach(p => {
-            foreach (WFileParser parser in ParseMode.Parsers)
+            foreach (WFileParser parser in ParseMode.GetParsers(true))
             {
                 if (parser.Exists(p) && parser.Is(p, null, out ISoulsFile? file))
                 {
@@ -107,7 +105,7 @@ public static class WatcherMode
 
         if (count == 0)
         {
-            output.WriteLine($"Could not find valid parsers for any selected files. Aborting.");
+            output.WriteLine("Could not find valid parsers for any selected files. Aborting.");
             return;
         }
 

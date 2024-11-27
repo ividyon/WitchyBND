@@ -10,7 +10,7 @@ public class ParseModeTest : TestBase
     public void ParseMode()
     {
         IEnumerable<string> paths = GetSamples("ParseMode").Select(GetCopiedPath);
-        WitchyBND.CliModes.ParseMode.ParseFiles(paths);
+        WitchyBND.CliModes.ParseMode.ParseFiles(paths, false);
     }
 
     public ParseModeTest(bool location, bool parallel) : base(location, parallel)

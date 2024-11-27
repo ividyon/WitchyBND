@@ -1,7 +1,7 @@
-﻿using SoulsFormats;
-using System;
+﻿using System;
 using System.IO;
 using System.Xml;
+using SoulsFormats;
 using WitchyFormats;
 using WitchyLib;
 
@@ -14,17 +14,24 @@ namespace WitchyBND.Parsers
 
         public override bool Is(string path, byte[]? data, out ISoulsFile? file)
         {
-            var filename = Path.GetFileName(path).ToLower();
-            return IsRead<DBSUB>(path, data, out file) && Path.GetExtension(filename) == ".bin" && (filename.StartsWith("chapter_") || filename.EndsWith("_b0.bin") || filename.EndsWith("_d0.bin"));
+            return IsRead<DBSUB>(path, data, out file) && (IsSimple(path) ?? false);
         }
 
-        public override void Unpack(string srcPath, ISoulsFile? file)
+        public override bool? IsSimple(string path)
+        {
+            var filename = Path.GetFileName(path).ToLower();
+            return Path.GetExtension(filename) == ".bin" && (filename.StartsWith("chapter_") ||
+                                                             filename.EndsWith("_b0.bin") ||
+                                                             filename.EndsWith("_d0.bin"));
+        }
+
+        public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
         {
             var dbs = (file as DBSUB)!;
             XmlWriterSettings xws = new XmlWriterSettings();
             xws.Indent = true;
             xws.NewLineHandling = NewLineHandling.None; // Prevent \n from being turned into \r\n automatically
-            XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath), xws);
+            XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath, recursive), xws);
             xw.WriteStartElement(XmlTag);
             xw.WriteElementString(nameof(dbs.Compression), dbs.Compression.ToString());
             xw.WriteElementString(nameof(dbs.EventID), dbs.EventID.ToString());
@@ -62,7 +69,7 @@ namespace WitchyBND.Parsers
             xw.Close();
         }
 
-        public override void Repack(string srcPath)
+        public override void Repack(string srcPath, bool recursive)
         {
             DBSUB dbs = new DBSUB();
 
@@ -125,7 +132,7 @@ namespace WitchyBND.Parsers
             }
 
             string outPath = srcPath.Replace(".xml", "");
-            WBUtil.Backup(outPath);
+            Backup(outPath);
             dbs.TryWriteSoulsFile(outPath);
         }
     }

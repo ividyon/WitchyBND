@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
@@ -19,17 +17,20 @@ public class WLUAGNL : WXMLParser
         return Path.GetExtension(path).ToLower() == ".luagnl";
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? _)
+    public override bool? IsSimple(string path)
+    {
+        return Is(path, null, out _);
+    }
+
+    public override void Unpack(string srcPath, ISoulsFile? _, bool recursive)
     {
         LUAGNL gnl = LUAGNL.Read(srcPath);
         XmlWriterSettings xws = new XmlWriterSettings();
         xws.Indent = true;
-        XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath), xws);
+        XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath, recursive), xws);
         xw.WriteStartElement("luagnl");
 
-        xw.WriteElementString("filename", Path.GetFileName(srcPath));
-        if (!string.IsNullOrEmpty(Configuration.Args.Location))
-            xw.WriteElementString("sourcePath", Path.GetDirectoryName(srcPath));
+        AddLocationToXml(srcPath, recursive, xw);
 
         xw.WriteElementString("bigendian", gnl.BigEndian.ToString());
         xw.WriteElementString("longformat", gnl.LongFormat.ToString());
@@ -45,7 +46,7 @@ public class WLUAGNL : WXMLParser
         xw.Close();
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
         LUAGNL gnl = new LUAGNL();
         XElement xml = LoadXml(srcPath);
@@ -58,7 +59,7 @@ public class WLUAGNL : WXMLParser
         }
 
         string outPath = GetRepackDestPath(srcPath, xml);
-        WBUtil.Backup(outPath);
+        Backup(outPath);
         gnl.TryWriteSoulsFile(outPath);
     }
 }

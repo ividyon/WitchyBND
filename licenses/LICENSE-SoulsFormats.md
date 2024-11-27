@@ -1,0 +1,1 @@
+![Cum License](https://github.com/JKAnderson/SoulsFormats/blob/er/assets/cum-license.png)

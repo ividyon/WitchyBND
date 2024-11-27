@@ -1,10 +1,6 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
-using PPlus;
-using WitchyBND;
 using WitchyBND.Errors;
 using ThreadState = System.Diagnostics.ThreadState;
 

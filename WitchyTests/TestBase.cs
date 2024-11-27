@@ -48,12 +48,12 @@ public class TestBase
     [OneTimeSetUp]
     public void StartUp()
     {
-        Configuration.ReplaceConfig(new ConfigurationBuilder()
+        Configuration.SwapOutConfig(new ConfigurationBuilder()
             .AddJsonFile(Path.Combine(TestContext.CurrentContext.TestDirectory, "appsettings.json"))
             .Build());
-        Configuration.Args.Passive = true;
+        Configuration.Active.Passive = true;
         Configuration.IsTest = true;
-        Configuration.Parallel = Parallel;
+        Configuration.Active.Parallel = Parallel;
         WBUtil.ExeLocation = TestContext.CurrentContext.TestDirectory;
         Environment.SetEnvironmentVariable("PromptPlusOverUnitTest", "true");
         PromptPlus.Setup();
@@ -67,7 +67,7 @@ public class TestBase
     [SetUp]
     public void Init()
     {
-        Configuration.Args.Location = null;
+        Configuration.Active.Location = null;
         if (Directory.Exists(Path.Combine(TestContext.CurrentContext.TestDirectory, "Results")))
             Directory.Delete(Path.Combine(TestContext.CurrentContext.TestDirectory, "Results"), true);
     }
@@ -76,12 +76,12 @@ public class TestBase
     {
         if (Location)
         {
-            Configuration.Args.Location = Path.Combine(Path.GetDirectoryName(path)!, "Target");
-            Directory.CreateDirectory(Configuration.Args.Location);
+            Configuration.Active.Location = Path.Combine(Path.GetDirectoryName(path)!, "Target");
+            Directory.CreateDirectory(Configuration.Active.Location);
             return;
         }
 
-        Configuration.Args.Location = null;
+        Configuration.Active.Location = null;
     }
 
 

@@ -15,26 +15,31 @@ public partial class WTAEFolder
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
         file = null;
-        return Configuration.TaeFolder && IsRead<TAE>(path, data, out file);
+        return Configuration.Active.TaeFolder && IsRead<TAE>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override bool? IsSimple(string path)
+    {
+        string filename = Path.GetFileName(path).ToLower();
+        return Configuration.Active.TaeFolder && filename.EndsWith(".tae");
+    }
+
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         TAE tae = (file as TAE)!;
 
-        var game = gameService.DetermineGameType(srcPath, false).Item1;
-        if (!templateDict.ContainsKey(game))
-        {
-            throw new GameUnsupportedException(game);
-        }
+        var game = gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.Other).Item1;
 
-        var template = templateDict[game];
+        var template = gameService.GetTAETemplate(game);
         tae.ApplyTemplate(template);
-        string destDir = GetUnpackDestPath(srcPath);
+        string destDir = GetUnpackDestPath(srcPath, recursive);
         Directory.CreateDirectory(destDir);
 
         XDocument xDoc = new XDocument();
         XElement root = new XElement(XmlTag);
+
+        if (Version > 0) root.SetAttributeValue(VersionAttributeName, Version.ToString());
+
         xDoc.Add(root);
         root.AddE("id", tae.ID);
         root.AddE("compression", tae.Compression);
@@ -53,7 +58,7 @@ public partial class WTAEFolder
             UnpackAnim(destDir, tae, anim, addDigits);
         }
 
-        if (Configuration.Parallel)
+        if (Configuration.Active.Parallel)
         {
             Parallel.ForEach(tae.Animations, Callback);
         }
@@ -64,7 +69,7 @@ public partial class WTAEFolder
 
 
         var destPath = GetFolderXmlPath(destDir);
-        AddLocationToXml(srcPath, root);
+        AddLocationToXml(srcPath, recursive, root);
         xDoc.Save(destPath);
     }
 
@@ -107,7 +112,8 @@ public partial class WTAEFolder
                     eventEl.AddE("unk04", ev.Unk04);
                     eventEl.AddE("startTime", ev.StartTime);
                     eventEl.AddE("endTime", ev.EndTime);
-                    if (tae.AppliedTemplate[tae.EventBank].ContainsKey(ev.Type))
+
+                    if (ev.Parameters != null && ev.Parameters.Template != null)
                     {
                         eventEl.AddE("params", ev.Parameters?.Values.Select(p => {
                             var paramEl = new XElement("param");
@@ -118,7 +124,8 @@ public partial class WTAEFolder
                     }
                     else
                     {
-                        eventEl.AddE("isUnk", true);
+                        errorService.RegisterNotice($"Missing template for TAE event type {ev.Type}.");
+                        eventEl.AddE("isUnk", "True");
                         eventEl.AddE("unkParams", string.Join(",", ev.GetParameterBytes(tae.BigEndian)));
                     }
                     return eventEl;

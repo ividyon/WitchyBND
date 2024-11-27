@@ -18,15 +18,19 @@ on:
     branches: [ "main" ]
 
 env:
-  DOTNET_VERSION: '8.0.201'
+  DOTNET_VERSION: '8.0.204'
   NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+  NEXUSMOD_API_KEY: ${{ secrets.NEXUSMOD_API_KEY }}
+  NEXUSMOD_SESSION_COOKIE: ${{ secrets.NEXUSMOD_SESSION_COOKIE }}
 
 jobs:
   build:
     runs-on: windows-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
 
       - name: Dotnet cache
         id: cache-dotnet-core
@@ -76,3 +80,12 @@ jobs:
         with:
           name: 'WitchyBND-SHA${{ github.sha }}'
           path: './bin/publish'
+
+  nexus:
+    runs-on: windows-latest
+    steps:
+     - name: Setup mod uploader
+       run: dotnet tool install -g Digitalroot.ModUploader
+
+     - name: Check mod uploader
+       run: drmu nx check

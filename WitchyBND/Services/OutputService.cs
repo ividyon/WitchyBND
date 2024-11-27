@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using PPlus;
 using PPlus.Controls;
+using WitchyLib;
 
 namespace WitchyBND.Services;
 
@@ -45,37 +44,53 @@ public class OutputService : IOutputService
 {
     public OutputService()
     {
-        PromptPlus.Config.DefaultCulture = new CultureInfo("en-us");
+        if (WBUtil.GetConsoleWindow() != IntPtr.Zero)
+            PromptPlus.Config.DefaultCulture = new CultureInfo("en-us");
     }
 
     public object ConsoleWriterLock => new();
     public int WriteLine(string? value = null, Style? style = null, bool clearrestofline = true)
     {
-        if (Configuration.Args.Silent) return 0;
-        int outCode;
-        lock (ConsoleWriterLock)
-            outCode = PromptPlus.Write(value + Environment.NewLine, style, clearrestofline);
-        return outCode;
+        if (Configuration.Active.Silent) return 0;
+        try
+        {
+            int outCode;
+            lock (ConsoleWriterLock)
+                outCode = PromptPlus.Write(value + Environment.NewLine, style, clearrestofline);
+            return outCode;
+        }
+        catch
+        {
+            return -1;
+        }
     }
 
     public int WriteError(string? value = null, Style? style = null, bool clearrestofline = true)
     {
-        if (Configuration.Args.Silent) return 0;
-        int outCode;
-        lock (ConsoleWriterLock)
+        if (Configuration.Active.Silent) return 0;
+        try
         {
-            using (PromptPlus.OutputError())
+            int outCode;
+            lock (ConsoleWriterLock)
             {
-                outCode = PromptPlus.Write(value + Environment.NewLine, style, clearrestofline);
+                using (PromptPlus.OutputError())
+                {
+                    outCode = PromptPlus.Write(value + Environment.NewLine, style, clearrestofline);
+                }
             }
+
+            return outCode;
         }
-        return outCode;
+        catch
+        {
+            return -1;
+        }
     }
 
     public int DoubleDash(string value, DashOptions dashOptions = DashOptions.AsciiSingleBorder, int extralines = 0,
         Style? style = null)
     {
-        if (Configuration.Args.Silent) return 0;
+        if (Configuration.Active.Silent) return 0;
         int outCode;
         lock (ConsoleWriterLock)
             outCode = PromptPlus.DoubleDash(value, dashOptions, extralines, style);
@@ -90,7 +105,7 @@ public class OutputService : IOutputService
 
     public void Clear()
     {
-        if (Configuration.Args.Silent) return;
+        if (Configuration.Active.Silent) return;
         lock (ConsoleWriterLock)
             PromptPlus.Clear();
     }
@@ -109,7 +124,7 @@ public class OutputService : IOutputService
     public int SingleDash(string value, DashOptions dashOptions = DashOptions.AsciiSingleBorder, int extralines = 0,
         Style? style = null)
     {
-        if (Configuration.Args.Silent) return 0;
+        if (Configuration.Active.Silent) return 0;
         int outCode;
         lock (ConsoleWriterLock)
             outCode = PromptPlus.SingleDash(value, dashOptions, extralines, style);

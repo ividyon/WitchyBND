@@ -13,12 +13,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="BouncyCastle.Cryptography" Version="2.2.0" />
+      <PackageReference Include="BouncyCastle.Cryptography" Version="2.4.0" />
       <PackageReference Include="NativeFileDialogSharp" Version="0.6.0-alpha" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\SoulsFormats\SoulsFormats.csproj" />
+      <ProjectReference Include="..\SoulsFormats\SoulsFormats\SoulsFormats.csproj" />
     </ItemGroup>
 
 </Project>

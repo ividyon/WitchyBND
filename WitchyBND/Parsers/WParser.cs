@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Enumeration;
 using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
-using Microsoft.Extensions.DependencyInjection;
 using SoulsFormats;
-using WitchyBND.CliModes;
 using WitchyBND.Services;
 using WitchyLib;
 using ServiceProvider = WitchyBND.Services.ServiceProvider;
@@ -39,10 +33,12 @@ public abstract class WFileParser
 
     public virtual WFileParserVerb Verb => WFileParserVerb.Unpack;
     public virtual bool IncludeInList => true;
+    public virtual bool AppliesRecursively => true;
     public abstract string Name { get; }
     public virtual string ListName => Name;
 
     public virtual int Version => 0;
+    public virtual string VersionAttributeName => "WitchyVersion";
     public virtual string XmlTag
     {
         get
@@ -71,22 +67,34 @@ public abstract class WFileParser
 
     public virtual bool HasPreprocess => false;
 
-    protected readonly HashSet<string> PreprocessedPaths = new();
-
-    public virtual bool Preprocess(string srcPath)
-    { return false; }
+    public virtual bool Preprocess(string srcPath, bool recursive, ref Dictionary<string, (WFileParser, ISoulsFile)> files)
+    {
+        return false;
+    }
 
     public abstract bool Is(string path, byte[]? data, out ISoulsFile? file);
+    public abstract bool? IsSimple(string path);
+
+    public virtual bool IsSimpleFirst(string path, byte[]? data, out ISoulsFile? file)
+    {
+        file = null;
+        return IsSimple(path) ?? Is(path, data, out file);
+    }
+
     public abstract bool Exists(string path);
     public abstract bool ExistsUnpacked(string path);
     public abstract bool IsUnpacked(string path);
 
-    public abstract string GetUnpackDestPath(string srcPath);
+    public abstract string GetUnpackDestPath(string srcPath, bool recursive);
 
     public virtual int GetUnpackedVersion(string path)
     {
-        return Version;
+        var doc = XDocument.Load(path);
+        var attr = doc.Root?.Attribute(VersionAttributeName);
+        if (attr == null) return 0;
+        return int.Parse(attr.Value);
     }
+
     public virtual bool UnpackedFitsVersion(string path)
     {
         if (Version == 0) return true;
@@ -94,13 +102,12 @@ public abstract class WFileParser
             return false;
         return true;
     }
-
-    public abstract void Unpack(string srcPath, ISoulsFile? file);
-    public abstract void Repack(string srcPath);
-    public static void AddLocationToXml(string path, string srcPath)
+    public abstract void Unpack(string srcPath, ISoulsFile? file, bool recursive);
+    public abstract void Repack(string srcPath, bool recursive);
+    public static void AddLocationToXml(string path, string srcPath, bool recursive)
     {
         XDocument xml = XDocument.Load(path);
-        AddLocationToXml(srcPath, xml.Root!);
+        AddLocationToXml(srcPath, recursive, xml.Root!);
         xml.Save(path);
     }
 
@@ -110,11 +117,32 @@ public abstract class WFileParser
         xml.Element("sourcePath")?.Remove();
         return xml;
     }
-    public static void AddLocationToXml(string path, XElement xml)
+
+    public static void AddLocationToXml(string path, bool recursive, XmlWriter xw, bool skipFilename = false)
     {
-        if (!string.IsNullOrEmpty(Configuration.Args.Location))
-            xml.AddFirst(new XElement("sourcePath", Path.GetDirectoryName(path)));
-        xml.AddFirst(new XElement("filename", Path.GetFileName(path)));
+        string? location = Configuration.Active.Location;
+        if (!string.IsNullOrEmpty(location) && !recursive)
+        {
+            string srcPath = Path.GetDirectoryName(path)!;
+            if (location.StartsWith(srcPath))
+                srcPath = Path.GetRelativePath(location, srcPath);
+            xw.WriteElementString("sourcePath", srcPath);
+        }
+        if (!skipFilename)
+            xw.WriteElementString("filename",  Path.GetFileName(path));
+    }
+    public static void AddLocationToXml(string path, bool recursive, XElement xml, bool skipFilename = false)
+    {
+        string? location = Configuration.Active.Location;
+        if (!string.IsNullOrEmpty(location) && !recursive)
+        {
+            string srcPath = Path.GetDirectoryName(path)!;
+            if (location.StartsWith(srcPath))
+                srcPath = Path.GetRelativePath(location, srcPath);
+            xml.AddFirst(new XElement("sourcePath", srcPath));
+        }
+        if (!skipFilename)
+            xml.AddFirst(new XElement("filename", Path.GetFileName(path)));
     }
     public static XElement LoadXml(string path)
     {
@@ -122,6 +150,15 @@ public abstract class WFileParser
         if (doc.Root == null) throw new XmlException("XML has no root");
         return doc.Root;
     }
+
+    public static void Backup(string path)
+    {
+        Configuration.Active.GitBackup = false;
+        if (Configuration.Active.BackupMethod == WBUtil.BackupMethod.None) return;
+        if (!Configuration.Active.GitBackup && WBUtil.IsInGit(path)) return;
+        WBUtil.Backup(path, Configuration.Active.BackupMethod);
+    }
+
     private static bool IsRead<TFormat>(string path, out ISoulsFile? file) where TFormat : SoulsFile<TFormat>, new()
     {
         if (SoulsFile<TFormat>.IsRead(path, out TFormat format))
@@ -173,16 +210,69 @@ public abstract class WSingleFileParser : WFileParser
     }
 }
 
+public abstract class WDeferredFileParser : WSingleFileParser
+{
+    public abstract string[] UnpackExtensions { get; }
+    public abstract string[] RepackExtensions { get; }
+    public abstract DeferFormat DeferFormat { get; }
+    public override bool AppliesRecursively => false;
+    public override bool Is(string path, byte[]? _, out ISoulsFile? file)
+    {
+        file = null;
+        var extension = WBUtil.GetFullExtensions(path).ToLower();
+        var cond = UnpackExtensions.Contains(extension);
+        if (cond && !Configuration.Active.DeferTools.ContainsKey(DeferFormat))
+            throw new DeferToolPathException(DeferFormat);
+        return cond;
+    }
+
+    public override bool? IsSimple(string path)
+    {
+        return Is(path, null, out _);
+    }
+
+    public override bool IsUnpacked(string path)
+    {
+        var extension = WBUtil.GetFullExtensions(path).ToLower();
+        var cond = RepackExtensions.Contains(extension);
+        if (cond && !Configuration.Active.DeferTools.ContainsKey(DeferFormat))
+            throw new DeferToolPathException(DeferFormat);
+        return cond && !string.IsNullOrWhiteSpace(Configuration.Active.DeferTools[DeferFormat].RepackArgs);
+    }
+
+    public override string GetUnpackDestPath(string srcPath, bool recursive)
+    {
+        throw new NotSupportedException();
+    }
+
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
+    {
+        DeferredFormatHandling.Unpack(DeferFormat, srcPath);
+    }
+
+    public override void Repack(string srcPath, bool recursive)
+    {
+        DeferredFormatHandling.Repack(DeferFormat, srcPath);
+    }
+
+    public override string GetRepackDestPath(string srcPath, XElement xml)
+    {
+        throw new NotSupportedException();
+    }
+}
+
 public abstract class WXMLParser : WSingleFileParser
 {
-    public virtual string VersionAttributeName => "WitchyVersion";
     public override WFileParserVerb Verb => WFileParserVerb.Serialize;
 
-    public override string GetUnpackDestPath(string srcPath)
+    public override string GetUnpackDestPath(string srcPath, bool recursive)
     {
-        if (string.IsNullOrEmpty(Configuration.Args.Location))
-            return $"{srcPath}.xml";
-        return $"{Configuration.Args.Location}\\{Path.GetFileName(srcPath)}.xml";
+        string sourceDir = new FileInfo(srcPath).Directory?.FullName!;
+        string? location = Configuration.Active.Location;
+        if (!string.IsNullOrEmpty(location) && !recursive)
+            sourceDir = location;
+        sourceDir = Path.GetFullPath(sourceDir);
+        return Path.Combine(sourceDir, $"{Path.GetFileName(srcPath)}.xml");
     }
 
     public override string GetRepackDestPath(string srcPath, XElement xml)

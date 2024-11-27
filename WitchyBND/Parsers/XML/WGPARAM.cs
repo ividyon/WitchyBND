@@ -9,7 +9,6 @@ using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
 using WitchyLib;
-using GPARAM = WitchyFormats.GPARAM;
 
 namespace WitchyBND.Parsers;
 
@@ -21,21 +20,25 @@ public class WGPARAM : WXMLParser
       return IsRead<GPARAM>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override bool? IsSimple(string path)
+    {
+      string filename = Path.GetFileName(path).ToLower();
+      return filename.EndsWith(".gparam") || filename.EndsWith(".gparam.dcx");
+    }
+
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
       GPARAM gparam = (file as GPARAM)!;
-      string destPath = GetUnpackDestPath(srcPath);
+      string destPath = GetUnpackDestPath(srcPath, recursive);
       if (File.Exists(destPath))
-        WBUtil.Backup(destPath);
-      using (XmlWriter xw = XmlWriter.Create(destPath, new XmlWriterSettings()
-      {
+        Backup(destPath);
+      using (XmlWriter xw = XmlWriter.Create(destPath, new XmlWriterSettings
+             {
         Indent = true
       }))
       {
         xw.WriteStartElement(XmlTag);
-        xw.WriteElementString("filename", Path.GetFileName(srcPath));
-        if (!string.IsNullOrEmpty(Configuration.Args.Location))
-          xw.WriteElementString("sourcePath", Path.GetDirectoryName(srcPath));
+        AddLocationToXml(srcPath, recursive, xw);
 
         xw.WriteElementString("compression", gparam.Compression.ToString());
         xw.WriteElementString("game", gparam.Game.ToString());
@@ -75,9 +78,9 @@ public class WGPARAM : WXMLParser
                 Vector2 vector2 = (Vector2) obj.Values[index];
                 XmlWriter xmlWriter2 = xw;
                 DefaultInterpolatedStringHandler interpolatedStringHandler = new DefaultInterpolatedStringHandler(1, 2);
-                interpolatedStringHandler.AppendFormatted<float>(vector2.X);
+                interpolatedStringHandler.AppendFormatted(vector2.X);
                 interpolatedStringHandler.AppendLiteral(" ");
-                interpolatedStringHandler.AppendFormatted<float>(vector2.Y);
+                interpolatedStringHandler.AppendFormatted(vector2.Y);
                 string stringAndClear = interpolatedStringHandler.ToStringAndClear();
                 xmlWriter2.WriteString(stringAndClear);
               }
@@ -86,11 +89,11 @@ public class WGPARAM : WXMLParser
                 Vector3 vector3 = (Vector3) obj.Values[index];
                 XmlWriter xmlWriter3 = xw;
                 DefaultInterpolatedStringHandler interpolatedStringHandler = new DefaultInterpolatedStringHandler(2, 3);
-                interpolatedStringHandler.AppendFormatted<float>(vector3.X);
+                interpolatedStringHandler.AppendFormatted(vector3.X);
                 interpolatedStringHandler.AppendLiteral(" ");
-                interpolatedStringHandler.AppendFormatted<float>(vector3.Y);
+                interpolatedStringHandler.AppendFormatted(vector3.Y);
                 interpolatedStringHandler.AppendLiteral(" ");
-                interpolatedStringHandler.AppendFormatted<float>(vector3.Z);
+                interpolatedStringHandler.AppendFormatted(vector3.Z);
                 string stringAndClear = interpolatedStringHandler.ToStringAndClear();
                 xmlWriter3.WriteString(stringAndClear);
               }
@@ -99,13 +102,13 @@ public class WGPARAM : WXMLParser
                 Vector4 vector4 = (Vector4) obj.Values[index];
                 XmlWriter xmlWriter4 = xw;
                 DefaultInterpolatedStringHandler interpolatedStringHandler = new DefaultInterpolatedStringHandler(3, 4);
-                interpolatedStringHandler.AppendFormatted<float>(vector4.X);
+                interpolatedStringHandler.AppendFormatted(vector4.X);
                 interpolatedStringHandler.AppendLiteral(" ");
-                interpolatedStringHandler.AppendFormatted<float>(vector4.Y);
+                interpolatedStringHandler.AppendFormatted(vector4.Y);
                 interpolatedStringHandler.AppendLiteral(" ");
-                interpolatedStringHandler.AppendFormatted<float>(vector4.Z);
+                interpolatedStringHandler.AppendFormatted(vector4.Z);
                 interpolatedStringHandler.AppendLiteral(" ");
-                interpolatedStringHandler.AppendFormatted<float>(vector4.W);
+                interpolatedStringHandler.AppendFormatted(vector4.W);
                 string stringAndClear = interpolatedStringHandler.ToStringAndClear();
                 xmlWriter4.WriteString(stringAndClear);
               }
@@ -114,13 +117,13 @@ public class WGPARAM : WXMLParser
                 byte[] numArray = (byte[]) obj.Values[index];
                 XmlWriter xmlWriter5 = xw;
                 DefaultInterpolatedStringHandler interpolatedStringHandler = new DefaultInterpolatedStringHandler(3, 4);
-                interpolatedStringHandler.AppendFormatted<byte>(numArray[0], "X2");
+                interpolatedStringHandler.AppendFormatted(numArray[0], "X2");
                 interpolatedStringHandler.AppendLiteral(" ");
-                interpolatedStringHandler.AppendFormatted<byte>(numArray[1], "X2");
+                interpolatedStringHandler.AppendFormatted(numArray[1], "X2");
                 interpolatedStringHandler.AppendLiteral(" ");
-                interpolatedStringHandler.AppendFormatted<byte>(numArray[2], "X2");
+                interpolatedStringHandler.AppendFormatted(numArray[2], "X2");
                 interpolatedStringHandler.AppendLiteral(" ");
-                interpolatedStringHandler.AppendFormatted<byte>(numArray[3], "X2");
+                interpolatedStringHandler.AppendFormatted(numArray[3], "X2");
                 string stringAndClear = interpolatedStringHandler.ToStringAndClear();
                 xmlWriter5.WriteString(stringAndClear);
               }
@@ -151,7 +154,7 @@ public class WGPARAM : WXMLParser
       }
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
       GPARAM gparam = new GPARAM();
       XmlDocument xmlDocument = new XmlDocument();
@@ -265,7 +268,7 @@ public class WGPARAM : WXMLParser
       XElement xml = LoadXml(srcPath);
       string path = GetRepackDestPath(srcPath, xml);
       if (File.Exists(path))
-        WBUtil.Backup(path);
+        Backup(path);
       gparam.TryWriteSoulsFile(path);
     }
 }

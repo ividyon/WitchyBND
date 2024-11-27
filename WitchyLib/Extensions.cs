@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
@@ -84,5 +85,19 @@ public static class XmlExtensions {
     public static void AddE(this XElement el, string name, params object[] content)
     {
         el.Add(new XElement(name, content));
+    }
+}
+
+public static class WitchyExtensions {
+    public static int? NextAvailable(this IEnumerable<int> ints)
+    {
+        int counter = ints.Any() ? ints.First() : -1;
+
+        while (counter < int.MaxValue)
+        {
+            if (!ints.Contains(++counter)) return counter;
+        }
+
+        return null;
     }
 }

@@ -1,0 +1,233 @@
+0 test 0
+1 test 1
+1000 regain lost life
+1010 take a life
+1020 read the tombstone
+3000 Read the letter (blood letters)
+3010 Check your letter (blood letters)
+4000 pick up items
+4100 Take relics (enemy drop items/corpse glow)
+4110 Take relics (enemy dropped items/enemy disappears)
+4200 Take relics (treasure item)
+4210 Take the relics (treasure item_Companions of the Nightmare Lord)
+4400 OK
+5000 climb the ladder
+5010 go down the ladder
+6000 Talk to me (c0000)
+6001 Conversation skip
+6002 Talk (wide range)
+6003 Talk to (doll heroine)
+6004 Examine (doll heroine doll state)
+6005 Kneel (Queen of the Dirty Bloodline)
+6006 Talk to (gatekeeper_before opening the door)
+6007 Talk to (Spider Man Patch_Door stuck)
+6008 Talk to (President)
+6009 Talk to (fake female doctor)
+6010 warehouse
+6011 blacksmith table
+6012 body gem
+6013 Purchasing tools
+6014 Right hand weapon selection
+6015 Left hand weapon selection
+6016 Character makeup editing
+6017 messenger dress up
+6018 SAN value trading
+6019 Investigate (dead state of doll heroine)
+6020 Talk to (Spider Man Patch_on the desk)
+6021 Talk to (for bigoted old people)
+6022 Talk to (conversation through the door with a female doctor/fake female doctor)
+6023 Talk to me (Spider Man Patch_Dungeon in the air)
+6024 Talk to (girl)
+6025 receive a gift from a messenger
+6026 Investigate (for corpses communicating to obtain gestures)
+6030 Knock (conversation through the door)
+6031 Investigate (Queen Altar of the Impure Bloodline)
+6100 start the chair
+6101 sit on a chair
+6102 Sit on a chair_360 degrees
+6110 Touching a corpse (Yānam)
+6111 Touching a corpse (frontier)
+6112 Touching a Corpse (Hidden Land)
+6113 Touching a corpse (unawakenable nightmare)
+6115 Touch a corpse (quick dungeon)
+6116 Touching a Corpse (Channel Dungeon 1)
+6117 Touch a corpse (Channel Dungeon 2)
+6118 Touch a corpse (Channel Dungeon 3)
+6119 Touch a corpse (Channel Dungeon 4)
+6120 Touch a corpse (Channel Dungeon 5)
+6121 Touch a corpse (Channel Dungeon 6)
+6130 Touching a corpse (Yharnam) No warp destination
+6131 Touching a corpse (frontier) No warp destination
+6132 Touching a corpse (hidden land) No warp destination
+6133 Touching a corpse (unawakenable nightmare) No warp destination
+6140 Touch a corpse (DLC base warp OBJ)
+7000 Open the door_general purpose
+7001 Close the door_General purpose
+7002 Open the gate_general purpose
+7010 Open the door_Lift_Damipoly 120 directions
+7011 Open the door_Lift_Damipoly 122 directions
+7030 Open the door_pull_Damipoly 100 directions
+7031 Open the door_Push_Damipoli 101 direction
+7100 start the device
+7200 Open the treasure chest (small)
+7201 Take treasure (small)
+7210 Open the treasure chest (middle)
+7211 Take treasure (middle)
+7220 Open the treasure chest (large)
+7221 Take treasure (large)
+7230 Open the coffin (Dungeon block treasure chest)
+7231 Take the coffin (large)
+7300 Retrieving belongings_only 180 degrees forward
+7310 Retrieve personal belongings_1.50m lower
+7311 Retrieve personal belongings_2.00m lower
+7400 Progress aid hint__01 Immediately after the start
+7401 Progress aid hint_03 Cathedral town B
+7402 Progress aid hint_04 Crazy hint of Odon Church_①
+7403 Progress aid hint_05 Crazy hint of Odon Church_②
+7404 Progress aid hint_06 Crazy hint of Odon Church_③
+7405 Progress aid hint_11 Cathedral proverb
+7406 Progress aid hint_12 Medical church workshop motto
+7407 Progress aid tips_13 Classroom graffiti ①
+7408 Progress aid tips_14 Classroom graffiti ②
+7409 Progress aid tips_15 Classroom graffiti ③
+7410 Progress aid tips_16 Classroom graffiti ④
+7411 Progress aid hint_17 Birgenwirth's memo ①
+7412 Progress aid hint_18 Birgenwirth's memo ②
+7413 Progress aid hint_19 City of Sacrifice
+7500 Get light source item
+10000 Ring the bell calling for NPCs
+10561 Call "Federation: Henrik"
+10562 Call the “Head of the Federation”
+10563 Call the “Head of the Federation (after succession to the head)”
+10564 Call for “Federation: Kimono”
+10565 Call "Federation: Executioner"
+10566 Called the "Mensis School"
+10567 Call "Top Hat Hunter"
+10568 Calling for “pilgrims”
+10569 Call "Dungeon NPC: Sword Hammer"
+10570 Call "Dungeon NPC: Great Sword"
+10571 Call "Dungeon NPC: Beast Claw"
+10572 Call "Dungeon NPC: Wheel"
+10573 Call "Dungeon NPC: Saw Whip"
+10574 Call "Abnormal: Multi-jointed"
+10575 Call "Father Gascoigne"
+10576 Call “Bloodline Hunter Alfred”
+200000 Cylinder sample
+200001 prismatic sample
+200010 fog wall sample
+2010000 Fog wall_before the boss
+2010010 Taking relics_coffin treasure corpse
+2010020 Open the door_Damipoli 101 direction
+2100800 Fog wall_before the boss
+2110000 examine the doll
+2110010 examine the shelves
+2110011 examine the altar
+2110012 examine the grave
+2200000 Open the gate_Damipoli 100 direction
+2200001 Open the gate_Damipoli 101 direction
+2200010 For carriage warp
+2200020 stop
+2200030 Open the door_Damipoli 101 direction
+2200040 Retrieving belongings_stable caught
+2200800 Fog wall_before the boss
+2300000 examine the altar
+2300010 Open the door_for shortcut_Damipoly 101 directions
+2300011 Open the door_For shortcut_Damipoly 100 directions
+2300020 warning door
+2300030 Open the gate_for shortcut_Damipoly 101 direction
+2300031 Open the gate_for shortcut_Damipoly 100 directions
+2300800 Fog wall_before the boss
+2400000 ring the bell
+2400010 examine the skull
+2400020 A lonely old woman's letter
+2400030 rotunda gate
+2400031 Behind the gate of the circular plaza
+2400040 Open the door to Basilica B
+2400050 Opening the gate_device door_origin
+2400051 Open the gate_device door_Damipoli 200
+2400800 Wall of fog_In front of Saint Beast
+2410000 Open the door_behind the boss
+2410001 Activate the device_behind the boss
+2410010 Private house door_inside
+2410011 Private house door_outside
+2410020 Door that opens with a lever_Damipoly 100 directions
+2410021 Door that opens with a lever_Not available msg for both sides
+2410031 Gate in front of the clinic_outside
+2410040 Wall of fog_in front of the vicar
+2410041 Wall of fog_In front of Father Gascoigne
+2410042 Wall of fog_Rector (Cathedral town A side)
+2410050 Open the door_Damipoli 101 direction
+2410060 Examine the treatment table at the clinic
+2420000 Open the door_Damipoli 101 direction
+2420001 Open the door_For shortcut_Damipoly 100 directions
+2420020 boss room altar
+2420021 Treasure that appears on the altar in the boss room
+2420030 Open the door_Back side of SC gate (copied from 7000)
+2420700 Fog wall_in front of the boss (terrace)
+2420800 Fog wall_before the boss (Spawn of the moon)
+2420950 Examine the chair_Obtain the Holy Grail
+2500010 SC elevator lever
+2500020 Filthy Bloodline Queen's Flesh
+2500030 Examine boss fixed treasure
+2500040 Examine the ledger table
+2500800 Fog wall_before the boss
+2600010 Open the door_Boss room entrance
+2600020 warping mirror
+2600030 general purpose treasure
+2600800 Fog wall_before the boss
+2600850 Wall of fog_before the middle boss
+2600990 evil eye
+2700000 Open the door_for shortcut_Damipoly 121 direction
+2700001 Open the door_For shortcut_Damipoly 100 directions
+2700002 Open the gate_for shortcut_Damipoly 121 direction
+2700003 Open the gate_for shortcut_Damipoly 100 directions
+2700004 Fog wall_before the boss
+2700005 [DLC] Take the relic (Long Helm of the Federation)
+2800000 Open the big door_lower big door
+2800001 Open the large door_Sacrifice entrance large door
+2800020 Examine the warp OBJ to Nightmare Classroom 2F.
+2800030 Examine SC warp OBJ
+2800040 Open the double doors_Damipoly 100 directions
+2800041 Open the double doors_Damipoli 101 direction
+2800050 Retrieving belongings_for carriages
+2800800 Fog wall_before the boss
+2900000 examine the stone monument
+2900001 ring the bell
+2900002 turn on the light
+2900003 broken warp chair
+2900004 start the chair
+2900010 Fog wall_before the boss
+3200000 Big Door_Nightmare Classroom_Going to hometown
+3200001 Big Door_Nightmare Classroom_To TR
+3200010 Get the key to the terrace
+3200800 Fog wall_before the boss
+3200810 Check the SFX that appear after defeating the boss
+3300800 Fog wall_before the boss
+3400100 pick up items
+3400800 Wall of fog_before boss 1
+3400850 Wall of fog_before boss 2
+3400900 Talk to (Ludo Week)
+3400950 Open the door_general purpose
+3500000 Open the door_Damipoli 101 direction
+3500001 Open the door_Damipoli 101 direction_For assassins only
+3500100 Examine the upper altar
+3500101 Put a pendant on the upper altar
+3500102 Take the item from the lower altar
+3500200 plate
+3500800 Wall of fog_before boss 1
+3500850 Wall of fog_before boss 2
+3500900 Talk to (killer)_High priority
+3500901 Talk to (killer)_Low priority
+3500902 Talk to (killer)_close range
+3500903 Talk to (killer)_Long distance_High
+3500904 Talk to (killer)_Long distance_Low
+3500910 Take the relic (obtain bogus item from the clock tower hunter)
+3500911 Examine (obtain clock face key)
+3500912 use the clock face key
+3500920 Talk to (head only mob patient)
+3600000 SC ladder launch
+3600800 Fog wall_before the boss
+9900800 Fog wall_before the boss
+9956010 dungeon entrance warp
+9956011 Dungeon Grail Altar
+9956012 Dungeon Holy Grail Altar_Round

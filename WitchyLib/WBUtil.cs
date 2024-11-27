@@ -1,9 +1,12 @@
 ﻿#nullable enable
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
@@ -12,7 +15,6 @@ using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using PPlus;
-using PPlus.Controls;
 using SoulsFormats;
 using PARAMDEF = WitchyFormats.PARAMDEF;
 
@@ -147,6 +149,9 @@ public static class WBUtil
         }
     }
 
+    [DllImport("kernel32.dll")]
+    public static extern IntPtr GetConsoleWindow();
+
     public static string GetExeLocation(params string[]? parts)
     {
         if (parts != null && parts.Any())
@@ -159,6 +164,11 @@ public static class WBUtil
     public static string GetExeLocation()
     {
         return GetExeLocation(Array.Empty<string>());
+    }
+
+    public static string GetExecutablePath()
+    {
+        return System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName;
     }
 
     public enum GameType
@@ -183,9 +193,19 @@ public static class WBUtil
         [Display(Name = "Armored Core VI")] AC6
     }
 
+    public static string GetAssetsPath()
+    {
+        return Path.Combine(GetExeLocation(), "Assets");
+    }
+
+    public static string GetAssetsPath(params string[] parts)
+    {
+        return Path.Combine(new[] { GetAssetsPath() }.Union(parts).ToArray());
+    }
+
     public static string GetParamdexPath()
     {
-        return $@"{GetExeLocation()}\Assets\Paramdex";
+        return Path.Combine(GetAssetsPath(), "Paramdex");
     }
 
     public static string GetParamdexPath(params string[] parts)
@@ -243,17 +263,16 @@ public static class WBUtil
             game = GameType.ER;
             return SFUtil.DecryptERRegulation(path);
         }
-        catch (Exception)
+        catch (Exception e) when (e is InvalidDataException or CryptographicException)
         {
             try
             {
                 game = GameType.AC6;
                 return SFUtil.DecryptAC6Regulation(path);
             }
-            catch (Exception e2)
+            catch (InvalidDataException e2)
             {
-                throw new InvalidDataException($"File is not a regulation.bin BND for Elden Ring or Armored Core VI.",
-                    e2);
+                throw new InvalidDataException($"Could not read sane data using either ER or AC6 decryption keys.");
             }
         }
     }
@@ -371,18 +390,19 @@ public static class WBUtil
     /// <summary>
     /// Removes common network path roots if present.
     /// </summary>
-    public static string UnrootBNDPath(string path, string root)
+    public static string UnrootBNDPath(string path, string? root)
     {
-        if (string.IsNullOrEmpty(root))
-            return path;
-
-        path = path.Substring(root.Length);
+        path = path.Substring(root?.Length ?? 0);
 
         Match drive = DriveRx.Match(path);
+
         if (drive.Success)
         {
             path = drive.Groups[2].Value;
         }
+
+        if (string.IsNullOrWhiteSpace(root))
+            return RemoveLeadingBackslashes(path);
 
         Match traversal = TraversalRx.Match(path);
         if (traversal.Success)
@@ -407,10 +427,56 @@ public static class WBUtil
         return path;
     }
 
-    public static void Backup(string path)
+    public static bool IsInGit(string? path)
     {
-        if (File.Exists(path) && !File.Exists(path + ".bak"))
-            File.Move(path, path + ".bak");
+        if (!Directory.Exists(path))
+            path = Path.GetDirectoryName(path)!;
+
+        // return Repository.IsValid(path);
+
+        while (!string.IsNullOrEmpty(path))
+        {
+            if (Directory.Exists(Path.Combine(path, ".git")))
+                return true;
+            path = Path.GetDirectoryName(path);
+        }
+
+        return false;
+    }
+    public enum BackupMethod
+    {
+        [Display(Name = "Write once")]
+        WriteOnce,
+        [Display(Name = "Always overwrite")]
+        OverwriteAlways,
+        [Display(Name = "Create copies")]
+        CreateCopies,
+        [Display(Name = "None")]
+        None
+    }
+    public static void Backup(string path, BackupMethod method)
+    {
+        if (method == BackupMethod.None) return;
+        if (!File.Exists(path)) return;
+        switch (method)
+        {
+            case BackupMethod.WriteOnce:
+                if (!File.Exists(path + ".bak"))
+                    File.Move(path, path + ".bak");
+                return;
+            case BackupMethod.OverwriteAlways:
+                if (File.Exists(path + ".bak"))
+                    File.Delete(path + ".bak");
+                File.Move(path, path + ".bak");
+                return;
+            case BackupMethod.CreateCopies:
+                var dest = NextAvailableFilename(path + ".bak");
+                File.Move(path, dest);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(method), method, null);
+        }
+
     }
 
     private static byte[] ds2RegulationKey =
@@ -540,6 +606,9 @@ public static class WBUtil
 
     public static void XmlSerialize<T>(object obj, string targetFile)
     {
+        var dir = Path.GetDirectoryName(targetFile)!;
+        if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+
         using (var xw = XmlWriter.Create(targetFile, new XmlWriterSettings() { Indent = true }))
         {
             var xmlSer = new XmlSerializer(typeof(T));
@@ -765,7 +834,9 @@ public static class WBUtil
             PromptPlus.ClearLine();
             PromptPlus.SetCursorPosition(cursor.Left, cursor.Top);
             PromptPlus.WriteLine("");
-            PromptPlus.KeyPress("Please read carefully, then press any key...").Run();
+            PromptPlus.KeyPress("Please read carefully, then press any key...")
+                .Config(a => a.EnabledAbortKey(false))
+                .Run();
             PromptPlus.ClearLine();
             PromptPlus.SetCursorPosition(cursor.Left, cursor.Top);
         }
@@ -779,10 +850,73 @@ public static class WBUtil
         return true;
     }
 
+    public static string GetValidFileName(string fileName)
+    {
+        var invalid = Path.GetInvalidFileNameChars();
+        return new string(fileName.Where(c => !invalid.Contains(c)).ToArray());
+    }
+
+    private static string numberPattern = " ({0})";
+
+    public static string NextAvailableFilename(string path)
+    {
+        // Short-cut if already available
+        if (!File.Exists(path))
+            return path;
+
+        // If path has extension then insert the number pattern just before the extension and return next filename
+        if (Path.HasExtension(path))
+            return GetNextFilename(path.Insert(path.LastIndexOf(Path.GetExtension(path)), numberPattern));
+
+        // Otherwise just append the pattern to the path and return next filename
+        return GetNextFilename(path + numberPattern);
+    }
+
+    private static string GetNextFilename(string pattern)
+    {
+        string tmp = string.Format(pattern, 1);
+        if (tmp == pattern)
+            throw new ArgumentException("The pattern must include an index place-holder", "pattern");
+
+        if (!File.Exists(tmp))
+            return tmp; // short-circuit if no matches
+
+        int min = 1, max = 2; // min is inclusive, max is exclusive/untested
+
+        while (File.Exists(string.Format(pattern, max)))
+        {
+            min = max;
+            max *= 2;
+        }
+
+        while (max != min + 1)
+        {
+            int pivot = (max + min) / 2;
+            if (File.Exists(string.Format(pattern, pivot)))
+                min = pivot;
+            else
+                max = pivot;
+        }
+
+        return string.Format(pattern, max);
+    }
+
     static WBUtil()
     {
         ExeLocation = Path.GetDirectoryName(AppContext.BaseDirectory);
         LatestKnownRegulationVersions = new();
     }
 
+    public static string GetFileNameWithoutAnyExtensions(string path)
+    {
+        return Path.GetFileName(path).Split(".").First();
+    }
+
+    public static string GetFullExtensions(string path)
+    {
+        var split = Path.GetFileName(path).Split(".");
+        if (split.Length > 1)
+            return "." + string.Join(".", Path.GetFileName(path).Split(".").Skip(1));
+        return "";
+    }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
@@ -17,17 +16,21 @@ public class WLUAINFO : WXMLParser
         return IsRead<LUAINFO>(path, data, out file);
     }
 
-    public override void Unpack(string srcPath, ISoulsFile? file)
+    public override bool? IsSimple(string path)
+    {
+        string filename = Path.GetFileName(path);
+        return filename.EndsWith(".luainfo");
+    }
+
+    public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         var info = (file as LUAINFO)!;
         XmlWriterSettings xws = new XmlWriterSettings();
         xws.Indent = true;
-        XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath), xws);
+        XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath, recursive), xws);
         xw.WriteStartElement("luainfo");
 
-        xw.WriteElementString("filename", Path.GetFileName(srcPath));
-        if (!string.IsNullOrEmpty(Configuration.Args.Location))
-            xw.WriteElementString("sourcePath", Path.GetDirectoryName(srcPath));
+        AddLocationToXml(srcPath, recursive, xw);
 
         xw.WriteElementString("bigendian", info.BigEndian.ToString());
         xw.WriteElementString("longformat", info.LongFormat.ToString());
@@ -50,7 +53,7 @@ public class WLUAINFO : WXMLParser
         xw.Close();
     }
 
-    public override void Repack(string srcPath)
+    public override void Repack(string srcPath, bool recursive)
     {
         LUAINFO info = new LUAINFO();
         XElement xml = LoadXml(srcPath);
@@ -68,7 +71,7 @@ public class WLUAINFO : WXMLParser
         }
 
         string outPath = GetRepackDestPath(srcPath, xml);
-        WBUtil.Backup(outPath);
+        Backup(outPath);
         info.TryWriteSoulsFile(outPath);
     }
 }

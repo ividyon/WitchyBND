@@ -14,7 +14,7 @@ public class SpecialBinderTests : TestBase
     [Test]
     public void FFXBNDModern()
     {
-        IEnumerable<string> paths = GetSamples("FFXBNDModern");
+        IEnumerable<string> paths = GetSamples("FFXBNDModern").Union(GetSamples("FFXBND"));
 
         var parser = new WFFXBNDModern();
 
@@ -24,24 +24,18 @@ public class SpecialBinderTests : TestBase
             Assert.That(parser.Exists(path));
             Assert.That(parser.Is(path, null, out var file));
 
-            parser.Unpack(path, file);
-            string? destPath = parser.GetUnpackDestPath(path);
+            parser.Unpack(path, file, false);
+            string? destPath = parser.GetUnpackDestPath(path, false);
 
             File.Delete(path);
 
             Assert.That(Directory.Exists(destPath));
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
-            parser.Repack(destPath);
+            parser.Repack(destPath, false);
             var xml = WFileParser.LoadXml(parser.GetFolderXmlPath(destPath));
 
             Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
-        }
-
-        IEnumerable<string> wrongPaths = GetSamples("FFXBND");
-        foreach (string wrongPath in wrongPaths)
-        {
-            Assert.That(parser.Is(wrongPath, null, out _), Is.False);
         }
     }
 
@@ -60,8 +54,8 @@ public class SpecialBinderTests : TestBase
 
             var bnd = BND4.Read(path);
 
-            parser.Unpack(path, outFile);
-            string? destPath = parser.GetUnpackDestPath(path);
+            parser.Unpack(path, outFile, false);
+            string? destPath = parser.GetUnpackDestPath(path, false);
 
             File.Delete(path);
 
@@ -77,7 +71,7 @@ public class SpecialBinderTests : TestBase
                 Assert.That(File.Exists(name));
             }
 
-            parser.Repack(destPath);
+            parser.Repack(destPath, false);
             var xml = WFileParser.LoadXml(parser.GetFolderXmlPath(destPath));
 
             Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
@@ -99,8 +93,8 @@ public class SpecialBinderTests : TestBase
 
             var bnd = BND4.Read(path);
 
-            parser.Unpack(path, outFile);
-            string? destPath = parser.GetUnpackDestPath(path);
+            parser.Unpack(path, outFile, false);
+            string? destPath = parser.GetUnpackDestPath(path, false);
 
             File.Delete(path);
 
@@ -116,7 +110,46 @@ public class SpecialBinderTests : TestBase
                 Assert.That(File.Exists(name));
             }
 
-            parser.Repack(destPath);
+            parser.Repack(destPath, false);
+            var xml = WFileParser.LoadXml(parser.GetFolderXmlPath(destPath));
+
+            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
+        }
+    }
+
+    [Test]
+    public void ANIBND4()
+    {
+        IEnumerable<string> paths = GetSamples("ANIBND4");
+
+        var parser = new WANIBND4();
+
+        foreach (string path in paths.Select(GetCopiedPath))
+        {
+            SetLocation(path);
+            Assert.That(parser.Exists(path));
+            Assert.That(parser.Is(path, null, out var outFile));
+
+            var bnd = BND4.Read(path);
+
+            parser.Unpack(path, outFile, false);
+            string? destPath = parser.GetUnpackDestPath(path, false);
+
+            File.Delete(path);
+
+            Assert.That(Directory.Exists(destPath));
+            Assert.That(parser.ExistsUnpacked(destPath));
+            Assert.That(parser.IsUnpacked(destPath));
+
+            var root = WBUtil.FindCommonRootPath(bnd.Files.Select(a => a.Name));
+            foreach (BinderFile file in bnd.Files)
+            {
+                string name = Path.Combine(destPath,
+                    !string.IsNullOrEmpty(root) ? Path.GetRelativePath(root, file.Name) : file.Name);
+                Assert.That(File.Exists(name));
+            }
+
+            parser.Repack(destPath, false);
             var xml = WFileParser.LoadXml(parser.GetFolderXmlPath(destPath));
 
             Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));

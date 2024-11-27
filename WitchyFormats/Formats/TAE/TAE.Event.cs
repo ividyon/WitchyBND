@@ -85,11 +85,16 @@ namespace WitchyFormats
                                     }
                                     catch (System.IO.InvalidDataException ex)
                                     {
-                                        var txtField = p.Name != null ? $"'{p.Name}'" : $"{(i + 1)} of {Template.Count}";
-                                        var txtEventType = Template.Name != null ? $"'{Template.Name}'" : Template.ID.ToString();
+                                        var txtField = p.Name != null
+                                            ? $"'{p.Name}'"
+                                            : $"{(i + 1)} of {Template.Count}";
+                                        var txtEventType = Template.Name != null
+                                            ? $"'{Template.Name}'"
+                                            : Template.ID.ToString();
 
-                                        throw new Exception($"Animation {animID}\nEvent[{eventIndex}] (Type: {txtEventType})" +
-                                                $"\n  -> Assert failed on field {txtField} (Type: {p.Type})", ex);
+                                        throw new Exception(
+                                            $"Animation {animID}\nEvent[{eventIndex}] (Type: {txtEventType})" +
+                                            $"\n  -> Assert failed on field {txtField} (Type: {p.Type})", ex);
                                     }
                                 }
                                 else
@@ -100,7 +105,6 @@ namespace WitchyFormats
                             }
                             else
                             {
-
                                 try
                                 {
                                     parameterValues.Add(p.GetKeyString(), p.ReadValue(br));
@@ -108,18 +112,23 @@ namespace WitchyFormats
                                 catch (Exception ex)
                                 {
                                     var txtField = p.Name != null ? $"'{p.Name}'" : $"{(i + 1)} of {Template.Count}";
-                                    var txtEventType = Template.Name != null ? $"'{Template.Name}'" : Template.ID.ToString();
+                                    var txtEventType = Template.Name != null
+                                        ? $"'{Template.Name}'"
+                                        : Template.ID.ToString();
 
-                                    throw new Exception($"Animation {animID}\nEvent[{eventIndex}] (Type: {txtEventType})" +
-                                            $"\n  -> Failed to read value of field {txtField} (Type: {p.Type})", ex);
+                                    throw new Exception(
+                                        $"Animation {animID}\nEvent[{eventIndex}] (Type: {txtEventType})" +
+                                        $"\n  -> Failed to read value of field {txtField} (Type: {p.Type})", ex);
                                 }
                             }
+
                             i++;
                         }
                     }
                 }
 
-                internal ParameterContainer(bool bigEndian, byte[] paramData, Template.EventTemplate template, bool suppressAssert = false)
+                internal ParameterContainer(bool bigEndian, byte[] paramData, Template.EventTemplate template,
+                    bool suppressAssert = false)
                 {
                     parameterValues = new Dictionary<string, object>();
                     Template = template;
@@ -140,11 +149,15 @@ namespace WitchyFormats
                                     }
                                     catch (System.IO.InvalidDataException ex)
                                     {
-                                        var txtField = p.Name != null ? $"'{p.Name}'" : $"{(i + 1)} of {Template.Count}";
-                                        var txtEventType = Template.Name != null ? $"'{Template.Name}'" : Template.ID.ToString();
+                                        var txtField = p.Name != null
+                                            ? $"'{p.Name}'"
+                                            : $"{(i + 1)} of {Template.Count}";
+                                        var txtEventType = Template.Name != null
+                                            ? $"'{Template.Name}'"
+                                            : Template.ID.ToString();
 
                                         throw new Exception($"Event Type: {txtEventType}" +
-                                                $"\n  -> Assert failed on field {txtField}", ex);
+                                                            $"\n  -> Assert failed on field {txtField}", ex);
                                     }
                                 }
                                 else
@@ -161,12 +174,16 @@ namespace WitchyFormats
                                 catch (Exception ex)
                                 {
                                     var txtField = p.Name != null ? $"'{p.Name}'" : $"{(i + 1)} of {Template.Count}";
-                                    var txtEventType = Template.Name != null ? $"'{Template.Name}'" : Template.ID.ToString();
+                                    var txtEventType = Template.Name != null
+                                        ? $"'{Template.Name}'"
+                                        : Template.ID.ToString();
 
                                     throw new Exception($"Event Type: {txtEventType}" +
-                                            $"\n  -> Failed to read value of field {txtField} (Type: {p.Type})", ex);
+                                                        $"\n  -> Failed to read value of field {txtField} (Type: {p.Type})",
+                                        ex);
                                 }
                             }
+
                             i++;
                         }
                     }
@@ -189,7 +206,6 @@ namespace WitchyFormats
                             {
                                 p.WriteValue(bw, this[p.GetKeyString()]);
                             }
-
                         }
 
                         return memStream.ToArray();
@@ -311,19 +327,20 @@ namespace WitchyFormats
             internal void ApplyTemplate(TAE containingTae, Template template,
                 long animID, int eventIndex, int eventType)
             {
-                
-                if (template[containingTae.EventBank].ContainsKey(eventType))
-                {
-                    if (Parameters != null)
-                    {
-                        CopyParametersToBytes(containingTae.BigEndian);
-                    }
-                    Type = eventType;
-                    Array.Resize(ref ParameterBytes, template[containingTae.EventBank][Type].GetAllParametersByteCount());
-                    Parameters = new ParameterContainer(animID, eventIndex,
-                        containingTae.BigEndian, ParameterBytes, template[containingTae.EventBank][Type]);
+                if (!template.Any(t => t.Value.ContainsKey(eventType)))
+                    return;
 
+                Template.EventTemplate eventTemplate = template.First(t => t.Value.ContainsKey(eventType)).Value[eventType];
+
+                if (Parameters != null)
+                {
+                    CopyParametersToBytes(containingTae.BigEndian);
                 }
+
+                Type = eventType;
+                Array.Resize(ref ParameterBytes, eventTemplate.GetAllParametersByteCount());
+                Parameters = new ParameterContainer(animID, eventIndex,
+                    containingTae.BigEndian, ParameterBytes, eventTemplate);
             }
 
             internal void ChangeTemplateAfterLoading(TAE containingTae, Template template,
@@ -332,7 +349,8 @@ namespace WitchyFormats
                 if (template[containingTae.EventBank].ContainsKey(eventType))
                 {
                     Type = eventType;
-                    Array.Resize(ref ParameterBytes, template[containingTae.EventBank][Type].GetAllParametersByteCount());
+                    Array.Resize(ref ParameterBytes,
+                        template[containingTae.EventBank][Type].GetAllParametersByteCount());
 
                     var newParameters = new ParameterContainer(animID, eventIndex,
                         containingTae.BigEndian, ParameterBytes, template[containingTae.EventBank][Type],
@@ -347,7 +365,6 @@ namespace WitchyFormats
                                 newParameters[field.Key] = Parameters[field.Key];
                         }
                     }
-                    
                 }
             }
 
@@ -358,14 +375,18 @@ namespace WitchyFormats
             {
                 if (template.ID != Type)
                 {
-                    throw new ArgumentException($"Template is for event type {template.ID} but this event is type {Type}");
+                    throw new ArgumentException(
+                        $"Template is for event type {template.ID} but this event is type {Type}");
                 }
+
                 if (Parameters != null)
                 {
                     CopyParametersToBytes(isBigEndian);
                 }
+
                 Array.Resize(ref ParameterBytes, template.GetAllParametersByteCount());
-                Parameters = new ParameterContainer(isBigEndian, ParameterBytes, template, suppressAssert: lenientOnAssert);
+                Parameters = new ParameterContainer(isBigEndian, ParameterBytes, template,
+                    suppressAssert: lenientOnAssert);
             }
 
             private void CopyParametersToBytes(bool isBigEndian)
@@ -389,7 +410,8 @@ namespace WitchyFormats
             /// Creates a new event with the specified start time, end time, type, and unknown then
             /// applies default values from the provided template.
             /// </summary>
-            public Event(float startTime, float endTime, int type, int unk04, bool isBigEndian, Template.EventTemplate template)
+            public Event(float startTime, float endTime, int type, int unk04, bool isBigEndian,
+                Template.EventTemplate template)
             {
                 StartTime = startTime;
                 EndTime = endTime;
@@ -401,7 +423,8 @@ namespace WitchyFormats
             /// <summary>
             /// Creates a new event with the specified start time, end time, type, unknown, and parameters.
             /// </summary>
-            public Event(float startTime, float endTime, int type, int unk04, byte[] parameters, bool isBigEndianParameters)
+            public Event(float startTime, float endTime, int type, int unk04, byte[] parameters,
+                bool isBigEndianParameters)
             {
                 StartTime = startTime;
                 EndTime = endTime;
@@ -420,7 +443,8 @@ namespace WitchyFormats
                 EndTime = endTime;
             }
 
-            internal void WriteHeader(BinaryWriterEx bw, int animIndex, int eventIndex, Dictionary<float, long> timeOffsets, TAEFormat format)
+            internal void WriteHeader(BinaryWriterEx bw, int animIndex, int eventIndex,
+                Dictionary<float, long> timeOffsets, TAEFormat format)
             {
                 bw.WriteVarint(timeOffsets[StartTime]);
                 bw.WriteVarint(timeOffsets[MemeEndTime]);
@@ -510,7 +534,8 @@ namespace WitchyFormats
                     //}
 
                     // Parameters will ALWAYS be right here otherwise it crashes iirc.
-                    parametersOffset = br.GetNextPaddedOffsetAfterCurrentField(br.VarintSize, format is TAEFormat.DES ? 0x10 : 0);
+                    parametersOffset =
+                        br.GetNextPaddedOffsetAfterCurrentField(br.VarintSize, format is TAEFormat.DES ? 0x10 : 0);
                     br.AssertVarint(parametersOffset, 0);
                     br.Position = parametersOffset;
                 }
