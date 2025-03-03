@@ -9,8 +9,8 @@
       },
       "DrSwizzler": {
         "type": "Transitive",
-        "resolved": "1.0.7",
-        "contentHash": "XpymhDjiRdJ+ztOpceluPPOlbXloiRyh8S2hK8XPBgb9P7NsPV6grR+1ffkeIirJe2pSk76o+0F6RETw3kmPnA=="
+        "resolved": "1.0.8",
+        "contentHash": "cf1gGHuKvym0gpAreJX35z+HJcKIdlx6TxGOhP5E1CosLcNyFDQAluN+qZo7htmUBDd8kroE77F6TQut609opw=="
       },
       "Microsoft.NETCore.Platforms": {
         "type": "Transitive",
@@ -39,7 +39,7 @@
         "type": "Project",
         "dependencies": {
           "BouncyCastle.Cryptography": "[2.4.0, )",
-          "DrSwizzler": "[1.0.7, )",
+          "DrSwizzler": "[1.0.8, )",
           "System.Text.Encoding.CodePages": "[4.7.0, )",
           "System.ValueTuple": "[4.5.0, )",
           "ZstdNet": "[1.4.5, )"

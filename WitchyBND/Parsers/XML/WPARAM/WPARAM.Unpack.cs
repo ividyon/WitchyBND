@@ -52,10 +52,11 @@ public partial class WPARAM
                     srcPath));
                 return;
             }
+        }
 
-            if (string.IsNullOrWhiteSpace(newParamType))
-            {
-            }
+        if (string.IsNullOrWhiteSpace(paramTypeToParamdef))
+        {
+            errorService.RegisterError($"Could not determine param type of param {paramName}. It may contain no rows.");
         }
 
         if (!gameService.ParamdefStorage[game].ContainsKey(paramTypeToParamdef))

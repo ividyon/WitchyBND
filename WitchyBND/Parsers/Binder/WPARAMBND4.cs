@@ -192,7 +192,7 @@ public class WPARAMBND4 : WBinderParser
                 {
                     paramParser.Unpack(Path.Combine(srcPath, filePath), null, recursive, true, (game, regVer));
                 }
-                catch (Exception e)
+                catch (Exception e) when (!Configuration.IsDebug)
                 {
                     throw new MalformedBinderException(
                         @$"The regulation binder is malformed: {Path.GetFileNameWithoutExtension(filePath)} has thrown an exception during read.",
