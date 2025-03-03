@@ -94,6 +94,11 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.14.4.4
+
+* Updated to latest SoulsFormatsNEXT, fixing some issues with unpacking console textures.
+* Updated to latest Paramdex from Smithbox.
+
 ### 2.14.4.3
 
 * Hotfix for supporting 1.16 PARAMs.
