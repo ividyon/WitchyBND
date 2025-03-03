@@ -70,7 +70,7 @@
     </Enum>
   </Enums>
   <Field>
-    <atkId_Bullet AltName="AtkParam ID" Wiki="Register each attack parameter ID.  Attack type / Attack material / Physical attack power / Magic attack power / Stamina attack power / Knockback distance." Refs="AtkParam_Pc,AtkParam_Npc" />
+    <atkId_Bullet AltName="AtkParam ID" Wiki="Register each attack parameter ID.  Attack type / Attack material / Physical attack power / Magic attack power / Stamina attack power / Knockback distance." Refs="AtkParam_Pc,AtkParam_Npc" DeepCopyTarget="Attack"  />
     <sfxId_Bullet AltName="Projectile SFX ID" Wiki="Enter the SFX ID for [Bullet]. -1 does not occur." ParticleAlias="" ExtRefs="common sfxbnd,sfx\sfxbnd_commoneffects.ffxbnd.dcx,GR\data\INTERROOT_win64\sfx\effect\f{0:D9}.fxr" />
     <sfxId_Hit AltName="Impact SFX ID" Wiki="[Impact] Enter the SFX ID. -1 does not occur." ParticleAlias="" ExtRefs="common sfxbnd,sfx\sfxbnd_commoneffects.ffxbnd.dcx,GR\data\INTERROOT_win64\sfx\effect\f{0:D9}.fxr" />
     <sfxId_Flick AltName="Repel SFX ID" Wiki="[At the time of repelling] Enter the SFX ID. -1 does not occur." ParticleAlias="" ExtRefs="common sfxbnd,sfx\sfxbnd_commoneffects.ffxbnd.dcx,GR\data\INTERROOT_win64\sfx\effect\f{0:D9}.fxr" />
@@ -90,18 +90,18 @@
     <hitRadius AltName="Initial Hit Radius" Wiki="Set the radius of the hit ball." />
     <hitRadiusMax AltName="Final Hit Radius" Wiki="Maximum radius of the hit sphere (If -1, make it the same as the initial radius / default)" />
     <spreadTime AltName="Radius Spread Time" Wiki="The time when the radius of the range expands to a small extent." />
-    <expDelay AltName="Explosion Delay" Wiki="Time from landing to explosion (if 0, it explodes immediately)." />
+    <expDelay AltName="Expansion Delay" Wiki="Time from landing to expand (if 0, it expands immediately)." />
     <hormingOffsetRange AltName="Homing Offset Range" Wiki="It is accurate if it is 0. At the time of shooting, each component of XYZ should be aimed by shifting this amount." />
     <dmgHitRecordLifeTime AltName="Damage Hit Duration" Wiki="Damage hit history survival time [sec] ( 0.0f: indefinite)" />
     <externalForce AltName="External Force in Bullet Direction" Wiki="External force applied in the direction of shooting. (Y-axis is removed)" />
-    <spEffectIDForShooter AltName="Shooter SpEffect ID" Wiki="Special effects on the person who shot" Refs="SpEffectParam" />
+    <spEffectIDForShooter AltName="Shooter SpEffect ID" Wiki="Special effects on the person who shot" Refs="SpEffectParam" DeepCopyTarget="SpEffect" />
     <autoSearchNPCThinkID AltName="Bullet AI" Wiki="Parameters used by the funnel to search for the target" Refs="NpcThinkParam" />
-    <HitBulletID AltName="Hit Bullet ID" Wiki="Specify the ID when generating a new bullet parameter from the bullet parameter" Refs="Bullet" />
-    <spEffectId0 AltName="Target SpEffect ID [0]" Wiki="Register each special effect parameter ID.  General special effects." Refs="SpEffectParam" />
-    <spEffectId1 AltName="Target SpEffect ID [1]" Wiki="Register each special effect parameter ID.  General special effects." Refs="SpEffectParam" />
-    <spEffectId2 AltName="Target SpEffect ID [2]" Wiki="Register each special effect parameter ID.  General special effects." Refs="SpEffectParam" />
-    <spEffectId3 AltName="Target SpEffect ID [3]" Wiki="Register each special effect parameter ID.  General special effects." Refs="SpEffectParam" />
-    <spEffectId4 AltName="Target SpEffect ID [4]" Wiki="Register each special effect parameter ID.  General special effects." Refs="SpEffectParam" />
+    <HitBulletID AltName="Hit Bullet ID" Wiki="Specify the ID when generating a new bullet parameter from the bullet parameter" Refs="Bullet" DeepCopyTarget="Bullet" />
+    <spEffectId0 AltName="Target SpEffect ID [0]" Wiki="Register each special effect parameter ID.  General special effects." Refs="SpEffectParam" DeepCopyTarget="SpEffect" />
+    <spEffectId1 AltName="Target SpEffect ID [1]" Wiki="Register each special effect parameter ID.  General special effects." Refs="SpEffectParam" DeepCopyTarget="SpEffect" />
+    <spEffectId2 AltName="Target SpEffect ID [2]" Wiki="Register each special effect parameter ID.  General special effects." Refs="SpEffectParam" DeepCopyTarget="SpEffect" />
+    <spEffectId3 AltName="Target SpEffect ID [3]" Wiki="Register each special effect parameter ID.  General special effects." Refs="SpEffectParam" DeepCopyTarget="SpEffect" />
+    <spEffectId4 AltName="Target SpEffect ID [4]" Wiki="Register each special effect parameter ID.  General special effects." Refs="SpEffectParam" DeepCopyTarget="SpEffect" />
     <numShoot AltName="Bullet Count" Wiki="The number of missiles fired at one time." />
     <homingAngle AltName="Homing Angle" Wiki="How many corrections per second? .." />
     <shootAngle AltName="Launch Angle" Wiki="Specify how many times the missile is fired forward." />
@@ -115,7 +115,7 @@
     <knockbackDamp AltName="Damage Falloff %: Knockback" Wiki="Correction value that decreases in 1 second after the attenuation distance." />
     <shootAngleXZ AltName="Launch Elevation Angle" Wiki="Additional elevation angle from the horizontal." />
     <lockShootLimitAng AltName="Lock Direction Limit Angle" Wiki="Limit angle when facing the lock direction" />
-    <pad2 AltName="" IsHidden=""/>
+    <pad2 AltName="" Padding=""/>
     <prevVelocityDirRate AltName="Previous Velocity Direction Rate" Wiki="Ratio to add the previous movement direction to the current direction when the sliding bullet hits the wall" />
     <atkAttribute AltName="Attack Attribute" Wiki="Set the physical attributes to set for the bullet" ProjectEnum="ATKPARAM_ATKATTR_TYPE" />
     <spAttribute AltName="Special Attribute" Wiki="Set special attributes to set for bullets" ProjectEnum="ATKPARAM_SPATTR_TYPE" />
@@ -123,7 +123,7 @@
     <Material_AttackMaterial AltName="Material Attack Material" Wiki="Used for SFX / SE during attack" Enum="WEP_MATERIAL_ATK" />
     <isPenetrateChr AltName="Is Penetrate Character" Wiki="If it is ON, it will penetrate without landing when it hits the character." IsBool="" />
     <isPenetrateObj AltName="Is Penetrate Object" Wiki="If it is ON, it will penetrate without landing when hitting a dynamic / partial destruction asset." IsBool="" />
-    <pad AltName="" IsHidden=""/>
+    <pad AltName="" Padding=""/>
     <launchConditionType AltName="Launch Condition Type" Wiki="Specify the condition to judge whether to generate a bullet when it lands or the life is extinguished" Enum="BULLET_LAUNCH_CONDITION_TYPE" />
     <FollowType AltName="Follow Type" Wiki="Follow-up type. Do not follow is the default." Enum="BULLET_FOLLOW_TYPE" />
     <EmittePosType AltName="Emitter Source Type" Wiki="Source type. Usually from Damipoli. (Introduced to judge meteo)" Enum="BULLET_EMITTE_POS_TYPE" />
@@ -150,20 +150,20 @@
     <targetYOffsetRange AltName="Target Vertical Offset" Wiki="Vertical offset of landing position. Shift the target position up and down at the time of launch and during homing. (-N ~ n)" />
     <shootAngleYMaxRandom AltName="Random Launch Angle - Max" Wiki="Upper limit of random number of firing angle (0 to 360)" />
     <shootAngleXMaxRandom AltName="Random Elevation Angle - Max" Wiki="Upper limit of firing elevation random number (0 to 360)" />
-    <intervalCreateBulletId AltName="Bullet Emitter: Bullet ID" Wiki="Bullet ID used when making bullets at regular intervals" Refs="Bullet" />
+    <intervalCreateBulletId AltName="Bullet Emitter: Bullet ID" Wiki="Bullet ID used when making bullets at regular intervals" Refs="Bullet" DeepCopyTarget="Bullet" />
     <intervalCreateTimeMin AltName="Bullet Emitter: Minimum Shoot Interval" Wiki="Minimum interval for making bullets at regular intervals (0 to n)" />
     <intervalCreateTimeMax AltName="Bullet Emitter: Maximum Shoot Interval" Wiki="Maximum interval for making bullets at regular intervals (function is disabled if 0 to n 0)" />
     <predictionShootObserveTime AltName="Prediction Shoot Observe Time" Wiki="Average speed observation time of predicted shooting function (function is invalid if 0 to 40)" />
     <intervalCreateWaitTime AltName="Bullet Emitter: Initial Wait Time" Wiki="Waiting time to start making bullets at regular intervals" />
     <sfxPostureType AltName="SFX Posture Type" Wiki="Set the initial attitude of an SFX or sub-bullet created from a bullet" Enum="BULLET_SFX_CREATE_POSTURE_TYPE" />
     <createLimitGroupId AltName="Create Limit Group ID" Wiki="If it is 0, it is unused. If the upper limit is reached when creating a bullet set in the same group Id, that bullet will not be created. (Bullets created synchronously on the network will be released regardless)" Refs="BulletCreateLimitParam" />
-    <pad5 AltName="" IsHidden=""/>
+    <pad5 AltName="" Padding=""/>
     <isInheritSpeedToChild AltName="Is Speed Inherited by Child Bullet" Wiki="Take over the speed of the timing to replace the submunition. Ignore the speed set for the submunition" IsBool="" />
     <isDisableHitSfx_byChrAndObj AltName="Is SFX Disabled on Chr/Object Hit" Wiki="When ON, the bullet parameter landing SFX does not play even if it hits a character / object." IsBool="" />
     <isCheckWall_byCenterRay AltName="Is Wall Checked by Center Ray" Wiki="There was a problem with the digging judgment when firing a bullet, so it is for error handling. SEQ23101 [Own character] If you use a soul short arrow or a strong soul short arrow in close contact with a character with a high lock-on position, the direction of the bullet will be reversed." IsBool="" />
     <isHitFlare AltName="Is Hit Flare" Wiki="Do you hit flare magic?" IsBool="" />
     <isUseBulletWallFilter AltName="Is Bullet Wall Filter Used" Wiki="Do you use primitive magic Atari? It will change to a filter that corresponds to the Atari dedicated to primitive magic." IsBool="" />
-    <pad1 AltName="" IsHidden=""/>
+    <pad1 AltName="" Padding=""/>
     <isNonDependenceMagicForFunnleNum AltName="Is Follow Bullet Count not scaled by INT" Wiki="The number of funnels on the PC does not fluctuate by force. Become the number of shots" IsBool="" />
     <isAiInterruptShootNoDamageBullet AltName="Is AI Interrupted by Bullet" Wiki="Does it react to AI bullets (even with 0 attack power)?" IsBool="" />
     <randomCreateRadius AltName="Emitter Source Radius" Wiki="The range of bullets used when the source type is set to occur at random locations." />
@@ -183,14 +183,20 @@
     <howitzerInitMaxVelocity AltName="Howitzer - Initial Max Velocity" Wiki="[Song firing] Maximum speed limit for song firing calculation [m / s]." />
     <sfxId_ForceErase AltName="SFX ID - Force Erase" Wiki="SFX ID at the time of forced erasure. -1 does not occur." ExtRefs="common sfxbnd,sfx\sfxbnd_commoneffects.ffxbnd.dcx,GR\data\INTERROOT_win64\sfx\effect\f{0:D9}.fxr" />
     <bulletSfxDeleteType_byForceErase AltName="Bullet SFX Delete Type - By Force Erase" Wiki="Bullet SFX extinction type at the time of forced erasure" Enum="BULLET_SFX_DELETE_TYPE" />
-    <pad3 AltName="" IsHidden=""/>
+    <pad3 AltName="" Padding=""/>
     <followDmypoly_forSfxPose AltName="Follow Bullet - Dummy Poly for SFX Pose" Wiki="SFX direction specification when following Damipoli" />
     <followOffset_Radius AltName="Follow Bullet - Radius Offset" Wiki="Funnel tracking position_radius [m]" />
     <spBulletDistUpRate AltName="SpEffect Bullet Distance - Magnification" Wiki="Special effect flight distance correction magnification" />
     <nolockTargetDist AltName="Target Range when Unlocked" Wiki="Target range when unlocked (-1: Refer to range, 0: No target)" />
     
     <mayRemoteDetonate AltName="Can be Remotely Detonated" Wiki="Bullets with Attach Type 6 will cause this bullet to be detonated if this bullet is within their hit radius." />
-    <pad4 AltName="" IsHidden=""/>
+    
+    <isDisableAiProjectileDodge
+    AltName="Disable AI Projectile Dodge"
+    Wiki="If ON, this projectile will not be dodged by the AI."
+    IsBool="" />
+    
+    <pad4 AltName="" Padding=""/>
   </Field>
   <Self Wiki="Governs motion, hitbox and appearance of projetiles. Can reference AtkParam for damage."/>
 </PARAMMETA>

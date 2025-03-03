@@ -1,2 +1,2 @@
-* Hotfix for supporting 1.16 PARAMs.
-* Updated SoulsFormatsNEXT to fix a MQB bug.
+* Updated to latest SoulsFormatsNEXT, fixing some issues with unpacking console textures.
+* Updated to latest Paramdex from Smithbox.
