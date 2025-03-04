@@ -69,7 +69,7 @@ jobs:
           path: '.'
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: 'WitchyBND-SHA${{ github.sha }}'
           path: WitchyBND-${{ github.ref_name }}.zip
@@ -85,9 +85,10 @@ jobs:
         run: drmu nx check
 
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: 'WitchyBND-SHA${{ github.sha }}'
+          path: 'WitchyBND-SHA${{ github.sha }}'
+          pattern: WitchyBND-SHA*
 
       - name: Upload to Elden Ring Nexus
         run: drmu nexusmods upload
