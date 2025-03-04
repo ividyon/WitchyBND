@@ -97,8 +97,9 @@ WitchyBND is built using the following licensed works:
 ### 2.14.4.4
 
 * Updated to latest SoulsFormatsNEXT, fixing some issues with unpacking console textures. (thanks to Shadowth117)
-* Fixed an MQB color repack bug. (thanks to Natsu)
 * Updated to latest Paramdex from Smithbox. (thanks to Vawser & contributors)
+* Fixed an MQB color repack bug. (thanks to Natsu)
+* Changed some logic in determining AC6 param types to work with the updated Paramdex.
 
 ### 2.14.4.3
 

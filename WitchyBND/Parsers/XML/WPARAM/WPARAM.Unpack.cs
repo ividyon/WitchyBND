@@ -39,13 +39,13 @@ public partial class WPARAM
         // Fixed cell style for now.
         CellStyle cellStyle = Configuration.Active.ParamCellStyle;
 
-        if (game == WBUtil.GameType.AC6 && string.IsNullOrWhiteSpace(paramTypeToParamdef))
+        if (game == WBUtil.GameType.AC6)
         {
             if (gameService.Ac6TentativeParamTypes.TryGetValue(paramName, out string? newParamType))
             {
                 paramTypeToParamdef = newParamType;
             }
-            else
+            else if (string.IsNullOrWhiteSpace(paramTypeToParamdef))
             {
                 errorService.RegisterError(new WitchyError(
                     @$"No tentative param type alternative found for ""{paramTypeToParamdef}"" -> ""{paramName}"" in {srcPath}.",
