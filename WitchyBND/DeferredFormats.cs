@@ -76,7 +76,8 @@ public static class DeferredFormatHandling
             DeferFormat.Flver,
             new()
             {
-                new DeferArgs("SoulsModelTool (ELDEN RING)", "-tofbx -meshnameismatname -transformmesh \"$path\"", null)
+                new DeferArgs("SoulsModelTool (ELDEN RING)", "-tofbx -meshnameismatname -transformmesh \"$path\"", null),
+                new DeferArgs("SoulsModelTool (ELDEN RING) (Z up)", "-tofbx -meshnameismatname -transformmesh -z_up \"$path\"", null)
             }
         },
         {
