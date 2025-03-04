@@ -87,7 +87,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          path: 'WitchyBND-SHA${{ github.sha }}'
+          path: 'WitchyBND-${{ github.ref_name }}.zip'
           pattern: WitchyBND-SHA*
 
       - name: Upload to Elden Ring Nexus
