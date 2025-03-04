@@ -87,7 +87,6 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          path: 'WitchyBND-${{ github.ref_name }}.zip'
           pattern: WitchyBND-SHA*
 
       - name: Upload to Elden Ring Nexus
@@ -98,7 +97,7 @@ jobs:
           -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
           -g eldenring
           -ddwm
-          3862 "WitchyBND-${{ github.ref_name }}.zip"
+          3862 "WitchyBND-SHA${{ github.sha }}\WitchyBND-${{ github.ref_name }}.zip"
 
       - name: Upload to ACVI Nexus
         run: drmu nexusmods upload
@@ -108,7 +107,7 @@ jobs:
           -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
           -g armoredcore6firesofrubicon
           -ddwm
-          20 "WitchyBND-${{ github.ref_name }}.zip"
+          20 "WitchyBND-SHA${{ github.sha }}\WitchyBND-${{ github.ref_name }}.zip"
 
       - name: Upload to DS1 Nexus
         run: drmu nexusmods upload
@@ -118,7 +117,7 @@ jobs:
           -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
           -g darksouls
           -ddwm
-          1865 "WitchyBND-${{ github.ref_name }}.zip"
+          1865 "WitchyBND-SHA${{ github.sha }}\WitchyBND-${{ github.ref_name }}.zip"
 
       - name: Upload to DS1R Nexus
         run: drmu nexusmods upload
@@ -128,7 +127,7 @@ jobs:
           -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
           -g darksoulsremastered
           -ddwm
-          653 "WitchyBND-${{ github.ref_name }}.zip"
+          653 "WitchyBND-SHA${{ github.sha }}\WitchyBND-${{ github.ref_name }}.zip"
 
       - name: Upload to DS2 Nexus
         run: drmu nexusmods upload
@@ -138,7 +137,7 @@ jobs:
           -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
           -g darksouls2
           -ddwm
-          1192 "WitchyBND-${{ github.ref_name }}.zip"
+          1192 "WitchyBND-SHA${{ github.sha }}\WitchyBND-${{ github.ref_name }}.zip"
 
       - name: Upload to DS3 Nexus
         run: drmu nexusmods upload
@@ -148,7 +147,7 @@ jobs:
           -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
           -g darksouls3
           -ddwm
-          1676 "WitchyBND-${{ github.ref_name }}.zip"
+          1676 "WitchyBND-SHA${{ github.sha }}\WitchyBND-${{ github.ref_name }}.zip"
 
       - name: Upload to Sekiro Nexus
         run: drmu nexusmods upload
@@ -158,7 +157,7 @@ jobs:
           -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
           -g sekiro
           -ddwm
-          1633 "WitchyBND-${{ github.ref_name }}.zip"
+          1633 "WitchyBND-SHA${{ github.sha }}\WitchyBND-${{ github.ref_name }}.zip"
 
       - name: Upload to Bloodborne Nexus
         run: drmu nexusmods upload
@@ -168,7 +167,7 @@ jobs:
           -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
           -g bloodborne
           -ddwm
-          20 "WitchyBND-${{ github.ref_name }}.zip"
+          20 "WitchyBND-SHA${{ github.sha }}\WitchyBND-${{ github.ref_name }}.zip"
 
   release:
     needs: nexus
