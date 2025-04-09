@@ -81,12 +81,16 @@ public class WFFXBNDModern : WBinderParser
         xml.Add(new XElement("root", rootPath));
 
         var firstEffect = bnd.Files.FirstOrDefault(f => f.Name.EndsWith(".fxr"));
-        var effectDir = firstEffect != null ? new DirectoryInfo(Path.GetDirectoryName(firstEffect.Name)!).Name : "effect";
+        var effectDir = firstEffect != null
+            ? new DirectoryInfo(Path.GetDirectoryName(firstEffect.Name)!).Name
+            : "effect";
         if (firstEffect != null) xml.Add(new XElement("effectDir", effectDir));
         var effectTargetDir = $@"{destDir}\{effectDir}";
 
         var firstTexture = bnd.Files.FirstOrDefault(f => f.Name.EndsWith(".tpf"));
-        var textureDir = firstTexture != null ? new DirectoryInfo(Path.GetDirectoryName(firstTexture.Name)!).Name : "texture";
+        var textureDir = firstTexture != null
+            ? new DirectoryInfo(Path.GetDirectoryName(firstTexture.Name)!).Name
+            : "texture";
         if (firstTexture != null) xml.Add(new XElement("textureDir", textureDir));
         var textureTargetDir = $@"{destDir}\{textureDir}";
 
@@ -137,6 +141,7 @@ public class WFFXBNDModern : WBinderParser
                     fileTargetDir = $@"{destDir}\other";
                     break;
             }
+
             if (!Directory.Exists(fileTargetDir))
                 Directory.CreateDirectory(fileTargetDir);
             File.WriteAllBytes($"{fileTargetDir}\\{fileTargetName}", bytes);
@@ -168,35 +173,47 @@ public class WFFXBNDModern : WBinderParser
 
         // Files
 
-        List<string> effectPaths = Directory.GetFiles(srcPath, "*.fxr", SearchOption.AllDirectories).OrderBy(Path.GetFileName).ToList();
-        List<string> texturePaths = Directory.GetFiles(srcPath, "*.dds", SearchOption.AllDirectories).OrderBy(Path.GetFileName).ToList();
-        List<string> modelPaths = Directory.GetFiles(srcPath, "*.flver", SearchOption.AllDirectories).OrderBy(Path.GetFileName).ToList();
-        List<string> animPaths = Directory.GetFiles(srcPath, "*.anibnd", SearchOption.AllDirectories).OrderBy(Path.GetFileName).ToList();
-        List<string> resPaths = Directory.GetFiles(srcPath, "*.ffxreslist", SearchOption.AllDirectories).OrderBy(Path.GetFileName).ToList();
+        XElement? resDirElement = xml.Element("resDir");
+
+        List<string> effectPaths = Directory.GetFiles(srcPath, "*.fxr", SearchOption.AllDirectories)
+            .OrderBy(Path.GetFileName).ToList();
+        List<string> texturePaths = Directory.GetFiles(srcPath, "*.dds", SearchOption.AllDirectories)
+            .OrderBy(Path.GetFileName).ToList();
+        List<string> modelPaths = Directory.GetFiles(srcPath, "*.flver", SearchOption.AllDirectories)
+            .OrderBy(Path.GetFileName).ToList();
+        List<string> animPaths = Directory.GetFiles(srcPath, "*.anibnd", SearchOption.AllDirectories)
+            .OrderBy(Path.GetFileName).ToList();
+        List<string> resPaths = Directory.GetFiles(srcPath, "*.ffxreslist", SearchOption.AllDirectories)
+            .OrderBy(Path.GetFileName).ToList();
 
         // Sanity check fxr and reslist
         // Every FXR must have a matching reslist with the exact same name and vice versa
         // therefore there must also be the same amount of FXRs as reslists
         List<string> missingReslists = new();
-        if (effectPaths.Count > 0)
+        if (resDirElement != null)
         {
-            var effectNames = new SortedSet<string>(effectPaths.Select(p => Path.GetFileNameWithoutExtension(p)));
-            var resNames = new SortedSet<string>(resPaths.Select(p => Path.GetFileNameWithoutExtension(p)));
-            if (!effectNames.SetEquals(resNames))
+            if (effectPaths.Count > 0)
             {
-                missingReslists = effectNames.Except(resNames).ToList();
-                string[] diff2 = resNames.Except(effectNames).ToArray();
-                if (missingReslists.Any())
+                var effectNames = new SortedSet<string>(effectPaths.Select(p => Path.GetFileNameWithoutExtension(p)));
+                var resNames = new SortedSet<string>(resPaths.Select(p => Path.GetFileNameWithoutExtension(p)));
+                if (!effectNames.SetEquals(resNames))
                 {
-                    errorService.RegisterNotice(@$"{missingReslists.Count} FXRs are missing reslists. WitchyBND will create empty reslist files to compensate.");
-                }
-                if (diff2.Any())
-                {
-                    errorService.RegisterNotice(@$"{diff2.Length} reslists are missing FXRs:
+                    missingReslists = effectNames.Except(resNames).ToList();
+                    string[] diff2 = resNames.Except(effectNames).ToArray();
+                    if (missingReslists.Any())
+                    {
+                        errorService.RegisterNotice(
+                            @$"{missingReslists.Count} FXRs are missing reslists. WitchyBND will create empty reslist files to compensate.");
+                    }
+
+                    if (diff2.Any())
+                    {
+                        errorService.RegisterNotice(@$"{diff2.Length} reslists are missing FXRs:
 
 {string.Join("\n", diff2)}
 
 Consider tidying up the unpacked archive folder.");
+                    }
                 }
             }
         }
@@ -274,13 +291,15 @@ Consider tidying up the unpacked archive folder.");
                 {
                     tex.Format = 106;
                 }
+
                 tex.Bytes = bytes;
 
                 tpf.Textures.Add(tex);
 
                 bytes = tpf.Write();
 
-                var file = new BinderFile(Binder.FileFlags.Flag1, 100000 + i, Path.Combine(basePath, Path.ChangeExtension(fileName, "tpf")),
+                var file = new BinderFile(Binder.FileFlags.Flag1, 100000 + i,
+                    Path.Combine(basePath, Path.ChangeExtension(fileName, "tpf")),
                     bytes);
                 bag.Add(file);
             }
@@ -342,7 +361,7 @@ Consider tidying up the unpacked archive folder.");
         {
             if (!resPaths.Any()) return;
 
-            string dir = xml.Element("resDir")?.Value ?? "";
+            string dir = xml.Element("resDir")?.Value ?? "ResourceList";
             string basePath = Path.Combine(rootPath, dir);
 
             if (Configuration.Active.Parallel)
@@ -371,9 +390,9 @@ Consider tidying up the unpacked archive folder.");
 
         void missingResCallback()
         {
-            if (!missingReslists.Any()) return;
+            if (resDirElement == null || !missingReslists.Any()) return;
 
-            string dir = xml.Element("resDir")?.Value ?? "ResourceList";
+            string dir = resDirElement.Value;
             string basePath = Path.Combine(rootPath, dir);
 
             if (Configuration.Active.Parallel)
@@ -386,14 +405,16 @@ Consider tidying up the unpacked archive folder.");
             {
                 var fileName = $"{effectName}.ffxreslist";
                 var effect = effectPaths.First(f => f.ToLower().EndsWith($"{effectName.ToLower()}.fxr"));
-                var file = new BinderFile(Binder.FileFlags.Flag1, 400000 + effectPaths.IndexOf(effect), Path.Combine(basePath, fileName), "\n"u8.ToArray());
+                var file = new BinderFile(Binder.FileFlags.Flag1, 400000 + effectPaths.IndexOf(effect),
+                    Path.Combine(basePath, fileName), "\n"u8.ToArray());
                 bag.Add(file);
             }
         }
 
         if (Configuration.Active.Parallel)
         {
-            Parallel.Invoke(effectCallback, textureCallback, modelCallback, animCallback, resCallback, missingResCallback);
+            Parallel.Invoke(effectCallback, textureCallback, modelCallback, animCallback, resCallback,
+                missingResCallback);
         }
         else
         {
