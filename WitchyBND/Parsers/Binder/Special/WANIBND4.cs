@@ -192,10 +192,7 @@ public class WANIBND4 : WBinderParser
                             taeId = split[0];
                             animId = split[1];
                         }
-                        // if (split.Length == 3)
-                        // {
-                        //     taeId += split[2] * 1000;
-                        // }
+
                         fileId = baseHkxId + (1000000 * taeId) + animId;
                     }
                     catch (Exception)
