@@ -1,5 +1,4 @@
-ID Name
-80100000 
+80100000
 0 Head
 1 Neutralizing Boluses
 2 Flask of Crimson Tears +5- Flask of Crimson Tears +5- Flask of Crimson Tears +6- Flask of Crimson Tears +6- Flask of Crimson Tears +11- Flask of Crimson Tears- Flask of Crimson Tears

@@ -36,6 +36,15 @@ public enum DsmsGameType
 
 public static class WBUtil
 {
+    public static string[] MorphemeExtensions =
+    [
+        ".nsa",
+        ".mba",
+        ".asa",
+        ".qsa",
+        ".nmb"
+    ];
+
     internal static readonly object ConsoleWriterLock = new object();
     public static string ExeLocation;
     public static readonly Dictionary<GameType, ulong?> LatestKnownRegulationVersions;
