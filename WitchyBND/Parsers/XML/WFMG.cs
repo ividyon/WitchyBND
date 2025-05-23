@@ -26,33 +26,25 @@ public class WFMG : WXMLParser
     public override void Unpack(string srcPath, ISoulsFile? _, bool recursive)
     {
         FMG fmg = FMG.Read(srcPath);
-        XmlWriterSettings xws = new XmlWriterSettings();
-        // You need Indent for it to write newlines
-        xws.Indent = true;
-        // But don't actually indent so there's more room for the text
-        xws.IndentChars = "";
-        XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath, recursive), xws);
-        xw.WriteStartElement("fmg");
+        var xml = PrepareXmlManifest(srcPath, recursive, false, fmg.Compression, out XDocument xDoc, null);
+        
+        xml.Add(
+            new XElement("version", fmg.Version.ToString()), 
+            new XElement("bigendian", fmg.BigEndian.ToString()));
 
-        AddLocationToXml(srcPath, recursive, xw);
-
-        xw.WriteElementString("compression", fmg.Compression.ToString());
-        xw.WriteElementString("version", fmg.Version.ToString());
-        xw.WriteElementString("bigendian", fmg.BigEndian.ToString());
-        xw.WriteStartElement("entries");
-
+        var entries = new XElement("entries");
+        
         fmg.Entries.Sort((e1, e2) => e1.ID.CompareTo(e2.ID));
+        
         foreach (FMG.Entry entry in fmg.Entries)
         {
-            xw.WriteStartElement("text");
-            xw.WriteAttributeString("id", entry.ID.ToString());
-            xw.WriteString(entry.Text ?? "%null%");
-            xw.WriteEndElement();
+            var entryXml = new XElement("text", new XAttribute("id", entry.ID.ToString()), entry.Text ?? "%null%");
+            entries.Add(entryXml);
         }
-
-        xw.WriteEndElement();
-        xw.WriteEndElement();
-        xw.Close();
+        
+        xml.Add(entries);
+        
+        WriteXmlManifest(xDoc, srcPath, recursive);
     }
 
     public override void Repack(string srcPath, bool recursive)
@@ -60,17 +52,16 @@ public class WFMG : WXMLParser
         FMG fmg = new FMG();
 
         XElement xml = LoadXml(srcPath);
-        Enum.TryParse(xml.Element("compression")?.Value ?? "None", out DCX.Type compression);
-        fmg.Compression = compression;
+        fmg.Compression = ReadCompressionDataFromXml(xml);
 
-        fmg.Version = (FMG.FMGVersion)Enum.Parse(typeof(FMG.FMGVersion), xml.Element("version").Value);
-        fmg.BigEndian = bool.Parse(xml.Element("bigendian").Value);
+        fmg.Version = (FMG.FMGVersion)Enum.Parse(typeof(FMG.FMGVersion), xml.Element("version")!.Value);
+        fmg.BigEndian = bool.Parse(xml.Element("bigendian")!.Value);
 
-        foreach (XElement textNode in xml.Element("entries").Elements("text"))
+        foreach (XElement textNode in xml.Element("entries")!.Elements("text"))
         {
-            int id = int.Parse(textNode.Attribute("id").Value);
+            int id = int.Parse(textNode.Attribute("id")!.Value);
             // \r\n is drawn as two newlines ingame
-            string text = textNode.Value.Replace("\r", "");
+            string? text = textNode.Value.Replace("\r", "");
             if (text == "%null%")
                 text = null;
             fmg.Entries.Add(new FMG.Entry(id, text));

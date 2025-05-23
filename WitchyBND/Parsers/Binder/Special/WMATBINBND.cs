@@ -8,6 +8,6 @@ public class WMATBINBND : WBND4Unsorted
     public override string Extension => "matbinbnd";
     public override UnsortedFileFormat[] PackedFormats => new[]
     {
-        new UnsortedFileFormat("*.matbin", Binder.FileFlags.Flag1, DCX.Type.None)
+        new UnsortedFileFormat("*.matbin", Binder.FileFlags.Flag1, new DCX.NoCompressionData())
     };
 }

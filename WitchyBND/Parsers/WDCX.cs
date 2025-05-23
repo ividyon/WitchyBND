@@ -93,20 +93,12 @@ public class WDCX : WSingleFileParser
     {
         string outPath = GetUnpackDestPath(srcPath, recursive);
 
-        byte[] bytes = DCX.Decompress(srcPath, out DCX.Type comp);
+        byte[] bytes = DCX.Decompress(srcPath, out DCX.CompressionData comp);
         File.WriteAllBytes(outPath, bytes);
 
-        XmlWriterSettings xws = new XmlWriterSettings();
-        xws.Indent = true;
-        XmlWriter xw = XmlWriter.Create(GetXmlPath(srcPath, recursive), xws);
-
-        xw.WriteStartElement("dcx");
-
-        AddLocationToXml(srcPath, recursive, xw);
-
-        xw.WriteElementString("compression", comp.ToString());
-        xw.WriteEndElement();
-        xw.Close();
+        PrepareXmlManifest(srcPath, recursive, false, comp, out XDocument xDoc, null);
+        
+        WriteXmlManifest(xDoc, srcPath, recursive);
     }
 
     public override void Repack(string srcPath, bool recursive)
@@ -114,7 +106,7 @@ public class WDCX : WSingleFileParser
         string xmlPath = GetRepackXmlPath(srcPath, null);
         XElement xml = LoadXml(xmlPath);
 
-        DCX.Type compression = (DCX.Type)Enum.Parse(typeof(DCX.Type), xml.Element("compression").Value);
+        DCX.CompressionData compression = ReadCompressionDataFromXml(xml);
 
         var outPath = GetRepackDestPath(srcPath, xml);
         Backup(outPath);
