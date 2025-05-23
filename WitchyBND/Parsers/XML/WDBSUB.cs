@@ -2,6 +2,7 @@
 using System.IO;
 using System.Xml;
 using SoulsFormats;
+using SoulsFormats.Other.AC4;
 using WitchyFormats;
 using WitchyLib;
 
@@ -14,7 +15,8 @@ namespace WitchyBND.Parsers
 
         public override bool Is(string path, byte[]? data, out ISoulsFile? file)
         {
-            return IsRead<DBSUB>(path, data, out file) && (IsSimple(path) ?? false);
+            file = null;
+            return (IsSimple(path) ?? false) && IsRead<DBSUB>(path, data, out file);
         }
 
         public override bool? IsSimple(string path)

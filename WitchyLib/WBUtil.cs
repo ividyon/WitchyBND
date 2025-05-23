@@ -16,6 +16,8 @@ using Microsoft.Win32;
 using Newtonsoft.Json;
 using PPlus;
 using SoulsFormats;
+using SoulsFormats.Cryptography;
+using SoulsFormats.Exceptions;
 using PARAMDEF = WitchyFormats.PARAMDEF;
 
 namespace WitchyLib;
@@ -270,14 +272,14 @@ public static class WBUtil
         try
         {
             game = GameType.ER;
-            return SFUtil.DecryptERRegulation(path);
+            return RegulationDecryptor.DecryptERRegulation(path);
         }
         catch (Exception e) when (e is InvalidDataException or CryptographicException)
         {
             try
             {
                 game = GameType.AC6;
-                return SFUtil.DecryptAC6Regulation(path);
+                return RegulationDecryptor.DecryptAC6Regulation(path);
             }
             catch (InvalidDataException e2)
             {
@@ -294,10 +296,10 @@ public static class WBUtil
         switch (game)
         {
             case GameType.ER:
-                SFUtil.EncryptERRegulation(path, bnd);
+                RegulationDecryptor.EncryptERRegulation(path, bnd);
                 break;
             case GameType.AC6:
-                SFUtil.EncryptAC6Regulation(path, bnd);
+                RegulationDecryptor.EncryptAC6Regulation(path, bnd);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(game), game, null);
@@ -312,8 +314,8 @@ public static class WBUtil
     {
         return game switch
         {
-            GameType.ER => SFUtil.DecryptERRegulation(path),
-            GameType.AC6 => SFUtil.DecryptAC6Regulation(path),
+            GameType.ER => RegulationDecryptor.DecryptERRegulation(path),
+            GameType.AC6 => RegulationDecryptor.DecryptAC6Regulation(path),
             _ => throw new InvalidOperationException("Only Elden Ring and Armored Core VI have a regulation.bin")
         };
     }

@@ -6,6 +6,7 @@ using System.Xml;
 using System.Xml.Linq;
 using PPlus;
 using SoulsFormats;
+using SoulsFormats.Cryptography;
 using WitchyBND.CliModes;
 using WitchyBND.Services;
 using WitchyLib;
@@ -66,7 +67,7 @@ public class WPARAMBND4 : WBinderParser
         if (FilenameIsDS3Regulation(path))
         {
             game = WBUtil.GameType.DS3;
-            return SFUtil.DecryptDS3Regulation(path);
+            return RegulationDecryptor.DecryptDS3Regulation(path);
         }
 
         if (FilenameIsModernRegulation(path))
@@ -222,7 +223,7 @@ public class WPARAMBND4 : WBinderParser
             case WBUtil.GameType.DS3:
                 bndParser.Repack(srcPath, recursive);
                 BND4 ds3Bnd = BND4.Read(destPath);
-                SFUtil.EncryptDS3Regulation(destPath, ds3Bnd);
+                RegulationDecryptor.EncryptDS3Regulation(destPath, ds3Bnd);
                 break;
             case WBUtil.GameType.ER:
             case WBUtil.GameType.SDT:

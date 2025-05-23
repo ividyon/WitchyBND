@@ -15,7 +15,7 @@ public class WBXF3 : WBinderParser
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
         file = null;
-        return BXF3.IsBHD(path) || BXF3.IsBDT(path);
+        return BXF3.IsHeader(path) || BXF3.IsData(path);
     }
 
     public override bool? IsSimple(string path)
@@ -33,7 +33,7 @@ public class WBXF3 : WBinderParser
         string nameWithoutExt = Path.GetFileNameWithoutExtension(srcPath);
         string destDir = GetUnpackDestPath(srcPath, recursive);
 
-        if (BXF3.IsBHD(srcPath))
+        if (BXF3.IsHeader(srcPath))
         {
             bhdPath = srcPath;
             bhdName = Path.GetFileName(srcPath);
