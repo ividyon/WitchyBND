@@ -64,8 +64,9 @@ public class WBXF3 : WBinderParser
         XElement files = WriteBinderFiles(bxf, destDir, root);
 
         var bdtFilename = new XElement("bdt_filename", bdtName);
-        var xml =
-            new XElement(XmlTag,
+
+        var xml = PrepareXmlManifest(srcPath, recursive, true, null, out XDocument xDoc, root);
+        xml.Add(
                 new XElement("bhd_filename", bhdName),
                 bdtFilename,
                 new XElement("version", bxf.Version),
@@ -74,19 +75,7 @@ public class WBXF3 : WBinderParser
                 new XElement("bitbigendian", bxf.BitBigEndian.ToString()),
                 files);
 
-        if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
-
-        AddLocationToXml(srcPath, recursive, xml, true);
-
-        if (!string.IsNullOrEmpty(root))
-            files.AddBeforeSelf(new XElement("root", root));
-
-        var xw = XmlWriter.Create($"{destDir}\\{GetFolderXmlFilename()}", new XmlWriterSettings
-        {
-            Indent = true
-        });
-        xml.WriteTo(xw);
-        xw.Close();
+        WriteXmlManifest(xDoc, srcPath, recursive);
     }
 
     public override void Repack(string srcPath, bool recursive)

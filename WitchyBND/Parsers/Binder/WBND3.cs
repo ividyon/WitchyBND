@@ -42,19 +42,14 @@ public class WBND3 : WBinderParser
 
         XElement files = WriteBinderFiles(bnd, destDir, root);
 
-        var xml =
-            new XElement(XmlTag,
-                new XElement("compression", bnd.Compression.ToString()),
+       var xml = PrepareXmlManifest(srcPath, recursive, false, bnd.Compression, out XDocument xDoc, root); 
+        xml.Add(
                 new XElement("version", bnd.Version),
                 new XElement("format", bnd.Format.ToString()),
                 new XElement("bigendian", bnd.BigEndian.ToString()),
                 new XElement("bitbigendian", bnd.BitBigEndian.ToString()),
                 new XElement("unk18", bnd.Unk18.ToString()),
                 files);
-
-        AddLocationToXml(srcPath, recursive, xml);
-
-        if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
 
         if (game != null)
         {
@@ -64,26 +59,18 @@ public class WBND3 : WBinderParser
         if (!string.IsNullOrEmpty(root))
             files.AddBeforeSelf(new XElement("root", root));
 
-        var xw = XmlWriter.Create($"{destDir}\\{GetFolderXmlFilename()}", new XmlWriterSettings
-        {
-            Indent = true
-        });
-        xml.WriteTo(xw);
-        xw.Close();
+        WriteXmlManifest(xDoc, srcPath, recursive);
     }
 
     public override void Repack(string srcPath, bool recursive)
     {
         var bnd = new BND3();
 
-        var doc = XDocument.Load(GetFolderXmlPath(srcPath));
-        if (doc.Root == null) throw new XmlException("XML has no root");
-        XElement xml = doc.Root;
+        var xml = LoadXml(GetFolderXmlPath(srcPath));
 
         string root = xml.Element("root")?.Value ?? "";
 
-        Enum.TryParse(xml.Element("compression")?.Value ?? "None", out DCX.Type compression);
-        bnd.Compression = compression;
+        bnd.Compression = ReadCompressionDataFromXml(xml);
 
         bnd.Version = xml.Element("version")!.Value;
         bnd.Format = (Binder.Format)Enum.Parse(typeof(Binder.Format), xml.Element("format")!.Value);

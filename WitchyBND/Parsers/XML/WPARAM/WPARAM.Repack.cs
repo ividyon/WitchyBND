@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using System.Xml.XPath;
 using SoulsFormats;
 using WitchyFormats;
 using WitchyLib;
@@ -18,52 +19,50 @@ public partial class WPARAM
     {
             var param = new FsParam();
 
-            XmlDocument xml = new XmlDocument();
-            xml.Load(srcPath);
+            XElement xml = LoadXml(srcPath);
 
-            Enum.TryParse(xml.SelectSingleNode("param/cellStyle")?.InnerText ?? "None", out CellStyle cellStyle);
+            Enum.TryParse(xml.Element("cellStyle")?.Value ?? "None", out CellStyle cellStyle);
 
-            Enum.TryParse(xml.SelectSingleNode("param/compression")?.InnerText ?? "None", out DCX.Type compression);
-            param.Compression = compression;
+            param.Compression = ReadCompressionDataFromXml(xml);
 
-            Enum.TryParse(xml.SelectSingleNode("param/format2D")?.InnerText ?? "0",
+            Enum.TryParse(xml.Element("format2D")?.Value ?? "0",
                 out FsParam.FormatFlags1 formatFlags1);
             param.Format2D = formatFlags1;
 
-            Enum.TryParse(xml.SelectSingleNode("param/format2E")?.InnerText ?? "0",
+            Enum.TryParse(xml.Element("format2E")?.Value ?? "0",
                 out FsParam.FormatFlags2 formatFlags2);
             param.Format2E = formatFlags2;
 
-            param.Unk06 = Convert.ToInt16(xml.SelectSingleNode("param/unk06").InnerText);
+            param.Unk06 = Convert.ToInt16(xml.Element("unk06")!.Value);
 
             var paramdef = new PARAMDEF();
 
-            paramdef.ParamType = xml.SelectSingleNode("param/paramdef/type")!.InnerText;
-            string paramTypeText = xml.SelectSingleNode("param/type")?.InnerText;
+            var paramdefXml = xml.Element("paramdef")!;
+
+            paramdef.ParamType = paramdefXml.Element("type")!.Value;
+            string? paramTypeText = xml.Element("type")?.Value;
             param.ParamType = !string.IsNullOrEmpty(paramTypeText)
                 ? paramTypeText
                 : paramdef.ParamType;
 
             var bigEndian =
-                Convert.ToBoolean(Convert.ToInt32(xml.SelectSingleNode("param/paramdef/bigEndian").InnerText));
+                Convert.ToBoolean(Convert.ToInt32(paramdefXml.Element("bigEndian")!.Value));
             param.BigEndian = bigEndian;
             paramdef.BigEndian = bigEndian;
 
             paramdef.Unicode =
-                Convert.ToBoolean(Convert.ToInt32(xml.SelectSingleNode("param/paramdef/unicode").InnerText));
+                Convert.ToBoolean(Convert.ToInt32(paramdefXml.Element("unicode")!.Value));
 
-            Enum.TryParse(xml.SelectSingleNode("param/paramdef/compression")?.InnerText ?? "None",
-                out DCX.Type defCompression);
-            paramdef.Compression = defCompression;
+            paramdef.Compression = ReadCompressionDataFromXml(paramdefXml);
 
-            paramdef.DataVersion = Convert.ToInt16(xml.SelectSingleNode("param/paramdef/dataVersion").InnerText);
-            string dataVersionText = xml.SelectSingleNode("param/dataVersion")?.InnerText;
+            paramdef.DataVersion = Convert.ToInt16(paramdefXml.Element("dataVersion")!.Value);
+            string? dataVersionText = xml.Element("dataVersion")?.Value;
             param.ParamdefDataVersion = !string.IsNullOrEmpty(dataVersionText)
                 ? Convert.ToInt16(dataVersionText)
                 : paramdef.DataVersion;
 
-            paramdef.FormatVersion = Convert.ToInt16(xml.SelectSingleNode("param/paramdef/formatVersion").InnerText);
-            string formatVersionText = xml.SelectSingleNode("param/formatVersion")?.InnerText;
+            paramdef.FormatVersion = Convert.ToInt16(paramdefXml.Element("formatVersion")!.Value);
+            string? formatVersionText = xml.Element("formatVersion")?.Value;
             param.ParamdefFormatVersion = !string.IsNullOrEmpty(formatVersionText)
                 ? Convert.ToByte(formatVersionText)
                 : Convert.ToByte(paramdef.FormatVersion);
@@ -72,21 +71,21 @@ public partial class WPARAM
 
             var defaultValues = new Dictionary<string, string?>();
 
-            foreach (XmlNode xmlRow in xml.SelectNodes("param/fields/field"))
+            foreach (XElement xmlRow in xml.Element("fields")!.Elements("field"))
             {
                 var field = new PARAMDEF.Field();
-                field.InternalName = xmlRow.Attributes["name"].InnerText;
+                field.InternalName = xmlRow.Attribute("name")!.Value;
 
-                Enum.TryParse(xmlRow.Attributes["type"].InnerText, out PARAMDEF.DefType displayType);
+                Enum.TryParse(xmlRow.Attribute("type")!.Value, out PARAMDEF.DefType displayType);
                 field.DisplayType = displayType;
 
-                field.ArrayLength = Convert.ToInt32(xmlRow.Attributes["arraylength"].InnerText);
-                field.BitSize = Convert.ToInt32(xmlRow.Attributes["bitsize"].InnerText);
-                field.SortID = Convert.ToInt32(xmlRow.Attributes["sortid"].InnerText);
-                field.UnkB8 = xmlRow.Attributes["unkb8"].InnerText;
-                field.UnkC0 = xmlRow.Attributes["unkc0"].InnerText;
+                field.ArrayLength = Convert.ToInt32(xmlRow.Attribute("arraylength")!.Value);
+                field.BitSize = Convert.ToInt32(xmlRow.Attribute("bitsize")!.Value);
+                field.SortID = Convert.ToInt32(xmlRow.Attribute("sortid")!.Value);
+                field.UnkB8 = xmlRow.Attribute("unkb8")?.Value;
+                field.UnkC0 = xmlRow.Attribute("unkc0")?.Value;
 
-                defaultValues[field.InternalName] = xmlRow.Attributes["defaultValue"]?.InnerText;
+                defaultValues[field.InternalName] = xmlRow.Attribute("defaultValue")?.Value;
 
                 paramdef.Fields.Add(field);
             }
@@ -96,19 +95,19 @@ public partial class WPARAM
             var rowDict = new ConcurrentDictionary<long, FsParam.Row>();
             var colList = param.Columns.ToList();
 
-            void ParallelCallback(XmlNode xmlRow, ParallelLoopState state, long i)
+            void ParallelCallback(XElement xmlRow, ParallelLoopState state, long i)
             {
                 Callback(xmlRow, i);
             }
 
-            void Callback(XmlNode xmlRow, long i)
+            void Callback(XElement xmlRow, long i)
             {
-                var id = int.Parse(xmlRow.Attributes["id"].InnerText);
-                var name = xmlRow.Attributes["name"]?.InnerText ?? string.Empty;
+                var id = int.Parse(xmlRow.Attribute("id")!.Value);
+                var name = xmlRow.Attribute("name")?.Value ?? string.Empty;
 
                 var row = new FsParam.Row(id, name, param);
 
-                var csv = cellStyle == CellStyle.CSV ? WBUtil.DelimitedString.Split(xmlRow.InnerText) : null;
+                var csv = cellStyle == CellStyle.CSV ? WBUtil.DelimitedString.Split(xmlRow.Value) : null;
 
                 foreach (FsParam.Column column in colList)
                 {
@@ -118,18 +117,18 @@ public partial class WPARAM
                     switch (cellStyle)
                     {
                         case CellStyle.Element:
-                            var fieldNode = xmlRow.SelectSingleNode($"field[@name = '{fieldName}']");
+                            XElement? fieldNode = xmlRow.XPathSelectElement($"field[@name = '{fieldName}']");
                             if (fieldNode != null)
                             {
-                                value = fieldNode.InnerText;
+                                value = fieldNode.Value;
                             }
 
                             break;
                         case CellStyle.Attribute:
-                            XmlAttribute attribute = xmlRow.Attributes[fieldName];
+                            XAttribute? attribute = xmlRow.Attribute(fieldName);
                             if (attribute != null)
                             {
-                                value = attribute.InnerText;
+                                value = attribute.Value;
                             }
 
                             break;
@@ -153,7 +152,7 @@ public partial class WPARAM
 
                 rowDict.TryAdd(i, row);
             }
-            var rows = xml.SelectNodes("param/rows/row").Cast<XmlNode>().ToList();
+            var rows = xml.Element("rows")!.Elements("row").ToList();
 
             // if (Configuration.Active.Parallel)
             // {

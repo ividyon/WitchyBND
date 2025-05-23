@@ -86,6 +86,10 @@ public static class XmlExtensions {
     {
         el.Add(new XElement(name, content));
     }
+    public static void AddA(this XElement el, string name, params object[] content)
+    {
+        el.Add(new XAttribute(name, content));
+    }
 }
 
 public static class WitchyExtensions {

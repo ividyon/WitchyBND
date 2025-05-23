@@ -730,7 +730,7 @@ public static class WBUtil
         }
     }
 
-    public static byte[] TryDecompressBytes(string sourceFile, out DCX.Type compression)
+    public static byte[] TryDecompressBytes(string sourceFile, out DCX.CompressionData compression)
     {
         try
         {
@@ -749,11 +749,11 @@ public static class WBUtil
         }
     }
 
-    public static void TryCompressBytes(byte[] data, DCX.Type type, string path)
+    public static void TryCompressBytes(byte[] data, DCX.CompressionData compression, string path)
     {
         try
         {
-            DCX.Compress(data, type, path);
+            DCX.Compress(data, compression, path);
         }
         catch (NoOodleFoundException)
         {
@@ -762,7 +762,7 @@ public static class WBUtil
                 throw;
 
             IntPtr handle = Kernel32.LoadLibrary(oo2corePath);
-            DCX.Compress(data, type, path);
+            DCX.Compress(data, compression, path);
             Kernel32.FreeLibrary(handle);
         }
     }
