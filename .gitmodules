@@ -1,3 +1,4 @@
 [submodule "SoulsFormats"]
 	path = SoulsFormats
 	url = https://github.com/soulsmods/SoulsFormatsNEXT
+    branch = dcx-compressiondata-rework
