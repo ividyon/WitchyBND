@@ -82,10 +82,7 @@ Special thanks to Nordgaren, The12thAvenger, philiquaz, TKGP, thefifthmatt, Kirn
 
 # License
 
-This work is licensed under a
-[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License][cc-by-nc-sa].
-
-[![CC BY-NC-SA 4.0][cc-by-nc-sa-image]][cc-by-nc-sa]
+This work is licensed under GPL v3. View the implications for your Witchy forks [here](https://www.tldrlegal.com/license/gnu-general-public-license-v3-gpl-3).
 
 WitchyBND is built using the following licensed works:
 * [SoulsFormats](https://github.com/JKAnderson/SoulsFormats/tree/er) by JKAnderson (see [License](licenses/LICENSE-SoulsFormats.md))

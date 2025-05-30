@@ -2,3 +2,4 @@
 * Updated the handling of compression types to include more information. In short, this will make Witchy more robust against manipulation attempts on compression headers.
 * Internally cleaned up various classes in significant ways. This may cause some regressions which will be quickly fixed once reported.
   * Several parser versions were raised due to this.
+* Changed the project license to GPL v3 (which CC-BY-NC-SA is forward-compatible to) to go along with the licensing of the original SoulsFormats.
