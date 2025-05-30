@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "dependencies": {
+    ".NETFramework,Version=v4.6": {
+      "SharpShell": {
+        "type": "Direct",
+        "requested": "[2.7.2, 2.7.2]",
+        "resolved": "2.7.2",
+        "contentHash": "2mExihaN8BBGG58xUrbdMwRjWlvcxCSFEZd30ChaO3rcTdlLQ9/aRaoqVJ/kIdz7pE+i+42wLQ83xOo7auTDFA=="
+      }
+    }
+  }
+}
