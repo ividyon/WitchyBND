@@ -94,6 +94,13 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.15.0.0
+
+* Added basic initial support for ELDEN RING NIGHTREIGN (thanks to Vawser and Nordgaren)
+* Updated the handling of compression types to include more information. In short, this will make Witchy more robust against manipulation attempts on compression headers.
+* Internally cleaned up various classes in significant ways. This may cause some regressions which will be quickly fixed once reported.
+  * Several parser versions were raised due to this.
+
 ### 2.14.4.5
 
 * Fixed assorted issues with the special ANIBND4 handling across different types of ANIBND in different games.
