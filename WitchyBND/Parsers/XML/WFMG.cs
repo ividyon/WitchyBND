@@ -52,7 +52,7 @@ public class WFMG : WXMLParser
         FMG fmg = new FMG();
 
         XElement xml = LoadXml(srcPath);
-        fmg.Compression = ReadCompressionDataFromXml(xml);
+        fmg.Compression = ReadCompressionInfoFromXml(xml);
 
         fmg.Version = (FMG.FMGVersion)Enum.Parse(typeof(FMG.FMGVersion), xml.Element("version")!.Value);
         fmg.BigEndian = bool.Parse(xml.Element("bigendian")!.Value);

@@ -152,44 +152,44 @@ public abstract class WFileParser
             xml.AddFirst(new XElement("filename", Path.GetFileName(path)));
     }
     
-    public static DCX.CompressionData ReadCompressionDataFromXml(XElement xml)
+    public static DCX.CompressionInfo ReadCompressionInfoFromXml(XElement xml)
     {
         string typeString = xml.Element("compression")?.Value ?? "None";
         // Legacy support
         switch (typeString.ToUpper())
         {
             case "DCX_DFLT_10000_24_9":
-                return new DCX.DcxDfltCompressionData(0x10000, 0x24, 0x2C, 9, 0);
+                return new DCX.DcxDfltCompressionInfo(0x10000, 0x24, 0x2C, 9, 0);
             case "DCX_DFLT_10000_44_9":
-                return new DCX.DcxDfltCompressionData(0x10000, 0x44, 0x4C, 9, 0);
+                return new DCX.DcxDfltCompressionInfo(0x10000, 0x44, 0x4C, 9, 0);
             case "DCX_DFLT_11000_44_8":
-                return new DCX.DcxDfltCompressionData(0x11000, 0x44, 0x4C, 8, 0);
+                return new DCX.DcxDfltCompressionInfo(0x11000, 0x44, 0x4C, 8, 0);
             case "DCX_DFLT_11000_44_9":
-                return new DCX.DcxDfltCompressionData(0x11000, 0x44, 0x4C, 9, 0);
+                return new DCX.DcxDfltCompressionInfo(0x11000, 0x44, 0x4C, 9, 0);
             case "DCX_DFLT_11000_44_9_15":
-                return new DCX.DcxDfltCompressionData(0x11000, 0x44, 0x4C, 9, 15);
+                return new DCX.DcxDfltCompressionInfo(0x11000, 0x44, 0x4C, 9, 15);
             case "DCX_KRAK_MAX":
             case "DCX_KRAK_9":
-                return new DCX.DcxKrakCompressionData(9);
+                return new DCX.DcxKrakCompressionInfo(9);
         }
         DCX.Type type = Enum.Parse<DCX.Type>(typeString);
         switch (type)
         {
             case DCX.Type.Unknown:
-                return new DCX.UnkCompressionData();
+                return new DCX.UnkCompressionInfo();
             case DCX.Type.None:
-                return new DCX.NoCompressionData();
+                return new DCX.NoCompressionInfo();
             case DCX.Type.Zlib:
-                return new DCX.ZlibCompressionData();
+                return new DCX.ZlibCompressionInfo();
             case DCX.Type.DCP_EDGE:
-                return new DCX.DcpEdgeCompressionData();
+                return new DCX.DcpEdgeCompressionInfo();
             case DCX.Type.DCP_DFLT:
-                return new DCX.DcpDfltCompressionData();
+                return new DCX.DcpDfltCompressionInfo();
             case DCX.Type.DCX_EDGE:
-                return new DCX.DcxEdgeCompressionData();
+                return new DCX.DcxEdgeCompressionInfo();
             case DCX.Type.DCX_DFLT:
                 // DCX_DFLT_11000_44_9_15
-                return new DCX.DcxDfltCompressionData(
+                return new DCX.DcxDfltCompressionInfo(
                     int.Parse(xml.Element("dfltUnk04")?.Value ?? ((int)0x11000).ToString()),
                     int.Parse(xml.Element("dfltUnk10")?.Value ?? ((int)0x44).ToString()),
                     int.Parse(xml.Element("dfltUnk14")?.Value ?? ((int)0x4C).ToString()),
@@ -197,39 +197,39 @@ public abstract class WFileParser
                     byte.Parse(xml.Element("dfltUnk38")?.Value ?? ((byte)0x15).ToString())
                 );
             case DCX.Type.DCX_KRAK:
-                return new DCX.DcxKrakCompressionData(byte.Parse(xml.Element("compressionLevel")!.Value));
+                return new DCX.DcxKrakCompressionInfo(byte.Parse(xml.Element("compressionLevel")!.Value));
             case DCX.Type.DCX_ZSTD:
-                return new DCX.DcxZstdCompressionData();
+                return new DCX.DcxZstdCompressionInfo();
             default:
                 throw new ArgumentOutOfRangeException();
         }
     }
 
-    public static void WriteCompressionDataToXml(XElement xml, DCX.CompressionData? compression)
+    public static void WriteCompressionInfoToXml(XElement xml, DCX.CompressionInfo? compression)
     {
-        compression ??= new DCX.NoCompressionData();
+        compression ??= new DCX.NoCompressionInfo();
         xml.Add(new XElement("compression", compression.Type.ToString()));
         switch (compression)
         {
-            case DCX.DcxDfltCompressionData dfltCompression:
+            case DCX.DcxDfltCompressionInfo dfltCompression:
                 xml.Add(new XElement("dfltUnk04", dfltCompression.Unk04.ToString()));
                 xml.Add(new XElement("dfltUnk10", dfltCompression.Unk10.ToString()));
                 xml.Add(new XElement("dfltUnk14", dfltCompression.Unk14.ToString()));
                 xml.Add(new XElement("dfltUnk30", dfltCompression.Unk30.ToString()));
                 xml.Add(new XElement("dfltUnk38", dfltCompression.Unk38.ToString()));
                 break;
-            case DCX.DcxKrakCompressionData krakCompression:
+            case DCX.DcxKrakCompressionInfo krakCompression:
                 xml.Add(new XElement("compressionLevel", krakCompression.CompressionLevel.ToString()));
                 break;
         }
     }
 
-    public virtual XElement PrepareXmlManifest(string srcPath, bool recursive, bool skipFilename, DCX.CompressionData? compression, out XDocument xDoc, string? root)
+    public virtual XElement PrepareXmlManifest(string srcPath, bool recursive, bool skipFilename, DCX.CompressionInfo? compression, out XDocument xDoc, string? root)
     {
         xDoc = new XDocument();
         var xml = new XElement(XmlTag);
         if (Version > 0) xml.Add(new XAttribute(VersionAttributeName, Version.ToString()));
-        WriteCompressionDataToXml(xml, compression);
+        WriteCompressionInfoToXml(xml, compression);
         AddLocationToXml(srcPath, recursive, xml, skipFilename);
         if (!string.IsNullOrEmpty(root))
             xml.Add(new XElement("root", root));
@@ -420,7 +420,7 @@ public abstract class WSerializedXMLParser : WXMLParser
         if (thing.GetType() != SerializedType || thing is not ISoulsFile file)
             throw new Exception();
 
-        file.Compression = ReadCompressionDataFromXml(xml);
+        file.Compression = ReadCompressionInfoFromXml(xml);
 
         string outPath = GetRepackDestPath(srcPath, xml);
         Backup(outPath);

@@ -70,7 +70,7 @@ public class WBND3 : WBinderParser
 
         string root = xml.Element("root")?.Value ?? "";
 
-        bnd.Compression = ReadCompressionDataFromXml(xml);
+        bnd.Compression = ReadCompressionInfoFromXml(xml);
 
         bnd.Version = xml.Element("version")!.Value;
         bnd.Format = (Binder.Format)Enum.Parse(typeof(Binder.Format), xml.Element("format")!.Value);

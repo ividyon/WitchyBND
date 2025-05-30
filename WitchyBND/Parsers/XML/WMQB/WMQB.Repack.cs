@@ -40,7 +40,7 @@ public partial class WMQB
         mqb.Version = version;
         mqb.Framerate = framerate;
         mqb.BigEndian = bigendian;
-        mqb.Compression = ReadCompressionDataFromXml(xml);
+        mqb.Compression = ReadCompressionInfoFromXml(xml);
         mqb.ResourceDirectory = resDir;
         mqb.Resources = resources;
         mqb.Cuts = cuts;

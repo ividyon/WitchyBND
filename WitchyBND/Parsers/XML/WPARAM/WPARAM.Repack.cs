@@ -23,7 +23,7 @@ public partial class WPARAM
 
             Enum.TryParse(xml.Element("cellStyle")?.Value ?? "None", out CellStyle cellStyle);
 
-            param.Compression = ReadCompressionDataFromXml(xml);
+            param.Compression = ReadCompressionInfoFromXml(xml);
 
             Enum.TryParse(xml.Element("format2D")?.Value ?? "0",
                 out FsParam.FormatFlags1 formatFlags1);
@@ -53,7 +53,7 @@ public partial class WPARAM
             paramdef.Unicode =
                 Convert.ToBoolean(Convert.ToInt32(paramdefXml.Element("unicode")!.Value));
 
-            paramdef.Compression = ReadCompressionDataFromXml(paramdefXml);
+            paramdef.Compression = ReadCompressionInfoFromXml(paramdefXml);
 
             paramdef.DataVersion = Convert.ToInt16(paramdefXml.Element("dataVersion")!.Value);
             string? dataVersionText = xml.Element("dataVersion")?.Value;

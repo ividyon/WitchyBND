@@ -110,7 +110,7 @@ public class WTPF : WFolderParser
                 srcPath));
         }
 
-        tpf.Compression = ReadCompressionDataFromXml(xml);
+        tpf.Compression = ReadCompressionInfoFromXml(xml);
 
         tpf.Encoding = Convert.ToByte(xml.Element("encoding")!.Value, 16);
         tpf.Flag2 = Convert.ToByte(xml.Element("flag2")!.Value, 16);

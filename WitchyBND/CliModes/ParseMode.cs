@@ -132,7 +132,7 @@ public static class ParseMode
             parsed = errorService.Catch(() => {
                 var innerParsed = false;
                 var innerError = false;
-                DCX.CompressionData compression = new DCX.NoCompressionData();
+                DCX.CompressionInfo compression = new DCX.NoCompressionInfo();
                 ISoulsFile? file = null;
                 if (preprocessedFiles.ContainsKey(path))
                 {
@@ -215,7 +215,7 @@ public static class ParseMode
         }
     }
 
-    public static void Unpack(string path, ISoulsFile? file, DCX.CompressionData compression, WFileParser? parser, bool recursive)
+    public static void Unpack(string path, ISoulsFile? file, DCX.CompressionInfo compression, WFileParser? parser, bool recursive)
     {
         string fileName = Path.GetFileName(path);
 

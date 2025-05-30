@@ -128,7 +128,7 @@ The error was:
             xml.Add(paramdefXml);
             paramdefXml.Add(new XElement("type", paramdef.ParamType));
             paramdefXml.Add(new XElement("bigEndian", Convert.ToInt32(paramdef.BigEndian).ToString()));
-            WriteCompressionDataToXml(paramdefXml, paramdef.Compression);
+            WriteCompressionInfoToXml(paramdefXml, paramdef.Compression);
             paramdefXml.Add(new XElement("unicode", Convert.ToInt32(paramdef.Unicode).ToString()));
             paramdefXml.Add(new XElement("dataVersion", paramdef.DataVersion.ToString()));
             paramdefXml.Add(new XElement("formatVersion", paramdef.FormatVersion.ToString()));

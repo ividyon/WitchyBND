@@ -115,8 +115,8 @@ public abstract class WBinderParser : WFolderParser
             {
                 pathCounts[path] = 1;
             }
-            if (file.CompressionData.Type != DCX.Type.Zlib)
-                WriteCompressionDataToXml(fileElement, file.CompressionData);
+            if (file.CompressionInfo.Type != DCX.Type.Zlib)
+                WriteCompressionInfoToXml(fileElement, file.CompressionInfo);
 
             byte[] bytes = file.Bytes;
             string destPath =
@@ -192,14 +192,14 @@ public abstract class WBinderParser : WFolderParser
             string path = file.Element("path")!.Value;
             string suffix = file.Element("suffix")?.Value ?? "";
             string? strCompression = file.Element("compression")?.Value;
-            DCX.CompressionData compression;
+            DCX.CompressionInfo compression;
             if (strCompression != null)
             {
-                compression = ReadCompressionDataFromXml(file);
+                compression = ReadCompressionInfoFromXml(file);
             }
             else
             {
-                compression = new DCX.ZlibCompressionData();
+                compression = new DCX.ZlibCompressionInfo();
             }
             string name = Path.Combine(root, path);
 
@@ -220,7 +220,7 @@ public abstract class WBinderParser : WFolderParser
             byte[] bytes = File.ReadAllBytes(inPath);
             bag.TryAdd(name, new BinderFile(flags, id, name, bytes)
             {
-                CompressionData = compression
+                CompressionInfo = compression
             });
         }
 
@@ -247,13 +247,13 @@ public class UnsortedFileFormat
     public string SearchPattern { get; }
     public Binder.FileFlags FileFlags { get; }
 
-    public DCX.CompressionData Compression { get; }
+    public DCX.CompressionInfo Compression { get; }
 
-    public UnsortedFileFormat(string pattern, Binder.FileFlags flags, DCX.CompressionData? compression = null)
+    public UnsortedFileFormat(string pattern, Binder.FileFlags flags, DCX.CompressionInfo? compression = null)
     {
         SearchPattern = pattern;
         FileFlags = flags;
-        Compression = compression ?? new DCX.ZlibCompressionData();
+        Compression = compression ?? new DCX.ZlibCompressionInfo();
     }
 }
 
@@ -289,7 +289,7 @@ public abstract class WUnsortedBinderParser : WBinderParser
             byte[] bytes = File.ReadAllBytes(filePath);
             bnd.Files.Add(new BinderFile(format.FileFlags, i, name, bytes)
             {
-                CompressionData = format.Compression
+                CompressionInfo = format.Compression
             });
             i++;
         }

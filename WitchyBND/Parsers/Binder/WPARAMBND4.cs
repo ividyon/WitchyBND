@@ -134,6 +134,7 @@ public class WPARAMBND4 : WBinderParser
             case WBUtil.GameType.ER:
             case WBUtil.GameType.SDT:
             case WBUtil.GameType.AC6:
+            case WBUtil.GameType.ERN:
                 gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.PARAMBND, game,
                     ulong.Parse(bnd.Version));
                 ParseMode.GetParser<WBND4>().Unpack(srcPath, bnd, recursive, game);
@@ -228,6 +229,7 @@ public class WPARAMBND4 : WBinderParser
             case WBUtil.GameType.ER:
             case WBUtil.GameType.SDT:
             case WBUtil.GameType.AC6:
+            case WBUtil.GameType.ERN:
                 bndParser.Repack(srcPath, recursive);
                 BND4 regBnd = BND4.Read(destPath);
                 WBUtil.EncryptRegulationBin(destPath, game, regBnd);

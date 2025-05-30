@@ -31,7 +31,7 @@ public partial class WTAEFolder
         var game = Enum.Parse<WBUtil.GameType>(xml.Element("game")!.Value);
         TAE.Template template = gameService.GetTAETemplate(game);
 
-        tae.Compression = ReadCompressionDataFromXml(xml);
+        tae.Compression = ReadCompressionInfoFromXml(xml);
 
 
         tae.ID = int.Parse(xml.Element("id")!.Value);

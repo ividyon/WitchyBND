@@ -77,7 +77,7 @@ namespace WitchyBND.Parsers
             DBSUB dbs = new DBSUB();
             XElement xml = LoadXml(srcPath);
 
-            dbs.Compression = ReadCompressionDataFromXml(xml);
+            dbs.Compression = ReadCompressionInfoFromXml(xml);
 
             uint.TryParse(xml.Element(nameof(dbs.EventID))?.Value ?? "0", out uint eventId);
             dbs.EventID = eventId;

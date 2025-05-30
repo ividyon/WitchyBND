@@ -149,7 +149,7 @@ public class WFFXBNDModern : WBinderParser
 
         XElement xml = LoadXml(GetFolderXmlPath(srcPath));
 
-        bnd.Compression = ReadCompressionDataFromXml(xml);
+        bnd.Compression = ReadCompressionInfoFromXml(xml);
 
         bnd.Version = xml.Element("version")!.Value;
         bnd.Format = (Binder.Format)Enum.Parse(typeof(Binder.Format), xml.Element("format")!.Value);
@@ -264,7 +264,7 @@ Consider tidying up the unpacked archive folder.");
                 var bytes = File.ReadAllBytes(filePath);
                 var tpf = new TPF();
 
-                tpf.Compression = new DCX.NoCompressionData();
+                tpf.Compression = new DCX.NoCompressionInfo();
                 tpf.Encoding = 0x01;
                 tpf.Flag2 = 0x03;
                 tpf.Platform = TPF.TPFPlatform.PC;

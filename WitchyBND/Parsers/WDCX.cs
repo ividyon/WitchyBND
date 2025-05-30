@@ -93,7 +93,7 @@ public class WDCX : WSingleFileParser
     {
         string outPath = GetUnpackDestPath(srcPath, recursive);
 
-        byte[] bytes = DCX.Decompress(srcPath, out DCX.CompressionData comp);
+        byte[] bytes = DCX.Decompress(srcPath, out DCX.CompressionInfo comp);
         File.WriteAllBytes(outPath, bytes);
 
         PrepareXmlManifest(srcPath, recursive, false, comp, out XDocument xDoc, null);
@@ -106,7 +106,7 @@ public class WDCX : WSingleFileParser
         string xmlPath = GetRepackXmlPath(srcPath, null);
         XElement xml = LoadXml(xmlPath);
 
-        DCX.CompressionData compression = ReadCompressionDataFromXml(xml);
+        DCX.CompressionInfo compression = ReadCompressionInfoFromXml(xml);
 
         var outPath = GetRepackDestPath(srcPath, xml);
         Backup(outPath);

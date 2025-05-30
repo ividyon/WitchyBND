@@ -26,7 +26,7 @@ public partial class WMSBEFolder
 
         XElement xml = LoadXml(GetFolderXmlPath(srcPath));
 
-        msb.Compression = ReadCompressionDataFromXml(xml);
+        msb.Compression = ReadCompressionInfoFromXml(xml);
 
         var taskList = new List<Task>();
 

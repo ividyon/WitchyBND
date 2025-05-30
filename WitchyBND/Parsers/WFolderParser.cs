@@ -25,7 +25,7 @@ public abstract class WFolderParser : WFileParser
         return int.Parse(attr.Value);
     }
 
-    protected void WarnAboutKrak(DCX.CompressionData compression, int count)
+    protected void WarnAboutKrak(DCX.CompressionInfo compression, int count)
     {
         if (compression.Type is not DCX.Type.DCX_KRAK) return;
         if (WarnedAboutKrak) return;
@@ -51,7 +51,7 @@ Simply replace the compression level in the {GetFolderXmlFilename()} file to thi
     }
 
     public override XElement PrepareXmlManifest(string srcPath, bool recursive, bool skipFilename,
-        DCX.CompressionData? compression, out XDocument xDoc, string? root)
+        DCX.CompressionInfo? compression, out XDocument xDoc, string? root)
     {
         var destPath = GetUnpackDestPath(srcPath, recursive);
         Directory.CreateDirectory(destPath);

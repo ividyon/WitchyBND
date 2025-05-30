@@ -120,7 +120,7 @@ public class WGPARAM : WXMLParser
     {
         GPARAM gparam = new GPARAM();
         XElement xml = LoadXml(srcPath);
-        gparam.Compression = ReadCompressionDataFromXml(xml);
+        gparam.Compression = ReadCompressionInfoFromXml(xml);
         Enum.TryParse(xml.Element("game")!.Value, out gparam.Game);
         gparam.Unk0D = bool.Parse(xml.Element("unk0D")!.Value);
         gparam.Unk14 = int.Parse(xml.Element("unk14")!.Value);

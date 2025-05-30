@@ -82,6 +82,7 @@ public class GameService : IGameService
         { "DarkSoulsII.exe", WBUtil.GameType.DS2S },
         { "armoredcore.exe", WBUtil.GameType.AC6 },
         { "sekiro.exe", WBUtil.GameType.SDT },
+        { "nightreign.exe", WBUtil.GameType.ERN }
     };
 
     public WBUtil.GameType? DsmsGameTypeToWitchyGameType(DsmsGameType type)
@@ -97,6 +98,7 @@ public class GameService : IGameService
             DsmsGameType.Sekiro => WBUtil.GameType.SDT,
             DsmsGameType.EldenRing => WBUtil.GameType.ER,
             DsmsGameType.ArmoredCoreVI => WBUtil.GameType.AC6,
+            DsmsGameType.Nightreign => WBUtil.GameType.ERN,
             _ => null
         };
     }
