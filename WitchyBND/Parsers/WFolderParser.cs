@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
 using WitchyLib;
@@ -24,15 +25,15 @@ public abstract class WFolderParser : WFileParser
         return int.Parse(attr.Value);
     }
 
-    protected void WarnAboutKrak(DCX.Type compression, int count)
+    protected void WarnAboutKrak(DCX.CompressionInfo compression, int count)
     {
-        if (compression is not DCX.Type.DCX_KRAK and not DCX.Type.DCX_KRAK_MAX) return;
+        if (compression.Type is not DCX.Type.DCX_KRAK) return;
         if (WarnedAboutKrak) return;
         if (count <= 10) return;
 
-        errorService.RegisterNotice(@$"DCX compression is set to DCX_KRAK or DCX_KRAK_MAX.
+        errorService.RegisterNotice(@$"DCX compression is set to DCX_KRAK.
 Kraken compression is slightly more compact, but extremely slow.
-Consider switching to a faster compression such as: DCX_DFLT_11000_44_9_15
+Consider switching to a faster compression such as: DCX_DFLT
 Simply replace the compression level in the {GetFolderXmlFilename()} file to this value.");
 
         WarnedAboutKrak = true;
@@ -47,6 +48,26 @@ Simply replace the compression level in the {GetFolderXmlFilename()} file to thi
             sourceDir = location;
         sourceDir = Path.GetFullPath(sourceDir);
         return Path.Combine(sourceDir, fileName.Replace('.', '-'));
+    }
+
+    public override XElement PrepareXmlManifest(string srcPath, bool recursive, bool skipFilename,
+        DCX.CompressionInfo? compression, out XDocument xDoc, string? root)
+    {
+        var destPath = GetUnpackDestPath(srcPath, recursive);
+        Directory.CreateDirectory(destPath);
+        return base.PrepareXmlManifest(srcPath, recursive, skipFilename, compression, out xDoc, root);
+    }
+
+    public override void WriteXmlManifest(XDocument xDoc, string srcPath, bool recursive)
+    {
+        var destPath = GetUnpackDestPath(srcPath, recursive);
+        //xDoc.Save(GetFolderXmlPath(destPath));
+        using var xw = XmlWriter.Create(GetFolderXmlPath(destPath), new XmlWriterSettings
+        {
+            Indent = true
+        });
+        xDoc.WriteTo(xw);
+        xw.Close();
     }
 
     public virtual string GetRepackDestPath(string srcDirPath, XElement xml, string filenameElement = "filename")

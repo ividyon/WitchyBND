@@ -33,7 +33,8 @@ public enum DsmsGameType
     Bloodborne = 6,
     Sekiro = 7,
     EldenRing = 8,
-    ArmoredCoreVI = 9
+    ArmoredCoreVI = 9,
+    Nightreign = 15
 }
 
 public static class WBUtil
@@ -199,9 +200,10 @@ public static class WBUtil
         [Display(Name = "Dark Souls 2: Scholar of the First Sin")]
         DS2S,
         [Display(Name = "Dark Souls 3")] DS3,
-        [Display(Name = "Elden Ring")] ER,
+        [Display(Name = "ELDEN RING")] ER,
         [Display(Name = "Sekiro")] SDT,
-        [Display(Name = "Armored Core VI")] AC6
+        [Display(Name = "Armored Core VI")] AC6,
+        [Display(Name = "ELDEN RING NIGHTREIGN")] ERN
     }
 
     public static string GetAssetsPath()
@@ -281,9 +283,17 @@ public static class WBUtil
                 game = GameType.AC6;
                 return RegulationDecryptor.DecryptAC6Regulation(path);
             }
-            catch (InvalidDataException e2)
+            catch (Exception e2) when (e2 is InvalidDataException or CryptographicException)
             {
-                throw new InvalidDataException($"Could not read sane data using either ER or AC6 decryption keys.");
+                try
+                {
+                    game = GameType.ERN;
+                    return RegulationDecryptor.DecryptERNRRegulation(path);
+                }
+                catch (InvalidDataException e3)
+                {
+                    throw new InvalidDataException($"Could not read sane data using either ER, NR or AC6 decryption keys.");
+                }
             }
         }
     }
@@ -301,6 +311,9 @@ public static class WBUtil
             case GameType.AC6:
                 RegulationDecryptor.EncryptAC6Regulation(path, bnd);
                 break;
+            case GameType.ERN:
+                RegulationDecryptor.EncryptERNRRegulation(path, bnd);
+                break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(game), game, null);
         }
@@ -315,8 +328,9 @@ public static class WBUtil
         return game switch
         {
             GameType.ER => RegulationDecryptor.DecryptERRegulation(path),
+            GameType.ERN => RegulationDecryptor.DecryptERNRRegulation(path),
             GameType.AC6 => RegulationDecryptor.DecryptAC6Regulation(path),
-            _ => throw new InvalidOperationException("Only Elden Ring and Armored Core VI have a regulation.bin")
+            _ => throw new InvalidOperationException("Only Elden Ring, Nightreign and Armored Core VI have a regulation.bin")
         };
     }
 
@@ -730,7 +744,7 @@ public static class WBUtil
         }
     }
 
-    public static byte[] TryDecompressBytes(string sourceFile, out DCX.Type compression)
+    public static byte[] TryDecompressBytes(string sourceFile, out DCX.CompressionInfo compression)
     {
         try
         {
@@ -749,11 +763,11 @@ public static class WBUtil
         }
     }
 
-    public static void TryCompressBytes(byte[] data, DCX.Type type, string path)
+    public static void TryCompressBytes(byte[] data, DCX.CompressionInfo compression, string path)
     {
         try
         {
-            DCX.Compress(data, type, path);
+            DCX.Compress(data, compression, path);
         }
         catch (NoOodleFoundException)
         {
@@ -762,7 +776,7 @@ public static class WBUtil
                 throw;
 
             IntPtr handle = Kernel32.LoadLibrary(oo2corePath);
-            DCX.Compress(data, type, path);
+            DCX.Compress(data, compression, path);
             Kernel32.FreeLibrary(handle);
         }
     }

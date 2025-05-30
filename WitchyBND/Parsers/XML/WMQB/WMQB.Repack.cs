@@ -17,33 +17,30 @@ public partial class WMQB
     {
 
         MQB mqb = new MQB();
-        XmlDocument xml = new XmlDocument();
-        xml.Load(srcPath);
+        XElement xml = LoadXml(srcPath);
 
-        string name = xml.SelectSingleNode("MQB/Name").InnerText;
-        var version = FriendlyParseEnum<MQB.MQBVersion>(nameof(MQB), nameof(MQB.Version), xml.SelectSingleNode("MQB/Version").InnerText);
-        float framerate = FriendlyParseFloat32(nameof(MQB), nameof(MQB.Framerate), xml.SelectSingleNode("MQB/Framerate").InnerText);
-        bool bigendian = FriendlyParseBool(nameof(MQB), nameof(MQB.BigEndian), xml.SelectSingleNode("MQB/BigEndian").InnerText);
-        if (!Enum.TryParse(xml.SelectSingleNode("MQB/Compression")?.InnerText ?? "None", out DCX.Type compression))
-            throw new FriendlyException($"{nameof(MQB)} {nameof(MQB.Compression)} could not be parsed.");
+        string name = xml.Element("Name")!.Value;
+        var version = FriendlyParseEnum<MQB.MQBVersion>(nameof(MQB), nameof(MQB.Version), xml.Element("MQBVersion")!.Value);
+        float framerate = FriendlyParseFloat32(nameof(MQB), nameof(MQB.Framerate), xml.Element("Framerate")!.Value);
+        bool bigendian = FriendlyParseBool(nameof(MQB), nameof(MQB.BigEndian), xml.Element("BigEndian")!.Value);
 
-        string resDir = xml.SelectSingleNode("MQB/ResourceDirectory").InnerText;
+        string resDir = xml.Element("ResourceDirectory")!.Value;
         List<MQB.Resource> resources = new List<MQB.Resource>();
         List<MQB.Cut> cuts = new List<MQB.Cut>();
 
-        var resourcesNode = xml.SelectSingleNode("MQB/Resources");
-        foreach (XmlNode resNode in resourcesNode.SelectNodes("Resource"))
+        var resourcesNode = xml.Element("Resources")!;
+        foreach (XElement resNode in resourcesNode.Elements("Resource"))
             resources.Add(RepackResource(resNode));
 
-        var cutsNode = xml.SelectSingleNode("MQB/Cuts");
-        foreach (XmlNode cutNode in cutsNode.SelectNodes("Cut"))
+        var cutsNode = xml.Element("Cuts")!;
+        foreach (XElement cutNode in cutsNode.Elements("Cut"))
             cuts.Add(RepackCut(cutNode));
 
         mqb.Name = name;
         mqb.Version = version;
         mqb.Framerate = framerate;
         mqb.BigEndian = bigendian;
-        mqb.Compression = compression;
+        mqb.Compression = ReadCompressionInfoFromXml(xml);
         mqb.ResourceDirectory = resDir;
         mqb.Resources = resources;
         mqb.Cuts = cuts;
@@ -56,18 +53,18 @@ public partial class WMQB
 
     #region Repack Helpers
 
-    public static MQB.Resource RepackResource(XmlNode resNode)
+    public static MQB.Resource RepackResource(XElement resNode)
     {
         MQB.Resource resource = new MQB.Resource();
 
-        string name = resNode.SelectSingleNode("Name").InnerText;
-        string path = resNode.SelectSingleNode("Path").InnerText;
-        int parentIndex = FriendlyParseInt32(nameof(MQB.Resource), nameof(MQB.Resource.ParentIndex), resNode.SelectSingleNode("ParentIndex").InnerText);
-        int unk48 = FriendlyParseInt32(nameof(MQB.Resource), nameof(MQB.Resource.Unk48), resNode.SelectSingleNode("Unk48").InnerText);
+        string name = resNode.Element("Name")!.Value;
+        string path = resNode.Element("Path")!.Value;
+        int parentIndex = FriendlyParseInt32(nameof(MQB.Resource), nameof(MQB.Resource.ParentIndex), resNode.Element("ParentIndex")!.Value);
+        int unk48 = FriendlyParseInt32(nameof(MQB.Resource), nameof(MQB.Resource.Unk48), resNode.Element("Unk48")!.Value);
         List<MQB.CustomData> customData = new List<MQB.CustomData>();
 
-        var resCusDataNode = resNode.SelectSingleNode("Resource_CustomData");
-        foreach (XmlNode cusDataNode in resCusDataNode.SelectNodes("CustomData"))
+        var resCusDataNode = resNode.Element("Resource_CustomData")!;
+        foreach (XElement cusDataNode in resCusDataNode.Elements("CustomData"))
             customData.Add(RepackCustomData(cusDataNode));
 
         resource.Name = name;
@@ -78,19 +75,19 @@ public partial class WMQB
         return resource;
     }
 
-    public static MQB.CustomData RepackCustomData(XmlNode customdataNode)
+    public static MQB.CustomData RepackCustomData(XElement customdataNode)
     {
         MQB.CustomData customdata = new MQB.CustomData();
 
-        string name = customdataNode.SelectSingleNode("Name").InnerText;
-        var type = FriendlyParseEnum<MQB.CustomData.DataType>(nameof(MQB.CustomData), nameof(MQB.CustomData.Type), customdataNode.SelectSingleNode("Type").InnerText);
+        string name = customdataNode.Element("Name")!.Value;
+        var type = FriendlyParseEnum<MQB.CustomData.DataType>(nameof(MQB.CustomData), nameof(MQB.CustomData.Type), customdataNode.Element("Type")!.Value);
 
-        int memberCount = FriendlyParseInt32(nameof(MQB.CustomData), nameof(MQB.CustomData.MemberCount), customdataNode.SelectSingleNode("MemberCount").InnerText);
-        object value = ConvertValueToDataType(customdataNode.SelectSingleNode("Value").InnerText, type, memberCount);
+        int memberCount = FriendlyParseInt32(nameof(MQB.CustomData), nameof(MQB.CustomData.MemberCount), customdataNode.Element("MemberCount")!.Value);
+        object value = ConvertValueToDataType(customdataNode.Element("Value")!.Value, type, memberCount);
         var sequences = new List<MQB.CustomData.Sequence>();
 
-        var seqsNode = customdataNode.SelectSingleNode("Sequences");
-        foreach (XmlNode seqNode in seqsNode.SelectNodes("Sequence"))
+        var seqsNode = customdataNode.Element("Sequences")!;
+        foreach (XElement seqNode in seqsNode.Elements("Sequence"))
             sequences.Add(RepackSequence(seqNode));
 
         customdata.Name = name;
@@ -101,17 +98,17 @@ public partial class WMQB
         return customdata;
     }
 
-    public static MQB.CustomData.Sequence RepackSequence(XmlNode seqNode)
+    public static MQB.CustomData.Sequence RepackSequence(XElement seqNode)
     {
         MQB.CustomData.Sequence sequence = new MQB.CustomData.Sequence();
 
-        int valueIndex = FriendlyParseInt32(nameof(MQB.CustomData.Sequence), nameof(MQB.CustomData.Sequence.ValueIndex), seqNode.SelectSingleNode("ValueIndex").InnerText);
-        var type = FriendlyParseEnum<MQB.CustomData.DataType>(nameof(MQB.CustomData.Sequence), nameof(MQB.CustomData.Sequence.ValueType), seqNode.SelectSingleNode("ValueType").InnerText);
-        int pointType = FriendlyParseInt32(nameof(MQB.CustomData.Sequence), nameof(MQB.CustomData.Sequence.PointType), seqNode.SelectSingleNode("PointType").InnerText);
+        int valueIndex = FriendlyParseInt32(nameof(MQB.CustomData.Sequence), nameof(MQB.CustomData.Sequence.ValueIndex), seqNode.Element("ValueIndex")!.Value);
+        var type = FriendlyParseEnum<MQB.CustomData.DataType>(nameof(MQB.CustomData.Sequence), nameof(MQB.CustomData.Sequence.ValueType), seqNode.Element("ValueType")!.Value);
+        int pointType = FriendlyParseInt32(nameof(MQB.CustomData.Sequence), nameof(MQB.CustomData.Sequence.PointType), seqNode.Element("PointType")!.Value);
         List<MQB.CustomData.Sequence.Point> points = new List<MQB.CustomData.Sequence.Point>();
 
-        var pointsNode = seqNode.SelectSingleNode("Points");
-        foreach (XmlNode pointNode in pointsNode.SelectNodes("Point"))
+        var pointsNode = seqNode.Element("Points")!;
+        foreach (XElement pointNode in pointsNode.Elements("Point"))
             points.Add(RepackPoint(pointNode, type));
 
         sequence.ValueIndex = valueIndex;
@@ -121,11 +118,11 @@ public partial class WMQB
         return sequence;
     }
 
-    public static MQB.CustomData.Sequence.Point RepackPoint(XmlNode pointNode, MQB.CustomData.DataType type)
+    public static MQB.CustomData.Sequence.Point RepackPoint(XElement pointNode, MQB.CustomData.DataType type)
     {
         MQB.CustomData.Sequence.Point point = new MQB.CustomData.Sequence.Point();
 
-        string valueStr = pointNode.SelectSingleNode("Value").InnerText;
+        string valueStr = pointNode.Element("Value")!.Value;
         object value;
 
         switch (type)
@@ -135,9 +132,9 @@ public partial class WMQB
             default: throw new NotSupportedException($"Unsupported sequence point value type: {type}");
         }
 
-        int unk08 = FriendlyParseInt32(nameof(MQB.CustomData.Sequence.Point), nameof(MQB.CustomData.Sequence.Point.Unk08), pointNode.SelectSingleNode("Unk08").InnerText);
-        float unk10 = FriendlyParseFloat32(nameof(MQB.CustomData.Sequence.Point), nameof(MQB.CustomData.Sequence.Point.Unk10), pointNode.SelectSingleNode("Unk10").InnerText);
-        float unk14 = FriendlyParseFloat32(nameof(MQB.CustomData.Sequence.Point), nameof(MQB.CustomData.Sequence.Point.Unk14), pointNode.SelectSingleNode("Unk14").InnerText);
+        int unk08 = FriendlyParseInt32(nameof(MQB.CustomData.Sequence.Point), nameof(MQB.CustomData.Sequence.Point.Unk08), pointNode.Element("Unk08")!.Value);
+        float unk10 = FriendlyParseFloat32(nameof(MQB.CustomData.Sequence.Point), nameof(MQB.CustomData.Sequence.Point.Unk10), pointNode.Element("Unk10")!.Value);
+        float unk14 = FriendlyParseFloat32(nameof(MQB.CustomData.Sequence.Point), nameof(MQB.CustomData.Sequence.Point.Unk14), pointNode.Element("Unk14")!.Value);
 
         point.Value = value;
         point.Unk08 = unk08;
@@ -146,17 +143,17 @@ public partial class WMQB
         return point;
     }
 
-    public static MQB.Cut RepackCut(XmlNode cutNode)
+    public static MQB.Cut RepackCut(XElement cutNode)
     {
         MQB.Cut cut = new MQB.Cut();
 
-        string name = cutNode.SelectSingleNode("Name").InnerText;
-        int duration = FriendlyParseInt32("Cut", nameof(cut.Duration), cutNode.SelectSingleNode("Duration").InnerText);
-        int unk44 = FriendlyParseInt32("Cut", nameof(cut.Unk44), cutNode.SelectSingleNode("Unk44").InnerText);
+        string name = cutNode.Element("Name")!.Value;
+        int duration = FriendlyParseInt32("Cut", nameof(cut.Duration), cutNode.Element("Duration")!.Value);
+        int unk44 = FriendlyParseInt32("Cut", nameof(cut.Unk44), cutNode.Element("Unk44")!.Value);
         List<MQB.Timeline> timelines = new List<MQB.Timeline>();
 
-        var timelinesNode = cutNode.SelectSingleNode("Timelines");
-        foreach (XmlNode timelineNode in timelinesNode.SelectNodes("Timeline"))
+        var timelinesNode = cutNode.Element("Timelines")!;
+        foreach (XElement timelineNode in timelinesNode.Elements("Timeline"))
             timelines.Add(RepackTimeline(timelineNode));
 
         cut.Name = name;
@@ -166,20 +163,20 @@ public partial class WMQB
         return cut;
     }
 
-    public static MQB.Timeline RepackTimeline(XmlNode timelineNode)
+    public static MQB.Timeline RepackTimeline(XElement timelineNode)
     {
         MQB.Timeline timeline = new MQB.Timeline();
 
-        int unk10 = FriendlyParseInt32(nameof(MQB.Timeline), nameof(MQB.Timeline.Unk10), timelineNode.SelectSingleNode("Unk10").InnerText);
+        int unk10 = FriendlyParseInt32(nameof(MQB.Timeline), nameof(MQB.Timeline.Unk10), timelineNode.Element("Unk10")!.Value);
         List<MQB.Disposition> dispositions = new List<MQB.Disposition>();
         List<MQB.CustomData> customdata = new List<MQB.CustomData>();
 
-        var dispositionsNode = timelineNode.SelectSingleNode("Dispositions");
-        foreach (XmlNode disNode in dispositionsNode.SelectNodes("Disposition"))
+        var dispositionsNode = timelineNode.Element("Dispositions")!;
+        foreach (XElement disNode in dispositionsNode.Elements("Disposition"))
             dispositions.Add(RepackDisposition(disNode));
 
-        var timelineCusDataNode = timelineNode.SelectSingleNode("Timeline_CustomData");
-        foreach (XmlNode cusDataNode in timelineCusDataNode.SelectNodes("CustomData"))
+        var timelineCusDataNode = timelineNode.Element("Timeline_CustomData")!;
+        foreach (XElement cusDataNode in timelineCusDataNode.Elements("CustomData"))
             customdata.Add(RepackCustomData(cusDataNode));
 
         timeline.Unk10 = unk10;
@@ -188,29 +185,29 @@ public partial class WMQB
         return timeline;
     }
 
-    public static MQB.Disposition RepackDisposition(XmlNode disNode)
+    public static MQB.Disposition RepackDisposition(XElement disNode)
     {
         MQB.Disposition disposition = new MQB.Disposition();
 
-        int id = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.ID), disNode.SelectSingleNode("ID").InnerText);
-        int duration = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.Duration), disNode.SelectSingleNode("Duration").InnerText);
-        int resIndex = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.ResourceIndex), disNode.SelectSingleNode("ResourceIndex").InnerText);
-        int startFrame = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.StartFrame), disNode.SelectSingleNode("StartFrame").InnerText);
-        int unk08 = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.Unk08), disNode.SelectSingleNode("Unk08").InnerText);
-        int unk14 = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.Unk14), disNode.SelectSingleNode("Unk14").InnerText);
-        int unk18 = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.Unk18), disNode.SelectSingleNode("Unk18").InnerText);
-        int unk1C = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.Unk1C), disNode.SelectSingleNode("Unk1C").InnerText);
-        int unk20 = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.Unk20), disNode.SelectSingleNode("Unk20").InnerText);
-        int unk28 = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.Unk28), disNode.SelectSingleNode("Unk28").InnerText);
+        int id = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.ID), disNode.Element("ID")!.Value);
+        int duration = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.Duration), disNode.Element("Duration")!.Value);
+        int resIndex = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.ResourceIndex), disNode.Element("ResourceIndex")!.Value);
+        int startFrame = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.StartFrame), disNode.Element("StartFrame")!.Value);
+        int unk08 = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.Unk08), disNode.Element("Unk08")!.Value);
+        int unk14 = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.Unk14), disNode.Element("Unk14")!.Value);
+        int unk18 = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.Unk18), disNode.Element("Unk18")!.Value);
+        int unk1C = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.Unk1C), disNode.Element("Unk1C")!.Value);
+        int unk20 = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.Unk20), disNode.Element("Unk20")!.Value);
+        int unk28 = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.Unk28), disNode.Element("Unk28")!.Value);
         List<MQB.Transform> transforms = new List<MQB.Transform>();
         List<MQB.CustomData> customdata = new List<MQB.CustomData>();
 
-        var transformsNode = disNode.SelectSingleNode("Transforms");
-        foreach (XmlNode transformNode in transformsNode.SelectNodes("Transform"))
+        var transformsNode = disNode.Element("Transforms")!;
+        foreach (XElement transformNode in transformsNode.Elements("Transform"))
             transforms.Add(RepackTransform(transformNode));
 
-        var disCusDataNode = disNode.SelectSingleNode("Disposition_CustomData");
-        foreach (XmlNode cusDataNode in disCusDataNode.SelectNodes("CustomData"))
+        var disCusDataNode = disNode.Element("Disposition_CustomData")!;
+        foreach (XElement cusDataNode in disCusDataNode.Elements("CustomData"))
             customdata.Add(RepackCustomData(cusDataNode));
 
         disposition.ID = id;
@@ -228,20 +225,20 @@ public partial class WMQB
         return disposition;
     }
 
-    public static MQB.Transform RepackTransform(XmlNode transNode)
+    public static MQB.Transform RepackTransform(XElement transNode)
     {
         MQB.Transform transform = new MQB.Transform();
 
-        float frame = FriendlyParseFloat32(nameof(MQB.Transform), nameof(MQB.Transform.Frame), transNode.SelectSingleNode("Frame").InnerText);
-        Vector3 translation = FriendlyParseVector3(nameof(MQB.Transform), nameof(MQB.Transform.Translation), transNode.SelectSingleNode("Translation").InnerText);
-        Vector3 rotation = FriendlyParseVector3(nameof(MQB.Transform), nameof(MQB.Transform.Rotation), transNode.SelectSingleNode("Rotation").InnerText);
-        Vector3 scale = FriendlyParseVector3(nameof(MQB.Transform), nameof(MQB.Transform.Scale), transNode.SelectSingleNode("Scale").InnerText);
-        Vector3 unk10 = FriendlyParseVector3(nameof(MQB.Transform), nameof(MQB.Transform.Unk10), transNode.SelectSingleNode("Unk10").InnerText);
-        Vector3 unk1C = FriendlyParseVector3(nameof(MQB.Transform), nameof(MQB.Transform.Unk1C), transNode.SelectSingleNode("Unk1C").InnerText);
-        Vector3 unk34 = FriendlyParseVector3(nameof(MQB.Transform), nameof(MQB.Transform.Unk34), transNode.SelectSingleNode("Unk34").InnerText);
-        Vector3 unk40 = FriendlyParseVector3(nameof(MQB.Transform), nameof(MQB.Transform.Unk40), transNode.SelectSingleNode("Unk40").InnerText);
-        Vector3 unk58 = FriendlyParseVector3(nameof(MQB.Transform), nameof(MQB.Transform.Unk58), transNode.SelectSingleNode("Unk58").InnerText);
-        Vector3 unk64 = FriendlyParseVector3(nameof(MQB.Transform), nameof(MQB.Transform.Unk64), transNode.SelectSingleNode("Unk64").InnerText);
+        float frame = FriendlyParseFloat32(nameof(MQB.Transform), nameof(MQB.Transform.Frame), transNode.Element("Frame")!.Value);
+        Vector3 translation = FriendlyParseVector3(nameof(MQB.Transform), nameof(MQB.Transform.Translation), transNode.Element("Translation")!.Value);
+        Vector3 rotation = FriendlyParseVector3(nameof(MQB.Transform), nameof(MQB.Transform.Rotation), transNode.Element("Rotation")!.Value);
+        Vector3 scale = FriendlyParseVector3(nameof(MQB.Transform), nameof(MQB.Transform.Scale), transNode.Element("Scale")!.Value);
+        Vector3 unk10 = FriendlyParseVector3(nameof(MQB.Transform), nameof(MQB.Transform.Unk10), transNode.Element("Unk10")!.Value);
+        Vector3 unk1C = FriendlyParseVector3(nameof(MQB.Transform), nameof(MQB.Transform.Unk1C), transNode.Element("Unk1C")!.Value);
+        Vector3 unk34 = FriendlyParseVector3(nameof(MQB.Transform), nameof(MQB.Transform.Unk34), transNode.Element("Unk34")!.Value);
+        Vector3 unk40 = FriendlyParseVector3(nameof(MQB.Transform), nameof(MQB.Transform.Unk40), transNode.Element("Unk40")!.Value);
+        Vector3 unk58 = FriendlyParseVector3(nameof(MQB.Transform), nameof(MQB.Transform.Unk58), transNode.Element("Unk58")!.Value);
+        Vector3 unk64 = FriendlyParseVector3(nameof(MQB.Transform), nameof(MQB.Transform.Unk64), transNode.Element("Unk64")!.Value);
 
         transform.Frame = frame;
         transform.Translation = translation;

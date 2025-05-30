@@ -115,9 +115,8 @@ public abstract class WBinderParser : WFolderParser
             {
                 pathCounts[path] = 1;
             }
-
-            if (file.CompressionType != DCX.Type.Zlib)
-                fileElement.Add("compression_type", file.CompressionType.ToString());
+            if (file.CompressionInfo.Type != DCX.Type.Zlib)
+                WriteCompressionInfoToXml(fileElement, file.CompressionInfo);
 
             byte[] bytes = file.Bytes;
             string destPath =
@@ -192,7 +191,16 @@ public abstract class WBinderParser : WFolderParser
             string strId = file.Element("id")?.Value ?? "-1"; // Edge case for PC save files
             string path = file.Element("path")!.Value;
             string suffix = file.Element("suffix")?.Value ?? "";
-            string strCompression = file.Element("compression_type")?.Value ?? DCX.Type.Zlib.ToString();
+            string? strCompression = file.Element("compression")?.Value;
+            DCX.CompressionInfo compression;
+            if (strCompression != null)
+            {
+                compression = ReadCompressionInfoFromXml(file);
+            }
+            else
+            {
+                compression = new DCX.ZlibCompressionInfo();
+            }
             string name = Path.Combine(root, path);
 
             if (!Enum.TryParse(strFlags, out Binder.FileFlags flags))
@@ -201,10 +209,6 @@ public abstract class WBinderParser : WFolderParser
 
             if (!int.TryParse(strId, out int id))
                 throw new FriendlyException($"Could not parse file ID: {strId}\nID must be a 32-bit signed integer.");
-
-            if (!Enum.TryParse(strCompression, out DCX.Type compressionType))
-                throw new FriendlyException(
-                    $"Could not parse compression type: {strCompression}\nCompression type must be a valid DCX Type.");
 
             string inPath =
                 $@"{srcDirPath}\{Path.GetDirectoryName(path)}\{Path.GetFileNameWithoutExtension(path)}{suffix}{Path.GetExtension(path)}";
@@ -216,7 +220,7 @@ public abstract class WBinderParser : WFolderParser
             byte[] bytes = File.ReadAllBytes(inPath);
             bag.TryAdd(name, new BinderFile(flags, id, name, bytes)
             {
-                CompressionType = compressionType
+                CompressionInfo = compression
             });
         }
 
@@ -243,13 +247,13 @@ public class UnsortedFileFormat
     public string SearchPattern { get; }
     public Binder.FileFlags FileFlags { get; }
 
-    public DCX.Type Compression { get; }
+    public DCX.CompressionInfo Compression { get; }
 
-    public UnsortedFileFormat(string pattern, Binder.FileFlags flags, DCX.Type compression = DCX.Type.Zlib)
+    public UnsortedFileFormat(string pattern, Binder.FileFlags flags, DCX.CompressionInfo? compression = null)
     {
         SearchPattern = pattern;
         FileFlags = flags;
-        Compression = compression;
+        Compression = compression ?? new DCX.ZlibCompressionInfo();
     }
 }
 
@@ -285,7 +289,7 @@ public abstract class WUnsortedBinderParser : WBinderParser
             byte[] bytes = File.ReadAllBytes(filePath);
             bnd.Files.Add(new BinderFile(format.FileFlags, i, name, bytes)
             {
-                CompressionType = format.Compression
+                CompressionInfo = format.Compression
             });
             i++;
         }

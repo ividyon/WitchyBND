@@ -15,56 +15,9 @@ namespace WitchyBND.Parsers;
 public partial class WPARAM : WXMLParser
 {
 
-    public static bool? WarnedAboutParams { get; set; }
-
-    public static bool WarnAboutParams()
-    {
-        if (Configuration.Active.Expert || Configuration.Active.Passive) return true;
-        if (WarnedAboutParams != null) return WarnedAboutParams.Value;
-
-        List<string> lines = new()
-        {
-            "[RED]Editing PARAMs using WitchyBND is highly discouraged.[/]",
-            @"For PARAM editing, DSMapStudio is the recommended application. It can be downloaded from GitHub.
-If DSMapStudio does not yet support this game or regulation version, an experimental build may be available at ?ServerName? Discord.",
-            "Editing, merging and upgrading of new PARAM entries should all be done in DSMapStudio.",
-            "Merging outdated PARAMs (from a previous regulation) with WitchyBND is guaranteed to cause issues.",
-            "WitchyBND is not capable of upgrading outdated PARAMs to a newer regulation version under ANY circumstances!",
-        };
-        var warned = WBUtil.ObnoxiousWarning(lines);
-        WarnedAboutParams = warned;
-        return warned;
-    }
-
-    private class WPARAMRow
-    {
-        public int ID { get; set; }
-        public string? Name { get; set; }
-        public string? ParamdexName { get; set; }
-        public Dictionary<string, string> Fields { get; } = new();
-    }
-
-    /// <summary>
-    /// The style in which cells will be read/written.
-    /// CSV: Store all row cells as a CSV-style concatenated string with delimiters (min. readability).
-    /// Attribute: Store all row cells as attributes on the row element. (readability compromise)
-    /// Element: Store all row cells as separate elements (max. readability, max lines).
-    /// </summary>
-    public enum CellStyle
-    {
-        [Display(Name = "XML attribute",
-            Description = @"Each field is added to the row element as an attribute. Small file size.")]
-        Attribute,
-        [Display(Name = "XML element",
-            Description = @"Each field is added to the row element as a child element. Easier to tell differences between two versions of the file.")]
-        Element,
-        [Display(Name = "CSV",
-            Description = @"Stores all fields as a single delimited string. The least readable, potentially smallest file size.")]
-        CSV
-    }
-
     public override string Name => "PARAM";
-    public override int Version => WBUtil.WitchyVersionToInt("2.7.1.0");
+    
+    public override int Version => WBUtil.WitchyVersionToInt("2.15.0.0");
 
     public override bool HasPreprocess => true;
 
@@ -111,6 +64,54 @@ If DSMapStudio does not yet support this game or regulation version, an experime
     {
         string filename = Path.GetFileName(path).ToLower();
         return filename.EndsWith(".param");
+    }
+
+    public static bool? WarnedAboutParams { get; set; }
+
+    public static bool WarnAboutParams()
+    {
+        if (Configuration.Active.Expert || Configuration.Active.Passive) return true;
+        if (WarnedAboutParams != null) return WarnedAboutParams.Value;
+
+        List<string> lines = new()
+        {
+            "[RED]Editing PARAMs using WitchyBND is highly discouraged.[/]",
+            @"For PARAM editing, DSMapStudio is the recommended application. It can be downloaded from GitHub.
+If DSMapStudio does not yet support this game or regulation version, an experimental build may be available at ?ServerName? Discord.",
+            "Editing, merging and upgrading of new PARAM entries should all be done in DSMapStudio.",
+            "Merging outdated PARAMs (from a previous regulation) with WitchyBND is guaranteed to cause issues.",
+            "WitchyBND is not capable of upgrading outdated PARAMs to a newer regulation version under ANY circumstances!",
+        };
+        var warned = WBUtil.ObnoxiousWarning(lines);
+        WarnedAboutParams = warned;
+        return warned;
+    }
+
+    private class WPARAMRow
+    {
+        public int ID { get; set; }
+        public string? Name { get; set; }
+        public string? ParamdexName { get; set; }
+        public Dictionary<string, string> Fields { get; } = new();
+    }
+
+    /// <summary>
+    /// The style in which cells will be read/written.
+    /// CSV: Store all row cells as a CSV-style concatenated string with delimiters (min. readability).
+    /// Attribute: Store all row cells as attributes on the row element. (readability compromise)
+    /// Element: Store all row cells as separate elements (max. readability, max lines).
+    /// </summary>
+    public enum CellStyle
+    {
+        [Display(Name = "XML attribute",
+            Description = @"Each field is added to the row element as an attribute. Small file size.")]
+        Attribute,
+        [Display(Name = "XML element",
+            Description = @"Each field is added to the row element as a child element. Easier to tell differences between two versions of the file.")]
+        Element,
+        [Display(Name = "CSV",
+            Description = @"Stores all fields as a single delimited string. The least readable, potentially smallest file size.")]
+        CSV
     }
 
     public static Byte[] Dummy8Read(string dummy8, int expectedLength)

@@ -46,8 +46,8 @@ public class WFFXBNDModern : WBinderParser
         var destDir = GetUnpackDestPath(srcPath, recursive);
         Directory.CreateDirectory(destDir);
 
-        var xml = new XElement(XmlTag,
-            new XElement("compression", bnd.Compression.ToString()),
+        var xml = PrepareXmlManifest(srcPath, recursive, false, bnd.Compression, out XDocument xDoc, null);
+        xml.Add(
             new XElement("version", bnd.Version),
             new XElement("format", bnd.Format.ToString()),
             new XElement("bigendian", bnd.BigEndian.ToString()),
@@ -57,20 +57,11 @@ public class WFFXBNDModern : WBinderParser
             new XElement("unk04", bnd.Unk04.ToString()),
             new XElement("unk05", bnd.Unk05.ToString())
         );
-        AddLocationToXml(srcPath, recursive, xml);
-
-        if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
-
-        using var xw = XmlWriter.Create($"{destDir}\\{GetFolderXmlFilename()}", new XmlWriterSettings
-        {
-            Indent = true,
-        });
 
         // Files
         if (!bnd.Files.Any())
         {
-            xml.WriteTo(xw);
-            xw.Close();
+            WriteXmlManifest(xDoc, srcPath, recursive);
             return;
         }
 
@@ -109,8 +100,7 @@ public class WFFXBNDModern : WBinderParser
         if (firstRes != null) xml.Add(new XElement("resDir", resDir));
         var resTargetDir = $@"{destDir}\{resDir}";
 
-        xml.WriteTo(xw);
-        xw.Close();
+        WriteXmlManifest(xDoc, srcPath, recursive);
 
         void Callback(BinderFile bndFile)
         {
@@ -159,8 +149,7 @@ public class WFFXBNDModern : WBinderParser
 
         XElement xml = LoadXml(GetFolderXmlPath(srcPath));
 
-        DCX.Type compression = Enum.Parse<DCX.Type>(xml.Element("compression")?.Value ?? "None");
-        bnd.Compression = compression;
+        bnd.Compression = ReadCompressionInfoFromXml(xml);
 
         bnd.Version = xml.Element("version")!.Value;
         bnd.Format = (Binder.Format)Enum.Parse(typeof(Binder.Format), xml.Element("format")!.Value);
@@ -275,7 +264,7 @@ Consider tidying up the unpacked archive folder.");
                 var bytes = File.ReadAllBytes(filePath);
                 var tpf = new TPF();
 
-                tpf.Compression = DCX.Type.None;
+                tpf.Compression = new DCX.NoCompressionInfo();
                 tpf.Encoding = 0x01;
                 tpf.Flag2 = 0x03;
                 tpf.Platform = TPF.TPFPlatform.PC;
@@ -431,7 +420,7 @@ Consider tidying up the unpacked archive folder.");
         string destPath = GetRepackDestPath(srcPath, xml);
         Backup(destPath);
 
-        WarnAboutKrak(compression, bnd.Files.Count);
+        WarnAboutKrak(bnd.Compression, bnd.Files.Count);
 
         bnd.Write(destPath);
     }

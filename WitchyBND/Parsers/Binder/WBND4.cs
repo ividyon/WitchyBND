@@ -44,9 +44,8 @@ public class WBND4 : WBinderParser
 
         XElement files = WriteBinderFiles(bnd, destDir, root);
 
-        var xml =
-            new XElement(XmlTag,
-                new XElement("compression", bnd.Compression.ToString()),
+        var xml = PrepareXmlManifest(srcPath, recursive, false, bnd.Compression, out XDocument xDoc, root);
+        xml.Add(
                 new XElement("version", bnd.Version),
                 new XElement("format", bnd.Format.ToString()),
                 new XElement("bigendian", bnd.BigEndian.ToString()),
@@ -57,23 +56,12 @@ public class WBND4 : WBinderParser
                 new XElement("unk05", bnd.Unk05.ToString()),
                 files);
 
-        AddLocationToXml(srcPath, recursive, xml);
-
-        if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
-
         if (game != null)
         {
             xml.AddFirst(new XElement("game", game.ToString()));
         }
-        if (!string.IsNullOrEmpty(root))
-            files.AddBeforeSelf(new XElement("root", root));
 
-        using var xw = XmlWriter.Create($"{destDir}\\{GetFolderXmlFilename()}", new XmlWriterSettings
-        {
-            Indent = true
-        });
-        xml.WriteTo(xw);
-        xw.Close();
+        WriteXmlManifest(xDoc, srcPath, recursive);
     }
 
     public override void Repack(string srcPath, bool recursive)
@@ -84,8 +72,7 @@ public class WBND4 : WBinderParser
 
         string root = xml.Element("root")?.Value ?? "";
 
-        Enum.TryParse(xml.Element("compression")?.Value ?? "None", out DCX.Type compression);
-        bnd.Compression = compression;
+        bnd.Compression = ReadCompressionInfoFromXml(xml);
 
         bnd.Version = xml.Element("version")!.Value;
         bnd.Format = (Binder.Format)Enum.Parse(typeof(Binder.Format), xml.Element("format")!.Value);
@@ -103,7 +90,7 @@ public class WBND4 : WBinderParser
 
         Backup(destPath);
 
-        WarnAboutKrak(compression, bnd.Files.Count);
+        WarnAboutKrak(bnd.Compression, bnd.Files.Count);
 
         bnd.Write(destPath);
     }

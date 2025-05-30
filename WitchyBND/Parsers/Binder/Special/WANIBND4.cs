@@ -51,7 +51,6 @@ public class WANIBND4 : WBinderParser
     {
         BND4 bnd = (file as BND4)!;
         var destDir = GetUnpackDestPath(srcPath, recursive);
-        var srcName = Path.GetFileName(srcPath);
         Directory.CreateDirectory(destDir);
 
         var root = "";
@@ -60,8 +59,8 @@ public class WANIBND4 : WBinderParser
             root = WBUtil.FindCommonRootPath(bnd.Files.Select(bndFile => bndFile.Name));
         }
 
-        var xml = new XElement(XmlTag,
-            new XElement("compression", bnd.Compression.ToString()),
+        var xml = PrepareXmlManifest(srcPath, recursive, false, bnd.Compression, out XDocument xDoc, root);
+        xml.Add(
             new XElement("version", bnd.Version),
             new XElement("format", bnd.Format.ToString()),
             new XElement("bigendian", bnd.BigEndian.ToString()),
@@ -72,22 +71,9 @@ public class WANIBND4 : WBinderParser
             new XElement("unk05", bnd.Unk05.ToString())
         );
 
-        AddLocationToXml(srcPath, recursive, xml);
-
-        if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
-
-        if (!string.IsNullOrEmpty(root))
-            xml.Add(new XElement("root", root));
-
-        using var xw = XmlWriter.Create($"{destDir}\\{GetFolderXmlFilename()}", new XmlWriterSettings
-        {
-            Indent = true,
-        });
-
         if (!bnd.Files.Any())
         {
-            xml.WriteTo(xw);
-            xw.Close();
+            WriteXmlManifest(xDoc, srcPath, recursive);
             return;
         }
 
@@ -126,8 +112,7 @@ public class WANIBND4 : WBinderParser
 
         XElement files = WriteBinderFiles(bnd, destDir, root);
         xml.Add(files);
-        xml.WriteTo(xw);
-        xw.Close();
+        WriteXmlManifest(xDoc, srcPath, recursive);
 
         if (Configuration.Active.Recursive)
         {
@@ -143,8 +128,7 @@ public class WANIBND4 : WBinderParser
 
         string root = xml.Element("root")?.Value ?? "";
 
-        Enum.TryParse(xml.Element("compression")?.Value ?? "None", out DCX.Type compression);
-        bnd.Compression = compression;
+        bnd.Compression = ReadCompressionInfoFromXml(xml);
 
         bnd.Version = xml.Element("version")!.Value;
         bnd.Format = (Binder.Format)Enum.Parse(typeof(Binder.Format), xml.Element("format")!.Value);
@@ -298,7 +282,7 @@ public class WANIBND4 : WBinderParser
 
         Backup(destPath);
 
-        WarnAboutKrak(compression, bnd.Files.Count);
+        WarnAboutKrak(bnd.Compression, bnd.Files.Count);
 
         bnd.Write(destPath);
     }

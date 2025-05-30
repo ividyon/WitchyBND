@@ -80,31 +80,21 @@ public class WTPF : WFolderParser
             textures.Add(texElement);
         }
 
-        var xml = new XElement(XmlTag,
-            new XElement("compression", tpf.Compression.ToString()),
+        var xml = PrepareXmlManifest(srcPath, recursive, false, tpf.Compression, out XDocument xDoc, null);
+        xml.Add(
             new XElement("encoding", $"0x{tpf.Encoding:X2}"),
             new XElement("flag2", $"0x{tpf.Flag2:X2}"),
             new XElement("platform", tpf.Platform.ToString()),
             textures
         );
-        AddLocationToXml(srcPath, recursive, xml);
-
-        if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
-
-        using var xw = XmlWriter.Create(GetFolderXmlPath(destDir), new XmlWriterSettings
-        {
-            Indent = true
-        });
-        xml.WriteTo(xw);
-        xw.Close();
+        
+        WriteXmlManifest(xDoc, srcPath, recursive);
     }
 
     public override void Repack(string srcPath, bool recursive)
     {
         TPF tpf = new TPF();
-        // XmlDocument xml = new XmlDocument();
-
-        // xml.Load(GetBinderXmlPath(srcPath));
+        
         var doc = XDocument.Load(GetFolderXmlPath(srcPath));
         if (doc.Root == null) throw new XmlException("XML has no root");
         XElement xml = doc.Root;
@@ -120,11 +110,10 @@ public class WTPF : WFolderParser
                 srcPath));
         }
 
-        Enum.TryParse(xml.Element("compression")?.Value ?? "None", out DCX.Type compression);
-        tpf.Compression = compression;
+        tpf.Compression = ReadCompressionInfoFromXml(xml);
 
-        tpf.Encoding = Convert.ToByte(xml.Element("encoding").Value, 16);
-        tpf.Flag2 = Convert.ToByte(xml.Element("flag2").Value, 16);
+        tpf.Encoding = Convert.ToByte(xml.Element("encoding")!.Value, 16);
+        tpf.Flag2 = Convert.ToByte(xml.Element("flag2")!.Value, 16);
 
         foreach (XElement texNode in xml.Element("textures")!.Elements("texture"))
         {
@@ -152,7 +141,7 @@ public class WTPF : WFolderParser
         string outPath = GetRepackDestPath(srcPath, xml);
         Backup(outPath);
 
-        WarnAboutKrak(compression, tpf.Textures.Count);
+        WarnAboutKrak(tpf.Compression, tpf.Textures.Count);
         tpf.TryWriteSoulsFile(outPath);
     }
 }

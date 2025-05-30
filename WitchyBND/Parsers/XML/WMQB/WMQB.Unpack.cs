@@ -3,6 +3,7 @@ using System.Drawing;
 using System.IO;
 using System.Numerics;
 using System.Xml;
+using System.Xml.Linq;
 using SoulsFormats;
 using WitchyLib;
 
@@ -10,63 +11,55 @@ namespace WitchyBND.Parsers;
 
 public partial class WMQB
 {
-
     public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
-        var mqb = file as MQB;
-        var targetPath = GetUnpackDestPath(srcPath, recursive);
+        var mqb = (file as MQB)!;
         var filename = Path.GetFileName(srcPath);
-        Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
-        var xws = new XmlWriterSettings();
-        xws.Indent = true;
-        var xw = XmlWriter.Create(targetPath, xws);
-        xw.WriteStartElement(XmlTag);
-        if (Version > 0) xw.WriteAttributeString(VersionAttributeName, Version.ToString());
 
-        xw.WriteElementString("Name", mqb.Name);
+        var xml = PrepareXmlManifest(srcPath, recursive, true, mqb.Compression, out XDocument xDoc, null);
 
-        AddLocationToXml(srcPath, recursive, xw, true);
+        xml.Add(new XElement("Name", mqb.Name));
+        xml.Add(new XElement("MQBVersion", mqb.Version.ToString()));
+        xml.Add(new XElement("Filename", filename));
+        xml.Add(new XElement("Framerate", mqb.Framerate));
+        xml.Add(new XElement("BigEndian", mqb.BigEndian.ToString()));
+        xml.Add(new XElement("ResourceDirectory", mqb.ResourceDirectory));
 
-        xw.WriteElementString("Version", mqb.Version.ToString());
-        xw.WriteElementString("Filename", filename);
-        xw.WriteElementString("Framerate", mqb.Framerate.ToString());
-        xw.WriteElementString("BigEndian", mqb.BigEndian.ToString());
-        xw.WriteElementString("Compression", mqb.Compression.ToString());
-        xw.WriteElementString("ResourceDirectory", mqb.ResourceDirectory);
-
-        xw.WriteStartElement("Resources");
+        var resXml = new XElement("Resources");
         foreach (var resource in mqb.Resources)
-            UnpackResource(xw, resource);
-        xw.WriteEndElement();
-        xw.WriteStartElement("Cuts");
+            UnpackResource(resXml, resource);
+        xml.Add(resXml);
+        
+        var cutsXml = new XElement("Cuts");
         foreach (var cut in mqb.Cuts)
-            UnpackCut(xw, cut);
-        xw.WriteEndElement();
-        xw.WriteEndElement();
-        xw.Close();
+            UnpackCut(cutsXml, cut);
+        xml.Add(cutsXml);
+        
+        var destPath = GetUnpackDestPath(srcPath, recursive);
+        WriteXmlManifest(xDoc, srcPath, recursive);
     }
 
     #region Unpack Helpers
 
-    public static void UnpackResource(XmlWriter xw, MQB.Resource resource)
+    public static void UnpackResource(XElement xml, MQB.Resource resource)
     {
-        xw.WriteStartElement("Resource");
-        xw.WriteElementString("Name", $"{resource.Name}");
-        xw.WriteElementString("Path", $"{resource.Path}");
-        xw.WriteElementString("ParentIndex", $"{resource.ParentIndex}");
-        xw.WriteElementString("Unk48", $"{resource.Unk48}");
-        xw.WriteStartElement("Resource_CustomData");
+        var resXml = new XElement("Resource");
+        resXml.Add(new XElement("Name", resource.Name));
+        resXml.Add(new XElement("Path", resource.Path));
+        resXml.Add(new XElement("ParentIndex", resource.ParentIndex.ToString()));
+        resXml.Add(new XElement("Unk48", resource.Unk48.ToString()));
+        var customDataXml = new XElement("Resource_CustomData");
         foreach (var customdata in resource.CustomData)
-            UnpackCustomData(xw, customdata);
-        xw.WriteEndElement();
-        xw.WriteEndElement();
+            UnpackCustomData(customDataXml, customdata);
+        resXml.Add(customDataXml);
+        xml.Add(resXml);
     }
 
-    public static void UnpackCustomData(XmlWriter xw, MQB.CustomData customdata)
+    public static void UnpackCustomData(XElement xml, MQB.CustomData customdata)
     {
-        xw.WriteStartElement("CustomData");
-        xw.WriteElementString("Name", $"{customdata.Name}");
-        xw.WriteElementString("Type", $"{customdata.Type}");
+        var cdXml = new XElement("CustomData");
+        cdXml.Add(new XElement("Name", customdata.Name));
+        cdXml.Add(new XElement("Type", customdata.Type));
 
         switch (customdata.Type)
         {
@@ -74,20 +67,20 @@ public partial class WMQB
                 switch (customdata.MemberCount)
                 {
                     case 2:
-                        xw.WriteElementString("Value", ((Vector2)customdata.Value).Vector2ToString());
+                        cdXml.Add(new XElement("Value", ((Vector2)customdata.Value).Vector2ToString()));
                         break;
                     case 3:
-                        xw.WriteElementString("Value", ((Vector3)customdata.Value).Vector3ToString());
+                        cdXml.Add(new XElement("Value", ((Vector3)customdata.Value).Vector3ToString()));
                         break;
                     case 4:
-                        xw.WriteElementString("Value", ((Vector4)customdata.Value).Vector4ToString());
+                        cdXml.Add(new XElement("Value", ((Vector4)customdata.Value).Vector4ToString()));
                         break;
                     default:
                         throw new NotImplementedException($"{nameof(MQB.CustomData.MemberCount)} {customdata.MemberCount} not implemented for: {nameof(MQB.CustomData.DataType.Vector)}");
                 }
                 break;
             case MQB.CustomData.DataType.Custom:
-                xw.WriteElementString("Value", ((byte[])customdata.Value).ToHexString());
+                cdXml.Add(new XElement("Value", ((byte[])customdata.Value).ToHexString()));
                 break;
             case MQB.CustomData.DataType.Color:
             case MQB.CustomData.DataType.IntColor:
@@ -96,116 +89,117 @@ public partial class WMQB
                 {
                     case 3:
                         // Prevent showing alpha when it really isn't there
-                        xw.WriteElementString("Value", $"Color [R={color.R}, G={color.G}, B={color.B}]");
+                        cdXml.Add(new XElement("Value", $"Color [R={color.R}, G={color.G}, B={color.B}]"));
                         break;
                     case 4:
                     default:
-                        xw.WriteElementString("Value", $"{customdata.Value}");
+                        cdXml.Add(new XElement("Value", customdata.Value.ToString()));
                         break;
                 }
                 break;
             default:
-                xw.WriteElementString("Value", $"{customdata.Value}");
+                cdXml.Add(new XElement("Value", customdata.Value.ToString()));
                 break;
         }
 
-        xw.WriteElementString("MemberCount", $"{customdata.MemberCount}");
-        xw.WriteStartElement("Sequences");
+        cdXml.Add(new XElement("MemberCount", customdata.MemberCount.ToString()));
+        var seqXml = new XElement("Sequences");
         foreach (MQB.CustomData.Sequence sequence in customdata.Sequences)
-            UnpackSequence(xw, sequence);
-        xw.WriteEndElement();
-        xw.WriteEndElement();
+            UnpackSequence(seqXml, sequence);
+        cdXml.Add(seqXml);
+        xml.Add(cdXml);
     }
 
-    public static void UnpackSequence(XmlWriter xw, MQB.CustomData.Sequence sequence)
+    public static void UnpackSequence(XElement xml, MQB.CustomData.Sequence sequence)
     {
-        xw.WriteStartElement("Sequence");
-        xw.WriteElementString("ValueIndex", $"{sequence.ValueIndex}");
-        xw.WriteElementString("ValueType", $"{sequence.ValueType}");
-        xw.WriteElementString("PointType", $"{sequence.PointType}");
-        xw.WriteStartElement("Points");
+        var seqXml = new XElement("Sequence");
+        seqXml.Add(new XElement("ValueIndex", sequence.ValueIndex.ToString()));
+        seqXml.Add(new XElement("ValueType", sequence.ValueType.ToString()));
+        seqXml.Add(new XElement("PointType", sequence.PointType.ToString()));
+        var pointsXml = new XElement("Points");
         foreach (var point in sequence.Points)
-            UnpackPoint(xw, point);
-        xw.WriteEndElement();
-        xw.WriteEndElement();
+            UnpackPoint(pointsXml, point);
+        seqXml.Add(pointsXml);
+        xml.Add(seqXml);
     }
 
-    public static void UnpackPoint(XmlWriter xw, MQB.CustomData.Sequence.Point point)
+    public static void UnpackPoint(XElement xml, MQB.CustomData.Sequence.Point point)
     {
-        xw.WriteStartElement("Point");
-        xw.WriteElementString("Value", $"{point.Value}");
-        xw.WriteElementString("Unk08", $"{point.Unk08}");
-        xw.WriteElementString("Unk10", $"{point.Unk10}");
-        xw.WriteElementString("Unk14", $"{point.Unk14}");
-        xw.WriteEndElement();
+        var pointXml = new XElement("Point");
+        pointXml.Add(new XElement("Value", $"{point.Value}"));
+        pointXml.Add(new XElement("Unk08", $"{point.Unk08}"));
+        pointXml.Add(new XElement("Unk10", $"{point.Unk10}"));
+        pointXml.Add(new XElement("Unk14", $"{point.Unk14}"));
+        xml.Add(pointXml);
     }
 
-    public static void UnpackCut(XmlWriter xw, MQB.Cut cut)
+    public static void UnpackCut(XElement xml, MQB.Cut cut)
     {
-        xw.WriteStartElement("Cut");
-        xw.WriteElementString("Name", $"{cut.Name}");
-        xw.WriteElementString("Duration", $"{cut.Duration}");
-        xw.WriteElementString("Unk44", $"{cut.Unk44}");
-        xw.WriteStartElement("Timelines");
+        var cutXml = new XElement("Cut");
+        cutXml.Add(new XElement("Name", $"{cut.Name}"));
+        cutXml.Add(new XElement("Duration", $"{cut.Duration}"));
+        cutXml.Add(new XElement("Unk44", $"{cut.Unk44}"));
+        var timeXml = new XElement("Timelines");
         foreach (var timeline in cut.Timelines)
-            UnpackTimeline(xw, timeline);
-        xw.WriteEndElement();
-        xw.WriteEndElement();
+            UnpackTimeline(timeXml, timeline);
+        cutXml.Add(timeXml);
+        xml.Add(cutXml);
     }
 
-    public static void UnpackTimeline(XmlWriter xw, MQB.Timeline timeline)
+    public static void UnpackTimeline(XElement xml, MQB.Timeline timeline)
     {
-        xw.WriteStartElement("Timeline");
-        xw.WriteElementString("Unk10", $"{timeline.Unk10}");
-        xw.WriteStartElement("Dispositions");
+        var timeXml = new XElement("Timeline");
+        timeXml.Add(new XElement("Unk10", $"{timeline.Unk10}"));
+        var dispXml = new XElement("Dispositions");
         foreach (var disposition in timeline.Dispositions)
-            UnpackDisposition(xw, disposition);
-        xw.WriteEndElement();
-        xw.WriteStartElement("Timeline_CustomData");
+            UnpackDisposition(dispXml, disposition);
+        var customDataXml = new XElement("Timeline_CustomData");
         foreach (var customdata in timeline.CustomData)
-            UnpackCustomData(xw, customdata);
-        xw.WriteEndElement();
-        xw.WriteEndElement();
+            UnpackCustomData(customDataXml, customdata);
+        timeXml.Add(dispXml);
+        timeXml.Add(customDataXml);
+        xml.Add(timeXml);
     }
 
-    public static void UnpackDisposition(XmlWriter xw, MQB.Disposition disposition)
+    public static void UnpackDisposition(XElement xml, MQB.Disposition disposition)
     {
-        xw.WriteStartElement("Disposition");
-        xw.WriteElementString("ID", $"{disposition.ID}");
-        xw.WriteElementString("Duration", $"{disposition.Duration}");
-        xw.WriteElementString("ResourceIndex", $"{disposition.ResourceIndex}");
-        xw.WriteElementString("StartFrame", $"{disposition.StartFrame}");
-        xw.WriteElementString("Unk08", $"{disposition.Unk08}");
-        xw.WriteElementString("Unk14", $"{disposition.Unk14}");
-        xw.WriteElementString("Unk18", $"{disposition.Unk18}");
-        xw.WriteElementString("Unk1C", $"{disposition.Unk1C}");
-        xw.WriteElementString("Unk20", $"{disposition.Unk20}");
-        xw.WriteElementString("Unk28", $"{disposition.Unk28}");
-        xw.WriteStartElement("Transforms");
+        var dispXml = new XElement("Disposition");
+        dispXml.Add(new XElement("ID", $"{disposition.ID}"));
+        dispXml.Add(new XElement("Duration", $"{disposition.Duration}"));
+        dispXml.Add(new XElement("ResourceIndex", $"{disposition.ResourceIndex}"));
+        dispXml.Add(new XElement("StartFrame", $"{disposition.StartFrame}"));
+        dispXml.Add(new XElement("Unk08", $"{disposition.Unk08}"));
+        dispXml.Add(new XElement("Unk14", $"{disposition.Unk14}"));
+        dispXml.Add(new XElement("Unk18", $"{disposition.Unk18}"));
+        dispXml.Add(new XElement("Unk1C", $"{disposition.Unk1C}"));
+        dispXml.Add(new XElement("Unk20", $"{disposition.Unk20}"));
+        dispXml.Add(new XElement("Unk28", $"{disposition.Unk28}"));
+        
+        var tfXml = new XElement("Transforms");
         foreach (var transform in disposition.Transforms)
-            UnpackTransform(xw, transform);
-        xw.WriteEndElement();
-        xw.WriteStartElement("Disposition_CustomData");
+            UnpackTransform(tfXml, transform);
+        dispXml.Add(tfXml);
+        var cdXml = new XElement("Disposition_CustomData");
         foreach (var customdata in disposition.CustomData)
-            UnpackCustomData(xw, customdata);
-        xw.WriteEndElement();
-        xw.WriteEndElement();
+            UnpackCustomData(cdXml, customdata);
+        dispXml.Add(cdXml);
+        xml.Add(dispXml);
     }
 
-    public static void UnpackTransform(XmlWriter xw, MQB.Transform transform)
+    public static void UnpackTransform(XElement xml, MQB.Transform transform)
     {
-        xw.WriteStartElement("Transform");
-        xw.WriteElementString("Frame", $"{transform.Frame}");
-        xw.WriteElementString("Translation", transform.Translation.Vector3ToString());
-        xw.WriteElementString("Rotation", transform.Rotation.Vector3ToString());
-        xw.WriteElementString("Scale", transform.Scale.Vector3ToString());
-        xw.WriteElementString("Unk10", transform.Unk10.Vector3ToString());
-        xw.WriteElementString("Unk1C", transform.Unk1C.Vector3ToString());
-        xw.WriteElementString("Unk34", transform.Unk34.Vector3ToString());
-        xw.WriteElementString("Unk40", transform.Unk40.Vector3ToString());
-        xw.WriteElementString("Unk58", transform.Unk58.Vector3ToString());
-        xw.WriteElementString("Unk64", transform.Unk64.Vector3ToString());
-        xw.WriteEndElement();
+        var tfXml = new XElement("Transform");
+        tfXml.Add(new XElement("Frame", $"{transform.Frame}"));
+        tfXml.Add(new XElement("Translation", transform.Translation.Vector3ToString()));
+        tfXml.Add(new XElement("Rotation", transform.Rotation.Vector3ToString()));
+        tfXml.Add(new XElement("Scale", transform.Scale.Vector3ToString()));
+        tfXml.Add(new XElement("Unk10", transform.Unk10.Vector3ToString()));
+        tfXml.Add(new XElement("Unk1C", transform.Unk1C.Vector3ToString()));
+        tfXml.Add(new XElement("Unk34", transform.Unk34.Vector3ToString()));
+        tfXml.Add(new XElement("Unk40", transform.Unk40.Vector3ToString()));
+        tfXml.Add(new XElement("Unk58", transform.Unk58.Vector3ToString()));
+        tfXml.Add(new XElement("Unk64", transform.Unk64.Vector3ToString()));
+        xml.Add(tfXml);
     }
 
     #endregion
