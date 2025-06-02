@@ -29,7 +29,7 @@ public partial class WMSBEFolder
 
         string destDir = GetUnpackDestPath(srcPath, recursive);
 
-        var xml = PrepareXmlManifest(srcPath, recursive, true, msb.Compression, out XDocument xDoc, null);
+        var xml = PrepareXmlManifest(srcPath, recursive, false, msb.Compression, out XDocument xDoc, null);
 
         var taskList = new List<Task>();
 

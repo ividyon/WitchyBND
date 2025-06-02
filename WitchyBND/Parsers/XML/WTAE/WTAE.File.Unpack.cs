@@ -34,7 +34,7 @@ public partial class WTAEFile
         var template = gameService.GetTAETemplate(game);
         tae.ApplyTemplate(template);
 
-        var xml = PrepareXmlManifest(srcPath, recursive, true, tae.Compression, out XDocument xDoc, null);
+        var xml = PrepareXmlManifest(srcPath, recursive, false, tae.Compression, out XDocument xDoc, null);
         xml.AddE("id", tae.ID);
         xml.AddE("game", game);
         xml.AddE("format", tae.Format);
