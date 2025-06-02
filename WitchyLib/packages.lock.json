@@ -150,8 +150,8 @@
       "witchyformats": {
         "type": "Project",
         "dependencies": {
-          "SoulsFormats": "[2.15.0, )",
-          "StudioUtils": "[2.15.0, )"
+          "SoulsFormats": "[2.15.0.1, )",
+          "StudioUtils": "[2.15.0.1, )"
         }
       }
     }

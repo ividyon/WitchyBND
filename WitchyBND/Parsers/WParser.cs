@@ -403,6 +403,7 @@ public abstract class WSerializedXMLParser : WXMLParser
             thing.Serialize(xmlWriter, file);
         }
         
+        xDoc.Root!.Add(xml.Attributes());
         xDoc.Root!.AddFirst(xml.Elements());
 
         xDoc.Save(GetUnpackDestPath(srcPath, recursive));
