@@ -91,6 +91,10 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.15.0.2
+
+* Re-release to attempt to fix an updating bug.
+
 ### 2.15.0.1
 
 * Fixed an issue where MATBINs, ENFLs, FXRs and MTDs would not repack due to version mismatches. You have to unpack them once again to fix the problem.
