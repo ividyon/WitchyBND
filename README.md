@@ -1,4 +1,4 @@
-[![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 <p align="center">
   <img src="https://github.com/ividyon/WitchyBND/blob/main/public/logo.png?raw=true" />
@@ -724,7 +724,3 @@ Due to being a large rewrite, bugs are expected. Please diligently report them.
 
 ### 1.0.1
 * Fix bad BXF4 repacking
-
-[cc-by-nc-sa]: http://creativecommons.org/licenses/by-nc-sa/4.0/
-[cc-by-nc-sa-image]: https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png
-[cc-by-nc-sa-shield]: https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg
