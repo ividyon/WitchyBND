@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Xml.Linq;
 using SoulsFormats;
 using WitchyBND.Errors;
 using WitchyBND.Services;
@@ -39,23 +40,24 @@ public partial class WPARAM
         // Fixed cell style for now.
         CellStyle cellStyle = Configuration.Active.ParamCellStyle;
 
-        if (game == WBUtil.GameType.AC6 && string.IsNullOrWhiteSpace(paramTypeToParamdef))
+        if (game == WBUtil.GameType.AC6)
         {
             if (gameService.Ac6TentativeParamTypes.TryGetValue(paramName, out string? newParamType))
             {
                 paramTypeToParamdef = newParamType;
             }
-            else
+            else if (string.IsNullOrWhiteSpace(paramTypeToParamdef))
             {
                 errorService.RegisterError(new WitchyError(
                     @$"No tentative param type alternative found for ""{paramTypeToParamdef}"" -> ""{paramName}"" in {srcPath}.",
                     srcPath));
                 return;
             }
+        }
 
-            if (string.IsNullOrWhiteSpace(newParamType))
-            {
-            }
+        if (string.IsNullOrWhiteSpace(paramTypeToParamdef))
+        {
+            errorService.RegisterError($"Could not determine param type of param {paramName}. It may contain no rows.");
         }
 
         if (!gameService.ParamdefStorage[game].ContainsKey(paramTypeToParamdef))
@@ -104,39 +106,33 @@ The error was:
         if (dry) return;
 
         // Begin writing the XML
-        var xws = new XmlWriterSettings();
-        xws.Indent = true;
-        XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath, recursive), xws);
-        xw.WriteStartElement(XmlTag);
-        if (Version > 0) xw.WriteAttributeString(VersionAttributeName, Version.ToString());
-
+        var xml = PrepareXmlManifest(srcPath, recursive, false, param.Compression, out XDocument xDoc, null);
+        
         // Meta data
-        AddLocationToXml(srcPath, recursive, xw);
         if (!string.IsNullOrEmpty(param.ParamType))
-            xw.WriteElementString("type", param.ParamType);
+            xml.Add(new XElement("type", param.ParamType));
 
-        xw.WriteElementString("game", game.ToString());
+        xml.Add(new XElement("game", game.ToString()));
 
 
-        xw.WriteElementString("cellStyle", ((int)cellStyle).ToString());
-        xw.WriteElementString("compression", param.Compression.ToString());
-        xw.WriteElementString("format2D", ((byte)param.Format2D).ToString());
-        xw.WriteElementString("format2E", ((byte)param.Format2E).ToString());
-        xw.WriteElementString("dataVersion", param.ParamdefDataVersion.ToString());
-        xw.WriteElementString("formatVersion", param.ParamdefFormatVersion.ToString());
-        xw.WriteElementString("unk06", param.Unk06.ToString());
+        xml.Add(new XElement("cellStyle", ((int)cellStyle).ToString()));
+        xml.Add(new XElement("format2D", ((byte)param.Format2D).ToString()));
+        xml.Add(new XElement("format2E", ((byte)param.Format2E).ToString()));
+        xml.Add(new XElement("dataVersion", param.ParamdefDataVersion.ToString()));
+        xml.Add(new XElement("formatVersion", param.ParamdefFormatVersion.ToString()));
+        xml.Add(new XElement("unk06", param.Unk06.ToString()));
 
         // Embed paramdef in the XML so it serves as its own paramdef.
         {
-            xw.WriteStartElement("paramdef");
-            xw.WriteElementString("type", paramdef.ParamType);
-            xw.WriteElementString("bigEndian", Convert.ToInt32(paramdef.BigEndian).ToString());
-            xw.WriteElementString("compression", paramdef.Compression.ToString());
-            xw.WriteElementString("unicode", Convert.ToInt32(paramdef.Unicode).ToString());
-            xw.WriteElementString("dataVersion", paramdef.DataVersion.ToString());
-            xw.WriteElementString("formatVersion", paramdef.FormatVersion.ToString());
-            // xw.WriteElementString("variableEditorValueTypes", paramdef.VariableEditorValueTypes.ToString());
-            xw.WriteEndElement();
+            var paramdefXml = new XElement("paramdef");
+            xml.Add(paramdefXml);
+            paramdefXml.Add(new XElement("type", paramdef.ParamType));
+            paramdefXml.Add(new XElement("bigEndian", Convert.ToInt32(paramdef.BigEndian).ToString()));
+            WriteCompressionInfoToXml(paramdefXml, paramdef.Compression);
+            paramdefXml.Add(new XElement("unicode", Convert.ToInt32(paramdef.Unicode).ToString()));
+            paramdefXml.Add(new XElement("dataVersion", paramdef.DataVersion.ToString()));
+            paramdefXml.Add(new XElement("formatVersion", paramdef.FormatVersion.ToString()));
+            // paramdefXml.Add(new XElement("variableEditorValueTypes", paramdef.VariableEditorValueTypes.ToString()));
         }
 
         gameService.PopulateNames(game, paramName);
@@ -222,50 +218,52 @@ The error was:
             .ToDictionary(a => a.Key, b => b.Value);
 
         // Field info (def & default values)
-        xw.WriteStartElement("fields");
+        var fieldsXml = new XElement("fields");
+        xml.Add(fieldsXml);
         foreach (var field in paramdef.Fields.FilterByGameVersion(gameInfo.Item2))
         {
             var fieldName = field.InternalName;
 
-            xw.WriteStartElement("field");
-            // xw.WriteAttributeString("idx", paramdef.Fields.IndexOf(field).ToString());
-            xw.WriteAttributeString("name", fieldName);
-            xw.WriteAttributeString("type", field.DisplayType.ToString());
-            // xw.WriteElementString("displayname", field.DisplayName);
-            // xw.WriteElementString("displayformat", field.DisplayFormat);
-            // xw.WriteElementString("description", field.Description);
-            xw.WriteAttributeString("arraylength", field.ArrayLength.ToString());
-            xw.WriteAttributeString("bitsize", field.BitSize.ToString());
-            xw.WriteAttributeString("sortid", field.SortID.ToString());
-            xw.WriteAttributeString("unkb8", field.UnkB8);
-            xw.WriteAttributeString("unkc0", field.UnkC0);
+            var fieldXml = new XElement("field");
+            fieldsXml.Add(fieldXml);
+            // fieldXml.Add(new XAttribute("idx", paramdef.Fields.IndexOf(field).ToString()));
+            fieldXml.Add(new XAttribute("name", fieldName));
+            fieldXml.Add(new XAttribute("type", field.DisplayType.ToString()));
+            // fieldXml.Add(new XElement("displayname", field.DisplayName));
+            // fieldXml.Add(new XElement("displayformat", field.DisplayFormat));
+            // fieldXml.Add(new XElement("description", field.Description));
+            fieldXml.Add(new XAttribute("arraylength", field.ArrayLength.ToString()));
+            fieldXml.Add(new XAttribute("bitsize", field.BitSize.ToString()));
+            fieldXml.Add(new XAttribute("sortid", field.SortID.ToString()));
+            if (field.UnkB8 != null)
+                fieldXml.Add(new XAttribute("unkb8", field.UnkB8));
+            if (field.UnkC0 != null)
+                fieldXml.Add(new XAttribute("unkc0", field.UnkC0));
 
             // Store common "default" values
             if (Configuration.ParamDefaultValues && defaultValues.TryGetValue(fieldName, out var value))
             {
-                xw.WriteAttributeString("defaultValue", value.Key);
+                fieldXml.Add(new XAttribute("defaultValue", value.Key));
                 if (defaultValuesAboveThreshold.TryGetValue(fieldName, out _))
-                    xw.WriteAttributeString("defaultThreshold", true.ToString());
+                    fieldXml.Add(new XAttribute("defaultThreshold", true.ToString()));
             }
-
-            xw.WriteEndElement();
         }
-
-        xw.WriteEndElement();
         // Rows
-        xw.WriteStartElement("rows");
+        var rowsXml = new XElement("rows");
+        xml.Add(rowsXml);
 
         foreach (WPARAMRow row in rows)
         {
-            xw.WriteStartElement("row");
-            xw.WriteAttributeString("id", row.ID.ToString());
+            var rowXml = new XElement("row");
+            rowsXml.Add(rowXml);
+            rowXml.Add(new XAttribute("id", row.ID.ToString()));
             if (!string.IsNullOrEmpty(row.Name))
             {
-                xw.WriteAttributeString("name", row.Name);
+                rowXml.Add(new XAttribute("name", row.Name));
             }
             else if (!string.IsNullOrEmpty(row.ParamdexName))
             {
-                xw.WriteAttributeString("paramdexName", row.ParamdexName);
+                rowXml.Add(new XAttribute("paramdexName", row.ParamdexName));
             }
 
             var csvValues = new List<string>();
@@ -282,13 +280,13 @@ The error was:
                         switch (cellStyle)
                         {
                             case CellStyle.Element:
-                                xw.WriteStartElement("field");
-                                xw.WriteAttributeString("name", fieldName);
-                                xw.WriteString(value);
-                                xw.WriteEndElement();
+                                var fieldXml = new XElement("field");
+                                rowXml.Add(fieldXml);
+                                fieldXml.Add(new XAttribute("name", fieldName));
+                                fieldXml.Value = value;
                                 break;
                             case CellStyle.Attribute:
-                                xw.WriteAttributeString(fieldName, value);
+                                rowXml.Add(new XAttribute(fieldName, value));
                                 break;
                             case CellStyle.CSV:
                                 csvValues.Add(value);
@@ -298,14 +296,10 @@ The error was:
                 }
 
                 if (cellStyle == CellStyle.CSV)
-                    xw.WriteString(WBUtil.DelimitedString.Join(csvValues));
+                    rowXml.Value = WBUtil.DelimitedString.Join(csvValues);
             }
-            xw.WriteEndElement();
         }
-
-        xw.WriteEndElement();
-
-        xw.WriteEndElement();
-        xw.Close();
+        
+        WriteXmlManifest(xDoc, srcPath, recursive);
     }
 }

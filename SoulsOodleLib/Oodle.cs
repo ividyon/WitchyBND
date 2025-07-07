@@ -7,8 +7,9 @@ public static class Oodle
     {
         if (_handle != null) return true;
 
-        var oodlePath = $@"{AppContext.BaseDirectory}\oo2core_8_win64.dll";
-        var oodlePath2 = $@"{AppContext.BaseDirectory}\oo2core_6_win64.dll";
+        var oodlePath = $@"{AppContext.BaseDirectory}\oo2core_9_win64.dll";
+        var oodlePath2 = $@"{AppContext.BaseDirectory}\oo2core_8_win64.dll";
+        var oodlePath3 = $@"{AppContext.BaseDirectory}\oo2core_6_win64.dll";
         if (File.Exists(oodlePath))
         {
             _handle = Kernel32.LoadLibrary(oodlePath);
@@ -19,6 +20,11 @@ public static class Oodle
             _handle = Kernel32.LoadLibrary(oodlePath2);
             return true;
         }
+        if (File.Exists(oodlePath3))
+        {
+            _handle = Kernel32.LoadLibrary(oodlePath3);
+            return true;
+        }
 
         if (gamePath == null)
         {
@@ -26,7 +32,8 @@ public static class Oodle
                 {
                     AssetLocator.Game.ArmoredCore6,
                     AssetLocator.Game.EldenRing,
-                    AssetLocator.Game.Sekiro
+                    AssetLocator.Game.Sekiro,
+                    AssetLocator.Game.Nightreign
                 },
                 writeLineFunction, useFolderPicker);
 
@@ -37,8 +44,9 @@ public static class Oodle
             }
         }
 
-        var gameOodlePath = @$"{gamePath}\oo2core_8_win64.dll";
-        var gameOodlePath2 = @$"{gamePath}\oo2core_6_win64.dll";
+        var gameOodlePath = @$"{gamePath}\oo2core_9_win64.dll";
+        var gameOodlePath2 = @$"{gamePath}\oo2core_8_win64.dll";
+        var gameOodlePath3 = @$"{gamePath}\oo2core_6_win64.dll";
 
         if (File.Exists(gameOodlePath))
         {
@@ -53,6 +61,14 @@ public static class Oodle
             _handle = Kernel32.LoadLibrary(gameOodlePath2);
             if (copyToAppFolder)
                 File.Copy(gameOodlePath2, $@"{AppDomain.CurrentDomain.BaseDirectory}\{Path.GetFileName(gameOodlePath2)}", true);
+            return true;
+        }
+
+        if (File.Exists(gameOodlePath3))
+        {
+            _handle = Kernel32.LoadLibrary(gameOodlePath3);
+            if (copyToAppFolder)
+                File.Copy(gameOodlePath3, $@"{AppDomain.CurrentDomain.BaseDirectory}\{Path.GetFileName(gameOodlePath2)}", true);
             return true;
         }
 

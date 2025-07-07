@@ -15,14 +15,16 @@ namespace SoulsOodleLib
         {
             EldenRing,
             ArmoredCore6,
-            Sekiro
+            Sekiro,
+            Nightreign
         }
 
         private static Dictionary<Game, string> SearchPaths = new()
         {
             { Game.EldenRing, @"\steamapps\common\ELDEN RING\Game" },
             { Game.ArmoredCore6, @"\steamapps\common\ARMORED CORE VI FIRES OF RUBICON\Game" },
-            { Game.Sekiro, @"\steamapps\common\Sekiro" }
+            { Game.Sekiro, @"\steamapps\common\Sekiro" },
+            { Game.Nightreign, @"\steamapps\common\ELDEN RING NIGHTREIGN\Game" }
         };
 
         private static Dictionary<Game, string> InstallPaths = new();

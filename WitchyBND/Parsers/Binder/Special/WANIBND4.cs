@@ -3,13 +3,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
 using WitchyBND.CliModes;
-using WitchyBND.Services;
-using WitchyFormats;
 using WitchyLib;
 
 namespace WitchyBND.Parsers;
@@ -23,15 +22,6 @@ public class WANIBND4 : WBinderParser
     [
         ".hkx",
         ".tae",
-        ".nsa",
-        ".mba",
-        ".asa",
-        ".qsa",
-        ".nmb"
-    ];
-
-    public string[] MorphemeExtensions =
-    [
         ".nsa",
         ".mba",
         ".asa",
@@ -61,7 +51,6 @@ public class WANIBND4 : WBinderParser
     {
         BND4 bnd = (file as BND4)!;
         var destDir = GetUnpackDestPath(srcPath, recursive);
-        var srcName = Path.GetFileName(srcPath);
         Directory.CreateDirectory(destDir);
 
         var root = "";
@@ -70,8 +59,8 @@ public class WANIBND4 : WBinderParser
             root = WBUtil.FindCommonRootPath(bnd.Files.Select(bndFile => bndFile.Name));
         }
 
-        var xml = new XElement(XmlTag,
-            new XElement("compression", bnd.Compression.ToString()),
+        var xml = PrepareXmlManifest(srcPath, recursive, false, bnd.Compression, out XDocument xDoc, root);
+        xml.Add(
             new XElement("version", bnd.Version),
             new XElement("format", bnd.Format.ToString()),
             new XElement("bigendian", bnd.BigEndian.ToString()),
@@ -82,22 +71,9 @@ public class WANIBND4 : WBinderParser
             new XElement("unk05", bnd.Unk05.ToString())
         );
 
-        AddLocationToXml(srcPath, recursive, xml);
-
-        if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
-
-        if (!string.IsNullOrEmpty(root))
-            xml.Add(new XElement("root", root));
-
-        using var xw = XmlWriter.Create($"{destDir}\\{GetFolderXmlFilename()}", new XmlWriterSettings
-        {
-            Indent = true,
-        });
-
         if (!bnd.Files.Any())
         {
-            xml.WriteTo(xw);
-            xw.Close();
+            WriteXmlManifest(xDoc, srcPath, recursive);
             return;
         }
 
@@ -109,7 +85,7 @@ public class WANIBND4 : WBinderParser
             var ext = Path.GetExtension(bndFile.Name);
             if (!ProcessedExtensions.Contains(ext) ||
                 bndFile.ID >= 7000000 && bndFile.ID <= 7999999 || // BB behaviors
-                bndFile.Name.ToLower().EndsWith("skeleton.hkx") ||
+                (bndFile.Name.EndsWith(".hkx") && bndFile.Name.ToLower().Contains("skeleton")) ||
                 (bndFile.Name.EndsWith(".tae") && Path.GetFileName(bndFile.Name).StartsWith("c"))
                )
             {
@@ -136,8 +112,7 @@ public class WANIBND4 : WBinderParser
 
         XElement files = WriteBinderFiles(bnd, destDir, root);
         xml.Add(files);
-        xml.WriteTo(xw);
-        xw.Close();
+        WriteXmlManifest(xDoc, srcPath, recursive);
 
         if (Configuration.Active.Recursive)
         {
@@ -153,8 +128,7 @@ public class WANIBND4 : WBinderParser
 
         string root = xml.Element("root")?.Value ?? "";
 
-        Enum.TryParse(xml.Element("compression")?.Value ?? "None", out DCX.Type compression);
-        bnd.Compression = compression;
+        bnd.Compression = ReadCompressionInfoFromXml(xml);
 
         bnd.Version = xml.Element("version")!.Value;
         bnd.Format = (Binder.Format)Enum.Parse(typeof(Binder.Format), xml.Element("format")!.Value);
@@ -182,17 +156,19 @@ public class WANIBND4 : WBinderParser
             RecursiveRepackFile(filePath, recursive);
 
             string fileName = Path.GetFileNameWithoutExtension(filePath);
-            bool isPlayer = pathDir.Contains("c0000");
-            if (MorphemeExtensions.Contains(ext))
+            var regex = Regex.Match(pathDir.ToLower(), "c[1-9][0-9][0-9][0-9]");
+            bool isEnemy = regex.Success;
+            bool isPlayer = pathDir.ToLower().Contains("c0000");
+            if (WBUtil.MorphemeExtensions.Contains(ext))
             {
                 fileBag.Add(new BinderFile(Binder.FileFlags.Flag1, -1, binderPath, File.ReadAllBytes(filePath)));
             }
             else if (ext == ".hkx")
             {
                 int baseHkxId = 1000000000;
-                if (fileName.ToLower() == "skeleton")
+                if (fileName.ToLower().Contains("skeleton"))
                 {
-                    fileBag.Add(new BinderFile(Binder.FileFlags.Flag1, isPlayer ? 1000000 : 4000000, binderPath,
+                    fileBag.Add(new BinderFile(Binder.FileFlags.Flag1, isEnemy ? 4000000 : 1000000, binderPath,
                         File.ReadAllBytes(filePath)));
                 }
                 else
@@ -201,14 +177,27 @@ public class WANIBND4 : WBinderParser
 
                     try
                     {
-                        var split = fileName.Substring(1).Split("_").Select(a => int.Parse(a)).ToArray();
-                        int taeId = split[0];
-                        int animId = split[1];
+                        var rawSplit = fileName.Split("_");
+                        var split = rawSplit.Select(a => int.Parse(new string(a.Where(c => char.IsDigit(c)).ToArray()))).ToArray();
+                        bool ffx = rawSplit.Length == 3 && rawSplit[0].Length == 6 && rawSplit[0].First() == 's';
+                        int taeId;
+                        int animId;
+                        if (ffx)
+                        {
+                            taeId = split[1];
+                            animId = split[2];
+                        }
+                        else
+                        {
+                            taeId = split[0];
+                            animId = split[1];
+                        }
+
                         fileId = baseHkxId + (1000000 * taeId) + animId;
                     }
                     catch (Exception)
                     {
-                        errorService.RegisterNotice($"Skipping HKX with unrecognized file name pattern: {pathDir}");
+                        errorService.RegisterError($"Skipping HKX with unrecognized file name pattern: {pathDir}\nPlease correct any erroneous file names or, if this is an operation performed on an unmodified vanilla file, please report this as a bug.");
                         return;
                     }
 
@@ -218,7 +207,9 @@ public class WANIBND4 : WBinderParser
             }
             else if (ext == ".tae")
             {
-                if (isPlayer)
+                var split = fileName.Split("_");
+                bool namedByTaeId = split.Length == 1 && split[0].First() == 'a';
+                if (namedByTaeId)
                 {
                     int taeId;
                     try
@@ -227,7 +218,7 @@ public class WANIBND4 : WBinderParser
                     }
                     catch (Exception)
                     {
-                        errorService.RegisterNotice($"Skipping TAE with unrecognized file name pattern: {pathDir}");
+                        errorService.RegisterError($"Skipping TAE with unrecognized file name pattern: {pathDir}\nPlease correct any erroneous file names or, if this is an operation performed on an unmodified vanilla file, please report this as a bug.");
                         return;
                     }
 
@@ -288,7 +279,7 @@ public class WANIBND4 : WBinderParser
 
         Backup(destPath);
 
-        WarnAboutKrak(compression, bnd.Files.Count);
+        WarnAboutKrak(bnd.Compression, bnd.Files.Count);
 
         bnd.Write(destPath);
     }

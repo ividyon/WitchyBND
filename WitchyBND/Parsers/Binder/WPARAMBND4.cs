@@ -6,6 +6,7 @@ using System.Xml;
 using System.Xml.Linq;
 using PPlus;
 using SoulsFormats;
+using SoulsFormats.Cryptography;
 using WitchyBND.CliModes;
 using WitchyBND.Services;
 using WitchyLib;
@@ -66,7 +67,7 @@ public class WPARAMBND4 : WBinderParser
         if (FilenameIsDS3Regulation(path))
         {
             game = WBUtil.GameType.DS3;
-            return SFUtil.DecryptDS3Regulation(path);
+            return RegulationDecryptor.DecryptDS3Regulation(path);
         }
 
         if (FilenameIsModernRegulation(path))
@@ -133,6 +134,7 @@ public class WPARAMBND4 : WBinderParser
             case WBUtil.GameType.ER:
             case WBUtil.GameType.SDT:
             case WBUtil.GameType.AC6:
+            case WBUtil.GameType.ERN:
                 gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.PARAMBND, game,
                     ulong.Parse(bnd.Version));
                 ParseMode.GetParser<WBND4>().Unpack(srcPath, bnd, recursive, game);
@@ -192,7 +194,7 @@ public class WPARAMBND4 : WBinderParser
                 {
                     paramParser.Unpack(Path.Combine(srcPath, filePath), null, recursive, true, (game, regVer));
                 }
-                catch (Exception e)
+                catch (Exception e) when (!Configuration.IsDebug)
                 {
                     throw new MalformedBinderException(
                         @$"The regulation binder is malformed: {Path.GetFileNameWithoutExtension(filePath)} has thrown an exception during read.",
@@ -222,11 +224,12 @@ public class WPARAMBND4 : WBinderParser
             case WBUtil.GameType.DS3:
                 bndParser.Repack(srcPath, recursive);
                 BND4 ds3Bnd = BND4.Read(destPath);
-                SFUtil.EncryptDS3Regulation(destPath, ds3Bnd);
+                RegulationDecryptor.EncryptDS3Regulation(destPath, ds3Bnd);
                 break;
             case WBUtil.GameType.ER:
             case WBUtil.GameType.SDT:
             case WBUtil.GameType.AC6:
+            case WBUtil.GameType.ERN:
                 bndParser.Repack(srcPath, recursive);
                 BND4 regBnd = BND4.Read(destPath);
                 WBUtil.EncryptRegulationBin(destPath, game, regBnd);

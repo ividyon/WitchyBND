@@ -16,7 +16,7 @@ permissions:
   contents: write
 
 env:
-  DOTNET_VERSION: '8.0.404'
+  DOTNET_VERSION: '8.0.408'
   NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
   NEXUSMOD_API_KEY: ${{ secrets.NEXUSMOD_API_KEY }}
   NEXUSMOD_SESSION_COOKIE: ${{ secrets.NEXUSMOD_SESSION_COOKIE }}
@@ -69,7 +69,7 @@ jobs:
           path: '.'
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: 'WitchyBND-SHA${{ github.sha }}'
           path: WitchyBND-${{ github.ref_name }}.zip
@@ -85,9 +85,9 @@ jobs:
         run: drmu nx check
 
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: 'WitchyBND-SHA${{ github.sha }}'
+          pattern: WitchyBND-SHA*
 
       - name: Upload to Elden Ring Nexus
         run: drmu nexusmods upload
@@ -97,7 +97,7 @@ jobs:
           -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
           -g eldenring
           -ddwm
-          3862 "WitchyBND-${{ github.ref_name }}.zip"
+          3862 "WitchyBND-SHA${{ github.sha }}\WitchyBND-${{ github.ref_name }}.zip"
 
       - name: Upload to ACVI Nexus
         run: drmu nexusmods upload
@@ -107,7 +107,7 @@ jobs:
           -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
           -g armoredcore6firesofrubicon
           -ddwm
-          20 "WitchyBND-${{ github.ref_name }}.zip"
+          20 "WitchyBND-SHA${{ github.sha }}\WitchyBND-${{ github.ref_name }}.zip"
 
       - name: Upload to DS1 Nexus
         run: drmu nexusmods upload
@@ -117,7 +117,7 @@ jobs:
           -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
           -g darksouls
           -ddwm
-          1865 "WitchyBND-${{ github.ref_name }}.zip"
+          1865 "WitchyBND-SHA${{ github.sha }}\WitchyBND-${{ github.ref_name }}.zip"
 
       - name: Upload to DS1R Nexus
         run: drmu nexusmods upload
@@ -127,7 +127,7 @@ jobs:
           -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
           -g darksoulsremastered
           -ddwm
-          653 "WitchyBND-${{ github.ref_name }}.zip"
+          653 "WitchyBND-SHA${{ github.sha }}\WitchyBND-${{ github.ref_name }}.zip"
 
       - name: Upload to DS2 Nexus
         run: drmu nexusmods upload
@@ -137,7 +137,7 @@ jobs:
           -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
           -g darksouls2
           -ddwm
-          1192 "WitchyBND-${{ github.ref_name }}.zip"
+          1192 "WitchyBND-SHA${{ github.sha }}\WitchyBND-${{ github.ref_name }}.zip"
 
       - name: Upload to DS3 Nexus
         run: drmu nexusmods upload
@@ -147,7 +147,7 @@ jobs:
           -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
           -g darksouls3
           -ddwm
-          1676 "WitchyBND-${{ github.ref_name }}.zip"
+          1676 "WitchyBND-SHA${{ github.sha }}\WitchyBND-${{ github.ref_name }}.zip"
 
       - name: Upload to Sekiro Nexus
         run: drmu nexusmods upload
@@ -157,7 +157,7 @@ jobs:
           -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
           -g sekiro
           -ddwm
-          1633 "WitchyBND-${{ github.ref_name }}.zip"
+          1633 "WitchyBND-SHA${{ github.sha }}\WitchyBND-${{ github.ref_name }}.zip"
 
       - name: Upload to Bloodborne Nexus
         run: drmu nexusmods upload
@@ -167,7 +167,7 @@ jobs:
           -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
           -g bloodborne
           -ddwm
-          20 "WitchyBND-${{ github.ref_name }}.zip"
+          20 "WitchyBND-SHA${{ github.sha }}\WitchyBND-${{ github.ref_name }}.zip"
 
   release:
     needs: nexus
@@ -177,13 +177,13 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: 'WitchyBND-SHA${{ github.sha }}'
+          pattern: WitchyBND-SHA*
 
       - name: Upload Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: 'WitchyBND-${{ github.ref_name }}.zip'
+          artifacts: 'WitchyBND-SHA${{ github.sha }}\WitchyBND-${{ github.ref_name }}.zip'
           bodyFile: "./NOTES.md"
           token: ${{ secrets.GITHUB_TOKEN }}

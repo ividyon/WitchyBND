@@ -220,6 +220,9 @@ public class CliOptions
     [Option('e', "parallel", HelpText = "Runs operations parallelized")]
     public bool Parallel { get; set; }
 
+    [Option('t', "singlethread", HelpText = "Runs operations single-threaded")]
+    public bool SingleThread { get; set; }
+
     [Option('m', "mode", HelpText = "Toggle the mode to use. Options are \"Parse\", \"Watch\" and \"Config\".",
         Default = CliMode.Parse)]
     public CliMode Mode { get; set; }

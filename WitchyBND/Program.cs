@@ -95,6 +95,8 @@ internal static class Program
                             Configuration.Active.Recursive = opt.Recursive;
                         if (opt.Parallel)
                             Configuration.Active.Parallel = opt.Parallel;
+                        if (opt.SingleThread)
+                            Configuration.Active.Parallel = false;
                         if (opt.Flexible)
                             Configuration.Active.Flexible = opt.Flexible;
 

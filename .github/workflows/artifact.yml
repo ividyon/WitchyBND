@@ -18,7 +18,7 @@ on:
     branches: [ "main" ]
 
 env:
-  DOTNET_VERSION: '8.0.404'
+  DOTNET_VERSION: '8.0.408'
   NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
   NEXUSMOD_API_KEY: ${{ secrets.NEXUSMOD_API_KEY }}
   NEXUSMOD_SESSION_COOKIE: ${{ secrets.NEXUSMOD_SESSION_COOKIE }}
@@ -76,7 +76,7 @@ jobs:
 
       # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: 'WitchyBND-SHA${{ github.sha }}'
           path: './bin/publish'

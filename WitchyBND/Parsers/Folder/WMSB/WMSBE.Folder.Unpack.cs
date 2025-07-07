@@ -28,15 +28,8 @@ public partial class WMSBEFolder
         MSBE msb = (file as MSBE)!;
 
         string destDir = GetUnpackDestPath(srcPath, recursive);
-        Directory.CreateDirectory(destDir);
 
-        XDocument xDoc = new XDocument();
-        XElement root = new XElement(XmlTag);
-        xDoc.Add(root);
-
-        if (Version > 0) root.SetAttributeValue(VersionAttributeName, Version.ToString());
-
-        root.AddE("compression", msb.Compression);
+        var xml = PrepareXmlManifest(srcPath, recursive, false, msb.Compression, out XDocument xDoc, null);
 
         var taskList = new List<Task>();
 
@@ -57,18 +50,18 @@ public partial class WMSBEFolder
         Directory.CreateDirectory(Path.Combine(destDir, "Route"));
 
         var eventsEl = new XElement("events");
-        root.Add(eventsEl);
+        xml.Add(eventsEl);
         var regionsEl = new XElement("regions");
-        root.Add(regionsEl);
+        xml.Add(regionsEl);
         var partsEl = new XElement("parts");
-        root.Add(partsEl);
+        xml.Add(partsEl);
         var modelsEl = new XElement("models");
-        root.Add(modelsEl);
+        xml.Add(modelsEl);
         var routesEl = new XElement("routes");
-        root.Add(routesEl);
+        xml.Add(routesEl);
         var layersEl = new XElement("layers");
         layersEl.SetAttributeValue("version", msb.Layers.Version);
-        root.Add(layersEl);
+        xml.Add(layersEl);
 
         taskList.Add(new Task(() => {
             UnpackEntries(eventsEl, msb.Events.GetEntries().Cast<MSBE.Entry>().ToList(), destDir);
@@ -100,11 +93,8 @@ public partial class WMSBEFolder
                 task.Wait();
             });
         }
-
-
-        var destPath = GetFolderXmlPath(destDir);
-        AddLocationToXml(srcPath, recursive, root);
-        xDoc.Save(destPath);
+        
+        WriteXmlManifest(xDoc, srcPath, recursive);
     }
 
     private void UnpackEntries(XElement parentEl, List<MSBE.Entry> entries, string rootDir)

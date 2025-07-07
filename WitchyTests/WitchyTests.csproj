@@ -38,9 +38,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Samples\ANIBND4\AC6\" />
-      <Folder Include="Samples\ANIBND4\BB\" />
-      <Folder Include="Samples\ANIBND4\ER\" />
       <Folder Include="Samples\FFXBNDModern\" />
       <Folder Include="Samples\MATBINBND\AC6\" />
       <Folder Include="Samples\PARAMBND3\" />

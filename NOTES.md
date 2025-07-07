@@ -1,2 +1,1 @@
-* Hotfix for supporting 1.16 PARAMs.
-* Updated SoulsFormatsNEXT to fix a MQB bug.
+* Re-release to attempt to fix an updating bug.

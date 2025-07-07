@@ -15,7 +15,7 @@ public class WBXF4 : WBinderParser
     public override bool Is(string path, byte[]? _, out ISoulsFile? file)
     {
         file = null;
-        return BXF4.IsBHD(path) || BXF4.IsBDT(path);
+        return BXF4.IsHeader(path) || BXF4.IsData(path);
     }
 
     public override bool? IsSimple(string path)
@@ -33,7 +33,7 @@ public class WBXF4 : WBinderParser
         string nameWithoutExt = Path.GetFileNameWithoutExtension(srcPath);
         string destDir = GetUnpackDestPath(srcPath, recursive);
 
-        if (BXF4.IsBHD(srcPath))
+        if (BXF4.IsHeader(srcPath))
         {
             bhdPath = srcPath;
             bhdName = Path.GetFileName(srcPath);
@@ -65,8 +65,8 @@ public class WBXF4 : WBinderParser
 
         XElement bdtFilename = new XElement("bdt_filename", bdtName);
 
-        var xml =
-            new XElement(XmlTag,
+        var xml = PrepareXmlManifest(srcPath, recursive, true, null, out XDocument xDoc, root);
+        xml.Add(
                 new XElement("bhd_filename", bhdName),
                 bdtFilename,
                 new XElement("version", bxf.Version),
@@ -79,19 +79,7 @@ public class WBXF4 : WBinderParser
                 new XElement("unk05", bxf.Unk05.ToString()),
                 files);
 
-        if (Version > 0) xml.SetAttributeValue(VersionAttributeName, Version.ToString());
-
-        AddLocationToXml(srcPath, recursive, xml, true);
-
-        if (!string.IsNullOrEmpty(root))
-            files.AddBeforeSelf(new XElement("root", root));
-
-        var xw = XmlWriter.Create($"{destDir}\\{GetFolderXmlFilename()}", new XmlWriterSettings
-        {
-            Indent = true
-        });
-        xml.WriteTo(xw);
-        xw.Close();
+        WriteXmlManifest(xDoc, srcPath, recursive);
     }
 
     public override void Repack(string srcPath, bool recursive)

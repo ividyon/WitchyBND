@@ -8,6 +8,6 @@ public class WMTDBND : WBND4Unsorted
     public override string Extension => "mtdbnd";
     public override UnsortedFileFormat[] PackedFormats => new[]
     {
-        new UnsortedFileFormat("*.mtd", Binder.FileFlags.Flag1, DCX.Type.None)
+        new UnsortedFileFormat("*.mtd", Binder.FileFlags.Flag1, new DCX.NoCompressionInfo())
     };
 }

@@ -26,8 +26,7 @@ public partial class WMSBEFolder
 
         XElement xml = LoadXml(GetFolderXmlPath(srcPath));
 
-        DCX.Type compression = Enum.Parse<DCX.Type>(xml.Element("compression")?.Value ?? "None");
-        msb.Compression = compression;
+        msb.Compression = ReadCompressionInfoFromXml(xml);
 
         var taskList = new List<Task>();
 

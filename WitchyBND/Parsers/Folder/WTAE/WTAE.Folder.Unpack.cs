@@ -33,23 +33,16 @@ public partial class WTAEFolder
         var template = gameService.GetTAETemplate(game);
         tae.ApplyTemplate(template);
         string destDir = GetUnpackDestPath(srcPath, recursive);
-        Directory.CreateDirectory(destDir);
 
-        XDocument xDoc = new XDocument();
-        XElement root = new XElement(XmlTag);
-
-        if (Version > 0) root.SetAttributeValue(VersionAttributeName, Version.ToString());
-
-        xDoc.Add(root);
-        root.AddE("id", tae.ID);
-        root.AddE("compression", tae.Compression);
-        root.AddE("game", game);
-        root.AddE("format", tae.Format);
-        root.AddE("eventBank", tae.EventBank);
-        root.AddE("sibName", tae.SibName);
-        root.AddE("skeletonName", tae.SkeletonName);
-        root.AddE("flags", string.Join(",", tae.Flags));
-        root.AddE("bigendian", tae.BigEndian);
+        var xml = PrepareXmlManifest(srcPath, recursive, false, tae.Compression, out XDocument xDoc, null);
+        xml.AddE("id", tae.ID);
+        xml.AddE("game", game);
+        xml.AddE("format", tae.Format);
+        xml.AddE("eventBank", tae.EventBank);
+        xml.AddE("sibName", tae.SibName);
+        xml.AddE("skeletonName", tae.SkeletonName);
+        xml.AddE("flags", string.Join(",", tae.Flags));
+        xml.AddE("bigendian", tae.BigEndian);
 
         var addDigits = tae.Animations.Any() && tae.Animations.Max(a => a.ID) > 999999;
 
@@ -66,11 +59,8 @@ public partial class WTAEFolder
         {
             tae.Animations.ForEach(Callback);
         }
-
-
-        var destPath = GetFolderXmlPath(destDir);
-        AddLocationToXml(srcPath, recursive, root);
-        xDoc.Save(destPath);
+        
+        WriteXmlManifest(xDoc, srcPath, recursive);
     }
 
     public void UnpackAnim(string destDir, TAE tae, TAE.Animation anim, bool addDigits)

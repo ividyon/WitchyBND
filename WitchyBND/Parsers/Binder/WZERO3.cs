@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using SoulsFormats;
-using SoulsFormats.AC4;
+using SoulsFormats.Other;
 
 namespace WitchyBND.Parsers;
 
@@ -12,7 +12,7 @@ public class WZERO3 : WFolderParser
     public override bool Is(string path, byte[]? _, out ISoulsFile? file)
     {
         file = null;
-        return Zero3.Is(path);
+        return Path.GetExtension(path) == ".000";
     }
 
     public override bool? IsSimple(string path)

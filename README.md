@@ -1,4 +1,4 @@
-[![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 <p align="center">
   <img src="https://github.com/ividyon/WitchyBND/blob/main/public/logo.png?raw=true" />
@@ -82,10 +82,7 @@ Special thanks to Nordgaren, The12thAvenger, philiquaz, TKGP, thefifthmatt, Kirn
 
 # License
 
-This work is licensed under a
-[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License][cc-by-nc-sa].
-
-[![CC BY-NC-SA 4.0][cc-by-nc-sa-image]][cc-by-nc-sa]
+This work is licensed under GPL v3. View the implications for your Witchy forks [here](https://www.tldrlegal.com/license/gnu-general-public-license-v3-gpl-3).
 
 WitchyBND is built using the following licensed works:
 * [SoulsFormats](https://github.com/JKAnderson/SoulsFormats/tree/er) by JKAnderson (see [License](licenses/LICENSE-SoulsFormats.md))
@@ -93,6 +90,35 @@ WitchyBND is built using the following licensed works:
 
 # Changelog
 ## WitchyBND
+
+### 2.15.0.2
+
+* Re-release to attempt to fix an updating bug.
+
+### 2.15.0.1
+
+* Fixed an issue where MATBINs, ENFLs, FXRs and MTDs would not repack due to version mismatches. You have to unpack them once again to fix the problem.
+* Fixed an issue where TAEs and MSBs would not repack due to a missing filename in the manifest XML. You have to unpack them once again to fix the problem.
+
+### 2.15.0.0
+
+* Added basic initial support for ELDEN RING NIGHTREIGN (thanks to Vawser and Nordgaren)
+* Updated the handling of compression types to include more information. In short, this will make Witchy more robust against manipulation attempts on compression headers.
+* Internally cleaned up various classes in significant ways. This may cause some regressions which will be quickly fixed once reported.
+  * Several parser versions were raised due to this.
+
+### 2.14.4.5
+
+* Fixed assorted issues with the special ANIBND4 handling across different types of ANIBND in different games.
+* Fixed an issue with the special FFXBND handling where empty FFXRESLISTs would try to be created for FFXBND archives that don't have them, such as Sekiro's or DS3's FFXBND.
+* Updated SoulsFormatsNEXT.
+
+### 2.14.4.4
+
+* Updated to latest SoulsFormatsNEXT, fixing some issues with unpacking console textures. (thanks to Shadowth117)
+* Updated to latest Paramdex from Smithbox. (thanks to Vawser & contributors)
+* Fixed an MQB color repack bug. (thanks to Natsu)
+* Changed some logic in determining AC6 param types to work with the updated Paramdex.
 
 ### 2.14.4.3
 
@@ -698,7 +724,3 @@ Due to being a large rewrite, bugs are expected. Please diligently report them.
 
 ### 1.0.1
 * Fix bad BXF4 repacking
-
-[cc-by-nc-sa]: http://creativecommons.org/licenses/by-nc-sa/4.0/
-[cc-by-nc-sa-image]: https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png
-[cc-by-nc-sa-shield]: https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg

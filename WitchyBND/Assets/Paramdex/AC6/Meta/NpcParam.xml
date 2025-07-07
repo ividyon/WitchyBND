@@ -196,7 +196,7 @@
     
   </Enums>
   <Field>
-    <Unk0x00 IsHidden="" />
+    <Unk0x00 Padding="" />
     <behaviorVariationId AltName="Behavior Variation ID" Wiki="Variation ID used when calculating the action ID." />
     <accountParamId AltName="Account ID" Refs="AccountParam" Wiki="Refers to the Account Param row to use to represent this NPC." />
     <modelId AltName="Model ID" Wiki="Refers to the Chr ID to use for this NPC." />
@@ -486,7 +486,7 @@
     <npcMaterialParamId AltName="Material Param ID" Wiki="Affects NPC design, such as paint.\nReferences rows in NpcMaterialParam. Rows references seem to be Character ID + this field." />
     <chrActTurnParamId1 AltName="Character Act Turn ID [1]" Refs="ChrActTurnParam_Npc" />
     
-    <padding IsHidden="" />
+    <padding Padding="" />
     <npcEquipPartsParamId AltName="Equipment Parts ID" Refs="NpcEquipPartsParam" />
     <maxLockonDistOverride AltName="Max Lock-on Distance Override" />
     <chrModelParamId AltName="Character Model ID" Refs="ChrModelParam" />
@@ -541,20 +541,20 @@
     <npcAttackActionId30 AltName="Attack Action ID [30]" Refs="AttackActionParam_NPC" />
     <npcAttackActionId31 AltName="Attack Action ID [31]" Refs="AttackActionParam_NPC" />
     
-    <lookAtParamNpcId_0 AltName="Look-at Param ID [0]" Refs="LookAtParam_Npc" />
+    <lookAtParamNpcId_0 AltName="LookAt Param ID [0]" Refs="LookAtParam_Npc" />
     
     <shieldPartHp AltName="Shield Part HP" />
     
     <showStabilityBar AltName="Show Stability Bar" Wiki="If stability bar should appear in UI." IsBool="" />
     <damageLevelConvThresholdParamId AltName="Stability Threshold Ref (DamageLevelConvThresholdParam ID)" Refs="DamageLevelConvThresholdParam" Wiki="Determines attitude stability behavior." />
     
-    <lookAtParamNpcId_1 AltName="Look-at Param ID [1]" Refs="LookAtParam_Npc" />
-    <lookAtParamNpcId_2 AltName="Look-at Param ID [2]" Refs="LookAtParam_Npc" />
-    <lookAtParamNpcId_3 AltName="Look-at Param ID [3]" Refs="LookAtParam_Npc" />
-    <lookAtParamNpcId_4 AltName="Look-at Param ID [4]" Refs="LookAtParam_Npc" />
-    <lookAtParamNpcId_5 AltName="Look-at Param ID [5]" Refs="LookAtParam_Npc" />
-    <lookAtParamNpcId_6 AltName="Look-at Param ID [6]" Refs="LookAtParam_Npc" />
-    <lookAtParamNpcId_7 AltName="Look-at Param ID [7]" Refs="LookAtParam_Npc" />
+    <lookAtParamNpcId_1 AltName="LookAt Param ID [1]" Refs="LookAtParam_Npc" />
+    <lookAtParamNpcId_2 AltName="LookAt Param ID [2]" Refs="LookAtParam_Npc" />
+    <lookAtParamNpcId_3 AltName="LookAt Param ID [3]" Refs="LookAtParam_Npc" />
+    <lookAtParamNpcId_4 AltName="LookAt Param ID [4]" Refs="LookAtParam_Npc" />
+    <lookAtParamNpcId_5 AltName="LookAt Param ID [5]" Refs="LookAtParam_Npc" />
+    <lookAtParamNpcId_6 AltName="LookAt Param ID [6]" Refs="LookAtParam_Npc" />
+    <lookAtParamNpcId_7 AltName="LookAt Param ID [7]" Refs="LookAtParam_Npc" />
     
     <pulseArmorReapplyDelaySeconds AltName="Pulse Armor: Reapplication Delay" Wiki="In seconds" />
     <pulseArmorRicochetedDamageCorrection AltName="Pulse Armor: Ricocheted Damage Correction" />
@@ -579,7 +579,7 @@
     
     <effectiveRangeLimit AltName="Effective Range Cap %" Wiki="Percentage-based modifier that reduces the effective range of your weapon against a specific NPC and causes ricochets to happen sooner. Ranges from 1.00 to 0.00, where 1.00 is 100% and 0.00 is 0%. At 1.00, your weapons can cover their full effective range before ricochets occur. At 0, your weapons will ricochet the moment they surpass their ideal range." />
     
-    <endPadding IsHidden="" />
+    <endPadding Padding="" />
     
   </Field>
   <Self Wiki="Defines the stats for a given enemy or group of enemies. Does not determine model or location.\nStats are often affected greatly by attached SpEffects."/>

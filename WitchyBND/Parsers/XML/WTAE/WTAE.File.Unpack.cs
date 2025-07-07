@@ -34,26 +34,21 @@ public partial class WTAEFile
         var template = gameService.GetTAETemplate(game);
         tae.ApplyTemplate(template);
 
-        XDocument xDoc = new XDocument();
-        XElement root = new XElement(XmlTag);
-        xDoc.Add(root);
-        root.AddE("id", tae.ID);
-        root.AddE("compression", tae.Compression);
-        root.AddE("game", game);
-        root.AddE("format", tae.Format);
-        root.AddE("eventBank", tae.EventBank);
-        root.AddE("sibName", tae.SibName);
-        root.AddE("skeletonName", tae.SkeletonName);
-        root.AddE("flags", string.Join(",", tae.Flags));
-        root.AddE("bigendian", tae.BigEndian);
-
-        if (Version > 0) root.SetAttributeValue(VersionAttributeName, Version.ToString());
+        var xml = PrepareXmlManifest(srcPath, recursive, false, tae.Compression, out XDocument xDoc, null);
+        xml.AddE("id", tae.ID);
+        xml.AddE("game", game);
+        xml.AddE("format", tae.Format);
+        xml.AddE("eventBank", tae.EventBank);
+        xml.AddE("sibName", tae.SibName);
+        xml.AddE("skeletonName", tae.SkeletonName);
+        xml.AddE("flags", string.Join(",", tae.Flags));
+        xml.AddE("bigendian", tae.BigEndian);
 
         if (tae.Animations.Any())
         {
             var bag = new ConcurrentBag<XElement>();
             var animsEl = new XElement("anims");
-            root.Add(animsEl);
+            xml.Add(animsEl);
             void Callback(TAE.Animation anim)
             {
                 bag.Add(UnpackAnim(tae, anim));
@@ -74,10 +69,7 @@ public partial class WTAEFile
             }
         }
 
-
-        var destPath = GetUnpackDestPath(srcPath, recursive);
-        AddLocationToXml(srcPath, recursive, root);
-        xDoc.Save(destPath);
+        WriteXmlManifest(xDoc, srcPath, recursive);
     }
 
     public XElement UnpackAnim(TAE tae, TAE.Animation anim)

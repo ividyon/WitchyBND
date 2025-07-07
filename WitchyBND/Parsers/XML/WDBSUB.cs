@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Xml;
+using System.Xml.Linq;
 using SoulsFormats;
+using SoulsFormats.Other.AC4;
 using WitchyFormats;
 using WitchyLib;
 
@@ -14,7 +16,8 @@ namespace WitchyBND.Parsers
 
         public override bool Is(string path, byte[]? data, out ISoulsFile? file)
         {
-            return IsRead<DBSUB>(path, data, out file) && (IsSimple(path) ?? false);
+            file = null;
+            return (IsSimple(path) ?? false) && IsRead<DBSUB>(path, data, out file);
         }
 
         public override bool? IsSimple(string path)
@@ -72,59 +75,56 @@ namespace WitchyBND.Parsers
         public override void Repack(string srcPath, bool recursive)
         {
             DBSUB dbs = new DBSUB();
+            XElement xml = LoadXml(srcPath);
 
-            XmlDocument xml = new XmlDocument();
-            xml.Load(srcPath);
+            dbs.Compression = ReadCompressionInfoFromXml(xml);
 
-            Enum.TryParse(xml.SelectSingleNode($"{XmlTag}/{nameof(dbs.Compression)}")?.InnerText ?? "None", out DCX.Type compression);
-            dbs.Compression = compression;
+            uint.TryParse(xml.Element(nameof(dbs.EventID))?.Value ?? "0", out uint eventId);
+            dbs.EventID = eventId;
 
-            uint.TryParse(xml.SelectSingleNode($"{XmlTag}/{nameof(dbs.EventID)}")?.InnerText ?? "0", out uint eventID);
-            dbs.EventID = eventID;
-
-            bool.TryParse(xml.SelectSingleNode($"{XmlTag}/{nameof(dbs.Unicode)}")?.InnerText ?? "false", out bool unicode);
+            bool.TryParse(xml.Element(nameof(dbs.Unicode))?.Value ?? "false", out bool unicode);
             dbs.Unicode = unicode;
 
-            XmlNode subsNode = xml.SelectSingleNode($"{XmlTag}/{nameof(dbs.SubtitleEntries)}");
+            XElement? subsNode = xml.Element($"{nameof(dbs.SubtitleEntries)}");
             if (subsNode != null)
             {
-                foreach (XmlNode subNode in subsNode.SelectNodes(nameof(DBSUB.SubtitleEntry)))
+                foreach (XElement subNode in subsNode.Elements(nameof(DBSUB.SubtitleEntry)))
                 {
                     var subEntry = new DBSUB.SubtitleEntry();
 
-                    subEntry.FrameDelay = short.Parse(subNode.SelectSingleNode(nameof(subEntry.FrameDelay))?.InnerText
+                    subEntry.FrameDelay = short.Parse(subNode.Element(nameof(subEntry.FrameDelay))?.Value
                         ?? throw new FriendlyException($"{nameof(subEntry.FrameDelay)} could not be parsed."));
 
-                    subEntry.FrameTime = short.Parse(subNode.SelectSingleNode(nameof(subEntry.FrameTime))?.InnerText
+                    subEntry.FrameTime = short.Parse(subNode.Element(nameof(subEntry.FrameTime))?.Value
                         ?? throw new FriendlyException($"{nameof(subEntry.FrameTime)} could not be parsed."));
 
-                    subEntry.Text = subNode.SelectSingleNode(nameof(subEntry.Text)).InnerText
+                    subEntry.Text = subNode.Element(nameof(subEntry.Text))!.Value
                         ?? throw new FriendlyException($"{nameof(subEntry.Text)} could not be parsed.");
 
                     dbs.SubtitleEntries.Add(subEntry);
                 }
             }
 
-            XmlNode vidsNode = xml.SelectSingleNode($"{XmlTag}/{nameof(dbs.VideoEntries)}");
+            XElement? vidsNode = xml.Element(nameof(dbs.VideoEntries));
             if (vidsNode != null)
             {
-                foreach (XmlNode vidNode in vidsNode.SelectNodes(nameof(DBSUB.VideoEntry)))
+                foreach (XElement vidNode in vidsNode.Elements(nameof(DBSUB.VideoEntry)))
                 {
                     var vidEntry = new DBSUB.VideoEntry();
 
-                    vidEntry.Unk08 = short.Parse(vidNode.SelectSingleNode(nameof(vidEntry.Unk08))?.InnerText
+                    vidEntry.Unk08 = short.Parse(vidNode.Element(nameof(vidEntry.Unk08))?.Value
                         ?? throw new FriendlyException($"{nameof(vidEntry.Unk08)} could not be parsed."));
 
-                    vidEntry.Unk0A = short.Parse(vidNode.SelectSingleNode(nameof(vidEntry.Unk0A))?.InnerText
+                    vidEntry.Unk0A = short.Parse(vidNode.Element(nameof(vidEntry.Unk0A))?.Value
                         ?? throw new FriendlyException($"{nameof(vidEntry.Unk0A)} could not be parsed."));
 
-                    vidEntry.Width = short.Parse(vidNode.SelectSingleNode(nameof(vidEntry.Width))?.InnerText
+                    vidEntry.Width = short.Parse(vidNode.Element(nameof(vidEntry.Width))?.Value
                         ?? throw new FriendlyException($"{nameof(vidEntry.Width)} could not be parsed."));
 
-                    vidEntry.Height = short.Parse(vidNode.SelectSingleNode(nameof(vidEntry.Height))?.InnerText
+                    vidEntry.Height = short.Parse(vidNode.Element(nameof(vidEntry.Height))?.Value
                         ?? throw new FriendlyException($"{nameof(vidEntry.Height)} could not be parsed."));
 
-                    vidEntry.Name = vidNode.SelectSingleNode(nameof(vidEntry.Name)).InnerText
+                    vidEntry.Name = vidNode.Element(nameof(vidEntry.Name))!.Value
                         ?? throw new FriendlyException($"{nameof(vidEntry.Name)} could not be parsed.");
 
                     dbs.VideoEntries.Add(vidEntry);
