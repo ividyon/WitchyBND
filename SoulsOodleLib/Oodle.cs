@@ -34,10 +34,10 @@ public static class Oodle
         {
             gamePath = AssetLocator.GetGamePath(new List<AssetLocator.Game>
                 {
+                    AssetLocator.Game.Nightreign,
                     AssetLocator.Game.ArmoredCore6,
                     AssetLocator.Game.EldenRing,
                     AssetLocator.Game.Sekiro,
-                    AssetLocator.Game.Nightreign
                 },
                 writeLineFunction, useFolderPicker);
 
