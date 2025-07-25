@@ -10,6 +10,7 @@ using System.Xml.Linq;
 using PPlus;
 using PPlus.Controls;
 using WitchyBND.Errors;
+using WitchyBND.Parsers;
 using WitchyFormats;
 using WitchyLib;
 
@@ -82,7 +83,7 @@ public class GameService : IGameService
         { "DarkSoulsII.exe", WBUtil.GameType.DS2S },
         { "armoredcore.exe", WBUtil.GameType.AC6 },
         { "sekiro.exe", WBUtil.GameType.SDT },
-        { "nightreign.exe", WBUtil.GameType.ERN }
+        { "nightreign.exe", WBUtil.GameType.NR }
     };
 
     public WBUtil.GameType? DsmsGameTypeToWitchyGameType(DsmsGameType type)
@@ -98,7 +99,7 @@ public class GameService : IGameService
             DsmsGameType.Sekiro => WBUtil.GameType.SDT,
             DsmsGameType.EldenRing => WBUtil.GameType.ER,
             DsmsGameType.ArmoredCoreVI => WBUtil.GameType.AC6,
-            DsmsGameType.Nightreign => WBUtil.GameType.ERN,
+            DsmsGameType.Nightreign => WBUtil.GameType.NR,
             _ => null
         };
     }
@@ -136,10 +137,9 @@ public class GameService : IGameService
             {
                 XDocument xDoc = XDocument.Load(xmlPath);
 
-                if (game == null && xDoc.Root?.Element("game")?.Value != null)
+                if (game == null && xDoc.Root != null)
                 {
-                    Enum.TryParse(xDoc.Root!.Element("game")!.Value, out WBUtil.GameType regGame);
-                    game = regGame;
+                    game = WFileParser.GetGameTypeFromXml(xDoc.Root);
                 }
 
                 if (regVer == 0 && xDoc.Root?.Element("version")?.Value != null)

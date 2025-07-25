@@ -34,9 +34,8 @@ public class RegulationTests : TestBase
             string? destPath = parser.GetUnpackDestPath(path, false);
 
             var xml = WFileParser.LoadXml(parser.GetFolderXmlPath(destPath, "bnd3"));
-            XElement? gameElement = xml.Element("game");
-            if (gameElement == null) throw new XmlException("XML has no Game element");
-            TryParse(xml.Element("game")!.Value, out WBUtil.GameType game);
+
+            WBUtil.GameType game = WFileParser.GetGameTypeFromXml(xml);
 
             string fullPath = Path.GetDirectoryName(Path.GetFullPath(path))!.TrimEnd(Path.DirectorySeparatorChar);
             string gameName = fullPath.Split(Path.DirectorySeparatorChar).Last();
@@ -78,9 +77,7 @@ public class RegulationTests : TestBase
             string? destPath = parser.GetUnpackDestPath(path, false);
 
             var xml = WFileParser.LoadXml(parser.GetFolderXmlPath(destPath, "bnd4"));
-            XElement? gameElement = xml.Element("game");
-            if (gameElement == null) throw new XmlException("XML has no Game element");
-            TryParse(xml.Element("game")!.Value, out WBUtil.GameType game);
+            WBUtil.GameType game = WFileParser.GetGameTypeFromXml(xml);
 
             Assert.That(game, Is.EqualTo(dirGame),
                 $"XML game {game.ToString()} was not directory game {dirGame.ToString()}");

@@ -70,6 +70,10 @@
         </None>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Assets\Paramdex\SDT\Meta\" />
+    </ItemGroup>
+
     <Target Name="CleanPublishDir" BeforeTargets="BeforeBuild" Condition="'$(_IsPublishing)' == 'true'">
         <Message Importance="high" Text="Cleaning publish directory..." />
         <RemoveDir Directories="$(PublishDir)" />

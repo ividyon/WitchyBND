@@ -145,6 +145,7 @@ public static class Configuration
         var builder = new ConfigurationBuilder();
         bool breakOut = false;
         string userSettingsPath = Path.Combine(AppDataDirectory, "appsettings.user.json");
+        string debugSettingsPath = WBUtil.GetExeLocation("appsettings.debug.json");
         while (!breakOut)
         {
             try
@@ -152,7 +153,9 @@ public static class Configuration
                 IConfigurationRoot config;
                 builder.AddJsonFile(WBUtil.GetExeLocation("appsettings.json"), true);
 
-                if (!IsDebug && !IsTest)
+                if (IsDebug || IsTest)
+                    builder.AddJsonFile(debugSettingsPath, true);
+                else
                     builder.AddJsonFile(userSettingsPath, true);
 
                 builder.AddJsonFile(WBUtil.GetExeLocation("appsettings.override.json"), true);
@@ -164,8 +167,16 @@ public static class Configuration
             }
             catch (JsonReaderException e)
             {
-                if (File.Exists(userSettingsPath))
-                    File.Delete(userSettingsPath);
+                if (IsDebug || IsTest)
+                {
+                    if (File.Exists(debugSettingsPath))
+                        File.Delete(debugSettingsPath);
+                }
+                else
+                {
+                    if (File.Exists(userSettingsPath))
+                        File.Delete(userSettingsPath);
+                }
                 breakOut = false;
             }
         }
@@ -174,7 +185,10 @@ public static class Configuration
     public static void SaveConfiguration()
     {
         var newStored = JsonSerializer.Serialize(Stored, new JsonSerializerOptions { WriteIndented = true });
-        File.WriteAllText(Path.Combine(AppDataDirectory, "appsettings.user.json"), newStored);
+        if (IsDebug || IsTest)
+            File.WriteAllText(WBUtil.GetExeLocation("appsettings.debug.json"), newStored);
+        else
+            File.WriteAllText(Path.Combine(AppDataDirectory, "appsettings.user.json"), newStored);
     }
 
     public static void ActivateStoredConfiguration(StoredConfig? stored = null)

@@ -134,7 +134,7 @@ public class WPARAMBND4 : WBinderParser
             case WBUtil.GameType.ER:
             case WBUtil.GameType.SDT:
             case WBUtil.GameType.AC6:
-            case WBUtil.GameType.ERN:
+            case WBUtil.GameType.NR:
                 gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.PARAMBND, game,
                     ulong.Parse(bnd.Version));
                 ParseMode.GetParser<WBND4>().Unpack(srcPath, bnd, recursive, game);
@@ -154,9 +154,7 @@ public class WPARAMBND4 : WBinderParser
         if (doc.Root == null) throw new XmlException("XML has no root");
         XElement xml = doc.Root;
 
-        var gameElement = xml.Element("game");
-        if (gameElement == null) throw new XmlException("XML has no Game element");
-        Enum.TryParse(gameElement.Value, out WBUtil.GameType game);
+        WBUtil.GameType game = GetGameTypeFromXml(xml);
 
         var versionElement = xml.Element("version");
         if (versionElement == null) throw new XmlException("XML has no Version element");
@@ -229,7 +227,7 @@ public class WPARAMBND4 : WBinderParser
             case WBUtil.GameType.ER:
             case WBUtil.GameType.SDT:
             case WBUtil.GameType.AC6:
-            case WBUtil.GameType.ERN:
+            case WBUtil.GameType.NR:
                 bndParser.Repack(srcPath, recursive);
                 BND4 regBnd = BND4.Read(destPath);
                 WBUtil.EncryptRegulationBin(destPath, game, regBnd);

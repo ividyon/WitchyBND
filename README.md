@@ -91,6 +91,12 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.15.1.0
+
+* Hopefully resolved the Oodle library issue that causes an infinite "Preprocessing" loop.
+* Added support for reading Nightreign TAEs.
+* Fixed a possible incompatibility with old XML manifests using DCX_KRAK compression.
+
 ### 2.15.0.2
 
 * Re-release to attempt to fix an updating bug.

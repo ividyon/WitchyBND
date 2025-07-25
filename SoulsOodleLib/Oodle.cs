@@ -2,28 +2,32 @@
 
 public static class Oodle
 {
-    private static IntPtr? _handle = null;
-    public static bool GrabOodle(Action<string> writeLineFunction, bool useFolderPicker = true, bool copyToAppFolder = false, string? gamePath = null)
+    private static IntPtr _handle = IntPtr.Zero;
+    public static IntPtr GrabOodle(Action<string> writeLineFunction, bool useFolderPicker = true, bool copyToAppFolder = false, string? gamePath = null)
     {
-        if (_handle != null) return true;
+        if (_handle != IntPtr.Zero) return _handle;
 
-        var oodlePath = $@"{AppContext.BaseDirectory}\oo2core_9_win64.dll";
-        var oodlePath2 = $@"{AppContext.BaseDirectory}\oo2core_8_win64.dll";
-        var oodlePath3 = $@"{AppContext.BaseDirectory}\oo2core_6_win64.dll";
-        if (File.Exists(oodlePath))
+        var oodlePath9 = $@"{AppContext.BaseDirectory}\oo2core_9_win64.dll";
+        var oodlePath8 = $@"{AppContext.BaseDirectory}\oo2core_8_win64.dll";
+        var oodlePath6 = $@"{AppContext.BaseDirectory}\oo2core_6_win64.dll";
+
+        if (File.Exists(oodlePath9))
         {
-            _handle = Kernel32.LoadLibrary(oodlePath);
-            return true;
+            _handle = Kernel32.LoadLibrary(oodlePath9);
+            SoulsFormats.Oodle.Oodle9Ptr = _handle;
+            return _handle;
         }
-        if (File.Exists(oodlePath2))
+        if (File.Exists(oodlePath8))
         {
-            _handle = Kernel32.LoadLibrary(oodlePath2);
-            return true;
+            _handle = Kernel32.LoadLibrary(oodlePath8);
+            SoulsFormats.Oodle.Oodle8Ptr = _handle;
+            return _handle;
         }
-        if (File.Exists(oodlePath3))
+        if (File.Exists(oodlePath6))
         {
-            _handle = Kernel32.LoadLibrary(oodlePath3);
-            return true;
+            _handle = Kernel32.LoadLibrary(oodlePath6);
+            SoulsFormats.Oodle.Oodle6Ptr = _handle;
+            return _handle;
         }
 
         if (gamePath == null)
@@ -40,39 +44,42 @@ public static class Oodle
             if (gamePath == null)
             {
                 writeLineFunction("Could not find Oodle compression library (oo2core DLL). Please copy it from your Game folder into the application folder.");
-                return false;
+                return IntPtr.Zero;
             }
         }
 
-        var gameOodlePath = @$"{gamePath}\oo2core_9_win64.dll";
-        var gameOodlePath2 = @$"{gamePath}\oo2core_8_win64.dll";
-        var gameOodlePath3 = @$"{gamePath}\oo2core_6_win64.dll";
+        var gameOodlePath9 = @$"{gamePath}\oo2core_9_win64.dll";
+        var gameOodlePath8 = @$"{gamePath}\oo2core_8_win64.dll";
+        var gameOodlePath6 = @$"{gamePath}\oo2core_6_win64.dll";
 
-        if (File.Exists(gameOodlePath))
+        if (File.Exists(gameOodlePath9))
         {
-            _handle = Kernel32.LoadLibrary(gameOodlePath);
+            _handle = Kernel32.LoadLibrary(gameOodlePath9);
             if (copyToAppFolder)
-                File.Copy(gameOodlePath, $@"{AppDomain.CurrentDomain.BaseDirectory}\{Path.GetFileName(gameOodlePath)}", true);
-            return true;
+                File.Copy(gameOodlePath9, $@"{AppDomain.CurrentDomain.BaseDirectory}\{Path.GetFileName(gameOodlePath9)}", true);
+            SoulsFormats.Oodle.Oodle9Ptr = _handle;
+            return _handle;
         }
 
-        if (File.Exists(gameOodlePath2))
+        if (File.Exists(gameOodlePath8))
         {
-            _handle = Kernel32.LoadLibrary(gameOodlePath2);
+            _handle = Kernel32.LoadLibrary(gameOodlePath8);
             if (copyToAppFolder)
-                File.Copy(gameOodlePath2, $@"{AppDomain.CurrentDomain.BaseDirectory}\{Path.GetFileName(gameOodlePath2)}", true);
-            return true;
+                File.Copy(gameOodlePath8, $@"{AppDomain.CurrentDomain.BaseDirectory}\{Path.GetFileName(gameOodlePath8)}", true);
+            SoulsFormats.Oodle.Oodle8Ptr = _handle;
+            return _handle;
         }
 
-        if (File.Exists(gameOodlePath3))
+        if (File.Exists(gameOodlePath6))
         {
-            _handle = Kernel32.LoadLibrary(gameOodlePath3);
+            _handle = Kernel32.LoadLibrary(gameOodlePath6);
             if (copyToAppFolder)
-                File.Copy(gameOodlePath3, $@"{AppDomain.CurrentDomain.BaseDirectory}\{Path.GetFileName(gameOodlePath2)}", true);
-            return true;
+                File.Copy(gameOodlePath6, $@"{AppDomain.CurrentDomain.BaseDirectory}\{Path.GetFileName(gameOodlePath8)}", true);
+            SoulsFormats.Oodle.Oodle6Ptr = _handle;
+            return _handle;
         }
 
-        return false;
+        return IntPtr.Zero;
     }
 
     private static void KillOodle(IntPtr? oodleHandle)
@@ -81,7 +88,7 @@ public static class Oodle
             Kernel32.FreeLibrary(oodleHandle.Value);
     }
 
-    public static IntPtr? GetOodleHandle()
+    public static IntPtr GetOodleHandle()
     {
         return _handle;
     }
