@@ -91,6 +91,10 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.15.1.1
+
+* Fixed the Oodle library issue that causes an infinite "Preprocessing" loop, for realsies this time.
+
 ### 2.15.1.0
 
 * Hopefully resolved the Oodle library issue that causes an infinite "Preprocessing" loop.

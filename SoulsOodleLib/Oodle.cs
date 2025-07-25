@@ -74,7 +74,7 @@ public static class Oodle
         {
             _handle = Kernel32.LoadLibrary(gameOodlePath6);
             if (copyToAppFolder)
-                File.Copy(gameOodlePath6, $@"{AppDomain.CurrentDomain.BaseDirectory}\{Path.GetFileName(gameOodlePath8)}", true);
+                File.Copy(gameOodlePath6, $@"{AppDomain.CurrentDomain.BaseDirectory}\{Path.GetFileName(gameOodlePath6)}", true);
             SoulsFormats.Oodle.Oodle6Ptr = _handle;
             return _handle;
         }
