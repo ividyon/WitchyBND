@@ -62,6 +62,7 @@ public static class ParseMode
             new WLUAINFO(),
             new WTPF(),
             new WZERO3(),
+            new WFXR1(),
             new WFXR3(),
             new WMATBIN(),
             new WMTD(),
