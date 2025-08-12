@@ -1,11 +1,10 @@
-﻿using System;
-using System.IO;
+using System;
 using System.Text;
+using System.IO;
 using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
 using SoulsFormats.Other.AC4;
-using WitchyFormats;
 using WitchyLib;
 
 namespace WitchyBND.Parsers

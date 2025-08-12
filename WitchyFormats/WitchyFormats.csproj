@@ -7,6 +7,7 @@
     <Title>WitchyFormats</Title>
     <AssemblyTitle>WitchyFormats</AssemblyTitle>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -21,6 +22,5 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SoulsFormats\SoulsFormats\SoulsFormats.csproj" />
-    <ProjectReference Include="..\StudioUtils\StudioUtils.csproj" />
   </ItemGroup>
 </Project>

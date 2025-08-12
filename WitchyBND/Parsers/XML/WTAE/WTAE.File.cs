@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using SoulsFormats;
 using WitchyBND.Services;
-using WitchyFormats;
 using WitchyLib;
 
 namespace WitchyBND.Parsers;

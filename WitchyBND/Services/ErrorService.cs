@@ -2,8 +2,6 @@
 using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
-using System.IO;
-using SoulsFormats;
 using SoulsFormats.Exceptions;
 using WitchyBND.Errors;
 using WitchyLib;

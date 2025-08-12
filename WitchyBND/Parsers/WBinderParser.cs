@@ -6,10 +6,8 @@ using System.IO.Enumeration;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using PPlus;
 using SoulsFormats;
 using WitchyBND.CliModes;
-using WitchyBND.Services;
 using WitchyLib;
 
 namespace WitchyBND.Parsers;

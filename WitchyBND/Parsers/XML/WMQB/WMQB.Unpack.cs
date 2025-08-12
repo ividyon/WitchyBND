@@ -2,7 +2,6 @@
 using System.Drawing;
 using System.IO;
 using System.Numerics;
-using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
 using WitchyLib;
@@ -48,69 +47,69 @@ public partial class WMQB
         resXml.Add(new XElement("Path", resource.Path));
         resXml.Add(new XElement("ParentIndex", resource.ParentIndex.ToString()));
         resXml.Add(new XElement("Unk48", resource.Unk48.ToString()));
-        var customDataXml = new XElement("Resource_CustomData");
-        foreach (var customdata in resource.CustomData)
-            UnpackCustomData(customDataXml, customdata);
-        resXml.Add(customDataXml);
+        var parametersXml = new XElement("Resource_Parameters");
+        foreach (var parameter in resource.Parameters)
+            UnpackParameter(parametersXml, parameter);
+        resXml.Add(parametersXml);
         xml.Add(resXml);
     }
 
-    public static void UnpackCustomData(XElement xml, MQB.CustomData customdata)
+    public static void UnpackParameter(XElement xml, MQB.Parameter parameter)
     {
-        var cdXml = new XElement("CustomData");
-        cdXml.Add(new XElement("Name", customdata.Name));
-        cdXml.Add(new XElement("Type", customdata.Type));
+        var paramXml = new XElement("Parameter");
+        paramXml.Add(new XElement("Name", parameter.Name));
+        paramXml.Add(new XElement("Type", parameter.Type));
 
-        switch (customdata.Type)
+        switch (parameter.Type)
         {
-            case MQB.CustomData.DataType.Vector:
-                switch (customdata.MemberCount)
+            case MQB.Parameter.DataType.Vector:
+                switch (parameter.MemberCount)
                 {
                     case 2:
-                        cdXml.Add(new XElement("Value", ((Vector2)customdata.Value).Vector2ToString()));
+                        paramXml.Add(new XElement("Value", ((Vector2)parameter.Value).Vector2ToString()));
                         break;
                     case 3:
-                        cdXml.Add(new XElement("Value", ((Vector3)customdata.Value).Vector3ToString()));
+                        paramXml.Add(new XElement("Value", ((Vector3)parameter.Value).Vector3ToString()));
                         break;
                     case 4:
-                        cdXml.Add(new XElement("Value", ((Vector4)customdata.Value).Vector4ToString()));
+                        paramXml.Add(new XElement("Value", ((Vector4)parameter.Value).Vector4ToString()));
                         break;
                     default:
-                        throw new NotImplementedException($"{nameof(MQB.CustomData.MemberCount)} {customdata.MemberCount} not implemented for: {nameof(MQB.CustomData.DataType.Vector)}");
+                        throw new NotImplementedException($"{nameof(MQB.Parameter.MemberCount)} {parameter.MemberCount} not implemented for: {nameof(MQB.Parameter.DataType.Vector)}");
                 }
                 break;
-            case MQB.CustomData.DataType.Custom:
-                cdXml.Add(new XElement("Value", ((byte[])customdata.Value).ToHexString()));
+            case MQB.Parameter.DataType.Custom:
+                paramXml.Add(new XElement("Value", ((byte[])parameter.Value).ToHexString()));
                 break;
-            case MQB.CustomData.DataType.Color:
-            case MQB.CustomData.DataType.IntColor:
-                Color color = (Color)customdata.Value;
-                switch (customdata.MemberCount)
+            case MQB.Parameter.DataType.Color:
+            case MQB.Parameter.DataType.IntColor:
+                Color color = (Color)parameter.Value;
+                switch (parameter.MemberCount)
                 {
                     case 3:
                         // Prevent showing alpha when it really isn't there
-                        cdXml.Add(new XElement("Value", $"Color [R={color.R}, G={color.G}, B={color.B}]"));
+                        paramXml.Add(new XElement("Value", $"Color [R={color.R}, G={color.G}, B={color.B}]"));
                         break;
                     case 4:
                     default:
-                        cdXml.Add(new XElement("Value", customdata.Value.ToString()));
+                        paramXml.Add(new XElement("Value", parameter.Value.ToString()));
                         break;
                 }
                 break;
             default:
-                cdXml.Add(new XElement("Value", customdata.Value.ToString()));
+                paramXml.Add(new XElement("Value", parameter.Value.ToString()));
                 break;
         }
 
-        cdXml.Add(new XElement("MemberCount", customdata.MemberCount.ToString()));
+        paramXml.Add(new XElement("MemberCount", parameter.MemberCount.ToString()));
         var seqXml = new XElement("Sequences");
-        foreach (MQB.CustomData.Sequence sequence in customdata.Sequences)
+        foreach (MQB.Parameter.Sequence sequence in parameter.Sequences)
             UnpackSequence(seqXml, sequence);
-        cdXml.Add(seqXml);
-        xml.Add(cdXml);
+        paramXml.Add(seqXml);
+        xml.Add(paramXml);
     }
 
-    public static void UnpackSequence(XElement xml, MQB.CustomData.Sequence sequence)
+    public static void UnpackSequence(XElement xml, MQB.Parameter.Sequence sequence)
     {
         var seqXml = new XElement("Sequence");
         seqXml.Add(new XElement("ValueIndex", sequence.ValueIndex.ToString()));
@@ -123,7 +122,7 @@ public partial class WMQB
         xml.Add(seqXml);
     }
 
-    public static void UnpackPoint(XElement xml, MQB.CustomData.Sequence.Point point)
+    public static void UnpackPoint(XElement xml, MQB.Parameter.Sequence.Point point)
     {
         var pointXml = new XElement("Point");
         pointXml.Add(new XElement("Value", $"{point.Value}"));
@@ -150,38 +149,38 @@ public partial class WMQB
     {
         var timeXml = new XElement("Timeline");
         timeXml.Add(new XElement("Unk10", $"{timeline.Unk10}"));
-        var dispXml = new XElement("Dispositions");
-        foreach (var disposition in timeline.Dispositions)
-            UnpackDisposition(dispXml, disposition);
-        var customDataXml = new XElement("Timeline_CustomData");
-        foreach (var customdata in timeline.CustomData)
-            UnpackCustomData(customDataXml, customdata);
+        var dispXml = new XElement("Events");
+        foreach (MQB.Event? @event in timeline.Events)
+            UnpackEvent(dispXml, @event);
+        var parametersXml = new XElement("Timeline_Parameters");
+        foreach (var parameter in timeline.Parameters)
+            UnpackParameter(parametersXml, parameter);
         timeXml.Add(dispXml);
-        timeXml.Add(customDataXml);
+        timeXml.Add(parametersXml);
         xml.Add(timeXml);
     }
 
-    public static void UnpackDisposition(XElement xml, MQB.Disposition disposition)
+    public static void UnpackEvent(XElement xml, MQB.Event @event)
     {
-        var dispXml = new XElement("Disposition");
-        dispXml.Add(new XElement("ID", $"{disposition.ID}"));
-        dispXml.Add(new XElement("Duration", $"{disposition.Duration}"));
-        dispXml.Add(new XElement("ResourceIndex", $"{disposition.ResourceIndex}"));
-        dispXml.Add(new XElement("StartFrame", $"{disposition.StartFrame}"));
-        dispXml.Add(new XElement("Unk08", $"{disposition.Unk08}"));
-        dispXml.Add(new XElement("Unk14", $"{disposition.Unk14}"));
-        dispXml.Add(new XElement("Unk18", $"{disposition.Unk18}"));
-        dispXml.Add(new XElement("Unk1C", $"{disposition.Unk1C}"));
-        dispXml.Add(new XElement("Unk20", $"{disposition.Unk20}"));
-        dispXml.Add(new XElement("Unk28", $"{disposition.Unk28}"));
+        var dispXml = new XElement("Event");
+        dispXml.Add(new XElement("ID", $"{@event.ID}"));
+        dispXml.Add(new XElement("Duration", $"{@event.Duration}"));
+        dispXml.Add(new XElement("ResourceIndex", $"{@event.ResourceIndex}"));
+        dispXml.Add(new XElement("StartFrame", $"{@event.StartFrame}"));
+        dispXml.Add(new XElement("Unk08", $"{@event.Unk08}"));
+        dispXml.Add(new XElement("Unk14", $"{@event.Unk14}"));
+        dispXml.Add(new XElement("Unk18", $"{@event.Unk18}"));
+        dispXml.Add(new XElement("Unk1C", $"{@event.Unk1C}"));
+        dispXml.Add(new XElement("Unk20", $"{@event.Unk20}"));
+        dispXml.Add(new XElement("Unk28", $"{@event.Unk28}"));
         
         var tfXml = new XElement("Transforms");
-        foreach (var transform in disposition.Transforms)
+        foreach (var transform in @event.Transforms)
             UnpackTransform(tfXml, transform);
         dispXml.Add(tfXml);
-        var cdXml = new XElement("Disposition_CustomData");
-        foreach (var customdata in disposition.CustomData)
-            UnpackCustomData(cdXml, customdata);
+        var cdXml = new XElement("Event_Parameters");
+        foreach (var parameter in @event.Parameters)
+            UnpackParameter(cdXml, parameter);
         dispXml.Add(cdXml);
         xml.Add(dispXml);
     }

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.IO;
-using System.Xml.Linq;
-using SoulsFormats;
 
 namespace WitchyBND.Parsers;
 

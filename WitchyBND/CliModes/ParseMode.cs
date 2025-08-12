@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using PPlus;
 using SoulsFormats;
 using WitchyBND.Parsers;
 using WitchyBND.Services;
@@ -63,6 +62,7 @@ public static class ParseMode
             new WLUAINFO(),
             new WTPF(),
             new WZERO3(),
+            new WFXR1(),
             new WFXR3(),
             new WMATBIN(),
             new WMTD(),

@@ -114,7 +114,7 @@ sutLq3uRjLMM0IeTkQO6Pv8/R7UNFtdCWwIERzH8IQ==
         var gameDataPath = $@"{gamePath}\Data0.bdt";
 
         var oodleResult = Oodle.GrabOodle(writeLineFunction, useFolderPicker, copyToAppFolder, gamePath);
-        if (!oodleResult)
+        if (oodleResult == IntPtr.Zero)
         {
             return false;
         }

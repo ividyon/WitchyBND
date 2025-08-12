@@ -3,10 +3,8 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using SoulsFormats;
-using WitchyBND.Errors;
-using WitchyFormats;
 using WitchyLib;
+using SoulsFormats;
 
 namespace WitchyBND.Parsers;
 
@@ -27,7 +25,7 @@ public partial class WTAEFile
 
         XElement xml = LoadXml(srcPath);
 
-        var game = Enum.Parse<WBUtil.GameType>(xml.Element("game")!.Value);
+        WBUtil.GameType game = GetGameTypeFromXml(xml);
         TAE.Template template = gameService.GetTAETemplate(game);
 
         tae.Compression = ReadCompressionInfoFromXml(xml);
