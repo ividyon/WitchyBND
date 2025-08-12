@@ -5,8 +5,6 @@ VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WitchyBND", "WitchyBND\WitchyBND.csproj", "{0406FE88-F044-4A16-994E-6E3C9715AC60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StudioUtils", "StudioUtils\StudioUtils.csproj", "{2BFBF581-55F6-4C1B-B97B-BDCACDB73114}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WitchyFormats", "WitchyFormats\WitchyFormats.csproj", "{13873177-67FF-4F5B-B766-B861E6F35DA7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WitchyLib", "WitchyLib\WitchyLib.csproj", "{2A37A91C-15E8-4BD9-BF6D-670F19526597}"
@@ -25,10 +23,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2BFBF581-55F6-4C1B-B97B-BDCACDB73114}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2BFBF581-55F6-4C1B-B97B-BDCACDB73114}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2BFBF581-55F6-4C1B-B97B-BDCACDB73114}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2BFBF581-55F6-4C1B-B97B-BDCACDB73114}.Release|Any CPU.Build.0 = Release|Any CPU
 		{13873177-67FF-4F5B-B766-B861E6F35DA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{13873177-67FF-4F5B-B766-B861E6F35DA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{13873177-67FF-4F5B-B766-B861E6F35DA7}.Release|Any CPU.ActiveCfg = Release|Any CPU

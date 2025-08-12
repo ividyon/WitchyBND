@@ -6,6 +6,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
+using SoulsFormats.Formats.MQB;
 using WitchyLib;
 using Enum = System.Enum;
 namespace WitchyBND.Parsers;
@@ -61,51 +62,51 @@ public partial class WMQB
         string path = resNode.Element("Path")!.Value;
         int parentIndex = FriendlyParseInt32(nameof(MQB.Resource), nameof(MQB.Resource.ParentIndex), resNode.Element("ParentIndex")!.Value);
         int unk48 = FriendlyParseInt32(nameof(MQB.Resource), nameof(MQB.Resource.Unk48), resNode.Element("Unk48")!.Value);
-        List<MQB.CustomData> customData = new List<MQB.CustomData>();
+        List<MQB.Parameter> parameter = new List<MQB.Parameter>();
 
-        var resCusDataNode = resNode.Element("Resource_CustomData")!;
-        foreach (XElement cusDataNode in resCusDataNode.Elements("CustomData"))
-            customData.Add(RepackCustomData(cusDataNode));
+        var resParametersNode = resNode.Element("Resource_Parameters")!;
+        foreach (XElement parameterNode in resParametersNode.Elements("Parameter"))
+            parameter.Add(RepackParameter(parameterNode));
 
         resource.Name = name;
         resource.Path = path;
         resource.ParentIndex = parentIndex;
         resource.Unk48 = unk48;
-        resource.CustomData = customData;
+        resource.Parameters = parameter;
         return resource;
     }
 
-    public static MQB.CustomData RepackCustomData(XElement customdataNode)
+    public static MQB.Parameter RepackParameter(XElement parametersNode)
     {
-        MQB.CustomData customdata = new MQB.CustomData();
+        MQB.Parameter parameters = new MQB.Parameter();
 
-        string name = customdataNode.Element("Name")!.Value;
-        var type = FriendlyParseEnum<MQB.CustomData.DataType>(nameof(MQB.CustomData), nameof(MQB.CustomData.Type), customdataNode.Element("Type")!.Value);
+        string name = parametersNode.Element("Name")!.Value;
+        var type = FriendlyParseEnum<MQB.Parameter.DataType>(nameof(MQB.Parameter), nameof(MQB.Parameter.Type), parametersNode.Element("Type")!.Value);
 
-        int memberCount = FriendlyParseInt32(nameof(MQB.CustomData), nameof(MQB.CustomData.MemberCount), customdataNode.Element("MemberCount")!.Value);
-        object value = ConvertValueToDataType(customdataNode.Element("Value")!.Value, type, memberCount);
-        var sequences = new List<MQB.CustomData.Sequence>();
+        int memberCount = FriendlyParseInt32(nameof(MQB.Parameter), nameof(MQB.Parameter.MemberCount), parametersNode.Element("MemberCount")!.Value);
+        object value = ConvertValueToDataType(parametersNode.Element("Value")!.Value, type, memberCount);
+        var sequences = new List<MQB.Parameter.Sequence>();
 
-        var seqsNode = customdataNode.Element("Sequences")!;
+        var seqsNode = parametersNode.Element("Sequences")!;
         foreach (XElement seqNode in seqsNode.Elements("Sequence"))
             sequences.Add(RepackSequence(seqNode));
 
-        customdata.Name = name;
-        customdata.Type = type;
-        customdata.Value = value;
-        customdata.MemberCount = memberCount;
-        customdata.Sequences = sequences;
-        return customdata;
+        parameters.Name = name;
+        parameters.Type = type;
+        parameters.Value = value;
+        parameters.MemberCount = memberCount;
+        parameters.Sequences = sequences;
+        return parameters;
     }
 
-    public static MQB.CustomData.Sequence RepackSequence(XElement seqNode)
+    public static MQB.Parameter.Sequence RepackSequence(XElement seqNode)
     {
-        MQB.CustomData.Sequence sequence = new MQB.CustomData.Sequence();
+        MQB.Parameter.Sequence sequence = new MQB.Parameter.Sequence();
 
-        int valueIndex = FriendlyParseInt32(nameof(MQB.CustomData.Sequence), nameof(MQB.CustomData.Sequence.ValueIndex), seqNode.Element("ValueIndex")!.Value);
-        var type = FriendlyParseEnum<MQB.CustomData.DataType>(nameof(MQB.CustomData.Sequence), nameof(MQB.CustomData.Sequence.ValueType), seqNode.Element("ValueType")!.Value);
-        int pointType = FriendlyParseInt32(nameof(MQB.CustomData.Sequence), nameof(MQB.CustomData.Sequence.PointType), seqNode.Element("PointType")!.Value);
-        List<MQB.CustomData.Sequence.Point> points = new List<MQB.CustomData.Sequence.Point>();
+        int valueIndex = FriendlyParseInt32(nameof(MQB.Parameter.Sequence), nameof(MQB.Parameter.Sequence.ValueIndex), seqNode.Element("ValueIndex")!.Value);
+        var type = FriendlyParseEnum<MQB.Parameter.DataType>(nameof(MQB.Parameter.Sequence), nameof(MQB.Parameter.Sequence.ValueType), seqNode.Element("ValueType")!.Value);
+        int pointType = FriendlyParseInt32(nameof(MQB.Parameter.Sequence), nameof(MQB.Parameter.Sequence.PointType), seqNode.Element("PointType")!.Value);
+        List<MQB.Parameter.Sequence.Point> points = new List<MQB.Parameter.Sequence.Point>();
 
         var pointsNode = seqNode.Element("Points")!;
         foreach (XElement pointNode in pointsNode.Elements("Point"))
@@ -118,23 +119,23 @@ public partial class WMQB
         return sequence;
     }
 
-    public static MQB.CustomData.Sequence.Point RepackPoint(XElement pointNode, MQB.CustomData.DataType type)
+    public static MQB.Parameter.Sequence.Point RepackPoint(XElement pointNode, MQB.Parameter.DataType type)
     {
-        MQB.CustomData.Sequence.Point point = new MQB.CustomData.Sequence.Point();
+        MQB.Parameter.Sequence.Point point = new MQB.Parameter.Sequence.Point();
 
         string valueStr = pointNode.Element("Value")!.Value;
         object value;
 
         switch (type)
         {
-            case MQB.CustomData.DataType.Byte: value = FriendlyParseByte(nameof(MQB.CustomData.Sequence.Point), nameof(MQB.CustomData.Sequence.Point.Value), valueStr); break;
-            case MQB.CustomData.DataType.Float: value = FriendlyParseFloat32(nameof(MQB.CustomData.Sequence.Point), nameof(MQB.CustomData.Sequence.Point.Value), valueStr); break;
+            case MQB.Parameter.DataType.Byte: value = FriendlyParseByte(nameof(MQB.Parameter.Sequence.Point), nameof(MQB.Parameter.Sequence.Point.Value), valueStr); break;
+            case MQB.Parameter.DataType.Float: value = FriendlyParseFloat32(nameof(MQB.Parameter.Sequence.Point), nameof(MQB.Parameter.Sequence.Point.Value), valueStr); break;
             default: throw new NotSupportedException($"Unsupported sequence point value type: {type}");
         }
 
-        int unk08 = FriendlyParseInt32(nameof(MQB.CustomData.Sequence.Point), nameof(MQB.CustomData.Sequence.Point.Unk08), pointNode.Element("Unk08")!.Value);
-        float unk10 = FriendlyParseFloat32(nameof(MQB.CustomData.Sequence.Point), nameof(MQB.CustomData.Sequence.Point.Unk10), pointNode.Element("Unk10")!.Value);
-        float unk14 = FriendlyParseFloat32(nameof(MQB.CustomData.Sequence.Point), nameof(MQB.CustomData.Sequence.Point.Unk14), pointNode.Element("Unk14")!.Value);
+        int unk08 = FriendlyParseInt32(nameof(MQB.Parameter.Sequence.Point), nameof(MQB.Parameter.Sequence.Point.Unk08), pointNode.Element("Unk08")!.Value);
+        float unk10 = FriendlyParseFloat32(nameof(MQB.Parameter.Sequence.Point), nameof(MQB.Parameter.Sequence.Point.Unk10), pointNode.Element("Unk10")!.Value);
+        float unk14 = FriendlyParseFloat32(nameof(MQB.Parameter.Sequence.Point), nameof(MQB.Parameter.Sequence.Point.Unk14), pointNode.Element("Unk14")!.Value);
 
         point.Value = value;
         point.Unk08 = unk08;
@@ -168,61 +169,61 @@ public partial class WMQB
         MQB.Timeline timeline = new MQB.Timeline();
 
         int unk10 = FriendlyParseInt32(nameof(MQB.Timeline), nameof(MQB.Timeline.Unk10), timelineNode.Element("Unk10")!.Value);
-        List<MQB.Disposition> dispositions = new List<MQB.Disposition>();
-        List<MQB.CustomData> customdata = new List<MQB.CustomData>();
+        List<MQB.Event> events = new List<MQB.Event>();
+        List<MQB.Parameter> parameters = new List<MQB.Parameter>();
 
-        var dispositionsNode = timelineNode.Element("Dispositions")!;
-        foreach (XElement disNode in dispositionsNode.Elements("Disposition"))
-            dispositions.Add(RepackDisposition(disNode));
+        var eventsNode = timelineNode.Element("Events")!;
+        foreach (XElement eventNode in eventsNode.Elements("Event"))
+            events.Add(RepackEvent(eventNode));
 
-        var timelineCusDataNode = timelineNode.Element("Timeline_CustomData")!;
-        foreach (XElement cusDataNode in timelineCusDataNode.Elements("CustomData"))
-            customdata.Add(RepackCustomData(cusDataNode));
+        var timelineParametersNode = timelineNode.Element("Timeline_Parameters")!;
+        foreach (XElement parameterNode in timelineParametersNode.Elements("Parameter"))
+            parameters.Add(RepackParameter(parameterNode));
 
         timeline.Unk10 = unk10;
-        timeline.Dispositions = dispositions;
-        timeline.CustomData = customdata;
+        timeline.Events = events;
+        timeline.Parameters = parameters;
         return timeline;
     }
 
-    public static MQB.Disposition RepackDisposition(XElement disNode)
+    public static MQB.Event RepackEvent(XElement eventNode)
     {
-        MQB.Disposition disposition = new MQB.Disposition();
+        MQB.Event @event = new MQB.Event();
 
-        int id = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.ID), disNode.Element("ID")!.Value);
-        int duration = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.Duration), disNode.Element("Duration")!.Value);
-        int resIndex = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.ResourceIndex), disNode.Element("ResourceIndex")!.Value);
-        int startFrame = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.StartFrame), disNode.Element("StartFrame")!.Value);
-        int unk08 = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.Unk08), disNode.Element("Unk08")!.Value);
-        int unk14 = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.Unk14), disNode.Element("Unk14")!.Value);
-        int unk18 = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.Unk18), disNode.Element("Unk18")!.Value);
-        int unk1C = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.Unk1C), disNode.Element("Unk1C")!.Value);
-        int unk20 = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.Unk20), disNode.Element("Unk20")!.Value);
-        int unk28 = FriendlyParseInt32(nameof(MQB.Disposition), nameof(MQB.Disposition.Unk28), disNode.Element("Unk28")!.Value);
+        int id = FriendlyParseInt32(nameof(MQB.Event), nameof(MQB.Event.ID), eventNode.Element("ID")!.Value);
+        int duration = FriendlyParseInt32(nameof(MQB.Event), nameof(MQB.Event.Duration), eventNode.Element("Duration")!.Value);
+        int resIndex = FriendlyParseInt32(nameof(MQB.Event), nameof(MQB.Event.ResourceIndex), eventNode.Element("ResourceIndex")!.Value);
+        int startFrame = FriendlyParseInt32(nameof(MQB.Event), nameof(MQB.Event.StartFrame), eventNode.Element("StartFrame")!.Value);
+        int unk08 = FriendlyParseInt32(nameof(MQB.Event), nameof(MQB.Event.Unk08), eventNode.Element("Unk08")!.Value);
+        int unk14 = FriendlyParseInt32(nameof(MQB.Event), nameof(MQB.Event.Unk14), eventNode.Element("Unk14")!.Value);
+        int unk18 = FriendlyParseInt32(nameof(MQB.Event), nameof(MQB.Event.Unk18), eventNode.Element("Unk18")!.Value);
+        int unk1C = FriendlyParseInt32(nameof(MQB.Event), nameof(MQB.Event.Unk1C), eventNode.Element("Unk1C")!.Value);
+        int unk20 = FriendlyParseInt32(nameof(MQB.Event), nameof(MQB.Event.Unk20), eventNode.Element("Unk20")!.Value);
+        int unk28 = FriendlyParseInt32(nameof(MQB.Event), nameof(MQB.Event.Unk28), eventNode.Element("Unk28")!.Value);
         List<MQB.Transform> transforms = new List<MQB.Transform>();
-        List<MQB.CustomData> customdata = new List<MQB.CustomData>();
+        List<MQB.Parameter> parameters = new List<MQB.Parameter>();
 
-        var transformsNode = disNode.Element("Transforms")!;
+        var transformsNode = eventNode.Element("Transforms")!;
         foreach (XElement transformNode in transformsNode.Elements("Transform"))
             transforms.Add(RepackTransform(transformNode));
 
-        var disCusDataNode = disNode.Element("Disposition_CustomData")!;
-        foreach (XElement cusDataNode in disCusDataNode.Elements("CustomData"))
-            customdata.Add(RepackCustomData(cusDataNode));
+        var evParametersNode = eventNode.Element("Event_Parameters")!;
+        foreach (XElement parameterNode in evParametersNode.Elements("Parameter"))
+            parameters.Add(RepackParameter(parameterNode));
 
-        disposition.ID = id;
-        disposition.Duration = duration;
-        disposition.ResourceIndex = resIndex;
-        disposition.StartFrame = startFrame;
-        disposition.Unk08 = unk08;
-        disposition.Unk14 = unk14;
-        disposition.Unk18 = unk18;
-        disposition.Unk1C = unk1C;
-        disposition.Unk20 = unk20;
-        disposition.Unk28 = unk28;
-        disposition.Transforms = transforms;
-        disposition.CustomData = customdata;
-        return disposition;
+        @event.ID = id;
+        @event.Duration = duration;
+        @event.ResourceIndex = resIndex;
+        @event.StartFrame = startFrame;
+        @event.Unk08 = unk08;
+        @event.Unk14 = unk14;
+        @event.Unk18 = unk18;
+        @event.Unk1C = unk1C;
+        @event.Unk20 = unk20;
+        @event.Unk28 = unk28;
+        @event.Transforms = transforms;
+        @event.Parameters = parameters;
+        return @event;
     }
 
     public static MQB.Transform RepackTransform(XElement transNode)
@@ -253,37 +254,37 @@ public partial class WMQB
         return transform;
     }
 
-    public static object ConvertValueToDataType(string str, MQB.CustomData.DataType type, int memberCount)
+    public static object ConvertValueToDataType(string str, MQB.Parameter.DataType type, int memberCount)
     {
         try
         {
             switch (type)
             {
-                case MQB.CustomData.DataType.Bool: return Convert.ToBoolean(str);
-                case MQB.CustomData.DataType.SByte: return Convert.ToSByte(str);
-                case MQB.CustomData.DataType.Byte: return Convert.ToByte(str);
-                case MQB.CustomData.DataType.Short: return Convert.ToInt16(str);
-                case MQB.CustomData.DataType.Int: return Convert.ToInt32(str);
-                case MQB.CustomData.DataType.UInt: return Convert.ToUInt32(str);
-                case MQB.CustomData.DataType.Float: return Convert.ToSingle(str);
-                case MQB.CustomData.DataType.String: return str;
-                case MQB.CustomData.DataType.Custom: return str.FriendlyHexToByteArray();
-                case MQB.CustomData.DataType.Color: return ConvertValueToColor(str);
-                case MQB.CustomData.DataType.IntColor: return ConvertValueToColor(str);
-                case MQB.CustomData.DataType.Vector:
+                case MQB.Parameter.DataType.Bool: return Convert.ToBoolean(str);
+                case MQB.Parameter.DataType.SByte: return Convert.ToSByte(str);
+                case MQB.Parameter.DataType.Byte: return Convert.ToByte(str);
+                case MQB.Parameter.DataType.Short: return Convert.ToInt16(str);
+                case MQB.Parameter.DataType.Int: return Convert.ToInt32(str);
+                case MQB.Parameter.DataType.UInt: return Convert.ToUInt32(str);
+                case MQB.Parameter.DataType.Float: return Convert.ToSingle(str);
+                case MQB.Parameter.DataType.String: return str;
+                case MQB.Parameter.DataType.Custom: return str.FriendlyHexToByteArray();
+                case MQB.Parameter.DataType.Color: return ConvertValueToColor(str);
+                case MQB.Parameter.DataType.IntColor: return ConvertValueToColor(str);
+                case MQB.Parameter.DataType.Vector:
                     switch (memberCount)
                     {
                         case 2: return str.ToVector2();
                         case 3: return str.ToVector3();
                         case 4: return str.ToVector4();
-                        default: throw new NotSupportedException($"{nameof(MQB.CustomData.MemberCount)} {memberCount} not supported for: {nameof(MQB.CustomData.DataType.Vector)}");
+                        default: throw new NotSupportedException($"{nameof(MQB.Parameter.MemberCount)} {memberCount} not supported for: {nameof(MQB.Parameter.DataType.Vector)}");
                     }
-                default: throw new NotImplementedException($"Unimplemented custom data type: {type}");
+                default: throw new NotImplementedException($"Unimplemented parameter type: {type}");
             }
         }
         catch
         {
-            throw new FriendlyException($"The value \"{str}\" could not be converted to the type {type} during custom data repacking.");
+            throw new FriendlyException($"The value \"{str}\" could not be converted to the type {type} during parameter repacking.");
         }
     }
 

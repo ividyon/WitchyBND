@@ -44,9 +44,6 @@
           "System.ValueTuple": "[4.5.0, )",
           "ZstdNet": "[1.4.5, )"
         }
-      },
-      "studioutils": {
-        "type": "Project"
       }
     }
   }

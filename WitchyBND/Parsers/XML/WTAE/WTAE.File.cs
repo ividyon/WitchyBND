@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using SoulsFormats;
+using SoulsFormats.Formats.TAE;
 using WitchyBND.Services;
 using WitchyFormats;
 using WitchyLib;

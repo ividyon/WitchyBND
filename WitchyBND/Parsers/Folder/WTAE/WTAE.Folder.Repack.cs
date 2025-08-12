@@ -4,9 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using SoulsFormats;
-using WitchyBND.Errors;
-using WitchyFormats;
+using SoulsFormats.Formats.TAE;
 using WitchyLib;
 
 namespace WitchyBND.Parsers;
