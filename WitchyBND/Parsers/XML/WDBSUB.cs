@@ -1,4 +1,6 @@
-﻿using System.IO;
+using System;
+using System.Text;
+using System.IO;
 using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
@@ -32,6 +34,8 @@ namespace WitchyBND.Parsers
             XmlWriterSettings xws = new XmlWriterSettings();
             xws.Indent = true;
             xws.NewLineHandling = NewLineHandling.None; // Prevent \n from being turned into \r\n automatically
+            xws.NewLineChars = "\n"; // Use only \n as all files here appear to use them
+            xws.Encoding = Encoding.Unicode; // Ensure UTF16 files have the full range avaliable to them
             XmlWriter xw = XmlWriter.Create(GetUnpackDestPath(srcPath, recursive), xws);
             xw.WriteStartElement(XmlTag);
             xw.WriteElementString(nameof(dbs.Compression), dbs.Compression.ToString());
