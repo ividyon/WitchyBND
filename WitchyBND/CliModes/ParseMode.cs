@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using PPlus;
 using SoulsFormats;
 using WitchyBND.Parsers;
 using WitchyBND.Services;

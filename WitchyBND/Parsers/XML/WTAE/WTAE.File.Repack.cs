@@ -3,8 +3,8 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using SoulsFormats.Formats.TAE;
 using WitchyLib;
+using SoulsFormats;
 
 namespace WitchyBND.Parsers;
 

@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using SoulsFormats.Formats.TAE;
+using SoulsFormats;
 using WitchyLib;
 
 namespace WitchyBND.Parsers;

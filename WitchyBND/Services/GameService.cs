@@ -8,11 +8,11 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using PPlus.Controls;
-using SoulsFormats.Formats.TAE;
+using SoulsFormats;
 using WitchyBND.Errors;
 using WitchyBND.Parsers;
-using WitchyFormats;
 using WitchyLib;
+using PARAMDEF = WitchyFormats.PARAMDEF;
 
 namespace WitchyBND.Services;
 

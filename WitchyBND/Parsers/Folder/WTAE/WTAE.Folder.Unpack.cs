@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using SoulsFormats;
-using SoulsFormats.Formats.TAE;
 using WitchyBND.Services;
 using WitchyLib;
 

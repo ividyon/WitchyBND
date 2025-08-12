@@ -2,10 +2,8 @@
 using System.Drawing;
 using System.IO;
 using System.Numerics;
-using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
-using SoulsFormats.Formats.MQB;
 using WitchyLib;
 
 namespace WitchyBND.Parsers;
