@@ -147,7 +147,7 @@
       "witchyformats": {
         "type": "Project",
         "dependencies": {
-          "SoulsFormats": "[2.15.2, )"
+          "SoulsFormats": "[2.16.0, )"
         }
       }
     }

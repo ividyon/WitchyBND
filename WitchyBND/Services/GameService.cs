@@ -12,7 +12,6 @@ using SoulsFormats;
 using WitchyBND.Errors;
 using WitchyBND.Parsers;
 using WitchyLib;
-using PARAMDEF = WitchyFormats.PARAMDEF;
 
 namespace WitchyBND.Services;
 

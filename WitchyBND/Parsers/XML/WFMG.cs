@@ -26,7 +26,6 @@ public class WFMG : WXMLParser
     {
         FMG fmg = FMG.Read(srcPath);
         var xml = PrepareXmlManifest(srcPath, recursive, false, fmg.Compression, out XDocument xDoc, null);
-        
         xml.Add(
             new XElement("version", fmg.Version.ToString()), 
             new XElement("bigendian", fmg.BigEndian.ToString()));
@@ -43,7 +42,7 @@ public class WFMG : WXMLParser
         
         xml.Add(entries);
         
-        WriteXmlManifest(xDoc, srcPath, recursive);
+        WriteXmlManifest(xDoc, srcPath, recursive, false);
     }
 
     public override void Repack(string srcPath, bool recursive)

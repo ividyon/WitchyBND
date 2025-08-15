@@ -9,7 +9,7 @@ public class WFXR1 : WSerializedXMLParser
 {
     public override string Name => "FXR1";
     
-    public override int Version => WBUtil.WitchyVersionToInt("2.15.0.0");
+    public override int Version => WBUtil.WitchyVersionToInt("2.16.0.0");
 
     public override Type SerializedType => typeof(FXR1);
 

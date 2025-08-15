@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
@@ -88,10 +89,14 @@ public abstract class WFileParser
 
     public abstract string GetUnpackDestPath(string srcPath, bool recursive);
 
-    public virtual void WriteXmlManifest(XDocument xDoc, string srcPath, bool recursive)
+    public virtual void WriteXmlManifest(XDocument xDoc, string srcPath, bool recursive, bool indent = true)
     {
         var destPath = GetUnpackDestPath(srcPath, recursive);
-        xDoc.Save(destPath);
+        using var xw = new XmlTextWriter(destPath, Encoding.UTF8);
+        xw.Formatting = Formatting.Indented;
+        xw.Indentation = indent ? 2 : 0;
+        xDoc.WriteTo(xw);
+        xw.Close();
     }
     public virtual int GetUnpackedVersion(string path)
     {

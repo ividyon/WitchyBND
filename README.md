@@ -74,6 +74,7 @@ It is originally based on [Yabber](https://github.com/JKAnderson/Yabber) by TKGP
 * *ClayAmore* - ZSTD Decompression
 * *The12thAvenger*: FLVER improvements (SoulsFormatsNEXT)
 * *Shadowth117*: Console TPF handling (SoulsFormatsNEXT)
+* *Thegreatgramcracker*: FXR1 support
 * All SoulsFormatsNEXT contributors
 * All Paramdex contributors
 * *ivi* - WitchyBND maintainer
@@ -90,6 +91,17 @@ WitchyBND is built using the following licensed works:
 
 # Changelog
 ## WitchyBND
+
+### 2.16.0.0
+
+* Added a parser for FXR1 files from Dark Souls (thanks to Thegreatgramcracker).
+* Updated to the latest version of SoulsFormatsNEXT.
+* Updated the terminology in the MQB parser to reflect the SFN update.
+* Updated the backend for the TAE parser to be the new SFN class.
+* Made some fixes to the DBSUB writer.
+* Changes the FFXDLSE parser to use the serialized parser workflow.
+* Restored the un-indented nature of the FMG parser XML.
+* Removed indentation from the PARAM parser XML to save space.
 
 ### 2.15.1.1
 
