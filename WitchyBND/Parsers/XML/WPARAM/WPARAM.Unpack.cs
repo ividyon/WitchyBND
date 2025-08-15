@@ -10,7 +10,6 @@ using WitchyBND.Errors;
 using WitchyBND.Services;
 using WitchyFormats;
 using WitchyLib;
-using PARAMDEF = WitchyFormats.PARAMDEF;
 
 namespace WitchyBND.Parsers;
 
@@ -299,6 +298,6 @@ The error was:
             }
         }
         
-        WriteXmlManifest(xDoc, srcPath, recursive);
+        WriteXmlManifest(xDoc, srcPath, recursive, false);
     }
 }

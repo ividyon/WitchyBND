@@ -7,7 +7,6 @@ using SoulsFormats;
 using WitchyBND.Services;
 using WitchyFormats;
 using WitchyLib;
-using PARAMDEF = WitchyFormats.PARAMDEF;
 
 namespace WitchyBND.Parsers;
 

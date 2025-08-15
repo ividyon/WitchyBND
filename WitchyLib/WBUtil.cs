@@ -18,7 +18,6 @@ using PPlus;
 using SoulsFormats;
 using SoulsFormats.Cryptography;
 using SoulsFormats.Exceptions;
-using PARAMDEF = WitchyFormats.PARAMDEF;
 
 namespace WitchyLib;
 
