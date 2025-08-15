@@ -99,6 +99,16 @@ jobs:
           -ddwm
           3862 "WitchyBND-SHA${{ github.sha }}\WitchyBND-${{ github.ref_name }}.zip"
 
+      - name: Upload to Nightreign Nexus
+        run: drmu nexusmods upload
+          -f "WitchyBND"
+          -v "${{ github.ref_name }}"
+          -t Main
+          -d "For the list of changes, view the changelog [url=https://github.com/ividyon/WitchyBND]on the GitHub page[/url]."
+          -g eldenringnightreign
+          -ddwm
+          336 "WitchyBND-SHA${{ github.sha }}\WitchyBND-${{ github.ref_name }}.zip"
+
       - name: Upload to ACVI Nexus
         run: drmu nexusmods upload
           -f "WitchyBND"
