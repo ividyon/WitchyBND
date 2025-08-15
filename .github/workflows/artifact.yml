@@ -12,8 +12,8 @@ on:
     branches:
       - 'main'
       - 'feat/*'
-    tags-ignore:
-      - '**'
+    tags:
+      - '!**'
   pull_request:
     branches: [ "main" ]
 
