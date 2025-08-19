@@ -81,11 +81,11 @@ jobs:
           name: 'WitchyBND-SHA${{ github.sha }}'
           path: './bin/publish'
 
-  nexus:
-    runs-on: windows-latest
-    steps:
-     - name: Setup mod uploader
-       run: dotnet tool install -g Digitalroot.ModUploader
-
-     - name: Check mod uploader
-       run: drmu nx check
+#  nexus:
+#    runs-on: windows-latest
+#    steps:
+#     - name: Setup mod uploader
+#       run: dotnet tool install -g Digitalroot.ModUploader
+#
+#     - name: Check mod uploader
+#       run: drmu nx check
