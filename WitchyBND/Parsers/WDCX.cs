@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using System.Text;
+using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
 
@@ -60,13 +62,22 @@ public class WDCX : WSingleFileParser
     public string GetXmlPath(string path, bool recursive)
     {
         var innerPath = GetUnpackDestPath(path, recursive);
-        return $"{innerPath}-wbinder-dcx.xml";
+        return $"{innerPath}-wdcx.xml";
     }
 
     public string GetRepackXmlPath(string path, XElement? xml)
     {
         var innerPath = GetRepackDestPath(path, xml);
-        return $"{innerPath.Replace(".dcx", "")}-wbinder-dcx.xml";
+        return $"{innerPath.Replace(".dcx", "")}-wdcx.xml";
+    }
+    public override void WriteXmlManifest(XDocument xDoc, string srcPath, bool recursive, bool indent = true)
+    {
+        var destPath = GetXmlPath(srcPath, recursive);
+        using var xw = new XmlTextWriter(destPath, Encoding.UTF8);
+        xw.Formatting = Formatting.Indented;
+        xw.Indentation = indent ? 2 : 0;
+        xDoc.WriteTo(xw);
+        xw.Close();
     }
 
     public override bool Exists(string path)
