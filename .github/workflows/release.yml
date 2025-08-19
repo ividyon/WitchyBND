@@ -180,7 +180,7 @@ jobs:
 #          20 "WitchyBND-SHA${{ github.sha }}\WitchyBND-${{ github.ref_name }}.zip"
 
   release:
-#    needs: nexus
+    needs: build
     runs-on: windows-latest
     steps:
       - name: Checkout code
