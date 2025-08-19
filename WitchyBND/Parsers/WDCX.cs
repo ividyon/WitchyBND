@@ -92,7 +92,7 @@ public class WDCX : WSingleFileParser
 
     public override bool IsUnpacked(string path)
     {
-        var xmlPath = $"{path}-wbinder-dcx.xml";
+        var xmlPath = $"{path}-wdcx.xml";
         return File.Exists(xmlPath);
     }
 

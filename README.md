@@ -92,6 +92,10 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.16.0.2
+* 
+* Fixed an issue where attempting to re-DCX un-DCX-ed files would do nothing.
+
 ### 2.16.0.1
 
 * Fixed an issue where attempting to un-DCX files would just overwrite the decompressed file with its own XML manifest.

@@ -1,1 +1,2 @@
-* Fixed an issue where attempting to un-DCX files would just overwrite the decompressed file with its own XML manifest.
+* Fixed an issue where attempting to re-DCX un-DCX-ed files would do nothing.
+
