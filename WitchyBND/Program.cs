@@ -110,6 +110,8 @@ internal static class Program
 
                         if (Configuration.Active.Flexible)
                             BinaryReaderEx.IsFlexible = true;
+
+                        TAE.ValidateEventBank = false;
                     }
 
                     _output.DoubleDash($"{assembly.GetName().Name} {assembly.GetName().Version}");

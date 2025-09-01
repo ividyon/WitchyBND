@@ -92,8 +92,14 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.16.0.3
+
+* TAE parsing will now once again attempt to grab event templates from any event bank, to match DSAS behavior.
+* Updated known ELDEN RING regulation version.
+* Fixed an issue with FFXBND repacking where the parser would cluelessly pack duplicate files with the same file names from different folders. It will now instead throw an error and ask you to clean up the duplicates.
+
 ### 2.16.0.2
-* 
+ 
 * Fixed an issue where attempting to re-DCX un-DCX-ed files would do nothing.
 
 ### 2.16.0.1
