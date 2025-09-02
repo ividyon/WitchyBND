@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
@@ -89,10 +89,14 @@ public abstract class WFileParser
 
     public abstract string GetUnpackDestPath(string srcPath, bool recursive);
 
-    public virtual void WriteXmlManifest(XDocument xDoc, string srcPath, bool recursive)
+    public virtual void WriteXmlManifest(XDocument xDoc, string srcPath, bool recursive, bool indent = true)
     {
         var destPath = GetUnpackDestPath(srcPath, recursive);
-        xDoc.Save(destPath);
+        using var xw = new XmlTextWriter(destPath, Encoding.UTF8);
+        xw.Formatting = Formatting.Indented;
+        xw.Indentation = indent ? 2 : 0;
+        xDoc.WriteTo(xw);
+        xw.Close();
     }
     public virtual int GetUnpackedVersion(string path)
     {
@@ -151,6 +155,17 @@ public abstract class WFileParser
         if (!skipFilename)
             xml.AddFirst(new XElement("filename", Path.GetFileName(path)));
     }
+
+    public static WBUtil.GameType GetGameTypeFromXml(XElement xml)
+    {
+        var gameElement = xml.Element("game");
+        if (gameElement == null) throw new XmlException("XML has no Game element");
+        var gameString = gameElement.Value;
+        if (gameString == "ERN")
+            return WBUtil.GameType.NR;
+        Enum.TryParse(gameElement.Value, out WBUtil.GameType game);
+        return game;
+    }
     
     public static DCX.CompressionInfo ReadCompressionInfoFromXml(XElement xml)
     {
@@ -197,7 +212,8 @@ public abstract class WFileParser
                     byte.Parse(xml.Element("dfltUnk38")?.Value ?? ((byte)0x15).ToString())
                 );
             case DCX.Type.DCX_KRAK:
-                return new DCX.DcxKrakCompressionInfo(byte.Parse(xml.Element("compressionLevel")!.Value));
+                var compLevel = xml.Element("compressionLevel")?.Value ?? "6";
+                return new DCX.DcxKrakCompressionInfo(byte.Parse(compLevel));
             case DCX.Type.DCX_ZSTD:
                 return new DCX.DcxZstdCompressionInfo();
             default:

@@ -18,7 +18,6 @@ using PPlus;
 using SoulsFormats;
 using SoulsFormats.Cryptography;
 using SoulsFormats.Exceptions;
-using PARAMDEF = WitchyFormats.PARAMDEF;
 
 namespace WitchyLib;
 
@@ -203,7 +202,7 @@ public static class WBUtil
         [Display(Name = "ELDEN RING")] ER,
         [Display(Name = "Sekiro")] SDT,
         [Display(Name = "Armored Core VI")] AC6,
-        [Display(Name = "ELDEN RING NIGHTREIGN")] ERN
+        [Display(Name = "ELDEN RING NIGHTREIGN")] NR
     }
 
     public static string GetAssetsPath()
@@ -287,7 +286,7 @@ public static class WBUtil
             {
                 try
                 {
-                    game = GameType.ERN;
+                    game = GameType.NR;
                     return RegulationDecryptor.DecryptERNRRegulation(path);
                 }
                 catch (InvalidDataException e3)
@@ -311,7 +310,7 @@ public static class WBUtil
             case GameType.AC6:
                 RegulationDecryptor.EncryptAC6Regulation(path, bnd);
                 break;
-            case GameType.ERN:
+            case GameType.NR:
                 RegulationDecryptor.EncryptERNRRegulation(path, bnd);
                 break;
             default:
@@ -328,7 +327,7 @@ public static class WBUtil
         return game switch
         {
             GameType.ER => RegulationDecryptor.DecryptERRegulation(path),
-            GameType.ERN => RegulationDecryptor.DecryptERNRRegulation(path),
+            GameType.NR => RegulationDecryptor.DecryptERNRRegulation(path),
             GameType.AC6 => RegulationDecryptor.DecryptAC6Regulation(path),
             _ => throw new InvalidOperationException("Only Elden Ring, Nightreign and Armored Core VI have a regulation.bin")
         };

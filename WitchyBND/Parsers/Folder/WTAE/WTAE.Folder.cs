@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.Collections.Generic;
 using SoulsFormats;
 using WitchyBND.Services;
-using WitchyFormats;
 using WitchyLib;
 
 namespace WitchyBND.Parsers;
@@ -29,27 +25,6 @@ public partial class WTAEFolder : WFolderParser
             files.TryAdd(srcPath, (this, file));
 
         return true;
-    }
-
-    private static WBUtil.GameType FormatToGame(TAE.TAEFormat format)
-    {
-        switch (format)
-        {
-            case TAE.TAEFormat.DS1:
-                return WBUtil.GameType.DS1;
-            case TAE.TAEFormat.SOTFS:
-                return WBUtil.GameType.DS2;
-            case TAE.TAEFormat.DS3:
-                return WBUtil.GameType.DS3;
-            case TAE.TAEFormat.SDT:
-                return WBUtil.GameType.SDT;
-            case TAE.TAEFormat.DES:
-                return WBUtil.GameType.DES;
-            case TAE.TAEFormat.DESR:
-                return WBUtil.GameType.DES;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(format), format, null);
-        }
     }
 
     private static bool WarnedAboutTAEs { get; set; }

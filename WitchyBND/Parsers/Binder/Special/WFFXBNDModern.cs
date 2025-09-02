@@ -3,9 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
 using WitchyBND.CliModes;
@@ -174,6 +172,27 @@ public class WFFXBNDModern : WBinderParser
             .OrderBy(Path.GetFileName).ToList();
         List<string> resPaths = Directory.GetFiles(srcPath, "*.ffxreslist", SearchOption.AllDirectories)
             .OrderBy(Path.GetFileName).ToList();
+
+        // Sanity check duplicate file names
+        bool duplicateCallback(List<string> files)
+        {
+            var duplicates = files.GroupBy(f => Path.GetFileName(f)).Where(g => g.Count() > 1).ToList();
+            if (duplicates.Any())
+            {
+                var duplicateNames = duplicates.SelectMany(f => f).Select(f => $"- {f.Substring(srcPath.Length)}").ToList();
+                errorService.RegisterError($"Error: Duplicate files with the same name were detected in different folders.\nPlease resolve the duplicate entries before trying again:\n\n{string.Join(Environment.NewLine, duplicateNames)}\n");
+                return false;
+            }
+            return true;
+        }
+
+        bool duplicateAbort = !duplicateCallback(effectPaths) || !duplicateCallback(texturePaths) || !duplicateCallback(modelPaths) || !duplicateCallback(animPaths) || !duplicateCallback(resPaths);
+
+        if (duplicateAbort)
+        {
+            throw new FriendlyException(
+                "Could not proceed with FFXBND repacking due to duplicate files. See above for more information.");
+        }
 
         // Sanity check fxr and reslist
         // Every FXR must have a matching reslist with the exact same name and vice versa

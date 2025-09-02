@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
@@ -58,14 +59,13 @@ Simply replace the compression level in the {GetFolderXmlFilename()} file to thi
         return base.PrepareXmlManifest(srcPath, recursive, skipFilename, compression, out xDoc, root);
     }
 
-    public override void WriteXmlManifest(XDocument xDoc, string srcPath, bool recursive)
+    public override void WriteXmlManifest(XDocument xDoc, string srcPath, bool recursive, bool indent = true)
     {
         var destPath = GetUnpackDestPath(srcPath, recursive);
-        //xDoc.Save(GetFolderXmlPath(destPath));
-        using var xw = XmlWriter.Create(GetFolderXmlPath(destPath), new XmlWriterSettings
-        {
-            Indent = true
-        });
+
+        using var xw = new XmlTextWriter(GetFolderXmlPath(destPath), Encoding.UTF8);
+        xw.Formatting = Formatting.Indented;
+        xw.Indentation = indent ? 2 : 0;
         xDoc.WriteTo(xw);
         xw.Close();
     }

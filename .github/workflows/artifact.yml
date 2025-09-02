@@ -12,13 +12,13 @@ on:
     branches:
       - 'main'
       - 'feat/*'
-    tags-ignore:
-      - '**'
+    tags:
+      - '!**'
   pull_request:
     branches: [ "main" ]
 
 env:
-  DOTNET_VERSION: '8.0.408'
+  DOTNET_VERSION: '8.0.411'
   NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
   NEXUSMOD_API_KEY: ${{ secrets.NEXUSMOD_API_KEY }}
   NEXUSMOD_SESSION_COOKIE: ${{ secrets.NEXUSMOD_SESSION_COOKIE }}
@@ -81,11 +81,11 @@ jobs:
           name: 'WitchyBND-SHA${{ github.sha }}'
           path: './bin/publish'
 
-  nexus:
-    runs-on: windows-latest
-    steps:
-     - name: Setup mod uploader
-       run: dotnet tool install -g Digitalroot.ModUploader
-
-     - name: Check mod uploader
-       run: drmu nx check
+#  nexus:
+#    runs-on: windows-latest
+#    steps:
+#     - name: Setup mod uploader
+#       run: dotnet tool install -g Digitalroot.ModUploader
+#
+#     - name: Check mod uploader
+#       run: drmu nx check

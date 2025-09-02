@@ -110,6 +110,8 @@ internal static class Program
 
                         if (Configuration.Active.Flexible)
                             BinaryReaderEx.IsFlexible = true;
+
+                        TAE.ValidateEventBank = false;
                     }
 
                     _output.DoubleDash($"{assembly.GetName().Name} {assembly.GetName().Version}");
@@ -282,7 +284,7 @@ internal static class Program
         if (result == null)
             result = new Parser(with => { }).ParseArguments<T>(new[] { "--help" });
 
-        var helpText = HelpText.AutoBuild(result, h => {
+        HelpText? helpText = HelpText.AutoBuild(result, h => {
             h.AutoHelp = false;
             h.AutoVersion = false;
             h.AdditionalNewLineAfterOption = false;
