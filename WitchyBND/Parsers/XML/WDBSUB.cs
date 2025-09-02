@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using System.IO;
+using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;

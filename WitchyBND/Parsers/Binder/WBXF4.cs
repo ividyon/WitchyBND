@@ -72,7 +72,7 @@ public class WBXF4 : WBinderParser
                 new XElement("format", bxf.Format.ToString()),
                 new XElement("bigendian", bxf.BigEndian.ToString()),
                 new XElement("bitbigendian", bxf.BitBigEndian.ToString()),
-                new XElement("unicode", bxf.BitBigEndian.ToString()),
+                new XElement("unicode", bxf.Unicode.ToString()),
                 new XElement("extended", $"0x{bxf.Extended:X2}"),
                 new XElement("unk04", bxf.Unk04.ToString()),
                 new XElement("unk05", bxf.Unk05.ToString()),
