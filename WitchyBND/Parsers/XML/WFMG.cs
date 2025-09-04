@@ -30,6 +30,12 @@ public class WFMG : WXMLParser
             new XElement("version", fmg.Version.ToString()), 
             new XElement("bigendian", fmg.BigEndian.ToString()));
 
+        if (fmg.Unicode == false)
+            xml.Add(new XElement("unicode", fmg.Unicode.ToString()));
+
+        if (fmg.Md5 == true)
+            xml.Add(new XElement("md5", fmg.Md5.ToString()));
+
         var entries = new XElement("entries");
         
         fmg.Entries.Sort((e1, e2) => e1.ID.CompareTo(e2.ID));
@@ -54,6 +60,9 @@ public class WFMG : WXMLParser
 
         fmg.Version = (FMG.FMGVersion)Enum.Parse(typeof(FMG.FMGVersion), xml.Element("version")!.Value);
         fmg.BigEndian = bool.Parse(xml.Element("bigendian")!.Value);
+        fmg.Unicode = bool.Parse(xml.Element("unicode")?.Value ?? true.ToString());
+        fmg.Md5 = bool.Parse(xml.Element("md5")?.Value ?? false.ToString());
+        fmg.ReuseOffsets = bool.Parse(xml.Element("reuseoffsets")?.Value ?? false.ToString());
 
         foreach (XElement textNode in xml.Element("entries")!.Elements("text"))
         {
