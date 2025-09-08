@@ -92,6 +92,13 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 2.16.0.4
+
+* Updated SoulsFormatsNEXT to ward against the latest 'encryption technology'. The cat and mouse game marches ever onward, and the mouse never cured its severe brain damage.
+* Fixed a bug with unpacking certain BXF4 files with Unicode.
+* Updated FMG support to support Unicode and MD5 hashes.
+* Updated to .NET 9.
+
 ### 2.16.0.3
 
 * TAE parsing will now once again attempt to grab event templates from any event bank, to match DSAS behavior.
