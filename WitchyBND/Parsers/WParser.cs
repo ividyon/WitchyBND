@@ -166,7 +166,29 @@ public abstract class WFileParser
         Enum.TryParse(gameElement.Value, out WBUtil.GameType game);
         return game;
     }
-    
+    private static Oodle.OodleLZ_Compressor ParseOodleTypeOrDefault(string? text, Oodle.OodleLZ_Compressor @default)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return @default;
+        text = text.Trim();
+
+        if (int.TryParse(text, out int num) &&
+            Enum.IsDefined(typeof(Oodle.OodleLZ_Compressor), num))
+        {
+            return (Oodle.OodleLZ_Compressor)num;
+        }
+
+        string key = new string(text.Where(char.IsLetterOrDigit).ToArray()).ToUpperInvariant();
+        return key switch
+        {
+            "KRAK" or "KRAKEN" => Oodle.OodleLZ_Compressor.OodleLZ_Compressor_Kraken,
+            "MERM" or "MERMAID" => Oodle.OodleLZ_Compressor.OodleLZ_Compressor_Mermaid,
+            "LEVI" or "LEVIATHAN" => Oodle.OodleLZ_Compressor.OodleLZ_Compressor_Leviathan,
+            "SELK" or "SELKIE" => Oodle.OodleLZ_Compressor.OodleLZ_Compressor_Selkie,
+            "HYDR" or "HYDRA" => Oodle.OodleLZ_Compressor.OodleLZ_Compressor_Hydra,
+            _ => throw new ArgumentException($"Unknown oodleCompressorType: {text}")
+        };
+    }
+
     public static DCX.CompressionInfo ReadCompressionInfoFromXml(XElement xml)
     {
         string typeString = xml.Element("compression")?.Value ?? "None";
@@ -212,10 +234,15 @@ public abstract class WFileParser
                     byte.Parse(xml.Element("dfltUnk38")?.Value ?? ((byte)0x15).ToString())
                 );
             case DCX.Type.DCX_KRAK:
-                var compLevel = xml.Element("compressionLevel")?.Value ?? "6";
-                return new DCX.DcxKrakCompressionInfo(byte.Parse(compLevel));
+                    var compLevel = xml.Element("compressionLevel")?.Value ?? "6";
+                    var ot = xml.Element("oodleCompressorType")?.Value;
+                    var algo = ParseOodleTypeOrDefault(ot, Oodle.OodleLZ_Compressor.OodleLZ_Compressor_Kraken);
+
+                    return new DCX.DcxKrakCompressionInfo(byte.Parse(compLevel), algo);
             case DCX.Type.DCX_ZSTD:
-                return new DCX.DcxZstdCompressionInfo();
+                var zstdLevel = xml.Element("compressionLevel")?.Value ?? "15";
+
+                return new DCX.DcxZstdCompressionInfo(byte.Parse(zstdLevel));
             default:
                 throw new ArgumentOutOfRangeException();
         }
@@ -236,6 +263,10 @@ public abstract class WFileParser
                 break;
             case DCX.DcxKrakCompressionInfo krakCompression:
                 xml.Add(new XElement("compressionLevel", krakCompression.CompressionLevel.ToString()));
+                xml.Add(new XElement("oodleCompressorType", "KRAK"));
+                break;
+            case DCX.DcxZstdCompressionInfo ZstdCompression:
+                xml.Add(new XElement("compressionLevel", ZstdCompression.CompressionLevel.ToString()));
                 break;
         }
     }
