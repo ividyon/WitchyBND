@@ -14,6 +14,8 @@ namespace WitchyBND.Services
         public int AccruedErrorCount { get; }
         public int AccruedNoticeCount { get; }
 
+        public bool HasErrors { get; }
+
         public void RegisterNotice(string message, bool write = true);
         public void RegisterNotice(WitchyNotice notice, bool write = true);
         public void RegisterException(Exception e, string? source = null);
@@ -33,6 +35,7 @@ namespace WitchyBND.Services
 
         public int AccruedErrorCount => AccruedErrors.Count;
         public int AccruedNoticeCount => AccruedNotices.Count;
+        public bool HasErrors => AccruedErrors.Count > 0;
 
         public ErrorService(IOutputService outputService)
         {

@@ -35,7 +35,7 @@ internal static class Program
     }
 
     [STAThread]
-    static void Main(string[] args)
+    static int Main(string[] args)
     {
         Console.OutputEncoding = Encoding.UTF8;
         Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
@@ -114,6 +114,9 @@ internal static class Program
                         TAE.ValidateEventBank = false;
                     }
 
+                    if (Configuration.Active.NoColors)
+                        _output.EscapeColorTokens();
+
                     _output.DoubleDash($"{assembly.GetName().Name} {assembly.GetName().Version}");
 
                     if (!string.IsNullOrWhiteSpace(opt.Location))
@@ -162,7 +165,7 @@ internal static class Program
                     {
                         case CliMode.Parse:
                             Oodle.GrabOodle(_ => { }, false, true);
-                            DisplayConfiguration(mode);
+                            PrintConfiguration(mode);
 
                             Stopwatch watch = new Stopwatch();
 
@@ -185,7 +188,7 @@ internal static class Program
                             break;
                         case CliMode.Watch:
                             Oodle.GrabOodle(_ => { }, false, true);
-                            DisplayConfiguration(mode);
+                            PrintConfiguration(mode);
                             WatcherMode.CliWatcherMode(opt);
                             PrintIssues();
                             PrintFinale();
@@ -205,6 +208,9 @@ internal static class Program
                 }
             })
             .WithNotParsed(errors => { DisplayHelp(parserResult, errors); });
+        if (_errorService.HasErrors)
+            return -1;
+        return 0;
     }
 
     private static void PrintIssues()
@@ -236,34 +242,37 @@ internal static class Program
         }
     }
 
-    private static void DisplayConfiguration(CliMode mode)
+    private static void PrintConfiguration(CliMode mode)
     {
-        var infoTable = new Dictionary<string, string>
+        var infoTable = new Dictionary<string, (string, string?)>
         {
-            { "Selected mode", mode.ToString() },
-            { "Specialized BND handling", Configuration.Active.Bnd.ToString() },
-            { "DCX decompression only", Configuration.Active.Dcx.ToString() },
-            { "Store PARAM field default values", Configuration.ParamDefaultValues.ToString() },
-            { "Recursive binder processing", Configuration.Active.Recursive.ToString() },
-            { "Parallel processing", Configuration.Active.Parallel.ToString() },
-            { "Flexible extraction", Configuration.Active.Flexible.ToString() }
+            { "Selected mode", (mode.ToString(), null) },
+            { "Specialized BND handling", (Configuration.Active.Bnd.ToString(), Configuration.Default.Bnd.ToString()) },
+            { "DCX decompression only", (Configuration.Active.Dcx.ToString(), Configuration.Default.Dcx.ToString()) },
+            { "Store PARAM field default values", (Configuration.ParamDefaultValues.ToString(), true.ToString()) },
+            { "Recursive binder processing", (Configuration.Active.Recursive.ToString(), Configuration.Default.Recursive.ToString()) },
+            { "Parallel processing", (Configuration.Active.Parallel.ToString(), Configuration.Default.Parallel.ToString()) },
+            { "Flexible extraction", (Configuration.Active.Flexible.ToString(), Configuration.Default.Flexible.ToString()) }
         };
 
         if (Configuration.Active.Passive)
-            infoTable.Add("Passive", Configuration.Active.Passive.ToString());
+            infoTable.Add("Passive", (Configuration.Active.Passive.ToString(), false.ToString()));
         if (!string.IsNullOrEmpty(Configuration.Active.Location))
-            infoTable.Add("Location", Configuration.Active.Location);
+            infoTable.Add("Location", (Configuration.Active.Location, string.Empty));
         if (Configuration.Active.RepackOnly)
-            infoTable.Add("Repack only", Configuration.Active.RepackOnly.ToString());
+            infoTable.Add("Repack only", (Configuration.Active.RepackOnly.ToString(), false.ToString()));
         if (Configuration.Active.UnpackOnly)
-            infoTable.Add("Unpack only", Configuration.Active.UnpackOnly.ToString());
+            infoTable.Add("Unpack only", (Configuration.Active.UnpackOnly.ToString(), false.ToString()));
 
         var longest = infoTable.Keys.MaxBy(s => s.Length).Length;
 
         _output.SingleDash("Configuration");
-        foreach ((string name, string value) in infoTable)
+        foreach ((string name, (string, string?) value) in infoTable)
         {
-            _output.WriteLine($"{name.PadLeft(longest)}: {value}");
+            string valueOutput = value.Item1;
+            if (!string.IsNullOrWhiteSpace(value.Item2) && value.Item1 != value.Item2)
+                valueOutput = $"[yellow]{valueOutput}[/]";
+            _output.WriteLine($"{name.PadLeft(longest)}: {valueOutput}");
         }
 
         _output.WriteLine("-------------");

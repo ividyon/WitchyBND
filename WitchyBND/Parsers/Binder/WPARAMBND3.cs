@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using PPlus;
 using SoulsFormats;
 using WitchyBND.CliModes;
 using WitchyLib;
@@ -46,7 +47,12 @@ public class WPARAMBND3 : WBinderParser
             return false;
         }
         BND3 bnd = (file as BND3)!;
-        return IsDSRParamBND(bnd) || IsPTDEParamBND(bnd) || IsAC4Regulation(bnd) || IsACFARegulation(bnd) || IsACFABoot(bnd);
+        bool check = IsDSRParamBND(bnd) || IsPTDEParamBND(bnd) || IsAC4Regulation(bnd) || IsACFARegulation(bnd) ||
+                     IsACFABoot(bnd);
+        if (!check)
+            file = null;
+
+        return check;
     }
 
     public override bool? IsSimple(string path)
@@ -57,6 +63,7 @@ public class WPARAMBND3 : WBinderParser
     public override bool IsUnpacked(string path)
     {
         if (!Directory.Exists(path)) return false;
+        PromptPlus.WriteLine("Tried IsUnpacked");
 
         string xmlPath = Path.Combine(path, GetFolderXmlFilename("bnd3"));
         if (!File.Exists(xmlPath)) return false;

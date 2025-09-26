@@ -1,4 +1,5 @@
-* Updated SoulsFormatsNEXT to ward against the latest 'encryption technology'. The cat and mouse game marches ever onward, and the mouse never cured its severe brain damage.
-* Fixed a bug with unpacking certain BXF4 files with Unicode.
-* Updated FMG support to support Unicode and MD5 hashes.
-* Updated to .NET 9.
+* Added support for Oodle compression types which aren't used by Fromsoft, just because, and more robust detection of corrupting nonsense. Credits to colaaaaaa123.
+* Witchy will now return a non-standard return code if there were any errors during its operation, allowing batch scripts to catch errors.
+* Non-default config values are now highlighted in yellow during startup.
+* Fixed an issue where BND3s during recursive processing would erroneously be detected as PARAMBND3.
+* Fixed an issue where TAE enums could not properly be read during repack.

@@ -2,7 +2,7 @@
     <PropertyGroup>
         <Authors>ividyon</Authors>
         <Company>ividyon</Company>
-        <Version>2.16.0.4</Version>
+        <Version>2.16.0.5</Version>
         <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=./</PathMap>
     </PropertyGroup>
 </Project>

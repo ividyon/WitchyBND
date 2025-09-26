@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text.Json;
 using CommandLine;
@@ -114,9 +115,12 @@ public static class Configuration
         public WBUtil.BackupMethod BackupMethod { get; set; }
 
         public bool GitBackup { get; set; }
+
+        public bool NoColors { get; set; }
     }
 
     public static StoredConfig Stored;
+    public static StoredConfig Default;
     public static ActiveConfig Active;
 
     public static string AppDataDirectory =
@@ -145,20 +149,24 @@ public static class Configuration
         var builder = new ConfigurationBuilder();
         bool breakOut = false;
         string userSettingsPath = Path.Combine(AppDataDirectory, "appsettings.user.json");
+        string defaultSettingsPath = WBUtil.GetExeLocation("appsettings.json");
         string debugSettingsPath = WBUtil.GetExeLocation("appsettings.debug.json");
+        string overrideSettingsPath = WBUtil.GetExeLocation("appsettings.override.json");
         while (!breakOut)
         {
             try
             {
                 IConfigurationRoot config;
-                builder.AddJsonFile(WBUtil.GetExeLocation("appsettings.json"), true);
+                builder.AddJsonFile(defaultSettingsPath, true);
 
+                var defaultConfig = builder.Build();
+                Default = defaultConfig.Get<StoredConfig>() ?? new StoredConfig();
                 if (IsDebug || IsTest)
                     builder.AddJsonFile(debugSettingsPath, true);
                 else
                     builder.AddJsonFile(userSettingsPath, true);
 
-                builder.AddJsonFile(WBUtil.GetExeLocation("appsettings.override.json"), true);
+                builder.AddJsonFile(overrideSettingsPath, true);
 
                 breakOut = true;
                 config = builder.Build();

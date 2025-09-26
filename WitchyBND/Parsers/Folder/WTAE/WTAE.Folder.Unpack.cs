@@ -106,7 +106,7 @@ public partial class WTAEFolder
                         eventEl.AddE("params", ev.Parameters?.Values.Select(p => {
                             var paramEl = new XElement("param");
                             paramEl.SetAttributeValue("name", p.Key);
-                            paramEl.SetAttributeValue("value", p.Value);
+                            paramEl.SetAttributeValue("value", ev.Parameters.Template[p.Key].ValueToString(p.Value));
                             return paramEl;
                         }));
                     }

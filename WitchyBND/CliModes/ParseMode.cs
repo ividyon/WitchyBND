@@ -107,6 +107,7 @@ public static class ParseMode
                         break;
                 }
             }
+            output.WriteLine($"Preprocessing complete.");
         }
 
         if (Configuration.Active.Parallel)
@@ -147,9 +148,9 @@ public static class ParseMode
 
                     innerParsed = errorService.Catch(() => {
                         ISoulsFile? parsedFile = null;
-                        if ((Configuration.Active.UnpackOnly || !Configuration.Active.RepackOnly) && (file != null ||
-                                (parser.Exists(path) &&
-                                 parser.Is(path, data, out parsedFile))))
+                        if ((Configuration.Active.UnpackOnly || !Configuration.Active.RepackOnly) &&
+                            (file != null ||
+                                (parser.Exists(path) && parser.Is(path, data, out parsedFile))))
                         {
                             file ??= parsedFile;
                             innerMatch = true;
