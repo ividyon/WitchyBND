@@ -13,6 +13,8 @@ public class WTPF : WFolderParser
 {
     public override string Name => "TPF";
 
+    public override int Version => WBUtil.WitchyVersionToInt("2.17.0.0");
+
 
     private static readonly List<TPF.TPFPlatform> UnpackPlatforms = new()
     {
@@ -64,6 +66,9 @@ public class WTPF : WFolderParser
             texElement.Add(new XElement("format", texture.Format.ToString()),
                 new XElement("flags1", $"0x{texture.Flags1:X2}"));
 
+            if (tpf.Platform == TPF.TPFPlatform.PS4)
+                texElement.Add(new XElement("unk2", $"0x{texture.Header.Unk2:X2}"));
+
             if (texture.FloatStruct != null)
             {
                 var floatStruct = new XElement("FloatStruct");
@@ -76,7 +81,7 @@ public class WTPF : WFolderParser
                 texElement.Add(floatStruct);
             }
 
-            File.WriteAllBytes($"{destDir}\\{WBUtil.SanitizeFilename(texture.Name)}.dds", texture.Headerize());
+            File.WriteAllBytes(Path.Combine(destDir, $"{WBUtil.SanitizeFilename(texture.Name)}.dds"), texture.Headerize());
             textures.Add(texElement);
         }
 
@@ -132,8 +137,12 @@ public class WTPF : WFolderParser
                     floatStruct.Values.Add(float.Parse(valueNode.Value));
             }
 
-            byte[] bytes = File.ReadAllBytes($"{srcPath}\\{outName}.dds");
+            byte[] bytes = File.ReadAllBytes(Path.Combine(srcPath, $"{outName}.dds"));
             var texture = new TPF.Texture(inName, format, flags1, bytes, platform);
+            if (platform == TPF.TPFPlatform.PS4)
+            {
+                texture.Header.Unk2 = Convert.ToInt32(texNode.Element("unk2")!.Value, 16);
+            }
             texture.FloatStruct = floatStruct;
             tpf.Textures.Add(texture);
         }
@@ -142,6 +151,6 @@ public class WTPF : WFolderParser
         Backup(outPath);
 
         WarnAboutKrak(tpf.Compression, tpf.Textures.Count);
-        tpf.TryWriteSoulsFile(outPath);
+        tpf.Write(outPath);
     }
 }

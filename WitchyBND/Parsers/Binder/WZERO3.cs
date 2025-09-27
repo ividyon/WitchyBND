@@ -31,7 +31,7 @@ public class WZERO3 : WFolderParser
         var targetDir = GetUnpackDestPath(srcPath, recursive);
         foreach (Zero3.File file in z3.Files)
         {
-            string outPath = $@"{targetDir}\{file.Name.Replace('/', '\\')}";
+            string outPath = $@"{targetDir}{Path.DirectorySeparatorChar}{file.Name.Replace('/', Path.DirectorySeparatorChar)}";
             Directory.CreateDirectory(Path.GetDirectoryName(outPath));
             File.WriteAllBytes(outPath, file.Bytes);
         }

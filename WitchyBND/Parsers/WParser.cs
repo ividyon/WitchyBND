@@ -137,7 +137,7 @@ public abstract class WFileParser
             string srcPath = Path.GetDirectoryName(path)!;
             if (location.StartsWith(srcPath))
                 srcPath = Path.GetRelativePath(location, srcPath);
-            xw.WriteElementString("sourcePath", srcPath);
+            xw.WriteElementString("sourcePath", srcPath.Replace(Path.DirectorySeparatorChar, '\\'));
         }
         if (!skipFilename)
             xw.WriteElementString("filename",  Path.GetFileName(path));
@@ -150,7 +150,7 @@ public abstract class WFileParser
             string srcPath = Path.GetDirectoryName(path)!;
             if (location.StartsWith(srcPath))
                 srcPath = Path.GetRelativePath(location, srcPath);
-            xml.AddFirst(new XElement("sourcePath", srcPath));
+            xml.AddFirst(new XElement("sourcePath", srcPath.Replace(Path.DirectorySeparatorChar, '\\')));
         }
         if (!skipFilename)
             xml.AddFirst(new XElement("filename", Path.GetFileName(path)));
@@ -420,7 +420,8 @@ public abstract class WXMLParser : WSingleFileParser
         var path = xml.Element("sourcePath")?.Value;
         if (path != null)
         {
-            return $"{path}\\{Path.GetFileName(srcPath).Replace(".xml", "")}";
+            path = path.Replace('\\', Path.DirectorySeparatorChar);
+            return Path.Combine(path, Path.GetFileName(srcPath).Replace(".xml", String.Empty));
         }
         return srcPath.Replace(".xml", "");
     }

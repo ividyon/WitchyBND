@@ -74,29 +74,29 @@ public class WFFXBNDModern : WBinderParser
             ? new DirectoryInfo(Path.GetDirectoryName(firstEffect.Name)!).Name
             : "effect";
         if (firstEffect != null) xml.Add(new XElement("effectDir", effectDir));
-        var effectTargetDir = $@"{destDir}\{effectDir}";
+        var effectTargetDir = Path.Combine(destDir, effectDir);
 
         var firstTexture = bnd.Files.FirstOrDefault(f => f.Name.EndsWith(".tpf"));
         var textureDir = firstTexture != null
             ? new DirectoryInfo(Path.GetDirectoryName(firstTexture.Name)!).Name
             : "texture";
         if (firstTexture != null) xml.Add(new XElement("textureDir", textureDir));
-        var textureTargetDir = $@"{destDir}\{textureDir}";
+        var textureTargetDir = Path.Combine(destDir, textureDir);
 
         var firstModel = bnd.Files.FirstOrDefault(f => f.Name.EndsWith(".flver"));
         var modelDir = firstModel != null ? new DirectoryInfo(Path.GetDirectoryName(firstModel.Name)!).Name : "model";
         if (firstModel != null) xml.Add(new XElement("modelDir", modelDir));
-        var modelTargetDir = $@"{destDir}\{modelDir}";
+        var modelTargetDir = Path.Combine(destDir, modelDir);
 
         var firstAnim = bnd.Files.FirstOrDefault(f => f.Name.EndsWith(".anibnd"));
         var animDir = firstAnim != null ? new DirectoryInfo(Path.GetDirectoryName(firstAnim.Name)!).Name : "animation";
         if (firstAnim != null) xml.Add(new XElement("animDir", animDir));
-        var animTargetDir = $@"{destDir}\{animDir}";
+        var animTargetDir = Path.Combine(destDir, animDir);
 
         var firstRes = bnd.Files.FirstOrDefault(f => f.Name.EndsWith(".ffxreslist"));
         var resDir = firstRes != null ? new DirectoryInfo(Path.GetDirectoryName(firstRes.Name)!).Name : "resource";
         if (firstRes != null) xml.Add(new XElement("resDir", resDir));
-        var resTargetDir = $@"{destDir}\{resDir}";
+        var resTargetDir = Path.Combine(destDir, resDir);
 
         WriteXmlManifest(xDoc, srcPath, recursive);
 
@@ -126,13 +126,13 @@ public class WFFXBNDModern : WBinderParser
                     fileTargetDir = resTargetDir;
                     break;
                 default:
-                    fileTargetDir = $@"{destDir}\other";
+                    fileTargetDir = Path.Combine(destDir, "other");
                     break;
             }
 
             if (!Directory.Exists(fileTargetDir))
                 Directory.CreateDirectory(fileTargetDir);
-            File.WriteAllBytes($"{fileTargetDir}\\{fileTargetName}", bytes);
+            File.WriteAllBytes(Path.Combine(fileTargetDir, fileTargetName), bytes);
         }
 
         if (Configuration.Active.Parallel)

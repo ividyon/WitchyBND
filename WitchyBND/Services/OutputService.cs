@@ -44,8 +44,11 @@ public class OutputService : IOutputService
 {
     public OutputService()
     {
-        if (WBUtil.GetConsoleWindow() != IntPtr.Zero)
-            PromptPlus.Config.DefaultCulture = new CultureInfo("en-us");
+        PromptPlus.Config.DefaultCulture = new CultureInfo("en-us");
+        if (!OperatingSystem.IsWindows())
+        {
+            PromptPlus.ResetColor();
+        }
     }
 
     public object ConsoleWriterLock => new();

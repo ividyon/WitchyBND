@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Microsoft.Win32;
 using NativeFileDialogSharp;
+using SoulsFormats;
 
 namespace SoulsOodleLib
 {
@@ -19,37 +21,75 @@ namespace SoulsOodleLib
             Nightreign
         }
 
-        private static Dictionary<Game, string> SearchPaths = new()
+        private static readonly Dictionary<Game, string> steamSearchPaths = new()
         {
-            { Game.EldenRing, @"\steamapps\common\ELDEN RING\Game" },
-            { Game.ArmoredCore6, @"\steamapps\common\ARMORED CORE VI FIRES OF RUBICON\Game" },
-            { Game.Sekiro, @"\steamapps\common\Sekiro" },
-            { Game.Nightreign, @"\steamapps\common\ELDEN RING NIGHTREIGN\Game" }
+            { Game.EldenRing, @$"{Path.DirectorySeparatorChar}steamapps{Path.DirectorySeparatorChar}common{Path.DirectorySeparatorChar}ELDEN RING{Path.DirectorySeparatorChar}Game" },
+            { Game.ArmoredCore6, @$"{Path.DirectorySeparatorChar}steamapps{Path.DirectorySeparatorChar}common{Path.DirectorySeparatorChar}ARMORED CORE VI FIRES OF RUBICON{Path.DirectorySeparatorChar}Game" },
+            { Game.Sekiro, @$"{Path.DirectorySeparatorChar}steamapps{Path.DirectorySeparatorChar}common{Path.DirectorySeparatorChar}Sekiro" },
+            { Game.Nightreign, @$"{Path.DirectorySeparatorChar}steamapps{Path.DirectorySeparatorChar}common{Path.DirectorySeparatorChar}ELDEN RING NIGHTREIGN{Path.DirectorySeparatorChar}Game" }
         };
 
-        private static Dictionary<Game, string> InstallPaths = new();
-        static (string, string)[] _pathValueTuple =
+        private static readonly Dictionary<Game, string> installPaths = new();
+
+        private static readonly (string, string)[] winRegistryPathValueTuple =
         {
-            (@"HKEY_CURRENT_USER\SOFTWARE\Valve\Steam", "SteamPath"),
+            (@"HKEY_CURRENT_USER\SOFTWARE\Wow6432Node\Valve\Steam", "InstallPath"),
+            (@"HKEY_CURRENT_USER\SOFTWARE\Valve\Steam", "InstallPath"),
             (@"HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Valve\Steam", "InstallPath"),
             (@"HKEY_LOCAL_MACHINE\SOFTWARE\Valve\Steam", "InstallPath"),
-            (@"HKEY_CURRENT_USER\SOFTWARE\Wow6432Node\Valve\Steam", "SteamPath"),
         };
 
-        public static string GetSteamInstallPath()
+        public static string? GetSteamInstallPath()
         {
-            string installPath;
 
-            foreach ((string Path, string Value) pathValueTuple in _pathValueTuple)
+            string? installPath = null;
+            // TODO: Linux support
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                string registryKey = pathValueTuple.Path;
-                installPath = (string)Registry.GetValue(registryKey, pathValueTuple.Value, null);
-
-                if (installPath != null)
-                    return installPath;
+                foreach ((string Path, string Value) pathValueTuple in winRegistryPathValueTuple)
+                {
+                    string registryKey = pathValueTuple.Path;
+                    var regPath = (string?)Registry.GetValue(registryKey, pathValueTuple.Value, null);
+                    if (Directory.Exists(regPath))
+                    {
+                        installPath = regPath;
+                        break;
+                    }
+                }
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                var homeDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                var snapDir = Environment.GetEnvironmentVariable("SNAP_USER_DATA");
+                if (snapDir == null)
+                    snapDir = Path.Combine(homeDir, "snap");
+                HashSet<string> possiblePaths =
+                [
+                    // snap
+                    Path.Combine(homeDir, ".var/app/com.valvesoftware.Steam/.local/share/Steam"),
+                    Path.Combine(homeDir, ".var/app/com.valvesoftware.Steam/.steam/steam"),
+                    Path.Combine(homeDir, ".var/app/com.valvesoftware.Steam/.steam/root"),
+                    // regular
+                    Path.Combine(homeDir, ".local/share/Steam"),
+                    Path.Combine(homeDir, ".steam/steam"),
+                    Path.Combine(homeDir, ".steam/root"),
+                    Path.Combine(homeDir, ".steam/debian-installation"),
+                    // snap
+                    Path.Combine(snapDir, "steam/common/.local/share/Steam"),
+                    Path.Combine(snapDir, "steam/common/.steam/steam"),
+                    Path.Combine(snapDir, "steam/common/.steam/root")
+                ];
+                foreach (string possiblePath in possiblePaths)
+                {
+                    if (Directory.Exists(possiblePath))
+                    {
+                        installPath = possiblePath;
+                        break;
+                    }
+                }
             }
 
-            return null;
+            return installPath;
         }
 
         public static string? TryGetGameInstallLocation(string gamePath)
@@ -57,12 +97,12 @@ namespace SoulsOodleLib
             if (!gamePath.StartsWith("\\") && !gamePath.StartsWith("/"))
                 return null;
 
-            string steamPath = GetSteamInstallPath();
+            string? steamPath = GetSteamInstallPath();
 
-            if (string.IsNullOrWhiteSpace(steamPath) || !File.Exists($@"{steamPath}\SteamApps\libraryfolders.vdf"))
+            if (string.IsNullOrWhiteSpace(steamPath) || !File.Exists(Path.Combine(steamPath, "SteamApps", "libraryfolders.vdf")))
                 return null;
 
-            string[] libraryFolders = File.ReadAllLines($@"{steamPath}\SteamApps\libraryfolders.vdf");
+            string[] libraryFolders = File.ReadAllLines(Path.Combine(steamPath, "SteamApps", "libraryfolders.vdf"));
 
             var pathStrings = libraryFolders.Where(str => str.Contains("\"path\""));
             var paths = pathStrings.Select(str =>
@@ -76,7 +116,7 @@ namespace SoulsOodleLib
 
             foreach (string path in paths)
             {
-                string libraryPath = path.Replace(@"\\", @"\") + gamePath;
+                string libraryPath = path.Replace(@"\\", Path.DirectorySeparatorChar.ToString()) + gamePath;
                 if (Directory.Exists(libraryPath))
                     return libraryPath;
             }
@@ -87,17 +127,17 @@ namespace SoulsOodleLib
         public static string? GetGamePath(IEnumerable<Game> inputGames, Action<string> writeLineFunction, bool useFolderPicker)
         {
             IEnumerable<Game> games = inputGames as Game[] ?? inputGames.ToArray();
-            if (InstallPaths.Keys.Intersect(games).Any())
-                return InstallPaths[InstallPaths.Keys.Intersect(games).First()];
+            if (installPaths.Keys.Intersect(games).Any())
+                return installPaths[installPaths.Keys.Intersect(games).First()];
 
             string? path = null;
 
             foreach (Game game in games)
             {
-                path = TryGetGameInstallLocation(SearchPaths[game]);
+                path = TryGetGameInstallLocation(steamSearchPaths[game]);
                 if (path != null)
                 {
-                    InstallPaths[game] = path;
+                    installPaths[game] = path;
                     break;
                 }
             }
@@ -110,7 +150,7 @@ namespace SoulsOodleLib
                 var result = Dialog.FolderPicker();
                 if (result.IsOk)
                 {
-                    InstallPaths[games.First()] = result.Path;
+                    installPaths[games.First()] = result.Path;
                     path = result.Path;
                 }
             }

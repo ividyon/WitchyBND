@@ -7,6 +7,7 @@ using System.IO.Enumeration;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -102,16 +103,29 @@ public class UpdateService : IUpdateService
                     switch (select.Value)
                     {
                         case UpdateOptions.Update:
-                            try
+                            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                             {
-                                UpdateSelf(args);
+                                try
+                                {
+                                    UpdateSelf(args);
+                                }
+                                catch (Exception e)
+                                {
+                                    errorService.CriticalError(e.ToString());
+                                }
                             }
-                            catch (Exception e)
+                            else
                             {
-                                errorService.CriticalError(e.ToString());
+                                output.WriteLine("Automatic updating is currently only supported for Windows. Please download the new version manually.");
+                                var downloadConfirm = output.Confirm("Would you like to go to the download page?").Run();
+                                if (downloadConfirm.Value.IsYesResponseKey())
+                                {
+                                    Process.Start(new ProcessStartInfo
+                                        { FileName = ReleaseNotesUrl, UseShellExecute = true });
+                                }
                             }
-
                             loop = false;
+                            output.KeyPress("Press any key to continue...").Run();
                             break;
                         case UpdateOptions.ReleaseNotes:
                             Process.Start(
@@ -191,7 +205,7 @@ public class UpdateService : IUpdateService
             }
 
             // 2.11.0.1: Fix old PATH
-            if (Configuration.Stored.LastLaunchedVersion < new Version(2, 11, 0, 1))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Configuration.Stored.LastLaunchedVersion < new Version(2, 11, 0, 1))
             {
                 var exePath = Path.GetDirectoryName(AppContext.BaseDirectory)!;
                 var name = "PATH";

@@ -63,7 +63,6 @@ public class WPARAMBND3 : WBinderParser
     public override bool IsUnpacked(string path)
     {
         if (!Directory.Exists(path)) return false;
-        PromptPlus.WriteLine("Tried IsUnpacked");
 
         string xmlPath = Path.Combine(path, GetFolderXmlFilename("bnd3"));
         if (!File.Exists(xmlPath)) return false;

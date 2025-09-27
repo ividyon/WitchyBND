@@ -41,11 +41,18 @@ internal static class Program
         Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
         Assembly assembly = Assembly.GetExecutingAssembly();
+        // AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
 
         var parser = new Parser(with => {
             // with.AutoHelp = false;
             // with.AutoVersion = false;
         });
+
+        RuntimeHelpers.RunClassConstructor(typeof(Configuration).TypeHandle);
+        ServiceProvider.InitializeProvider();
+        _errorService = ServiceProvider.GetService<IErrorService>();
+        _updateService = ServiceProvider.GetService<IUpdateService>();
+        _output = ServiceProvider.GetService<IOutputService>();
 
         var parserResult = parser.ParseArguments<CliOptions>(args);
         parserResult.WithParsed(opt => {
@@ -56,12 +63,6 @@ internal static class Program
                         Configuration.Active.Silent = opt.Silent;
                         Configuration.Active.Passive = opt.Silent;
                     }
-
-                    RuntimeHelpers.RunClassConstructor(typeof(Configuration).TypeHandle);
-                    ServiceProvider.InitializeProvider();
-                    _errorService = ServiceProvider.GetService<IErrorService>();
-                    _updateService = ServiceProvider.GetService<IUpdateService>();
-                    _output = ServiceProvider.GetService<IOutputService>();
 
                     // Override configuration
                     if (opt.Help)
@@ -114,9 +115,6 @@ internal static class Program
                         TAE.ValidateEventBank = false;
                     }
 
-                    if (Configuration.Active.NoColors)
-                        _output.EscapeColorTokens();
-
                     _output.DoubleDash($"{assembly.GetName().Name} {assembly.GetName().Version}");
 
                     if (!string.IsNullOrWhiteSpace(opt.Location))
@@ -164,12 +162,12 @@ internal static class Program
                     switch (mode)
                     {
                         case CliMode.Parse:
-                            Oodle.GrabOodle(_ => { }, false, true);
                             PrintConfiguration(mode);
 
                             Stopwatch watch = new Stopwatch();
 
                             watch.Start();
+                            Oodle.GrabOodle(message => _output.WriteLine(message), false, true);
                             ParseMode.CliParseMode(opt);
                             watch.Stop();
 
@@ -187,8 +185,8 @@ internal static class Program
                             PrintFinale(pause);
                             break;
                         case CliMode.Watch:
-                            Oodle.GrabOodle(_ => { }, false, true);
                             PrintConfiguration(mode);
+                            Oodle.GrabOodle(_ => { }, false, true);
                             WatcherMode.CliWatcherMode(opt);
                             PrintIssues();
                             PrintFinale();
@@ -212,6 +210,21 @@ internal static class Program
             return -1;
         return 0;
     }
+
+    // private static Assembly? CurrentDomainOnAssemblyResolve(object? sender, ResolveEventArgs args)
+    // {
+    //     string dllName = args.Name.Contains(',') ? args.Name.Substring(0, args.Name.IndexOf(',')) : args.Name.Replace(".dll","");
+    //
+    //     dllName = dllName.Replace(".", "_").Replace("-", "_");
+    //
+    //     if (dllName.EndsWith("_resources")) return null;
+    //
+    //     System.Resources.ResourceManager rm = new System.Resources.ResourceManager(AppDomain.CurrentDomain.Asse + ".Properties.Resources", System.Reflection.Assembly.GetExecutingAssembly());
+    //
+    //     byte[] bytes = (byte[])rm.GetObject(dllName);
+    //
+    //     return System.Reflection.Assembly.Load(bytes);
+    // }
 
     private static void PrintIssues()
     {
@@ -270,7 +283,7 @@ internal static class Program
         foreach ((string name, (string, string?) value) in infoTable)
         {
             string valueOutput = value.Item1;
-            if (!string.IsNullOrWhiteSpace(value.Item2) && value.Item1 != value.Item2)
+            if (OperatingSystem.IsWindows() && !string.IsNullOrWhiteSpace(value.Item2) && value.Item1 != value.Item2)
                 valueOutput = $"[yellow]{valueOutput}[/]";
             _output.WriteLine($"{name.PadLeft(longest)}: {valueOutput}");
         }

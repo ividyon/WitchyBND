@@ -55,7 +55,7 @@ public class WANIBND4 : WBinderParser
         var root = "";
         if (Binder.HasNames(bnd.Format))
         {
-            root = WBUtil.FindCommonRootPath(bnd.Files.Select(bndFile => bndFile.Name));
+            root = WBUtil.FindCommonBndRootPath(bnd.Files.Select(bndFile => bndFile.Name));
         }
 
         var xml = PrepareXmlManifest(srcPath, recursive, false, bnd.Compression, out XDocument xDoc, root);
@@ -94,6 +94,7 @@ public class WANIBND4 : WBinderParser
 
             byte[] bytes = bndFile.Bytes;
             var path = WBUtil.UnrootBNDPath(bndFile.Name, root);
+            path = path.Replace('\\', Path.DirectorySeparatorChar);
             var destPath = Path.Combine(destDir, path);
             if (!Directory.Exists(Path.GetDirectoryName(destPath)))
                 Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);

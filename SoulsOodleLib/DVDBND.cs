@@ -94,7 +94,7 @@ sutLq3uRjLMM0IeTkQO6Pv8/R7UNFtdCWwIERzH8IQ==
     }
     public static bool CreateAssets(AssetLocator.Game game, string modPath, List<(string, string)> paths, Action<string> writeLineFunction, bool useFolderPicker, bool copyToAppFolder)
     {
-        var modPaths = paths.Select(a => $@"{modPath}\{a.Item2}").ToList();
+        var modPaths = paths.Select(a => Path.Combine(modPath, a.Item2)).ToList();
 
         if (modPaths.All(p => File.Exists(p)))
         {
@@ -110,8 +110,8 @@ sutLq3uRjLMM0IeTkQO6Pv8/R7UNFtdCWwIERzH8IQ==
             return false;
         }
 
-        var gameHeaderPath = $@"{gamePath}\Data0.bhd";
-        var gameDataPath = $@"{gamePath}\Data0.bdt";
+        var gameHeaderPath = Path.Combine(gamePath, "Data0.bhd");
+        var gameDataPath = Path.Combine(gamePath, "Data0.bdt");
 
         var oodleResult = Oodle.GrabOodle(writeLineFunction, useFolderPicker, copyToAppFolder, gamePath);
         if (oodleResult == IntPtr.Zero)
@@ -172,7 +172,7 @@ sutLq3uRjLMM0IeTkQO6Pv8/R7UNFtdCWwIERzH8IQ==
             {
                     if (hashes.ContainsKey(header.FileNameHash))
                     {
-                        var modFilePath = $@"{modPath}\{hashes[header.FileNameHash]}";
+                        var modFilePath = Path.Combine(modPath, hashes[header.FileNameHash]);
                         count++;
                         Directory.CreateDirectory(Path.GetDirectoryName(modFilePath));
                         File.WriteAllBytes(modFilePath, header.ReadFile(bdtStream));

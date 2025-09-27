@@ -39,7 +39,7 @@ public class WBXF3 : WBinderParser
 
             string bdtExtension = Path.GetExtension(srcPath).Replace("bhd", "bdt");
             bdtName = $"{nameWithoutExt}{bdtExtension}";
-            bdtPath = $"{srcDirPath}\\{bdtName}";
+            bdtPath = Path.Combine(srcDirPath, bdtName);
         }
         else
         {
@@ -48,7 +48,7 @@ public class WBXF3 : WBinderParser
 
             string bhdExtension = Path.GetExtension(srcPath).Replace("bdt", "bhd");
             bhdName = $"{nameWithoutExt}{bhdExtension}";
-            bhdPath = $"{srcDirPath}\\{bhdName}";
+            bhdPath = Path.Combine(srcDirPath, bhdName);
         }
 
         var bxf = BXF3.Read(bhdPath, bdtPath);
@@ -57,7 +57,7 @@ public class WBXF3 : WBinderParser
         var root = "";
         if (Binder.HasNames(bxf.Format))
         {
-            root = WBUtil.FindCommonRootPath(bxf.Files.Select(bxfFile => bxfFile.Name));
+            root = WBUtil.FindCommonBndRootPath(bxf.Files.Select(bxfFile => bxfFile.Name));
         }
 
         XElement files = WriteBinderFiles(bxf, destDir, root);

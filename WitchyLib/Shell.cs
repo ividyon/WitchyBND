@@ -10,12 +10,14 @@ public static class Shell
 {
     static Shell()
     {
+        if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException();
+        Root = Registry.CurrentUser;
     }
 
     private static readonly string exePath = Path.GetDirectoryName(AppContext.BaseDirectory)!;
     const int WmUser = 0x0400; //http://msdn.microsoft.com/en-us/library/windows/desktop/ms644931(v=vs.85).aspx
 
-    private static RegistryKey Root = Registry.CurrentUser;
+    private static RegistryKey Root;
     private static string ClassesKey = @"Software\Classes";
     private static string ProgIdQuick = "WitchyBND.A";
     private static string ProgId = "WitchyBND.B";

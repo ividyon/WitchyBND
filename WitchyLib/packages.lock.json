@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net8.0-windows7.0": {
+    "net8.0": {
       "Microsoft.CSharp": {
         "type": "Direct",
         "requested": "[4.7.0, )",
@@ -147,7 +147,7 @@
       "witchyformats": {
         "type": "Project",
         "dependencies": {
-          "SoulsFormats": "[2.16.0.5, )"
+          "SoulsFormats": "[2.17.0, )"
         }
       }
     }

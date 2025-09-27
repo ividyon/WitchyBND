@@ -105,7 +105,7 @@ public class GameService : IGameService
 
     public void PopulateTentativeAC6Types()
     {
-        var tentativeTypePath = $@"{WBUtil.GetParamdexPath()}\AC6\Defs\TentativeParamType.csv";
+        var tentativeTypePath = Path.Combine(WBUtil.GetParamdexPath(), "AC6", "Defs", "TentativeParamType.csv");
 
         if (File.Exists(tentativeTypePath))
         {
@@ -282,7 +282,7 @@ Enter 0, or leave it empty, to use the latest available paramdef.");
     public void UnpackParamdex()
     {
         var paramdexPath = WBUtil.GetParamdexPath();
-        var zipPath = $@"{WBUtil.GetExeLocation()}\Assets\Paramdex.zip";
+        var zipPath = WBUtil.GetExeLocation("Assets", "Paramdex.zip");
 
         if (!File.Exists(zipPath)) return;
 
@@ -318,10 +318,10 @@ Enter 0, or leave it empty, to use the latest available paramdef.");
 
         var paramdexPath = WBUtil.GetParamdexPath();
         if (!Directory.Exists(paramdexPath))
-            throw new DirectoryNotFoundException("Could not locate Assets\\Paramdex folder.");
+            throw new DirectoryNotFoundException($"Could not locate Assets{Path.DirectorySeparatorChar}Paramdex folder.");
 
         var gameName = game.ToString();
-        var paramdefPath = $@"{paramdexPath}\{gameName}\Defs";
+        var paramdefPath = Path.Combine(paramdexPath, gameName, "Defs");
 
         if (!Directory.Exists(paramdefPath))
         {

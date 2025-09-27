@@ -237,6 +237,6 @@ public class WGPARAM : WXMLParser
         string path = GetRepackDestPath(srcPath, xml);
         if (File.Exists(path))
             Backup(path);
-        gparam.TryWriteSoulsFile(path);
+        gparam.Write(path);
     }
 }

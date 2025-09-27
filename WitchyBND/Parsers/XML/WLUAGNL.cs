@@ -60,6 +60,6 @@ public class WLUAGNL : WXMLParser
 
         string outPath = GetRepackDestPath(srcPath, xml);
         Backup(outPath);
-        gnl.TryWriteSoulsFile(outPath);
+        gnl.Write(outPath);
     }
 }

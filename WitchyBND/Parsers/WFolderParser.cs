@@ -78,7 +78,7 @@ Simply replace the compression level in the {GetFolderXmlFilename()} file to thi
         var sourceDir = xml.Element("sourcePath")?.Value;
         if (sourceDir != null)
         {
-            return Path.GetFullPath(Path.Combine(srcDirPath, "..", sourceDir, filename));
+            return Path.GetFullPath(Path.Combine(srcDirPath, "..", sourceDir.Replace('\\', Path.DirectorySeparatorChar), filename));
         }
         string targetDir = new DirectoryInfo(srcDirPath).Parent?.FullName!;
         return Path.GetFullPath(Path.Combine(targetDir, filename));
@@ -119,19 +119,7 @@ Simply replace the compression level in the {GetFolderXmlFilename()} file to thi
     public virtual string GetFolderXmlPath(string dir, string? name = null)
     {
         name ??= XmlTag.ToLower();
-        dir = string.IsNullOrEmpty(dir) ? dir : $"{dir}\\";
-
-        if (File.Exists($"{dir}{GetFolderXmlFilename(name)}"))
-        {
-            return $"{dir}_witchy-{name}.xml";
-        }
-
-        if (File.Exists($"{dir}_yabber-{name}.xml"))
-        {
-            return $"{dir}_yabber-{name}.xml";
-        }
-
-        return $"{dir}{GetFolderXmlFilename(name)}";
+        return Path.Combine(dir, GetFolderXmlFilename(name));
     }
 
     public static List<string> GetFolderFilePaths(XElement filesElement, string srcDirPath)
@@ -142,8 +130,7 @@ Simply replace the compression level in the {GetFolderXmlFilename()} file to thi
                 throw new FriendlyException("File node missing path tag.");
             string path = pathEl.Value;
             string suffix = file.Element("suffix")?.Value ?? "";
-            string inPath =
-                $@"{srcDirPath}\{Path.GetDirectoryName(path)}\{Path.GetFileNameWithoutExtension(path)}{suffix}{Path.GetExtension(path)}";
+            string inPath = Path.Combine(srcDirPath, Path.GetDirectoryName(path)!, $"{Path.GetFileNameWithoutExtension(path)}{suffix}{Path.GetExtension(path)}");
             if (!File.Exists(inPath))
                 throw new FriendlyException($"File not found: {inPath}");
             return inPath;

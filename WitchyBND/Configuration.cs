@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using CommandLine;
 using Microsoft.Extensions.Configuration;
@@ -115,17 +116,15 @@ public static class Configuration
         public WBUtil.BackupMethod BackupMethod { get; set; }
 
         public bool GitBackup { get; set; }
-
-        public bool NoColors { get; set; }
     }
 
     public static StoredConfig Stored;
     public static StoredConfig Default;
     public static ActiveConfig Active;
 
-    public static string AppDataDirectory =
-        Path.Combine(Environment.ExpandEnvironmentVariables("%AppData%"), "WitchyBND");
+    public static string AppDataDirectory => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "WitchyBND");
 
+    public static OSPlatform Platform { get; set; }
     public static bool ParamDefaultValues => Active.ParamDefaultValueThreshold > 0f;
 
     public static void SwapOutConfig(IConfigurationRoot config)
@@ -140,6 +139,10 @@ public static class Configuration
 
         if (!Directory.Exists(AppDataDirectory))
             Directory.CreateDirectory(AppDataDirectory);
+
+        Platform = OSPlatform.Windows;
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            Platform = OSPlatform.Linux;
 
         LoadConfiguration();
     }

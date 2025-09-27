@@ -1,4 +1,9 @@
-﻿namespace SoulsOodleLib;
+﻿using System.Runtime.InteropServices;
+using SoulsFormats;
+using SoulsFormats.Exceptions;
+using NativeLibrary = SoulsFormats.NativeLibrary;
+
+namespace SoulsOodleLib;
 
 public static class Oodle
 {
@@ -7,27 +12,31 @@ public static class Oodle
     {
         if (_handle != IntPtr.Zero) return _handle;
 
-        var oodlePath9 = $@"{AppContext.BaseDirectory}\oo2core_9_win64.dll";
-        var oodlePath8 = $@"{AppContext.BaseDirectory}\oo2core_8_win64.dll";
-        var oodlePath6 = $@"{AppContext.BaseDirectory}\oo2core_6_win64.dll";
+        var isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
-        if (File.Exists(oodlePath9))
+        Dictionary<OodleVersion, string> localOodlePaths =
+        new() {
+            { OodleVersion.Oodle9, Path.Combine(AppContext.BaseDirectory, $"oo2core_9_win64.dll") },
+            { OodleVersion.Oodle8, Path.Combine(AppContext.BaseDirectory, $"oo2core_8_win64.dll") },
+            { OodleVersion.Oodle6, Path.Combine(AppContext.BaseDirectory, $"oo2core_6_win64.dll") }
+        };
+        if (isLinux)
         {
-            _handle = Kernel32.LoadLibrary(oodlePath9);
-            SoulsFormats.Oodle.Oodle9Ptr = _handle;
-            return _handle;
+            localOodlePaths = new() {
+                { OodleVersion.Oodle9, Path.Combine(AppContext.BaseDirectory, $"liboo2corelinux64.so.9") },
+                { OodleVersion.Oodle8, Path.Combine(AppContext.BaseDirectory, $"liboo2corelinux64.so.8") },
+                { OodleVersion.Oodle6, Path.Combine(AppContext.BaseDirectory, $"liboo2corelinux64.so.6") },
+            };
         }
-        if (File.Exists(oodlePath8))
+
+        foreach ((OodleVersion ver, string localOodlePath) in localOodlePaths)
         {
-            _handle = Kernel32.LoadLibrary(oodlePath8);
-            SoulsFormats.Oodle.Oodle8Ptr = _handle;
-            return _handle;
-        }
-        if (File.Exists(oodlePath6))
-        {
-            _handle = Kernel32.LoadLibrary(oodlePath6);
-            SoulsFormats.Oodle.Oodle6Ptr = _handle;
-            return _handle;
+            if (File.Exists(localOodlePath))
+            {
+                _handle = NativeLibrary.LoadLibrary(localOodlePath);
+                SoulsFormats.Oodle.OodlePtrs[ver] = _handle;
+                return _handle;
+            }
         }
 
         if (gamePath == null)
@@ -43,49 +52,50 @@ public static class Oodle
 
             if (gamePath == null)
             {
-                writeLineFunction("Could not find Oodle compression library (oo2core DLL). Please copy it from your Game folder into the application folder.");
+                if (!isLinux)
+                    writeLineFunction("Could not find Oodle compression library (oo2core_*_win64.dll). Please copy it from your Game folder into the application folder.");
+                else
+                    writeLineFunction("Could not find Oodle compression library (liboo2corelinux64.so.9). Please provide it in the application folder.");
                 return IntPtr.Zero;
             }
         }
 
-        var gameOodlePath9 = @$"{gamePath}\oo2core_9_win64.dll";
-        var gameOodlePath8 = @$"{gamePath}\oo2core_8_win64.dll";
-        var gameOodlePath6 = @$"{gamePath}\oo2core_6_win64.dll";
-
-        if (File.Exists(gameOodlePath9))
+        Dictionary<OodleVersion, string> gameOodlePaths =
+            new() {
+                { OodleVersion.Oodle9, Path.Combine(gamePath, $"oo2core_9_win64.dll") },
+                { OodleVersion.Oodle8, Path.Combine(gamePath, $"oo2core_8_win64.dll") },
+                { OodleVersion.Oodle6, Path.Combine(gamePath, $"oo2core_6_win64.dll") }
+            };
+        if (isLinux)
         {
-            _handle = Kernel32.LoadLibrary(gameOodlePath9);
+            gameOodlePaths = new() {
+                { OodleVersion.Oodle9, Path.Combine(gamePath, $"liboo2corelinux64.so.9") },
+                { OodleVersion.Oodle8, Path.Combine(gamePath, $"liboo2corelinux64.so.8") },
+                { OodleVersion.Oodle6, Path.Combine(gamePath, $"liboo2corelinux64.so.6") },
+            };
+        }
+
+        foreach ((OodleVersion ver, string gameOodlePath) in gameOodlePaths)
+        {
+            Console.WriteLine($"Loading oodle {gameOodlePath}");
+            _handle = NativeLibrary.LoadLibrary(gameOodlePath);
             if (copyToAppFolder)
-                File.Copy(gameOodlePath9, $@"{AppDomain.CurrentDomain.BaseDirectory}\{Path.GetFileName(gameOodlePath9)}", true);
-            SoulsFormats.Oodle.Oodle9Ptr = _handle;
+                File.Copy(gameOodlePath, Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Path.GetFileName(gameOodlePath)), true);
+            SoulsFormats.Oodle.OodlePtrs[ver] = _handle;
             return _handle;
         }
 
-        if (File.Exists(gameOodlePath8))
-        {
-            _handle = Kernel32.LoadLibrary(gameOodlePath8);
-            if (copyToAppFolder)
-                File.Copy(gameOodlePath8, $@"{AppDomain.CurrentDomain.BaseDirectory}\{Path.GetFileName(gameOodlePath8)}", true);
-            SoulsFormats.Oodle.Oodle8Ptr = _handle;
-            return _handle;
-        }
-
-        if (File.Exists(gameOodlePath6))
-        {
-            _handle = Kernel32.LoadLibrary(gameOodlePath6);
-            if (copyToAppFolder)
-                File.Copy(gameOodlePath6, $@"{AppDomain.CurrentDomain.BaseDirectory}\{Path.GetFileName(gameOodlePath6)}", true);
-            SoulsFormats.Oodle.Oodle6Ptr = _handle;
-            return _handle;
-        }
-
+        if (!isLinux)
+            writeLineFunction("Could not find Oodle compression library (oo2core_*_win64.dll). Please copy it from your Game folder into the application folder.");
+        else
+            writeLineFunction("Could not find Oodle compression library (liboo2corelinux64.so.9). Please provide it in the application folder.");
         return IntPtr.Zero;
     }
 
     private static void KillOodle(IntPtr? oodleHandle)
     {
         if (oodleHandle != null)
-            Kernel32.FreeLibrary(oodleHandle.Value);
+            NativeLibrary.FreeLibrary(oodleHandle.Value);
     }
 
     public static IntPtr GetOodleHandle()

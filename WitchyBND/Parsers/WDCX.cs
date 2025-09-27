@@ -45,15 +45,15 @@ public class WDCX : WSingleFileParser
             sourceDir = location;
         sourceDir = Path.GetFullPath(sourceDir);
         if (srcPath.ToLower().EndsWith(".dcx"))
-            return $"{sourceDir}\\{Path.GetFileNameWithoutExtension(srcPath)}";
-        return $"{sourceDir}\\{fileName}.undcx";
+            return Path.Combine(sourceDir, Path.GetFileNameWithoutExtension(srcPath));
+        return Path.Combine(sourceDir, $"{fileName}.undcx");
     }
 
     public override string GetRepackDestPath(string srcPath, XElement? xml)
     {
         var path = xml?.Element("sourcePath")?.Value;
         if (path != null)
-            srcPath = $"{path}\\{Path.GetFileName(srcPath)}";
+            srcPath = Path.Combine(path.Replace('\\', Path.DirectorySeparatorChar), Path.GetFileName(srcPath));
         if (srcPath.ToLower().EndsWith(".undcx"))
             return srcPath.Substring(0, srcPath.Length - 6);
         return srcPath + ".dcx";

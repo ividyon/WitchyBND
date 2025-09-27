@@ -230,18 +230,18 @@ public static class WBUtil
         return path == null ? GetParamdexPath() : Path.Combine(GetParamdexPath(), path);
     }
 
-    public static string GetParamdexPath(GameType game, string path = null)
+    public static string GetParamdexPath(GameType game, params string[]? path)
     {
         return path == null
             ? Path.Combine(GetParamdexPath(), game.ToString())
-            : Path.Combine(GetParamdexPath(), game.ToString(), path);
+            : Path.Combine(new[] { GetParamdexPath(), game.ToString() }.Union(path).ToArray());
     }
 
     public static ulong? GetLatestKnownRegulationVersion(GameType game)
     {
         if (LatestKnownRegulationVersions.ContainsKey(game)) return LatestKnownRegulationVersions[game];
 
-        string latestVerPath = GetParamdexPath(game, $@"Upgrader\version.txt");
+        string latestVerPath = GetParamdexPath(game, "Upgrader", "version.txt");
         if (File.Exists(latestVerPath))
             LatestKnownRegulationVersions[game] =
                 ulong.Parse(File.ReadAllText(latestVerPath).Replace("_", "").Replace("L", ""));
@@ -253,13 +253,13 @@ public static class WBUtil
 
     public static string? TraverseFindFile(string filename, string initPath, int levels = 999)
     {
-        string filePath = $@"{initPath}\{filename}";
+        string filePath = Path.Combine(initPath, filename);
         for (int i = 0; i < levels; i++)
         {
             if (File.Exists(filePath)) return filePath;
             string dirName = Path.GetDirectoryName(Path.GetDirectoryName(filePath));
             if (dirName == null) return null;
-            filePath = $@"{dirName}\{filename}";
+            filePath = Path.Combine(dirName, filename);
         }
 
         return null;
@@ -365,23 +365,6 @@ public static class WBUtil
         }
     }
 
-    public static string GetXmlPath(string type, string dir = "")
-    {
-        dir = string.IsNullOrEmpty(dir) ? dir : $"{dir}\\";
-
-        if (File.Exists($"{dir}_witchy-{type}.xml"))
-        {
-            return $"{dir}_witchy-{type}.xml";
-        }
-
-        if (File.Exists($"{dir}_yabber-{type}.xml"))
-        {
-            return $"{dir}_yabber-{type}.xml";
-        }
-
-        throw new Exception($"Could not find WitchyBND or Yabber {type.ToUpper()} XML");
-    }
-
     private static readonly Regex DriveRx = new Regex(@"^(\w\:\\)(.+)$");
     private static readonly Regex TraversalRx = new Regex(@"^([(..)\\\/]+)(.+)?$");
     private static readonly Regex SlashRx = new Regex(@"^(\\+)(.+)$");
@@ -390,7 +373,7 @@ public static class WBUtil
     /// <summary>
     /// Finds common path prefix in a list of strings.
     /// </summary>
-    public static string FindCommonRootPath(IEnumerable<string> paths)
+    public static string FindCommonBndRootPath(IEnumerable<string> paths)
     {
         string root = "";
 
@@ -436,7 +419,7 @@ public static class WBUtil
 
         if (path.Contains("..\\") || path.Contains("../"))
             throw new InvalidDataException(
-                $"the path {path} contains invalid data, attempting to extract to a different folder. Please report this file to Nordgaren.");
+                $"the path {path} contains invalid data, attempting to extract to a different folder.");
         return RemoveLeadingBackslashes(path);
     }
 
@@ -523,109 +506,6 @@ public static class WBUtil
             byte[] decrypted = CryptographyUtil.DecryptAesCtr(ms, ds2RegulationKey, iv);
             return BND4.Read(decrypted);
         }
-    }
-
-    static (string, string)[] _pathValueTuple = new (string, string)[]
-    {
-        (@"HKEY_CURRENT_USER\SOFTWARE\Valve\Steam", "SteamPath"),
-        (@"HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Valve\Steam", "InstallPath"),
-        (@"HKEY_LOCAL_MACHINE\SOFTWARE\Valve\Steam", "InstallPath"),
-        (@"HKEY_CURRENT_USER\SOFTWARE\Wow6432Node\Valve\Steam", "SteamPath"),
-    };
-
-    // Improved detection from Gideon
-    public static string TryGetGameInstallLocation(string gamePath)
-    {
-        if (!gamePath.StartsWith("\\") && !gamePath.StartsWith("/"))
-            return null;
-
-        string steamPath = GetSteamInstallPath();
-
-        if (string.IsNullOrWhiteSpace(steamPath) || !File.Exists($@"{steamPath}\SteamApps\libraryfolders.vdf"))
-            return null;
-
-        string[] libraryFolders = File.ReadAllLines($@"{steamPath}\SteamApps\libraryfolders.vdf");
-
-        var pathStrings = libraryFolders.Where(str => str.Contains("\"path\""));
-        var paths = pathStrings.Select(str => {
-            var split = str.Split('"').Where((s, i) => i % 2 == 1).ToList();
-            if (split.Count == 2)
-                return split[1];
-
-            return null;
-        }).ToList();
-
-        foreach (string path in paths)
-        {
-            string libraryPath = path.Replace(@"\\", @"\") + gamePath;
-            if (File.Exists(libraryPath))
-                return libraryPath;
-        }
-
-        return null;
-    }
-
-    public static string GetSteamInstallPath()
-    {
-        string installPath = null;
-
-        foreach ((string Path, string Value) pathValueTuple in _pathValueTuple)
-        {
-            string registryKey = pathValueTuple.Path;
-            installPath = (string)Registry.GetValue(registryKey, pathValueTuple.Value, null);
-
-            if (installPath != null)
-                break;
-        }
-
-        return installPath;
-    }
-
-    private static string[] Oodle6Games =
-    {
-        "Sekiro",
-        "ELDEN RING",
-    };
-
-    private static string[] Oodle8Games =
-    {
-        "ARMORED CORE VI FIRES OF RUBICON",
-    };
-
-
-    public static string GetOodlePath()
-    {
-        foreach (string game in Oodle6Games)
-        {
-            string path = TryGetGameInstallLocation($"\\steamapps\\common\\{game}\\Game\\oo2core_6_win64.dll");
-            if (path != null)
-                return path;
-        }
-
-        foreach (string game in Oodle8Games)
-        {
-            string path = TryGetGameInstallLocation($"\\steamapps\\common\\{game}\\Game\\oo2core_8_win64.dll");
-            if (path != null)
-                return path;
-        }
-
-        return null;
-    }
-
-    public static string JsonSerialize(object obj)
-    {
-        return JsonConvert.SerializeObject(obj, Newtonsoft.Json.Formatting.Indented, new JsonSerializerSettings
-        {
-            TypeNameHandling = TypeNameHandling.Auto
-        });
-    }
-
-    public static T JsonDeserialize<T>(string text)
-    {
-        return JsonConvert.DeserializeObject<T>(text, new JsonSerializerSettings
-        {
-            TypeNameHandling = TypeNameHandling.Auto
-        });
     }
 
     public static void XmlSerialize<T>(object obj, string targetFile)
@@ -741,108 +621,6 @@ public static class WBUtil
             return src.Replace(EscapeString + DelimiterString, DelimiterString)
                 .Replace(EscapeString + EscapeString, EscapeString);
         }
-    }
-
-    public static byte[] TryDecompressBytes(string sourceFile, out DCX.CompressionInfo compression)
-    {
-        try
-        {
-            return DCX.Decompress(sourceFile, out compression);
-        }
-        catch (NoOodleFoundException)
-        {
-            string oo2corePath = GetOodlePath();
-            if (oo2corePath == null)
-                throw;
-
-            IntPtr handle = Kernel32.LoadLibrary(oo2corePath);
-            byte[] bytes = DCX.Decompress(sourceFile, out compression);
-            Kernel32.FreeLibrary(handle);
-            return bytes;
-        }
-    }
-
-    public static void TryCompressBytes(byte[] data, DCX.CompressionInfo compression, string path)
-    {
-        try
-        {
-            DCX.Compress(data, compression, path);
-        }
-        catch (NoOodleFoundException)
-        {
-            string oo2corePath = WBUtil.GetOodlePath();
-            if (oo2corePath == null)
-                throw;
-
-            IntPtr handle = Kernel32.LoadLibrary(oo2corePath);
-            DCX.Compress(data, compression, path);
-            Kernel32.FreeLibrary(handle);
-        }
-    }
-
-    public static void TryWriteSoulsFile(this ISoulsFile file, string path)
-    {
-        try
-        {
-            file.Write(path);
-        }
-        catch (NoOodleFoundException)
-        {
-            string oo2corePath = GetOodlePath();
-            if (oo2corePath == null)
-                throw;
-
-            IntPtr handle = Kernel32.LoadLibrary(oo2corePath);
-            file.Write(path);
-            Kernel32.FreeLibrary(handle);
-        }
-    }
-
-    public static void TryWriteBXF(this BXF4 file, string bhdPath, string bdtPath)
-    {
-        try
-        {
-            file.Write(bhdPath, bdtPath);
-        }
-        catch (NoOodleFoundException)
-        {
-            string oo2corePath = GetOodlePath();
-            if (oo2corePath == null)
-                throw;
-
-            IntPtr handle = Kernel32.LoadLibrary(oo2corePath);
-            file.Write(bhdPath, bdtPath);
-            Kernel32.FreeLibrary(handle);
-        }
-    }
-
-    public static void TryWriteBXF(this BXF3 file, string bhdPath, string bdtPath)
-    {
-        try
-        {
-            file.Write(bhdPath, bdtPath);
-        }
-        catch (NoOodleFoundException)
-        {
-            string oo2corePath = GetOodlePath();
-            if (oo2corePath == null)
-                throw;
-
-            IntPtr handle = Kernel32.LoadLibrary(oo2corePath);
-            file.Write(bhdPath, bdtPath);
-            Kernel32.FreeLibrary(handle);
-        }
-    }
-
-    /// <summary>
-    /// Returns whether the file appears to be a file of this type and reads it if so.
-    /// </summary>
-    public static bool IsRead<TFormat>(this SoulsFile<TFormat> soulsFile, string path, out ISoulsFile file)
-        where TFormat : SoulsFile<TFormat>, new()
-    {
-        bool cond = SoulsFile<TFormat>.IsRead(path, out TFormat format);
-        file = format;
-        return cond;
     }
 
     public static bool ObnoxiousWarning(List<string> lines)

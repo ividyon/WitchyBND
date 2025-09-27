@@ -30,14 +30,29 @@ public abstract class WBinderParser : WFolderParser
         if (packed && file != null && file is IBinder bnd)
         {
             string destDir = GetUnpackDestPath(srcPath, recursive);
+            var pathCounts = new Dictionary<string, int>();
             foreach (var bndFile in bnd.Files)
             {
+
                 string path = GetBinderFilePath(bnd, bndFile, null);
-                string estFilePath =
-                    $@"{destDir}\{Path.GetDirectoryName(path)}\{Path.GetFileNameWithoutExtension(path)}{Path.GetExtension(path)}";
+
+                string suffix = "";
+                if (pathCounts.ContainsKey(path))
+                {
+                    pathCounts[path]++;
+                    suffix = $" ({pathCounts[path]})";
+                }
+                else
+                {
+                    pathCounts[path] = 1;
+                }
+
+                path = path.Replace('\\', Path.DirectorySeparatorChar);
+                string destFilePath = Path.Combine(destDir, Path.GetDirectoryName(path)!,
+                    $"{Path.GetFileNameWithoutExtension(path)}{suffix}{Path.GetExtension(path)}");
                 foreach (var parser in parsers)
                 {
-                    bool toBreak = parser.Preprocess(estFilePath, true, ref files);
+                    bool toBreak = parser.Preprocess(destFilePath, true, ref files);
                     if (toBreak)
                         break;
                 }
@@ -61,7 +76,7 @@ public abstract class WBinderParser : WFolderParser
 
     protected static string GetBinderFilePath(IBinder bnd, BinderFile file, string? root)
     {
-        root ??= WBUtil.FindCommonRootPath(bnd.Files.Select(bndFile => bndFile.Name));
+        root ??= WBUtil.FindCommonBndRootPath(bnd.Files.Select(bndFile => bndFile.Name));
         string path;
         if (Binder.HasNames(bnd.Format))
         {
@@ -117,9 +132,11 @@ public abstract class WBinderParser : WFolderParser
                 WriteCompressionInfoToXml(fileElement, file.CompressionInfo);
 
             byte[] bytes = file.Bytes;
-            string destPath =
-                $@"{destDirPath}\{Path.GetDirectoryName(path)}\{Path.GetFileNameWithoutExtension(path)}{suffix}{Path.GetExtension(path)}";
-            Directory.CreateDirectory(Path.GetDirectoryName(destPath));
+
+            path = path.Replace('\\', Path.DirectorySeparatorChar);
+            string destPath = Path.Combine(destDirPath, Path.GetDirectoryName(path)!,
+                $"{Path.GetFileNameWithoutExtension(path)}{suffix}{Path.GetExtension(path)}");
+            Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
             resultingPaths.Push(destPath);
             File.WriteAllBytes(destPath, bytes);
 
@@ -208,8 +225,10 @@ public abstract class WBinderParser : WFolderParser
             if (!int.TryParse(strId, out int id))
                 throw new FriendlyException($"Could not parse file ID: {strId}\nID must be a 32-bit signed integer.");
 
-            string inPath =
-                $@"{srcDirPath}\{Path.GetDirectoryName(path)}\{Path.GetFileNameWithoutExtension(path)}{suffix}{Path.GetExtension(path)}";
+            path = path.Replace('\\', Path.DirectorySeparatorChar);
+
+            string inPath = Path.Combine(srcDirPath, Path.GetDirectoryName(path)!,
+                $"{Path.GetFileNameWithoutExtension(path)}{suffix}{Path.GetExtension(path)}");
             if (!File.Exists(inPath))
                 throw new FriendlyException($"File not found: {inPath}");
 

@@ -47,7 +47,7 @@ public partial class WMQB
         XElement xelem = LoadXml(srcPath);
         string outPath = GetRepackDestPath(srcPath, xelem);
         Backup(outPath);
-        mqb.TryWriteSoulsFile(outPath);
+        mqb.Write(outPath);
     }
 
     #region Repack Helpers

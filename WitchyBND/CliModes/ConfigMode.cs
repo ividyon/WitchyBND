@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Runtime.InteropServices;
 using PPlus.Controls;
 using WitchyBND.Parsers;
 using WitchyBND.Services;
@@ -79,6 +80,9 @@ public static class ConfigMode
 
         [Display(Name = "Configure Windows integration")]
         Windows,
+
+        [Display(Name = "Reset skipped versions")]
+        ResetSkip,
 
         [Display(Name = "View available formats")]
         Formats,
@@ -266,7 +270,26 @@ Press any key to continue to the configuration screen...");
                     }
                     break;
                 case ConfigMenuItem.Windows:
-                    IntegrationMode.CliShellIntegrationMode(opt);
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                        IntegrationMode.CliShellIntegrationMode(opt);
+                    else
+                    {
+                        output.WriteLine("This is not supported on your current platform.");
+                        output.KeyPress(Constants.PressAnyKeyConfiguration).Run();
+                    }
+                    break;
+                case ConfigMenuItem.ResetSkip:
+                    var conf = output.Confirm($"Reset any skipped versions? The updater will once again prompt you for an update, if there is one.").Run();
+                    if (!conf.IsAborted)
+                        Configuration.Stored.SkipUpdateVersion = new Version(0, 0, 0, 0);
+                    updateConfig();
+                    if (Configuration.Active.Offline)
+                        output.WriteLine(
+                            $"Skipped versions reset. You are in Offline mode, so you will not be prompted for updates.");
+                    else
+                        output.WriteLine(
+                            "Skipped versions reset. If an update exists, you will not be prompted the next time you restart the program.");
+                    output.KeyPress(Constants.PressAnyKeyConfiguration).Run();
                     break;
                 case ConfigMenuItem.Formats:
                     output.WriteLine(

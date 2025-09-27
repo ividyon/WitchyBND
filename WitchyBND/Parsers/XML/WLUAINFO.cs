@@ -72,6 +72,6 @@ public class WLUAINFO : WXMLParser
 
         string outPath = GetRepackDestPath(srcPath, xml);
         Backup(outPath);
-        info.TryWriteSoulsFile(outPath);
+        info.Write(outPath);
     }
 }

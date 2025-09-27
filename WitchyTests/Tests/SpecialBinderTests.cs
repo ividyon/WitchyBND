@@ -63,7 +63,7 @@ public class SpecialBinderTests : TestBase
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
 
-            var root = WBUtil.FindCommonRootPath(bnd.Files.Select(a => a.Name));
+            var root = WBUtil.FindCommonBndRootPath(bnd.Files.Select(a => a.Name));
             foreach (BinderFile file in bnd.Files)
             {
                 string name = Path.Combine(destPath,
@@ -102,7 +102,7 @@ public class SpecialBinderTests : TestBase
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
 
-            var root = WBUtil.FindCommonRootPath(bnd.Files.Select(a => a.Name));
+            var root = WBUtil.FindCommonBndRootPath(bnd.Files.Select(a => a.Name));
             foreach (BinderFile file in bnd.Files)
             {
                 string name = Path.Combine(destPath,
@@ -141,7 +141,7 @@ public class SpecialBinderTests : TestBase
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
 
-            var root = WBUtil.FindCommonRootPath(bnd.Files.Select(a => a.Name));
+            var root = WBUtil.FindCommonBndRootPath(bnd.Files.Select(a => a.Name));
             foreach (BinderFile file in bnd.Files)
             {
                 string name = Path.Combine(destPath,

@@ -29,7 +29,7 @@ public abstract class WBND4Unsorted : WUnsortedBinderParser
         var root = "";
         if (Binder.HasNames(bnd.Format))
         {
-            root = WBUtil.FindCommonRootPath(bnd.Files.Select(bndFile => bndFile.Name));
+            root = WBUtil.FindCommonBndRootPath(bnd.Files.Select(bndFile => bndFile.Name));
         }
         WriteBinderFiles(bnd, destDir, root);
 

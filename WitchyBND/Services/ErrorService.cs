@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using SoulsFormats.Exceptions;
 using WitchyBND.Errors;
 using WitchyLib;
@@ -172,15 +173,29 @@ Process error output:
                     $"No tool is configured for the deferred format \"{e.Format.GetAttribute<DisplayAttribute>().Name}\". Please configure it in WitchyBND before attempting to process files of this type.",
                     source, WitchyErrorType.Generic));
             }
-            catch (Exception e) when (!Configuration.IsTest && !Configuration.IsDebug && e.Message.Contains("oo2core_6_win64.dll") ||
-                                      e.Message.Contains("oo2core_8_win64.dll") || e is NoOodleFoundException)
+            catch (Exception e) when (OperatingSystem.IsWindows() && !Configuration.IsTest && !Configuration.IsDebug &&
+                                      (e.Message.Contains("oo2core_6_win64.dll") ||
+                                       e.Message.Contains("oo2core_8_win64.dll") ||
+                                       e.Message.Contains("oo2core_9_win64.dll") || e is NoOodleFoundException))
             {
                 error = true;
                 if (Configuration.IsTest)
                     throw;
 
                 RegisterError(new WitchyError(
-                    "ERROR: Oodle DLL not found. Please copy oo2core_6_win64.dll or oo2core_8_win64.dll from the game directory to WitchyBND's directory.",
+                    $"ERROR: Oodle DLL not found. Please copy oo2core_9_win64.dll, oo2core_8_win64.dll or oo2core_6_win64.dll from the game directory to WitchyBND's directory.\n\nOriginal exception:\n\n{e}",
+                    WitchyErrorType.NoOodle));
+            }
+            catch (Exception e) when (!OperatingSystem.IsWindows() && !Configuration.IsTest && !Configuration.IsDebug &&
+                                      (e.Message.Contains("oo2core") ||
+                                       e.Message.Contains("oodle") || e is NoOodleFoundException))
+            {
+                error = true;
+                if (Configuration.IsTest)
+                    throw;
+
+                RegisterError(new WitchyError(
+                    $"ERROR: Oodle library not found. Please provide liboo2corelinux64.so.9 to WitchyBND's directory.\n\nOriginal exception:\n\n{e}",
                     WitchyErrorType.NoOodle));
             }
             catch (UnauthorizedAccessException) when (!Configuration.IsTest && !Configuration.IsDebug)

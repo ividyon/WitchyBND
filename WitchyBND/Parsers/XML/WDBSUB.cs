@@ -136,7 +136,7 @@ namespace WitchyBND.Parsers
 
             string outPath = srcPath.Replace(".xml", "");
             Backup(outPath);
-            dbs.TryWriteSoulsFile(outPath);
+            dbs.Write(outPath);
         }
     }
 }

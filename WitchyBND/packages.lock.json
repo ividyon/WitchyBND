@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net8.0-windows7.0": {
+    "net8.0": {
       "CommandLineParser": {
         "type": "Direct",
         "requested": "[2.9.1, )",
@@ -311,13 +311,13 @@
         "dependencies": {
           "BouncyCastle.Cryptography": "[2.4.0, )",
           "NativeFileDialogSharp": "[0.6.0-alpha, )",
-          "SoulsFormats": "[2.16.0.5, )"
+          "SoulsFormats": "[2.17.0, )"
         }
       },
       "witchyformats": {
         "type": "Project",
         "dependencies": {
-          "SoulsFormats": "[2.16.0.5, )"
+          "SoulsFormats": "[2.17.0, )"
         }
       },
       "witchylib": {
@@ -327,11 +327,11 @@
           "Microsoft.Extensions.FileSystemGlobbing": "[8.0.0-preview.2.23128.3, )",
           "Newtonsoft.Json": "[13.0.3, )",
           "PromptPlus": "[4.2.0, )",
-          "WitchyFormats": "[2.16.0.5, )"
+          "WitchyFormats": "[2.17.0, )"
         }
       }
     },
-    "net8.0-windows7.0/win-x64": {
+    "net8.0/win-x64": {
       "NativeFileDialogSharp": {
         "type": "Direct",
         "requested": "[0.6.0-alpha, )",
