@@ -17,7 +17,7 @@ public class WFFXBNDModern : WBinderParser
     public override string Name => "Modern FFXBND";
     public override string XmlTag => "ffxbnd";
 
-    public override int Version => WBUtil.WitchyVersionToInt("2.8.0.0");
+    public override int Version => WBUtil.WitchyVersionToInt("2.17.0.0");
 
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
@@ -98,6 +98,12 @@ public class WFFXBNDModern : WBinderParser
         if (firstRes != null) xml.Add(new XElement("resDir", resDir));
         var resTargetDir = Path.Combine(destDir, resDir);
 
+        if (firstTexture != null)
+        {
+            var tpf = TPF.Read(firstTexture.Bytes);
+            xml.Add(new XElement("platform", tpf.Platform));
+        }
+
         WriteXmlManifest(xDoc, srcPath, recursive);
 
         void Callback(BinderFile bndFile)
@@ -150,13 +156,15 @@ public class WFFXBNDModern : WBinderParser
         bnd.Compression = ReadCompressionInfoFromXml(xml);
 
         bnd.Version = xml.Element("version")!.Value;
-        bnd.Format = (Binder.Format)Enum.Parse(typeof(Binder.Format), xml.Element("format")!.Value);
+        bnd.Format = Enum.Parse<Binder.Format>(xml.Element("format")!.Value);
         bnd.BigEndian = bool.Parse(xml.Element("bigendian")!.Value);
         bnd.BitBigEndian = bool.Parse(xml.Element("bitbigendian")!.Value);
         bnd.Unicode = bool.Parse(xml.Element("unicode")!.Value);
         bnd.Extended = Convert.ToByte(xml.Element("extended")!.Value, 16);
         bnd.Unk04 = bool.Parse(xml.Element("unk04")!.Value);
         bnd.Unk05 = bool.Parse(xml.Element("unk05")!.Value);
+        string? platformValue = xml.Element("platform")?.Value;
+        TPF.TPFPlatform platform = platformValue != null ? Enum.Parse<TPF.TPFPlatform>(platformValue) : TPF.TPFPlatform.PC;
 
         // Files
 
@@ -286,7 +294,7 @@ Consider tidying up the unpacked archive folder.");
                 tpf.Compression = new DCX.NoCompressionInfo();
                 tpf.Encoding = 0x01;
                 tpf.Flag2 = 0x03;
-                tpf.Platform = TPF.TPFPlatform.PC;
+                tpf.Platform = platform;
 
                 var tex = new TPF.Texture();
                 tex.Name = Path.GetFileNameWithoutExtension(fileName).Trim();
