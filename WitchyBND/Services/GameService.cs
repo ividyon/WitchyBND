@@ -7,7 +7,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using PPlus.Controls;
 using SoulsFormats;
 using WitchyBND.Errors;
 using WitchyBND.Parsers;
@@ -215,7 +214,7 @@ public class GameService : IGameService
                     throw new Exception("Could not determine PARAM type.");
                 }
 
-                game = select.Value;
+                game = select.Content;
                 knownPath = Path.GetDirectoryName(path);
             }
             else
@@ -238,20 +237,20 @@ Format examples:
 ""11001000"" for Elden Ring 1.10.1
 Enter 0, or leave it empty, to use the latest available paramdef.");
                         var input = output.Input("Input regulation version")
-                            .AddValidators(PromptValidators.IsTypeULong())
-                            .ValidateOnDemand()
+                            // .AddValidators(PromptValidators.IsTypeULong())
+                            // .ValidateOnDemand()
                             .DefaultIfEmpty("0")
-                            .Config(config => {
-                                config.EnabledAbortKey(false);
+                            .Options(o => {
+                                o.EnabledAbortKey(false);
                             })
                             .Run();
-                        if (input.IsAborted || input.Value == "0")
+                        if (input.IsAborted || input.Content == "0")
                         {
                             output.WriteError("Defaulting to latest paramdef.");
                         }
                         else
                         {
-                            regVer = Convert.ToUInt64(input.Value);
+                            regVer = Convert.ToUInt64(input.Content);
                         }
                     }
                     else

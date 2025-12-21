@@ -48,7 +48,12 @@ Simply replace the compression level in the {GetFolderXmlFilename()} file to thi
         if (!string.IsNullOrEmpty(location) && !recursive)
             sourceDir = location;
         sourceDir = Path.GetFullPath(sourceDir);
-        return Path.Combine(sourceDir, fileName.Replace('.', '-'));
+        string tarDir = fileName.Replace('.', '-');
+        if (fileName == tarDir)
+        {
+            tarDir += "-unpacked";
+        }
+        return Path.Combine(sourceDir, tarDir);
     }
 
     public override XElement PrepareXmlManifest(string srcPath, bool recursive, bool skipFilename,

@@ -2,7 +2,7 @@
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using PPlus;
+using PromptPlusLibrary;
 using WitchyBND;
 using WitchyBND.Services;
 using WitchyLib;
@@ -56,9 +56,8 @@ public class TestBase
         Configuration.Active.Parallel = Parallel;
         WBUtil.ExeLocation = TestContext.CurrentContext.TestDirectory;
         Environment.SetEnvironmentVariable("PromptPlusOverUnitTest", "true");
-        PromptPlus.Setup();
-        PromptPlus.Reset();
-        PromptPlus.Clear();
+        // PromptPlus.Reset();
+        // PromptPlus.Clear();
         Console.OutputEncoding = Encoding.UTF8;
         Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
         PromptPlus.Config.DefaultCulture = new CultureInfo("en-us");

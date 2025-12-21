@@ -17,7 +17,6 @@ namespace WitchyBND;
 public interface IStoredConfig
 {
     public bool Bnd { get; set; }
-    public bool Dcx { get; set; }
     public float ParamDefaultValueThreshold { get; set; }
 
     public WPARAM.CellStyle ParamCellStyle { get; set; }
@@ -49,6 +48,7 @@ public interface ITempConfig
 {
     public bool UnpackOnly { get; set; }
     public bool RepackOnly { get; set; }
+    public bool Dcx { get; set; }
     public bool Passive { get; set; }
 
     public bool Silent { get; set; }
@@ -64,7 +64,6 @@ public static class Configuration
     public class StoredConfig : IStoredConfig, IStoredOnlyConfig
     {
         public bool Bnd { get; set; }
-        public bool Dcx { get; set; }
         public float ParamDefaultValueThreshold { get; set; }
 
         public WPARAM.CellStyle ParamCellStyle { get; set; }
@@ -206,7 +205,6 @@ public static class Configuration
     {
         stored ??= Stored;
         Active.Bnd = stored.Bnd;
-        Active.Dcx = stored.Dcx;
         Active.ParamDefaultValueThreshold = stored.ParamDefaultValueThreshold;
         Active.ParamCellStyle = stored.ParamCellStyle;
         Active.Recursive = stored.Recursive;

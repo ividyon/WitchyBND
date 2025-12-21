@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -240,12 +241,22 @@ public class WANIBND4 : WBinderParser
 
         void ExtensionCallback(string ext)
         {
+            var files = Directory.EnumerateFiles(srcPath, $"*{ext}", SearchOption.AllDirectories).ToList();
+            var dupes = files.GroupBy(f => Path.GetFileName(f)).Where(g => g.Count() > 1).ToList();
+            if (dupes.Any())
+            {
+                throw new DuplicateNameException(@$"Found the following duplicate files across different folders:
+
+{String.Join("\n", dupes.SelectMany(g => g.ToList()).Select(f => $"- {f}"))}
+
+Please address this issue before trying again.");
+            }
             if (Configuration.Active.Parallel)
-                Parallel.ForEach(Directory.EnumerateFiles(srcPath, $"*{ext}", SearchOption.AllDirectories),
+                Parallel.ForEach(files,
                     filePath => FileCallback(ext, filePath));
             else
             {
-                foreach (string filePath in Directory.EnumerateFiles(srcPath, $"*{ext}", SearchOption.AllDirectories))
+                foreach (string filePath in files)
                 {
                     FileCallback(ext, filePath);
                 }

@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using PPlus;
+using PromptPlusLibrary;
 using WitchyBND.CliModes;
 using WitchyLib;
 
@@ -97,10 +97,10 @@ public class UpdateService : IUpdateService
                 while (loop)
                 {
                     var select = output.Select<UpdateOptions>("Select an option")
-                        .Config(c => c.EnabledAbortKey(false))
+                        .Options(c => c.EnabledAbortKey(false))
                         .Run();
 
-                    switch (select.Value)
+                    switch (select.Content)
                     {
                         case UpdateOptions.Update:
                             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -118,7 +118,7 @@ public class UpdateService : IUpdateService
                             {
                                 output.WriteLine("Automatic updating is currently only supported for Windows. Please download the new version manually.");
                                 var downloadConfirm = output.Confirm("Would you like to go to the download page?").Run();
-                                if (downloadConfirm.Value.IsYesResponseKey())
+                                if (downloadConfirm.Content.Value.IsYesResponseKey())
                                 {
                                     Process.Start(new ProcessStartInfo
                                         { FileName = ReleaseNotesUrl, UseShellExecute = true });
@@ -144,7 +144,7 @@ public class UpdateService : IUpdateService
                             var confirm = output.Confirm(
                                     "Are you sure? You will not receive any more update prompts for this version, and be unable to use the auto-updater for it.")
                                 .Run();
-                            if (confirm.Value.IsYesResponseKey())
+                            if (confirm.Content.Value.IsYesResponseKey())
                             {
                                 Configuration.Stored.LastUpdateCheck = DateTime.UtcNow;
                                 Configuration.Stored.SkipUpdateVersion = onlineVersion;
@@ -415,9 +415,9 @@ Witchy will try to restore any open Explorer windows.");
             var contextMenuQuery = output.Confirm(
                     @"Would you like to enable Windows context menu integration?
 You'll be able to perform common WitchyBND operations by right-clicking on files and folders.")
-                .Config(c => c.EnabledAbortKey(false))
+                .Options(c => c.EnabledAbortKey(false))
                 .Run();
-            if (contextMenuQuery.Value.IsYesResponseKey())
+            if (contextMenuQuery.Content.Value.IsYesResponseKey())
             {
                 IntegrationMode.RegisterContext();
                 output.WriteLine("Windows integration enabled.");

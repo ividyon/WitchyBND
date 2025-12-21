@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using SoulsFormats;
+using WitchyFormats;
 using WitchyLib;
 
 namespace WitchyBND.Parsers;
@@ -60,7 +61,7 @@ public partial class WTAEFolder
             animFiles.ForEach(Callback);
         }
 
-        tae.Animations = bag.OrderBy(a => a.ID).ToList();
+        tae.Animations = bag.ToList();
 
         tae.ApplyTemplate(gameService.GetTAETemplate(game));
 
@@ -76,6 +77,7 @@ public partial class WTAEFolder
             var animName = animXml.Element("name")!.Value;
             var headerEl = animXml.Element("header")!;
             var headerType = Enum.Parse<TAE.Animation.MiniHeaderType>(headerEl.Element("type")!.Value);
+            var headerIsNull = bool.Parse(headerEl.Element("null")?.Value ?? "False");
             TAE.Animation.AnimMiniHeader header;
             switch (headerType)
             {
@@ -96,13 +98,49 @@ public partial class WTAEFolder
                     throw new ArgumentOutOfRangeException();
             }
 
+            header.IsNullHeader = headerIsNull;
+
             var anim = new TAE.Animation(id, header, animName);
             anim.Events = new();
             anim.EventGroups = new();
 
-            foreach (XElement groupEl in animXml.Element("animGroups")!.Elements("animGroup"))
+            foreach (XElement evEl in animXml.Element("events")!.Elements("event"))
             {
-                var type = long.Parse(groupEl.Element("type")!.Value);
+                    var evType = int.Parse(evEl.Element("type")!.Value);
+                    var unk04 = int.Parse(evEl.Element("unk04")!.Value);
+                    var startTime = float.Parse(evEl.Element("startTime")!.Value);
+                    var endTime = float.Parse(evEl.Element("endTime")!.Value);
+                    var isUnk = bool.Parse(evEl.Element("isUnk")?.Value ?? "False");
+                    var hasTemplate = template.Any(t => t.Value.ContainsKey(evType));
+                    if (!hasTemplate)
+                        errorService.RegisterNotice($"Missing template for TAE event type {evType}.");
+                    if (!isUnk && hasTemplate)
+                    {
+                        var ev = new TAE.Event(startTime, endTime, evType, unk04, tae.BigEndian, template.First(t => t.Value.ContainsKey(evType)).Value[evType]);
+
+                        var paramsEl = evEl.Element("params");
+                        if (paramsEl != null)
+                        {
+                            foreach (XElement paramEl in paramsEl.Elements("param"))
+                            {
+                                var key = paramEl.Attribute("name")!.Value;
+                                var value = paramEl.Attribute("value")!.Value;
+
+                                ev.Parameters[key] = ev.Parameters.Template[key].StorageToValue(value);
+                            }
+                        }
+                        anim.Events.Add(ev);
+                    }
+                    else
+                    {
+                        var paramBytes = evEl.Element("unkParams")!.Value.Split(",").Select(s => byte.Parse(s)).ToArray();
+                        var ev = new TAE.Event(startTime, endTime, evType, unk04, paramBytes, tae.BigEndian);
+                        anim.Events.Add(ev);
+                    }
+            }
+            foreach (XElement groupEl in animXml.Element("eventGroups")!.Elements("eventGroup"))
+            {
+                var type = int.Parse(groupEl.Element("type")!.Value);
                 var group = new TAE.EventGroup(type);
 
                 var data = new TAE.EventGroup.EventGroupDataStruct();
@@ -122,40 +160,9 @@ public partial class WTAEFolder
                 {
                     foreach (XElement evEl in eventsEl.Elements("event"))
                     {
-                        var evType = int.Parse(evEl.Element("type")!.Value);
-                        var unk04 = int.Parse(evEl.Element("unk04")!.Value);
-                        var startTime = float.Parse(evEl.Element("startTime")!.Value);
-                        var endTime = float.Parse(evEl.Element("endTime")!.Value);
-                        var isUnk = bool.Parse(evEl.Element("isUnk")?.Value ?? "False");
-                        var hasTemplate = template.Any(t => t.Value.ContainsKey(evType));
-                        if (!hasTemplate)
-                            errorService.RegisterNotice($"Missing template for TAE event type {evType}.");
-                        if (!isUnk && hasTemplate)
-                        {
-                            var ev = new TAE.Event(startTime, endTime, evType, unk04, tae.BigEndian, template.First(t => t.Value.ContainsKey(evType)).Value[evType]);
-                            ev.Group = group;
-
-                            var paramsEl = evEl.Element("params");
-                            if (paramsEl != null)
-                            {
-                                foreach (XElement paramEl in paramsEl.Elements("param"))
-                                {
-                                    var key = paramEl.Attribute("name")!.Value;
-                                    var value = paramEl.Attribute("value")!.Value;
-
-                                    ev.Parameters[key] = ev.Parameters.Template[key].StringToValue(value);
-                                }
-                            }
-                            anim.Events.Add(ev);
-                        }
-                        else
-                        {
-                            var paramBytes = evEl.Element("unkParams")!.Value.Split(",").Select(s => byte.Parse(s)).ToArray();
-                            var ev = new TAE.Event(startTime, endTime, evType, unk04, paramBytes, tae.BigEndian);
-                            ev.Group = group;
-                            anim.Events.Add(ev);
-                        }
-
+                        var idx = int.Parse(evEl.Attribute("index")!.Value);
+                        var ev = anim.Events.ElementAt(idx)!;
+                        ev.Group = group;
                     }
                 }
             }

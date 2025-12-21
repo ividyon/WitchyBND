@@ -18,7 +18,7 @@ on:
     branches: [ "main" ]
 
 env:
-  DOTNET_VERSION: '9.0.304'
+  DOTNET_VERSION: '9.0.306'
   NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
   NEXUSMOD_API_KEY: ${{ secrets.NEXUSMOD_API_KEY }}
   NEXUSMOD_SESSION_COOKIE: ${{ secrets.NEXUSMOD_SESSION_COOKIE }}

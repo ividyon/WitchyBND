@@ -73,6 +73,7 @@ public static class ParseMode
             new WTAEFolder(),
             new WTAEFile(),
             new WMSBEFolder(),
+            new WAIP(),
             new WDCX(false)
         };
     }

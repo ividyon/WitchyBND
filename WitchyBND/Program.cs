@@ -261,7 +261,6 @@ internal static class Program
         {
             { "Selected mode", (mode.ToString(), null) },
             { "Specialized BND handling", (Configuration.Active.Bnd.ToString(), Configuration.Default.Bnd.ToString()) },
-            { "DCX decompression only", (Configuration.Active.Dcx.ToString(), Configuration.Default.Dcx.ToString()) },
             { "Store PARAM field default values", (Configuration.ParamDefaultValues.ToString(), true.ToString()) },
             { "Recursive binder processing", (Configuration.Active.Recursive.ToString(), Configuration.Default.Recursive.ToString()) },
             { "Parallel processing", (Configuration.Active.Parallel.ToString(), Configuration.Default.Parallel.ToString()) },

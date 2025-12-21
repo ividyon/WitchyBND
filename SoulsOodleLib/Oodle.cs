@@ -1,6 +1,5 @@
 ﻿using System.Runtime.InteropServices;
 using SoulsFormats;
-using SoulsFormats.Exceptions;
 using NativeLibrary = SoulsFormats.NativeLibrary;
 
 namespace SoulsOodleLib;
@@ -31,12 +30,10 @@ public static class Oodle
 
         foreach ((OodleVersion ver, string localOodlePath) in localOodlePaths)
         {
-            if (File.Exists(localOodlePath))
-            {
-                _handle = NativeLibrary.LoadLibrary(localOodlePath);
-                SoulsFormats.Oodle.OodlePtrs[ver] = _handle;
-                return _handle;
-            }
+            if (!File.Exists(localOodlePath)) continue;
+            _handle = NativeLibrary.LoadLibrary(localOodlePath);
+            SoulsFormats.Oodle.OodlePtrs[ver] = _handle;
+            return _handle;
         }
 
         if (gamePath == null)
@@ -77,7 +74,7 @@ public static class Oodle
 
         foreach ((OodleVersion ver, string gameOodlePath) in gameOodlePaths)
         {
-            Console.WriteLine($"Loading oodle {gameOodlePath}");
+            if (!File.Exists(gameOodlePath)) continue;
             _handle = NativeLibrary.LoadLibrary(gameOodlePath);
             if (copyToAppFolder)
                 File.Copy(gameOodlePath, Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Path.GetFileName(gameOodlePath)), true);
@@ -92,7 +89,7 @@ public static class Oodle
         return IntPtr.Zero;
     }
 
-    private static void KillOodle(IntPtr? oodleHandle)
+    public static void KillOodle(IntPtr? oodleHandle)
     {
         if (oodleHandle != null)
             NativeLibrary.FreeLibrary(oodleHandle.Value);
