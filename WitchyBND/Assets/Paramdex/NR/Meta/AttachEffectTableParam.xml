@@ -4,6 +4,18 @@
   Wiki="" />
   
   <Field>
+    <attachEffectId 
+    AltName="Attached Effect" 
+    Wiki="The attached effect to use." 
+    Refs="AttachEffectParam" />
+    
+    <chanceWeight
+    AltName="Roll Weight: Base"
+    Wiki="The weighting to apply during the roll." />
+    
+    <chanceWeight_dlc
+    AltName="Roll Weight: DLC"
+    Wiki="The DLC new weighting to apply during the roll. -1 will use base roll weight." />
     
   </Field>
   
