@@ -1,14 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <PlatformTarget>x64</PlatformTarget>
+        <TargetFramework>net9.0</TargetFramework>
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+        <PlatformTarget>x64</PlatformTarget>
         <OutputType>Exe</OutputType>
         <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
         <IsPackable>false</IsPackable>
         <RootNamespace>WitchyBND</RootNamespace>
         <Title>WitchyBND</Title>
-        <PublishDir>..\bin\publish</PublishDir>
         <Nullable>enable</Nullable>
         <PublishTrimmed>True</PublishTrimmed>
         <PublishReadyToRun>true</PublishReadyToRun>
@@ -17,7 +16,17 @@
         <DeleteExistingFiles>true</DeleteExistingFiles>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
+        <CETCompat>false</CETCompat>
     </PropertyGroup>
+
+    <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+        <PublishDir>..\bin\publish\win-x64</PublishDir>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+        <PublishDir>..\bin\publish\linux-x64</PublishDir>
+    </PropertyGroup>
+
     <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
         <OutputPath>..\bin\Debug\</OutputPath>
     </PropertyGroup>
@@ -83,18 +92,21 @@
         </MSBuild>
     </Target>
     
-    <Target Name="IncludeAdditions" AfterTargets="Publish">
+    <Target Name="IncludeAdditionsWindows" AfterTargets="Publish" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
         <Message Importance="high"  Text="Including Shell DLL and Updater..." />
-        <Copy SourceFiles="..\WitchyBND.Shell\bin\$(Configuration)\WitchyBND.Shell.dll;..\WitchyBND.Shell\bin\$(Configuration)\SharpShell.dll;..\bin\Release\net8.0-windows\win-x64\x64\libzstd.dll;Assets\libzstd.so" DestinationFolder="$(PublishDir)" />
+        <Copy SourceFiles="..\WitchyBND.Shell\bin\$(Configuration)\WitchyBND.Shell.dll;..\WitchyBND.Shell\bin\$(Configuration)\SharpShell.dll;..\bin\Release\net8.0-windows\win-x64\x64\libzstd.dll" DestinationFolder="$(PublishDir)" />
 <!--        <Move SourceFiles="$(PublishDir)\WitchyUpdater.exe" DestinationFiles="$(PublishDir)\Updater.exe" />-->
+    </Target>
+
+    <Target Name="IncludeAdditionsLinux" AfterTargets="Publish" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+        <Message Importance="high"  Text="Including Shell DLL and Updater..." />
+        <Copy SourceFiles="Assets\libzstd.so" DestinationFolder="$(PublishDir)" />
+        <!--        <Move SourceFiles="$(PublishDir)\WitchyUpdater.exe" DestinationFiles="$(PublishDir)\Updater.exe" />-->
     </Target>
 
     <Target Name="DeleteSuperfluousFiles" AfterTargets="Publish">
         <Message Importance="high"  Text="Removing superfluous files..." />
-        <Delete Files="$(PublishDir)nfd.lib" />
-        <Delete Files="$(PublishDir)nfd.pdb" />
-        <Delete Files="$(PublishDir)SharpShell.xml" />
-        <Delete Files="$(PublishDir)libzstd.dll" />
+        <Delete Files="$(PublishDir)nfd.lib;$(PublishDir)nfd.pdb;$(PublishDir)SharpShell.xml;$(PublishDir)libzstd.dll;$(PublishDir)Assets/libzstd.so;$(PublishDir)x64;$(PublishDir)x86" />
     </Target>
 
     <Target Name="ZipParamdex" AfterTargets="Publish">

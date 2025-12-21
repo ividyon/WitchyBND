@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using SoulsFormats;
 using WitchyBND.Services;
+using WitchyFormats;
 using WitchyLib;
 
 namespace WitchyBND.Parsers;
@@ -70,6 +71,8 @@ public partial class WTAEFolder
         var header = new XElement("header");
         root.Add(header);
         header.AddE("type", anim.MiniHeader.Type);
+        if (anim.MiniHeader.IsNullHeader)
+            header.AddE("null", anim.MiniHeader.IsNullHeader);
         if (anim.MiniHeader is TAE.Animation.AnimMiniHeader.Standard standard)
         {
             header.AddE("allowDelayLoad", standard.AllowDelayLoad);
@@ -82,8 +85,33 @@ public partial class WTAEFolder
             header.AddE("animId", import.ImportFromAnimID);
         }
 
-        root.AddE("animGroups", anim.EventGroups.Select(group => {
-            var groupEl = new XElement("animGroup");
+        root.AddE("events", anim.Events.Select(ev => {
+            var eventEl = new XElement("event");
+            eventEl.AddE("type", ev.Type);
+            eventEl.AddE("unk04", ev.Unk04);
+            eventEl.AddE("startTime", ev.StartTime);
+            eventEl.AddE("endTime", ev.EndTime);
+
+            if (ev.Parameters != null && ev.Parameters.Template != null)
+            {
+                eventEl.AddE("params", ev.Parameters?.Values.Select(p => {
+                    var paramEl = new XElement("param");
+                    paramEl.SetAttributeValue("name", p.Key);
+                    paramEl.SetAttributeValue("value", ev.Parameters.Template[p.Key].ValueToStorage(p.Value));
+                    return paramEl;
+                }));
+            }
+            else
+            {
+                errorService.RegisterNotice($"Missing template for TAE event type {ev.Type}.");
+                eventEl.AddE("isUnk", "True");
+                eventEl.AddE("unkParams", string.Join(",", ev.GetParameterBytes(tae.BigEndian)));
+            }
+            return eventEl;
+        }));
+
+        root.AddE("eventGroups", anim.EventGroups.Select(group => {
+            var groupEl = new XElement("eventGroup");
             groupEl.AddE("type", group.GroupType);
             groupEl.AddE("dataType", group.GroupData.DataType);
             groupEl.AddE("area", group.GroupData.Area);
@@ -95,27 +123,9 @@ public partial class WTAEFolder
             if (events.Any())
             {
                 groupEl.AddE("events", events.Select(ev => {
+                    var idx = anim.Events.IndexOf(ev);
                     var eventEl = new XElement("event");
-                    eventEl.AddE("type", ev.Type);
-                    eventEl.AddE("unk04", ev.Unk04);
-                    eventEl.AddE("startTime", ev.StartTime);
-                    eventEl.AddE("endTime", ev.EndTime);
-
-                    if (ev.Parameters != null && ev.Parameters.Template != null)
-                    {
-                        eventEl.AddE("params", ev.Parameters?.Values.Select(p => {
-                            var paramEl = new XElement("param");
-                            paramEl.SetAttributeValue("name", p.Key);
-                            paramEl.SetAttributeValue("value", ev.Parameters.Template[p.Key].ValueToString(p.Value));
-                            return paramEl;
-                        }));
-                    }
-                    else
-                    {
-                        errorService.RegisterNotice($"Missing template for TAE event type {ev.Type}.");
-                        eventEl.AddE("isUnk", "True");
-                        eventEl.AddE("unkParams", string.Join(",", ev.GetParameterBytes(tae.BigEndian)));
-                    }
+                    eventEl.SetAttributeValue("index", idx.ToString());
                     return eventEl;
                 }));
             }

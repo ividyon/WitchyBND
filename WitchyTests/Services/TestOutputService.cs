@@ -1,5 +1,4 @@
-﻿using PPlus;
-using PPlus.Controls;
+﻿using PromptPlusLibrary;
 using WitchyBND.Services;
 
 namespace WitchyTests.Services;
@@ -8,25 +7,30 @@ public class TestOutputService : IOutputService
 {
 
     public object ConsoleWriterLock { get; }
-    public int WriteLine(string? value = null, Style? style = null, bool clearrestofline = true)
+    public (int, int) WriteLine(string? value = null, Style? style = null, bool clearrestofline = true)
     {
         TestContext.WriteLine(value);
-        return 1;
+        return (-1, -1);
     }
 
-    public int WriteError(string? value = null, Style? style = null, bool clearrestofline = true)
+    public (int Left, int Top) WriteLineColor(string? value = null, Overflow overflow = Overflow.Crop,
+        bool clearrestofline = true)
+    {
+        throw new NotImplementedException();
+    }
+
+    public (int, int) WriteError(string? value = null, Style? style = null, bool clearrestofline = true)
     {
         TestContext.Error.WriteLine(value);
-        return 1;
+        return (-1, -1);
     }
 
-    public int DoubleDash(string value, DashOptions dashOptions = DashOptions.AsciiSingleBorder, int extralines = 0,
+    public void DoubleDash(string value, DashOptions dashOptions = DashOptions.AsciiSingleBorder, int extralines = 0,
         Style? style = null)
     {
-        return 0;
     }
 
-    public IControlSelect<T> Select<T>(string prompt, string? description = null)
+    public ISelectControl<T> Select<T>(string prompt, string? description = null)
     {
         throw new NotImplementedException();
     }
@@ -40,28 +44,27 @@ public class TestOutputService : IOutputService
         throw new NotImplementedException();
     }
 
-    public IControlKeyPress Confirm(string prompt, Action<IPromptConfig> config = null)
+    public IKeyPressControl Confirm(string prompt, Action<IControlOptions> opt = null)
     {
         throw new NotImplementedException();
     }
 
-    public int SingleDash(string value, DashOptions dashOptions = DashOptions.AsciiSingleBorder, int extralines = 0,
+    public void SingleDash(string value, DashOptions dashOptions = DashOptions.AsciiSingleBorder, int extralines = 0,
         Style? style = null)
     {
-        return 0;
     }
 
-    public IControlInput Input(string prompt, Action<IPromptConfig> config = null)
+    public IInputControl Input(string prompt, Action<IControlOptions> opt = null)
     {
         throw new NotImplementedException();
     }
 
-    public IControlKeyPress KeyPress()
+    public IKeyPressControl KeyPress()
     {
         throw new NotImplementedException();
     }
 
-    public IControlKeyPress KeyPress(string prompt, Action<IPromptConfig> config = null)
+    public IKeyPressControl KeyPress(string prompt, Action<IControlOptions> opt = null)
     {
         throw new NotImplementedException();
     }

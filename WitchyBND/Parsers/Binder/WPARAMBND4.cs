@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
-using PPlus;
+using PromptPlusLibrary;
 using SoulsFormats;
 using SoulsFormats.Cryptography;
 using WitchyBND.CliModes;
@@ -211,7 +211,7 @@ public class WPARAMBND4 : WBinderParser
                         "DS2 files cannot be re-encrypted, yet, so re-packing this folder might ruin your encrypted bnd.");
                     var confirm = output.Confirm("Proceed to repack BND (without encryption)?")
                         .Run();
-                    if (confirm.IsAborted || confirm.Value.IsNoResponseKey())
+                    if (confirm.IsAborted || confirm.Content.Value.IsNoResponseKey())
                     {
                         return;
                     }

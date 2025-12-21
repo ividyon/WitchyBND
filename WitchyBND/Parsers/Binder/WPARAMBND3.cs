@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using PPlus;
 using SoulsFormats;
 using WitchyBND.CliModes;
 using WitchyLib;
@@ -17,27 +16,27 @@ public class WPARAMBND3 : WBinderParser
 
     private static bool IsPTDEParamBND(BND3 bnd)
     {
-        return bnd.Files.FirstOrDefault(f => f.Name.ToLower().Contains("default_aistandardinfobank.param"), null) != null;
+        return bnd.Files.FirstOrDefault(f => f?.Name.ToLower().Contains("default_aistandardinfobank.param") ?? false, null) != null;
     }
 
     private static bool IsDSRParamBND(BND3 bnd)
     {
-        return IsPTDEParamBND(bnd) && bnd.Files.FirstOrDefault(f => f.Name.ToLower().EndsWith("levelsyncparam.param"), null) != null;
+        return IsPTDEParamBND(bnd) && bnd.Files.FirstOrDefault(f => f?.Name.ToLower().EndsWith("levelsyncparam.param") ?? false, null) != null;
     }
 
     private static bool IsAC4Regulation(BND3 bnd)
     {
-        return bnd.Files.FirstOrDefault(f => f.Name.ToLower().EndsWith("comment_uk.fmg"), null) != null;
+        return bnd.Files.FirstOrDefault(f => f?.Name.ToLower().EndsWith("comment_uk.fmg") ?? false, null) != null;
     }
 
     private static bool IsACFARegulation(BND3 bnd)
     {
-        return bnd.Files.FirstOrDefault(f => f.Name.ToLower().EndsWith("comment_es.fmg"), null) != null;
+        return bnd.Files.FirstOrDefault(f => f?.Name.ToLower().EndsWith("comment_es.fmg") ?? false, null) != null;
     }
 
     private static bool IsACFABoot(BND3 bnd)
     {
-        return bnd.Files.FirstOrDefault(f => f.Name.ToLower().EndsWith("ac45_allsound.mgs"), null) != null;
+        return bnd.Files.FirstOrDefault(f => f?.Name.ToLower().EndsWith("ac45_allsound.mgs") ?? false, null) != null;
     }
 
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)

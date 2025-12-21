@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net8.0-windows7.0": {
+    "net9.0": {
       "coverlet.collector": {
         "type": "Direct",
         "requested": "[3.2.0, )",
@@ -207,8 +207,8 @@
       },
       "Microsoft.NETCore.Platforms": {
         "type": "Transitive",
-        "resolved": "3.1.0",
-        "contentHash": "z7aeg8oHln2CuNulfhiLYxCVMPEwBl3rzicjvIX+4sUuCwvXw5oXQEtbiU2c0z4qYL5L3Kmx0mMA/+t/SbY67w=="
+        "resolved": "1.1.0",
+        "contentHash": "kz0PEW2lhqygehI/d6XsPCQzD7ff7gUJaVGPVETX611eadGsA3A877GdSlU0LRVMCTH/+P3o2iDTak+S08V2+A=="
       },
       "Microsoft.NETCore.Targets": {
         "type": "Transitive",
@@ -249,13 +249,10 @@
       },
       "PromptPlus": {
         "type": "Transitive",
-        "resolved": "4.2.0",
-        "contentHash": "Won6lYBsdKarWafpfMjd81MlI7WPnW8cDQ7ODY5RBqlOaQ2vrHEOc22BMOEHHwJDm777DNLvcTN4Dy22fBrbBQ==",
+        "resolved": "5.0.0-IB2",
+        "contentHash": "DPRvXZO2QmUTDDWCSR9vHzyp+/qtgeEnlU9OD02ilvV9q4Fl0ZrPcL+MsdTz0gfg/biyB8c0Ff9OxR+x3E3OPA==",
         "dependencies": {
-          "EastAsianWidthDotNet": "1.0.1",
-          "System.ComponentModel.Annotations": "5.0.0",
-          "System.IO": "4.3.0",
-          "System.Text.Json": "7.0.3"
+          "EastAsianWidthDotNet": "1.0.1"
         }
       },
       "securifybv.PropertyStore": {
@@ -270,11 +267,6 @@
         "dependencies": {
           "securifybv.PropertyStore": "0.1.0"
         }
-      },
-      "System.ComponentModel.Annotations": {
-        "type": "Transitive",
-        "resolved": "5.0.0",
-        "contentHash": "dMkqfy2el8A8/I76n2Hi1oBFEbG1SfxD2l5nhwXV3XjlnOmwxJlQbYpJH4W51odnU9sARCSAgv7S3CyAFMkpYg=="
       },
       "System.Diagnostics.DiagnosticSource": {
         "type": "Transitive",
@@ -362,11 +354,8 @@
       },
       "System.Text.Encoding.CodePages": {
         "type": "Transitive",
-        "resolved": "4.7.0",
-        "contentHash": "aeu4FlaUTemuT1qOd1MyU4T516QR4Fy+9yDbwWMPHOHy7U8FD6SgTzdZFO7gHcfAPHtECqInbwklVvUK4RHcNg==",
-        "dependencies": {
-          "Microsoft.NETCore.Platforms": "3.1.0"
-        }
+        "resolved": "8.0.0",
+        "contentHash": "OZIsVplFGaVY90G2SbpgU7EnCoOO5pw1t4ic21dBF3/1omrJFpAGoNAVpPyMVOC90/hvgkGG3VFqR13YgZMQfg=="
       },
       "System.Text.Encodings.Web": {
         "type": "Transitive",
@@ -406,7 +395,7 @@
         "dependencies": {
           "BouncyCastle.Cryptography": "[2.4.0, )",
           "DrSwizzler": "[1.1.1, )",
-          "System.Text.Encoding.CodePages": "[4.7.0, )",
+          "System.Text.Encoding.CodePages": "[8.0.0, )",
           "System.ValueTuple": "[4.5.0, )",
           "ZstdNet": "[1.4.5, )"
         }
@@ -448,7 +437,7 @@
           "Microsoft.CSharp": "[4.7.0, )",
           "Microsoft.Extensions.FileSystemGlobbing": "[8.0.0-preview.2.23128.3, )",
           "Newtonsoft.Json": "[13.0.3, )",
-          "PromptPlus": "[4.2.0, )",
+          "PromptPlus": "[5.0.0-IB2, )",
           "WitchyFormats": "[2.17.0, )"
         }
       }

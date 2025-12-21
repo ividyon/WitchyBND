@@ -2,7 +2,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Runtime.InteropServices;
-using PPlus.Controls;
 using WitchyBND.Parsers;
 using WitchyBND.Services;
 using WitchyLib;
@@ -24,10 +23,6 @@ public static class ConfigMode
             Description =
                 "Enable to extract certain BND types into a custom, user-friendly structure. Disable for standard handling.")]
         ToggleBnd,
-
-        [Display(Name = "DCX decompression only",
-            Description = "Enable to exclusively decompress DCX files and leave their contents intact.")]
-        ToggleDcx,
 
         [Display(Name = "Recursive binder processing",
             Description =
@@ -112,7 +107,7 @@ Press any key to continue to the configuration screen...");
         {
             output.Clear();
             output.DoubleDash("Configuration menu");
-            output.WriteLine("This menu is [YELLOW]paged[/]; scroll down to find more options.");
+            output.WriteLineColor("This menu is [YELLOW]paged[/]; scroll down to find more options.");
             output.WriteLine();
             var select = output.Select<ConfigMenuItem>("Choose an option")
                 .TextSelector(a => {
@@ -122,9 +117,6 @@ Press any key to continue to the configuration screen...");
                     {
                         case ConfigMenuItem.ToggleBnd:
                             toggled = Configuration.Stored.Bnd;
-                            break;
-                        case ConfigMenuItem.ToggleDcx:
-                            toggled = Configuration.Stored.Dcx;
                             break;
                         case ConfigMenuItem.ToggleRecursive:
                             toggled = Configuration.Stored.Recursive;
@@ -172,14 +164,10 @@ Press any key to continue to the configuration screen...");
 
             if (select.IsAborted) return;
 
-            switch (select.Value)
+            switch (select.Content)
             {
                 case ConfigMenuItem.ToggleBnd:
                     Configuration.Stored.Bnd = !Configuration.Stored.Bnd;
-                    updateConfig();
-                    break;
-                case ConfigMenuItem.ToggleDcx:
-                    Configuration.Stored.Dcx = !Configuration.Stored.Dcx;
                     updateConfig();
                     break;
                 case ConfigMenuItem.ToggleRecursive:
@@ -210,10 +198,10 @@ Press any key to continue to the configuration screen...");
                     while (true)
                     {
                         var thresholdSelect = output.Input("Input new threshold (between 0.0 and 1.0")
-                            .AddValidators(PromptValidators.IsTypeFloat())
+                            // .AddValidators(PromptValidators.IsTypeFloat())
                             .Run();
                         if (thresholdSelect.IsAborted) break;
-                        var threshold = float.Parse(thresholdSelect.Value);
+                        var threshold = float.Parse(thresholdSelect.Content);
                         if (threshold < 0f)
                         {
                             output.WriteError("Number cannot be less than 0.");
@@ -238,7 +226,7 @@ Press any key to continue to the configuration screen...");
                     var cellSelect = output.Select<WPARAM.CellStyle>("Select PARAM field style").Run();
                     if (!cellSelect.IsAborted)
                     {
-                        Configuration.Stored.ParamCellStyle = cellSelect.Value;
+                        Configuration.Stored.ParamCellStyle = cellSelect.Content;
                         updateConfig();
                     }
                     break;
@@ -246,7 +234,7 @@ Press any key to continue to the configuration screen...");
                     var backupSelect = output.Select<WBUtil.BackupMethod>("Select backup method").Run();
                     if (!backupSelect.IsAborted)
                     {
-                        Configuration.Stored.BackupMethod = backupSelect.Value;
+                        Configuration.Stored.BackupMethod = backupSelect.Content;
                         updateConfig();
                     }
                     break;
@@ -260,12 +248,12 @@ Press any key to continue to the configuration screen...");
                 case ConfigMenuItem.ConfigureDelay:
                     var input = output.Input("Input new delay (in milliseconds)")
                         .AcceptInput(char.IsNumber)
-                        .AddValidators(PromptValidators.IsTypeUInt16("Input is not within valid range"))
-                        .ValidateOnDemand()
+                        // .AddValidators(PromptValidators.IsTypeUInt16("Input is not within valid range"))
+                        // .ValidateOnDemand()
                         .Run();
                     if (!input.IsAborted)
                     {
-                        Configuration.Stored.EndDelay = Convert.ToUInt16(input.Value);
+                        Configuration.Stored.EndDelay = Convert.ToUInt16(input.Content);
                         updateConfig();
                     }
                     break;

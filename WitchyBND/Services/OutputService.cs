@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
-using PPlus;
-using PPlus.Controls;
+using PromptPlusLibrary;
+using PromptPlusLibrary.PublicLibrary;
 using WitchyLib;
 
 namespace WitchyBND.Services;
@@ -9,35 +9,39 @@ namespace WitchyBND.Services;
 public interface IOutputService
 {
     public object ConsoleWriterLock { get; }
-    public int WriteLine(
+    public (int Left, int Top) WriteLine(
         string? value = null,
         Style? style = null,
         bool clearrestofline = true);
-    public int WriteError(
+    public (int Left, int Top) WriteLineColor(
+        string? value = null,
+        Overflow overflow = Overflow.Crop,
+        bool clearrestofline = true);
+    public (int Left, int Top) WriteError(
         string? value = null,
         Style? style = null,
         bool clearrestofline = true);
 
-    public int DoubleDash(
+    public void DoubleDash(
         string value,
         DashOptions dashOptions = DashOptions.AsciiSingleBorder,
         int extralines = 0,
         Style? style = null);
-    public IControlSelect<T> Select<T>(string prompt, string? description = null);
+    public ISelectControl<T> Select<T>(string prompt, string? description = null);
     public void Clear();
 
-    public IDisposable EscapeColorTokens();
+    // public IDisposable EscapeColorTokens();
 
-    public IControlKeyPress Confirm(string prompt, Action<IPromptConfig> config = null);
-    public int SingleDash(
+    public IKeyPressControl Confirm(string prompt, Action<IControlOptions> config = null);
+    public void SingleDash(
         string value,
         DashOptions dashOptions = DashOptions.AsciiSingleBorder,
         int extralines = 0,
         Style? style = null);
 
-    public IControlInput Input(string prompt, Action<IPromptConfig> config = null);
-    public IControlKeyPress KeyPress();
-    public IControlKeyPress KeyPress(string prompt, Action<IPromptConfig> config = null);
+    public IInputControl Input(string prompt, Action<IControlOptions> config = null);
+    public IKeyPressControl KeyPress();
+    public IKeyPressControl KeyPress(string prompt, Action<IControlOptions> config = null);
     public ConsoleKeyInfo ReadKey(bool intercept = false);
 }
 public class OutputService : IOutputService
@@ -47,38 +51,53 @@ public class OutputService : IOutputService
         PromptPlus.Config.DefaultCulture = new CultureInfo("en-us");
         if (!OperatingSystem.IsWindows())
         {
-            PromptPlus.ResetColor();
+            PromptPlus.Console.ResetColor();
         }
     }
 
     public object ConsoleWriterLock => new();
-    public int WriteLine(string? value = null, Style? style = null, bool clearrestofline = true)
+    public (int Left, int Top) WriteLine(string? value = null, Style? style = null, bool clearrestofline = true)
     {
-        if (Configuration.Active.Silent) return 0;
+        if (Configuration.Active.Silent) return (0, 0);
         try
         {
-            int outCode;
+            (int Left, int Top) outCode;
             lock (ConsoleWriterLock)
-                outCode = PromptPlus.Write(value + Environment.NewLine, style, clearrestofline);
+                outCode = PromptPlus.Console.Write(value + Environment.NewLine, style, clearrestofline);
             return outCode;
         }
         catch
         {
-            return -1;
+            return (-1, -1);
+        }
+    }
+    public (int Left, int Top) WriteLineColor(string? value = null, Overflow overflow = Overflow.Crop, bool clearrestofline = true)
+    {
+        if (Configuration.Active.Silent) return (0, 0);
+        try
+        {
+            (int Left, int Top) outCode;
+            lock (ConsoleWriterLock)
+                outCode = PromptPlus.Console.WriteColor(value + Environment.NewLine, Overflow.Crop, clearrestofline);
+            return outCode;
+        }
+        catch
+        {
+            return (-1, -1);
         }
     }
 
-    public int WriteError(string? value = null, Style? style = null, bool clearrestofline = true)
+    public (int Left, int Top) WriteError(string? value = null, Style? style = null, bool clearrestofline = true)
     {
-        if (Configuration.Active.Silent) return 0;
+        if (Configuration.Active.Silent) return (0, 0);
         try
         {
-            int outCode;
+            (int Left, int Top) outCode;
             lock (ConsoleWriterLock)
             {
-                using (PromptPlus.OutputError())
+                using (PromptPlus.Console.OutputError())
                 {
-                    outCode = PromptPlus.Write(value + Environment.NewLine, style, clearrestofline);
+                    outCode = PromptPlus.Console.Write(value + Environment.NewLine, style, clearrestofline);
                 }
             }
 
@@ -86,75 +105,72 @@ public class OutputService : IOutputService
         }
         catch
         {
-            return -1;
+            return (-1, -1);
         }
     }
 
-    public int DoubleDash(string value, DashOptions dashOptions = DashOptions.AsciiSingleBorder, int extralines = 0,
+    public void DoubleDash(string value, DashOptions dashOptions = DashOptions.AsciiSingleBorder, int extralines = 0,
         Style? style = null)
     {
-        if (Configuration.Active.Silent) return 0;
-        int outCode;
+        if (Configuration.Active.Silent) return;
         lock (ConsoleWriterLock)
-            outCode = PromptPlus.DoubleDash(value, dashOptions, extralines, style);
-        return outCode;
+            PromptPlus.Widgets.DoubleDash(value, dashOptions, extralines, style);
     }
 
-    public IControlSelect<T> Select<T>(string prompt, string? description = null)
+    public ISelectControl<T> Select<T>(string prompt, string? description = null)
     {
         lock (ConsoleWriterLock)
-            return PromptPlus.Select<T>(prompt, description);
+            return PromptPlus.Controls.Select<T>(prompt, description);
     }
 
     public void Clear()
     {
         if (Configuration.Active.Silent) return;
         lock (ConsoleWriterLock)
-            PromptPlus.Clear();
+            PromptPlus.Console.Clear();
     }
 
-    public IDisposable EscapeColorTokens()
-    {
-        return PromptPlus.EscapeColorTokens();
-    }
+    // public IDisposable EscapeColorTokens()
+    // {
+    //     return PromptPlus.Config.EscapeColorTokens();
+    // }
 
-    public IControlKeyPress Confirm(string prompt, Action<IPromptConfig> config = null)
+    public IKeyPressControl Confirm(string prompt, Action<IControlOptions> opt = null)
     {
         lock (ConsoleWriterLock)
-            return PromptPlus.Confirm(prompt, config);
+            return PromptPlus.Controls.Confirm(prompt).Options(opt);
     }
 
-    public int SingleDash(string value, DashOptions dashOptions = DashOptions.AsciiSingleBorder, int extralines = 0,
+    public void SingleDash(string value, DashOptions dashOptions = DashOptions.AsciiSingleBorder, int extralines = 0,
         Style? style = null)
     {
-        if (Configuration.Active.Silent) return 0;
-        int outCode;
+        if (Configuration.Active.Silent) return;
         lock (ConsoleWriterLock)
-            outCode = PromptPlus.SingleDash(value, dashOptions, extralines, style);
-        return outCode;
+            PromptPlus.Widgets.SingleDash(value, dashOptions, extralines, style);
     }
 
-    public IControlInput Input(string prompt, Action<IPromptConfig> config = null)
+    public IInputControl Input(string prompt, Action<IControlOptions> opt = null)
     {
         lock (ConsoleWriterLock)
-            return PromptPlus.Input(prompt, config);
+            return PromptPlus.Controls.Input(prompt).Options(opt);
     }
 
-    public IControlKeyPress KeyPress()
+    public IKeyPressControl KeyPress()
     {
         lock (ConsoleWriterLock)
-            return PromptPlus.KeyPress();
+            return PromptPlus.Controls.KeyPress();
     }
 
-    public IControlKeyPress KeyPress(string prompt, Action<IPromptConfig> config = null)
+    public IKeyPressControl KeyPress(string prompt, Action<IControlOptions>? opt = null)
     {
+        opt ??= _ => { };
         lock (ConsoleWriterLock)
-            return PromptPlus.KeyPress(prompt, config);
+            return PromptPlus.Controls.KeyPress(prompt).Options(opt);
     }
 
     public ConsoleKeyInfo ReadKey(bool intercept = false)
     {
         lock (ConsoleWriterLock)
-            return PromptPlus.ReadKey(intercept);
+            return PromptPlus.Console.ReadKey(intercept);
     }
 }

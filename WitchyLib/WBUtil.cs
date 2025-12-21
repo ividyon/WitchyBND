@@ -1,7 +1,6 @@
 ﻿#nullable enable
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
@@ -12,12 +11,9 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using Microsoft.Extensions.FileSystemGlobbing;
-using Microsoft.Win32;
-using Newtonsoft.Json;
-using PPlus;
+using PromptPlusLibrary;
 using SoulsFormats;
 using SoulsFormats.Cryptography;
-using SoulsFormats.Exceptions;
 
 namespace WitchyLib;
 
@@ -625,28 +621,28 @@ public static class WBUtil
 
     public static bool ObnoxiousWarning(List<string> lines)
     {
-        PromptPlus.WriteLine("");
+        PromptPlus.Console.WriteLine("");
 
         foreach (string line in lines)
         {
-            PromptPlus.WriteLine(line);
-            var cursor = PromptPlus.GetCursorPosition();
-            PromptPlus.WriteLine("");
-            PromptPlus.WaitTimer("Please read carefully, then press any key...", TimeSpan.FromSeconds(1));
-            PromptPlus.ClearLine();
-            PromptPlus.SetCursorPosition(cursor.Left, cursor.Top);
-            PromptPlus.WriteLine("");
-            PromptPlus.KeyPress("Please read carefully, then press any key...")
-                .Config(a => a.EnabledAbortKey(false))
+            PromptPlus.Console.WriteLine(line);
+            var cursor = PromptPlus.Console.GetCursorPosition();
+            PromptPlus.Console.WriteLine("");
+            PromptPlus.Controls.WaitTimer(TimeSpan.FromSeconds(1), "Please read carefully, then press any key...");
+            // ClearLine();
+            PromptPlus.Console.SetCursorPosition(cursor.Left, cursor.Top);
+            PromptPlus.Console.WriteLineColor("");
+            PromptPlus.Controls.KeyPress("Please read carefully, then press any key...")
+                .Options(a => a.EnabledAbortKey(false))
                 .Run();
-            PromptPlus.ClearLine();
-            PromptPlus.SetCursorPosition(cursor.Left, cursor.Top);
+            // PromptPlus.Console.ClearLine();
+            PromptPlus.Console.SetCursorPosition(cursor.Left, cursor.Top);
         }
 
-        PromptPlus.WriteLine("");
-        var confirm = PromptPlus.Confirm(@"Do you still wish to proceed?").Run();
+        PromptPlus.Console.WriteLine("");
+        var confirm = PromptPlus.Controls.Confirm(@"Do you still wish to proceed?").Run();
 
-        if (confirm.Value.IsNoResponseKey() || confirm.IsAborted)
+        if (confirm.Content.Value.IsAbortKeyPress() || confirm.IsAborted)
             return false;
 
         return true;

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.Win32;
-using PPlus;
+using PromptPlusLibrary;
 using WitchyBND.Services;
 using WitchyLib;
 
@@ -46,7 +46,7 @@ public static class IntegrationMode
             var select = output.Select<IntegrationChoices>("Select an option")
                 .Run();
             if (select.IsAborted) return;
-            switch (select.Value)
+            switch (select.Content)
             {
                 case IntegrationChoices.Register:
                     RegisterContext();
@@ -59,7 +59,7 @@ public static class IntegrationMode
                         @"Explorer needs to be restarted to complete the process.
 Your taskbar will briefly disappear for a few seconds. Witchy will try to restore any open Explorer windows.");
                     var choice = output.Confirm("Proceed with restarting the Explorer process?").Run();
-                    if (choice.Value.IsYesResponseKey())
+                    if (choice.Content.Value.IsYesResponseKey())
                     {
                         output.WriteLine("Restarting the Explorer process...");
                         Shell.RestartExplorer();
