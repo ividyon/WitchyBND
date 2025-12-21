@@ -1104,7 +1104,7 @@
             <s32 assert="0"/>
         </event>
         <event id="341" name="ChrSlotSys_341">
-            <s32 assert="0"/>
+            <s32/>
             <s32 assert="0"/>
             <s32 assert="0"/>
             <s32 assert="0"/>
@@ -1243,9 +1243,9 @@
                 <entry name="6: HeadTurn?" value="6"/>
                 <entry name="7: Throw?" value="7"/>
             </u8>
-            <u8 assert="0"/>
-            <u8 assert="0"/>
-            <u8 assert="0"/>
+            <u8/>
+            <u8/>
+            <u8/>
             <f32 name="UpMinimumAngle"/>
             <f32 name="DownMinimumAngle"/>
             <f32 name="RightMinimumAngle"/>

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <PARAMMETA XmlVersion="0">
   <Enums>
     <Enum Name="GOODS_TYPE" type="u8">
@@ -27,9 +27,15 @@
       <Option Value="1" Name="Bullet" />
       <Option Value="2" Name="SpEffect" />
     </Enum>
-    <Enum Name="BEHAVIOR_CATEGORY" type="u8">
-      <Option Value="0" Name="SpEffect" />
-      <Option Value="5" Name="Bullet" />
+      <Enum Name="QUICKMATCH_ITEM_USE" type="u8">
+      <Option Value="0" Name="Always Allowed" />
+      <Option Value="1" Name="Prohibited In Duel" />
+      <Option Value="2" Name="Prohibited In Team Match" />
+      <Option Value="3" Name="Prohibited In Brawl and Team Match" />
+      <Option Value="4" Name="Prohibited In Duel, Brawl, and Team Match" />
+      <Option Value="5" Name="Prohibited In Duel and Team Match" />
+      <Option Value="6" Name="Prohibited In Brawl and Team Match" />
+      <Option Value="7" Name="Always Prohibited" />
     </Enum>
     <Enum Name="GOODS_OPEN_MENU" type="u8">
       <Option Value="0" Name="None" />
@@ -49,8 +55,44 @@
       <Option Value="22" Name="Invade World (Festering Bloody Finger)" />
     </Enum>
     <Enum Name="SP_EFFECT_USELIMIT_CATEGORY" type="u8">
-        <Option Value="0" Name="Type 0" />
-        <Option Value="2" Name="Type 2" />
+        <Option Value="0" Name="None" />
+        <Option Value="1" Name="Apply First [10000]" />
+        <Option Value="2" Name="Apply First (Damage Level Change)" />
+        <Option Value="3" Name="Persist through Death" />
+        <Option Value="4" Name="Apply First [10002]" />
+        <Option Value="5" Name="Apply Highest (Category Priority) [1000]" />
+        <Option Value="6" Name="Apply Highest (Category Priority) [1001]" />
+        <Option Value="7" Name="Apply First (Blood Loss)" />
+        <Option Value="8" Name="Apply First (Poison)" />
+        <Option Value="9" Name="Apply First (Scarlet Rot)" />
+        <Option Value="10" Name="Apply First (Frostbite)" />
+        <Option Value="11" Name="Apply First (Damage Level Change) + Persist through Death" />
+        <Option Value="12" Name="Apply First (Damage Level Change) + Persist through Death + Apply First [10002]" />
+        <Option Value="13" Name="Apply First (Damage Level Change) + Apply First [10002]" />
+        <Option Value="14" Name="Apply First [10006]" />
+        <Option Value="15" Name="Apply First (Death)" />
+        <Option Value="16" Name="Apply First (Sleep)" />
+        <Option Value="17" Name="Apply First (Madness)" />
+    </Enum>
+    <Enum Name="GOODS_USELIMIT_SUMMONBUDDY" type="u8">
+        <Option Value="0" Name="None" />
+        <Option Value="1" Name="Apply First [10000]" />
+        <Option Value="2" Name="Apply First (Damage Level Change)" />
+        <Option Value="3" Name="Persist through Death" />
+        <Option Value="4" Name="Apply First [10002]" />
+        <Option Value="5" Name="Apply Highest (Category Priority) [1000]" />
+        <Option Value="6" Name="Apply Highest (Category Priority) [1001]" />
+        <Option Value="7" Name="Apply First (Blood Loss)" />
+        <Option Value="8" Name="Apply First (Poison)" />
+        <Option Value="9" Name="Apply First (Scarlet Rot)" />
+        <Option Value="10" Name="Apply First (Frostbite)" />
+        <Option Value="11" Name="Apply First (Damage Level Change) + Persist through Death" />
+        <Option Value="12" Name="Apply First (Damage Level Change) + Persist through Death + Apply First [10002]" />
+        <Option Value="13" Name="Apply First (Damage Level Change) + Apply First [10002]" />
+        <Option Value="14" Name="Apply First [10006]" />
+        <Option Value="15" Name="Apply First (Death)" />
+        <Option Value="16" Name="Apply First (Sleep)" />
+        <Option Value="17" Name="Apply First (Madness)" />
     </Enum>
     <Enum Name="REPLACE_CATEGORY" type="u8">
         <Option Value="0" Name="Type 0" />
@@ -75,10 +117,6 @@
       <Option Value="1" Name="Common" />
       <Option Value="2" Name="Rare" />
       <Option Value="3" Name="Legendary" />
-    </Enum>
-    <Enum Name="GOODS_USELIMIT_SUMMONBUDDY" type="u8">
-        <Option Value="0" Name="Type 0" />
-        <Option Value="1" Name="Type 1" />
     </Enum>
     <Enum Name="DISPLAY_CATEGORY_ID" type="u8">
       <Option Value="10" Name="Group 10" />
@@ -114,7 +152,8 @@
     <potGroupId AltName="Pot Group ID" Wiki="Consumable items for which 0 or more is set for the pot group ID can be possessed by the number of pots with the same pot group ID." />
     <pad AltName="" Padding=""/>
 
-    <iconId AltName="Icon ID" Wiki="Menu icon ID" TextureRef="Direct/01_common/SB_Icon_00/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_01/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_02/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_02_A/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_02_B/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_03/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_03_A/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_04/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_05/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_06/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_07_dlc/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_07_dlc_A/iconId/MENU_ItemIcon_,Direct/01_common/SB_Icon_08_dlc/iconId/MENU_ItemIcon_" /> />
+    <iconId AltName="Icon ID" Wiki="Menu icon ID"
+    IconConfig="Item" />
     <modelId AltName="Model ID" Wiki="Model ID" />
     <shopLv AltName="Shop Level" Wiki="Level that can be sold at the store" />
     <compTrophySedId AltName="Achivement ID" Wiki="SEQ number of complete trophy" />
@@ -124,18 +163,23 @@
     <overDexterity AltName="Over Dexterity" Wiki="Skill over start value" />
     <goodsType AltName="Goods Type" Wiki="Types of tools" Enum="GOODS_TYPE"/>
     <refCategory AltName="Reference Type" Wiki=" ID category - Attack, Projectile, Special" Enum="BEHAVIOR_REF_TYPE"  />
-    <spEffectCategory AltName="SpEffect Category" Wiki="Since there are effects (enchantment weapons, etc.) whose parameters fluctuate depending on skills, magic, items, etc., set each action so that the determined effect can correspond to the effect such as power up only weapon attack. Set None for items that do not need to be set, such as varistor." Enum="BEHAVIOR_CATEGORY" />
+    <quickMatchUseRestriction AltName="Quick Match Usage Restriction" Wiki="Controls when this item can be used during Quick Match multiplayer modes." Enum="QUICKMATCH_ITEM_USE_RESTRICTION" />
     <pad3 AltName="" Padding=""/>
     <goodsUseAnim AltName="Goods Use Animation" Wiki="Set the animation to play when using the tool" ProjectEnum="GOODS_USE_ANIM" />
     <opmeMenuType AltName="Interaction Menu Type" Wiki="Menu type that opens when using an item" Enum="GOODS_OPEN_MENU" />
-    <useLimitCategory AltName="Use Limit Category" Wiki="Specified to control whether it can be used by the special effect applied" Enum="SP_EFFECT_USELIMIT_CATEGORY" />
+
+    <useLimitCategory
+    AltName="Use Limit Category"
+    Wiki="This item is usable if any active spEffect with the following spCategories are active."
+    Enum="SP_EFFECT_USELIMIT_CATEGORY" />
+
     <replaceCategory AltName="Replace Category" Wiki="Condition category to add to call ID" Enum="REPLACE_CATEGORY" />
     <reserve4 AltName="" Padding=""/>
-    
+
     <enable_live AltName="Enable Host Player" Wiki="Is it possible to use a surviving player?" IsBool="" />
     <enable_gray AltName="Enable as Gray Phantom" Wiki="Can Gray Ghost be used?" IsBool="" />
-    <enable_white AltName="Enable as White Phantom" Wiki="Can white ghost be used?" IsBool="" />
-    <enable_black AltName="Enable as Black Phantom" Wiki="Is it possible to do a black ghost?" IsBool="" />
+    <enable_friendly AltName="Enable as friendly phantom" Wiki="Is it possible to use this item as a friendly phantom? (Furled Finger, Hunter, Npc Furled Finger)" IsBool="" />
+    <enable_hostile AltName="Enable as Black Phantom" Wiki="Is it possible to use this item as a hostile phantom? (All types of Invaders, Duelist, Npc Invaders, Npc's, etc...)" IsBool="" />
     <enable_multi AltName="Enable in Multiplayer" Wiki="Can it be used during multiplayer?" IsBool="" />
     <disable_offline AltName="Enable Online Only" Wiki="Is it unavailable while offline?" IsBool="" />
     <isEquip AltName="Is Equippable" Wiki="Whether it can be equipped" IsBool="" />
@@ -185,11 +229,16 @@
     <maxRepositoryNum AltName="Max Number Stored in Itembox" Wiki="Number of warehouses" />
     <sortGroupId AltName="Sort Group ID" Wiki="Sort item type ID. In the sort Item type order, the same ID is displayed together as the same group." Enum="DISPLAY_CATEGORY_ID" />
     <isUseNoAttackRegion AltName="Enabled in No Attack Region" Wiki="Can it be used in an attack-prohibited area?" IsBool="" />
-    <quickMatchReplanish AltName="Replanish after quick match" Wiki="Should amount of this item be stored and replenished after quick match?" IsBool="" />
+    <quickMatchReplenish AltName="Replenish after quick match" Wiki="Should amount of this item be stored and replenished after quick match?" IsBool="" />
     <pad1 AltName="" Padding=""/>
     <saleValue AltName="Sale Value" Wiki="Selling price" />
     <rarity AltName="Rarity" Wiki="Rarity used in item acquisition logs" Enum="RARITY" />
-    <useLimitSummonBuddy AltName="Use Limit - Spirit Summon" Wiki="Whether there are item usage restrictions for buddy items" Enum="GOODS_USELIMIT_SUMMONBUDDY" />
+
+    <useLimitSummonBuddy
+    AltName="Use Limit Category (Spirit Summon)"
+    Wiki="This item is usable if any active spEffect with the following spCategories are active."
+    Enum="SP_EFFECT_USELIMIT_CATEGORY" />
+
     <useLimitSpEffectType AltName="Use Limit - SpEffect Type" Wiki="Specified to control whether it can be used depending on the state change type of the special effect applied" ProjectEnum="SP_EFFECT_TYPE" />
     <aiUseJudgeId AltName="AI Usage Judgment ID" Wiki="AI usage judgment ID" />
     <consumeMP AltName="FP Cost" Wiki="MP consumption" />
@@ -218,7 +267,7 @@
     <itemGetTutorialFlagId AltName="Item Get Tutorial Flag ID" Wiki="Event flag ID for the tutorial when you first get the item. Flag ON when item is obtained." FlagAlias="" />
     <reserve3 AltName="" Padding=""/>
   </Field>
-  <Self Wiki="Defines an item, both consumable and key items.\nNote that many key items are placebo and the item's effect is granted through scripting. Passive effects from ownership are not defined here." 
+  <Self Wiki="Defines an item, both consumable and key items.\nNote that many key items are placebo and the item's effect is granted through scripting. Passive effects from ownership are not defined here."
   AlternativeOrder="sortId,sortGroupId,iconId,-,
 rarity,sellValue,basicPrice,saleValue,-,
 maxNum,maxRepositoryNum,potGroupId,-,
@@ -229,17 +278,17 @@ castSfxId,fireSfxId,effectSfxId,sfxVariationId,-,
 refCategory,refId_default,refId_1,refVirtualWepId,aiUseJudgeId,-,
 reinforceGoodsId,reinforceMaterialId,reinforcePrice,useLimitSummonBuddy,-,
 
-goodsUseAnim,goodsType,spEffectCategory,opmeMenuType,useLimitCategory,replaceCategory,suppleType,autoReplenishType,useEnableSpEffectType,useLimitSpEffectType,behaviorId,syncNumVaryId,yesNoDialogMessageId,replaceItemId,appearanceReplaceItemId,-,
+goodsUseAnim,goodsType,quickMatchUseRestriction,opmeMenuType,useLimitCategory,replaceCategory,suppleType,autoReplenishType,useEnableSpEffectType,useLimitSpEffectType,behaviorId,syncNumVaryId,yesNoDialogMessageId,replaceItemId,appearanceReplaceItemId,-,
 
 isEquip,isDrop,isDiscard,isDeposit,isFixItem,-,
 
-isConsume,isAutoEquip,isEstablishment,isOnlyOne,isSuppleItem,isFullSuppleItem,isAshenEstusFlask,isEnhance,isEnableFastUseItem,isBonfireWarpItem,isShieldEnchant,isWarpProhibited,enable_ActiveEmber,enable_Ladder,isUseMultiPlayPreparation,canMultiUse,isUseMultiPenaltyOnly,enable_ActiveBigRune,isSleepCol,isUseNoAttackRegion,quickMatchReplanish-,
+isConsume,isAutoEquip,isEstablishment,isOnlyOne,isSuppleItem,isFullSuppleItem,isAshenEstusFlask,isEnhance,isEnableFastUseItem,isBonfireWarpItem,isShieldEnchant,isWarpProhibited,enable_ActiveEmber,enable_Ladder,isUseMultiPlayPreparation,canMultiUse,isUseMultiPenaltyOnly,enable_ActiveBigRune,isSleepCol,isUseNoAttackRegion,quickMatchReplenish-,
 
 isSummonHorse,enableRiding,disableRiding,-,
 
 isDisableHand,isRemoveItem_forGameClear,isApplySpecialEffect,-,
 
-enable_live,enable_gray,enable_white,enable_black,enable_multi,disable_offline,disableUseAtColiseum,disableUseAtOutOfColiseum,disableMultiDropShare,-,
+enable_live,enable_gray,enable_friendly,enable_hostile,enable_multi,disable_offline,disableUseAtColiseum,disableUseAtOutOfColiseum,disableMultiDropShare,-,
 
 itemGetTutorialFlagId,-,
 compTrophySedId,trophySeqId,-,

@@ -4,6 +4,31 @@
   Wiki="" />
   
   <Field>
+    <patternId
+    AltName="Pattern ID"
+    Wiki="The pattern set this entry belongs to." />
+    
+    <attachId
+    AltName="Attach Point ID"
+    Wiki="The attach point for this entry."
+    Refs="SmallBaseAndSpotAttachPoint" />
+    
+    <smallBaseMapId
+    AltName="Small Map ID"
+    Wiki=""
+    Refs="SmallBaseMapVariationParam" />
+    
+    <mapIndex
+    AltName="Map Index"
+    Wiki="" />
+    
+    <variationId
+    AltName="Variation ID"
+    Wiki="" />
+    
+    <modifier
+    AltName="Modifier"
+    Wiki="" />
     
   </Field>
   
