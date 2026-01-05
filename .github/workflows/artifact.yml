@@ -1,19 +1,21 @@
 # This workflow will build a .NET project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
 
-name: New release
+name: Development artifact
 
 concurrency:
   group: build
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 on:
   push:
+    branches:
+      - 'main'
+      - 'feat/*'
     tags:
-      - '*'
-
-permissions:
-  contents: write
+      - '!**'
+  pull_request:
+    branches: [ "main" ]
 
 env:
   DOTNET_VERSION: '10.0.101'
@@ -63,7 +65,7 @@ jobs:
       - name: Restore packages
         if: ${{ steps.cache-nuget.outputs.cache-hit != 'true' }}
         run: dotnet restore -r win-x64 --locked-mode ./WitchyBND.sln --lock-file-path packages.win-x64.lock.json
-
+      
       - name: Build
         run: dotnet build -r win-x64 -c Release --no-restore ./WitchyTests/WitchyTests.csproj # Builds WitchyTests which builds WitchyBND which builds WitchyBND.Shell
 
@@ -75,19 +77,12 @@ jobs:
           cd WitchyBND
           dotnet publish -r win-x64 -c Release --no-build
 
-      - name: Archive release
-        uses: thedoctor0/zip-release@main
-        with:
-          type: 'zip'
-          filename: '../../WitchyBND-${{ github.ref_name }}-win-x64.zip'
-          directory: './bin/publish'
-          path: '.'
-
-      - name: Upload artifact
+      # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: 'WitchyBND-SHA${{ github.sha }}-win-x64'
-          path: WitchyBND-${{ github.ref_name }}-win-x64.zip
+          path: './bin/publish/win-x64'
 
   build-linux:
     runs-on: ubuntu-latest
@@ -142,35 +137,9 @@ jobs:
           cd WitchyBND
           dotnet publish -c Release -r linux-x64 --no-build
 
-      - name: Archive release
-        uses: thedoctor0/zip-release@main
-        with:
-          type: 'zip'
-          filename: '../../WitchyBND-${{ github.ref_name }}-linux-x64.zip'
-          directory: './bin/publish'
-          path: '.'
-
-      - name: Upload artifact
+      # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: 'WitchyBND-SHA${{ github.sha }}-linux-x64'
-          path: WitchyBND-${{ github.ref_name }}-linux-x64.zip
-
-  release:
-    needs: [build-windows, build-linux]
-    runs-on: windows-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          pattern: WitchyBND-SHA*
-
-      - name: Upload Release
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: 'WitchyBND-SHA${{ github.sha }}-win-x64\WitchyBND-${{ github.ref_name }}-win-x64.zip,WitchyBND-SHA${{ github.sha }}-linux-x64\WitchyBND-${{ github.ref_name }}-linux-x64.zip'
-          bodyFile: "./NOTES.md"
-          token: ${{ secrets.GITHUB_TOKEN }}
+          path: './bin/publish/linux-x64'

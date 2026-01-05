@@ -59,7 +59,7 @@ public class RegulationTests : TestBase
     // [Category("SkipOnGitHubAction")]
     public void PARAMBND4()
     {
-        IEnumerable<string> paths = GetSamples("PARAMBND4\\Correct");
+        IEnumerable<string> paths = GetSamples($"PARAMBND4{Path.DirectorySeparatorChar}Correct");
 
         var parser = ParseMode.GetParser<WPARAMBND4>();
 
@@ -101,7 +101,7 @@ public class RegulationTests : TestBase
     // [Category("SkipOnGitHubAction")]
     public void PARAMBND4TooHigh()
     {
-        IEnumerable<string> paths = GetSamples("PARAMBND4\\TooHigh");
+        IEnumerable<string> paths = GetSamples($"PARAMBND4{Path.DirectorySeparatorChar}TooHigh");
 
         var parser = new WPARAMBND4();
 
@@ -126,7 +126,7 @@ public class RegulationTests : TestBase
     // [Category("SkipOnGitHubAction")]
     public void PARAMBND4OutdatedParam()
     {
-        IEnumerable<string> paths = GetSamples("PARAMBND4\\OutdatedParam");
+        IEnumerable<string> paths = GetSamples($"PARAMBND4{Path.DirectorySeparatorChar}OutdatedParam");
 
         var parser = new WPARAMBND4();
 
