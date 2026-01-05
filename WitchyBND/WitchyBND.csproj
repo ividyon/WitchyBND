@@ -2,6 +2,7 @@
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
         <PlatformTarget>x64</PlatformTarget>
+        <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
         <OutputType>Exe</OutputType>
         <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
         <IsPackable>false</IsPackable>
@@ -45,7 +46,6 @@
     <ItemGroup>
         <TrimmableAssembly Include="Microsoft.CSharp" />
         <PackageReference Include="CommandLineParser" Version="2.9.1" />
-        <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0-preview.7.23375.6" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0-preview.7.23375.6" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
@@ -109,12 +109,13 @@
 
     <Target Name="DeleteSuperfluousFiles" AfterTargets="Publish">
         <Message Importance="high"  Text="Removing superfluous files..." />
-        <Delete Files="$(PublishDir)nfd.lib;$(PublishDir)nfd.pdb;$(PublishDir)SharpShell.xml;$(PublishDir)libzstd.dll;$(PublishDir)Assets/libzstd.so;$(PublishDir)x64;$(PublishDir)x86" />
+        <Delete Files="$(PublishDir)nfd.lib;$(PublishDir)nfd.pdb;$(PublishDir)SharpShell.xml;$(PublishDir)Assets/libzstd.so;$(PublishDir)PromptPlus.pdb;$(PublishDir)PromptPlus.xml" />
+        <RemoveDir Directories="$(PublishDir)x64;$(PublishDir)x86" />
     </Target>
 
     <Target Name="ZipParamdex" AfterTargets="Publish">
         <Message Importance="high" Text="Zipping Paramdex..." />
-        <ZipDirectory DestinationFile="$(PublishDir)Assets\Paramdex.zip" SourceDirectory="$(PublishDir)Assets\Paramdex" />
+        <ZipDirectory DestinationFile="$(PublishDir)Assets\Paramdex.zip" SourceDirectory="$(PublishDir)Assets\Paramdex" Overwrite="true" />
     </Target>
 
     <Target Name="DeleteParamdex" DependsOnTargets="ZipParamdex" AfterTargets="ZipParamdex">

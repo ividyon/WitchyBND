@@ -292,11 +292,26 @@
       "witchylib": {
         "type": "Project",
         "dependencies": {
+          "EastAsianWidthDotNet": "[1.0.1, )",
           "Microsoft.Extensions.FileSystemGlobbing": "[8.0.0-preview.2.23128.3, )",
           "Newtonsoft.Json": "[13.0.3, )",
           "PromptPlus": "[5.0.1, )",
           "WitchyFormats": "[2.17.0, )"
         }
+      }
+    },
+    "net10.0/linux-x64": {
+      "NativeFileDialogSharp": {
+        "type": "Transitive",
+        "resolved": "0.6.0-alpha",
+        "contentHash": "2JvfxgAMWEGA9rIuYw+/vcj8eisBJbb4fzviJU47urU72z7m6BW2SykaMRtQorr06Xh3ZxG+gykiqV3D4crfLA=="
+      }
+    },
+    "net10.0/win-x64": {
+      "NativeFileDialogSharp": {
+        "type": "Transitive",
+        "resolved": "0.6.0-alpha",
+        "contentHash": "2JvfxgAMWEGA9rIuYw+/vcj8eisBJbb4fzviJU47urU72z7m6BW2SykaMRtQorr06Xh3ZxG+gykiqV3D4crfLA=="
       }
     }
   }

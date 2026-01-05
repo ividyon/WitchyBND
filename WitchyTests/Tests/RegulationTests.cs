@@ -143,7 +143,19 @@ public class RegulationTests : TestBase
             Assert.That(Directory.Exists(destPath));
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
-            Assert.Throws<MalformedBinderException>(() => parser.Repack(destPath, false));
+            Assert.Throws<MalformedBinderException>(() => {
+                try
+                {
+                    parser.Repack(destPath, false);
+                }
+                catch (AggregateException e)
+                {
+                    foreach (Exception innerException in e.InnerExceptions)
+                    {
+                        throw innerException;
+                    }
+                }
+            });
         }
     }
 
