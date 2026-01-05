@@ -69,7 +69,7 @@ public static class WatcherMode
     internal static void CliWatcherMode(CliOptions opt)
     {
         var paths = opt.Paths.ToList();
-        paths = WBUtil.ProcessPathGlobs(paths);
+        paths = OSPath.ProcessPathGlobs(paths);
         WatchFiles(paths);
     }
 
@@ -93,7 +93,7 @@ public static class WatcherMode
                 }
             }
 
-            output.WriteError($"No valid unpacking parser found for {Path.GetFileName(p)}."
+            output.WriteError($"No valid unpacking parser found for {OSPath.GetFileName(p)}."
                 .PromptPlusEscape());
         });
 
@@ -119,14 +119,14 @@ public static class WatcherMode
             ParseMode.PrintParseSuccess(path, parsed, error, false);
 
             var watcher = new FileSystemWatcher();
-            watcher.Path = Path.GetDirectoryName(Path.GetFullPath(path))!;
-            watcher.Filter = Path.GetFileName(path);
+            watcher.Path = OSPath.GetDirectoryName(OSPath.GetFullPath(path))!;
+            watcher.Filter = OSPath.GetFileName(path);
             watcher.NotifyFilter = NotifyFilters.LastWrite;
             watcher.Changed += WatchUnpack;
             watcher.Deleted += WatchRemoval;
             watcher.Renamed += WatchRemoval;
 
-            string fullPath = Path.Combine(watcher.Path, watcher.Filter);
+            string fullPath = OSPath.Combine(watcher.Path, watcher.Filter);
             output.WriteLine($"Watching path \"{fullPath}\" for unpacking...".PromptPlusEscape());
             _watchedFiles.TryAdd(fullPath, new WatchedFileUnpack(fullPath, watcher, parser, file));
 
@@ -143,14 +143,14 @@ public static class WatcherMode
             ParseMode.PrintParseSuccess(path, parsed, error, false);
 
             var watcher = new FileSystemWatcher();
-            watcher.Path = Path.GetDirectoryName(Path.GetFullPath(path))!;
-            watcher.Filter = Path.GetFileName(path);
+            watcher.Path = OSPath.GetDirectoryName(OSPath.GetFullPath(path))!;
+            watcher.Filter = OSPath.GetFileName(path);
             watcher.NotifyFilter = NotifyFilters.LastWrite;
             watcher.Changed += WatchRepack;
             watcher.Deleted += WatchRemoval;
             watcher.Renamed += WatchRemoval;
 
-            string fullPath = Path.Combine(watcher.Path, watcher.Filter);
+            string fullPath = OSPath.Combine(watcher.Path, watcher.Filter);
             output.WriteLine($"Watching path \"{fullPath}\" for repacking...".PromptPlusEscape());
             _watchedFiles.TryAdd(fullPath, new WatchedFile(fullPath, watcher, parser));
 
@@ -163,9 +163,9 @@ public static class WatcherMode
             XElement xml = WFileParser.LoadXml(folderParser!.GetFolderXmlPath(path));
             XElement? filesEl = xml.Element("files");
             if (filesEl == null) continue;
-            var files = WFolderParser.GetFolderFilePaths(filesEl, path).Select(p => Path.GetFullPath(p)).ToList();
+            var files = WFolderParser.GetFolderFilePaths(filesEl, path).Select(p => OSPath.GetFullPath(p)).ToList();
             var watcher = new FileSystemWatcher();
-            watcher.Path = Path.GetFullPath(path);
+            watcher.Path = OSPath.GetFullPath(path);
             watcher.Filter = "*.*";
             watcher.IncludeSubdirectories = true;
             watcher.NotifyFilter = NotifyFilters.LastWrite;
@@ -190,7 +190,7 @@ public static class WatcherMode
     private static void WatchRemoval(object sender, FileSystemEventArgs e)
     {
         output.WriteLine(
-            $"Path {Path.GetFileName(e.Name)} was renamed or deleted, aborting watch.".PromptPlusEscape());
+            $"Path {OSPath.GetFileName(e.Name)} was renamed or deleted, aborting watch.".PromptPlusEscape());
         _watchedFiles[e.FullPath].Watcher.EnableRaisingEvents = false;
         _watchedFiles.Remove(e.FullPath);
     }
@@ -239,7 +239,7 @@ public static class WatcherMode
             return;
         file.LastChange = DateTime.Now; // In case of exceptions
         Thread.Sleep(ProcessDelay);
-        output.WriteLine($"[{DateTime.Now:T}] Detected change in {e.FullPath.Replace(Path.GetDirectoryName(file.Path) + "\\", "")}."
+        output.WriteLine($"[{DateTime.Now:T}] Detected change in {e.FullPath.Replace(OSPath.GetDirectoryName(file.Path) + Path.DirectorySeparatorChar, "")}."
             .PromptPlusEscape());
         bool parsed = errorService.Catch(() => {
             ParseMode.Repack(file.Path, file.Parser, false);

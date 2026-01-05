@@ -121,7 +121,7 @@ public static class Configuration
     public static StoredConfig Default;
     public static ActiveConfig Active;
 
-    public static string AppDataDirectory => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "WitchyBND");
+    public static string AppDataDirectory => OSPath.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "WitchyBND");
 
     public static OSPlatform Platform { get; set; }
     public static bool ParamDefaultValues => Active.ParamDefaultValueThreshold > 0f;
@@ -150,7 +150,7 @@ public static class Configuration
     {
         var builder = new ConfigurationBuilder();
         bool breakOut = false;
-        string userSettingsPath = Path.Combine(AppDataDirectory, "appsettings.user.json");
+        string userSettingsPath = OSPath.Combine(AppDataDirectory, "appsettings.user.json");
         string defaultSettingsPath = WBUtil.GetExeLocation("appsettings.json");
         string debugSettingsPath = WBUtil.GetExeLocation("appsettings.debug.json");
         string overrideSettingsPath = WBUtil.GetExeLocation("appsettings.override.json");
@@ -198,7 +198,7 @@ public static class Configuration
         if (IsDebug || IsTest)
             File.WriteAllText(WBUtil.GetExeLocation("appsettings.debug.json"), newStored);
         else
-            File.WriteAllText(Path.Combine(AppDataDirectory, "appsettings.user.json"), newStored);
+            File.WriteAllText(OSPath.Combine(AppDataDirectory, "appsettings.user.json"), newStored);
     }
 
     public static void ActivateStoredConfiguration(StoredConfig? stored = null)

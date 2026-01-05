@@ -21,13 +21,13 @@ public class WMATBIN : WSerializedXMLParser
 
     public override bool? IsSimple(string path)
     {
-        string filename = Path.GetFileName(path).ToLower();
+        string filename = OSPath.GetFileName(path).ToLower();
         return filename.EndsWith(".matbin") || filename.EndsWith(".matbin.dcx");
     }
 
     public override bool IsUnpacked(string path)
     {
-        if (Path.GetExtension(path) != ".xml")
+        if (OSPath.GetExtension(path).ToLower() != ".xml")
             return false;
 
         var doc = XDocument.Load(path);

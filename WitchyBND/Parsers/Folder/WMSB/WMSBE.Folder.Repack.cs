@@ -94,7 +94,7 @@ public partial class WMSBEFolder
 
     private MSBE.Event RepackEvent(string srcPath, string type, string fileName)
     {
-        var filePath = Path.Combine(srcPath, "Event", type, $"{fileName}.xml");
+        var filePath = OSPath.Combine(srcPath, "Event", type, $"{fileName}.xml");
         switch (type)
         {
             case "Generator":
@@ -128,7 +128,7 @@ public partial class WMSBEFolder
 
     private MSBE.Region RepackRegion(string srcPath, string type, string fileName)
     {
-        var filePath = Path.Combine(srcPath, "Region", type, $"{fileName}.xml");
+        var filePath = OSPath.Combine(srcPath, "Region", type, $"{fileName}.xml");
 
         switch (type)
         {
@@ -219,7 +219,7 @@ public partial class WMSBEFolder
 
     private MSBE.Model RepackModel(string srcPath, string type, string fileName)
     {
-        var filePath = Path.Combine(srcPath, "Model", type, $"{fileName}.xml");
+        var filePath = OSPath.Combine(srcPath, "Model", type, $"{fileName}.xml");
 
         switch (type)
         {
@@ -241,7 +241,7 @@ public partial class WMSBEFolder
 
     private MSBE.Part RepackPart(string srcPath, string type, string fileName)
     {
-        var filePath = Path.Combine(srcPath, "Part", type, $"{fileName}.xml");
+        var filePath = OSPath.Combine(srcPath, "Part", type, $"{fileName}.xml");
 
         switch (type)
         {
@@ -270,7 +270,7 @@ public partial class WMSBEFolder
 
     private MSBE.Route RepackRoute(string srcPath, string type, string fileName)
     {
-        var filePath = Path.Combine(srcPath, "Route", type, $"{fileName}.xml");
+        var filePath = OSPath.Combine(srcPath, "Route", type, $"{fileName}.xml");
 
         switch (type)
         {

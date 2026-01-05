@@ -91,9 +91,9 @@ public static class DeferredFormatHandling
 
     public static string BuildArgs(string args, string srcPath)
     {
-        var dirname = Path.GetDirectoryName(srcPath);
-        var filename = WBUtil.GetFileNameWithoutAnyExtensions(srcPath);
-        var fileext = WBUtil.GetFullExtensions(srcPath);
+        var dirname = OSPath.GetDirectoryName(srcPath);
+        var filename = OSPath.GetFileNameWithoutAnyExtensions(srcPath);
+        var fileext = OSPath.GetFullExtensions(srcPath);
         return args
             .Replace("$dirname", dirname)
             .Replace("$filename", filename)
@@ -107,7 +107,7 @@ public static class DeferredFormatHandling
 
         output.WriteLine($"Running deferred tool: \"{conf.Path} {args}\"");
         var process = ProcessHandling.RunProcess(conf.Path, out var text,
-            out var error, args, Path.GetDirectoryName(srcPath));
+            out var error, args, OSPath.GetDirectoryName(srcPath));
         output.WriteLine(text);
 
         if (process != 0)
@@ -124,7 +124,7 @@ public static class DeferredFormatHandling
 
         output.WriteLine($"Running deferred tool: \"{conf.Path} {args}\"");
         var process = ProcessHandling.RunProcess(conf.Path, out var text,
-            out var error, args, Path.GetDirectoryName(srcPath));
+            out var error, args, OSPath.GetDirectoryName(srcPath));
         output.WriteLine(text);
 
         if (process != 0)

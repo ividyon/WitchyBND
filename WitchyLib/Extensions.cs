@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -103,5 +104,21 @@ public static class WitchyExtensions {
         }
 
         return null;
+    }
+}
+
+public static class CrossPlatformExtensions
+{
+    extension(string path)
+    {
+        public string ToOSPath()
+        {
+            return path.Replace('\\', Path.DirectorySeparatorChar);
+        }
+
+        public string ToBndPath()
+        {
+            return path.Replace(Path.DirectorySeparatorChar, '\\');
+        }
     }
 }

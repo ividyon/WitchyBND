@@ -13,7 +13,7 @@ public partial class WMQB
     public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         var mqb = (file as MQB)!;
-        var filename = Path.GetFileName(srcPath);
+        var filename = OSPath.GetFileName(srcPath);
 
         var xml = PrepareXmlManifest(srcPath, recursive, true, mqb.Compression, out XDocument xDoc, null);
 

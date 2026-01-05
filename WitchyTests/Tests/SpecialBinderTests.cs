@@ -63,12 +63,12 @@ public class SpecialBinderTests : TestBase
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
 
-            var root = WBUtil.FindCommonBndRootPath(bnd.Files.Select(a => a.Name));
+            var root = BndPath.FindCommonBndRootPath(bnd.Files.Select(a => a.Name));
             foreach (BinderFile file in bnd.Files)
             {
                 string name = Path.Combine(destPath,
-                    !string.IsNullOrEmpty(root) ? Path.GetRelativePath(root, file.Name).Replace('\\', Path.DirectorySeparatorChar) : file.Name.Replace('\\', Path.DirectorySeparatorChar));
-                Assert.That(File.Exists(name));
+                    !string.IsNullOrEmpty(root) ? Path.GetRelativePath(root.ToOSPath(), file.Name.ToOSPath()) : file.Name.ToOSPath());
+                Assert.That(File.Exists(name), Is.True, $"{name} does not exist");
             }
 
             parser.Repack(destPath, false);
@@ -102,12 +102,12 @@ public class SpecialBinderTests : TestBase
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
 
-            var root = WBUtil.FindCommonBndRootPath(bnd.Files.Select(a => a.Name));
+            var root = BndPath.FindCommonBndRootPath(bnd.Files.Select(a => a.Name));
             foreach (BinderFile file in bnd.Files)
             {
                 string name = Path.Combine(destPath,
-                    !string.IsNullOrEmpty(root) ? Path.GetRelativePath(root, file.Name).Replace('\\', Path.DirectorySeparatorChar) : file.Name.Replace('\\', Path.DirectorySeparatorChar));
-                Assert.That(File.Exists(name));
+                    !string.IsNullOrEmpty(root) ? Path.GetRelativePath(root.ToOSPath(), file.Name.ToOSPath()) : file.Name.ToOSPath());
+                Assert.That(File.Exists(name), Is.True, $"{name} does not exist");
             }
 
             parser.Repack(destPath, false);
@@ -141,11 +141,11 @@ public class SpecialBinderTests : TestBase
             Assert.That(parser.ExistsUnpacked(destPath));
             Assert.That(parser.IsUnpacked(destPath));
 
-            var root = WBUtil.FindCommonBndRootPath(bnd.Files.Select(a => a.Name));
+            var root = BndPath.FindCommonBndRootPath(bnd.Files.Select(a => a.Name));
             foreach (BinderFile file in bnd.Files)
             {
                 string name = Path.Combine(destPath,
-                    WBUtil.UnrootBNDPath(file.Name, root).Replace('\\', Path.DirectorySeparatorChar));
+                    BndPath.Unroot(file.Name, root).ToOSPath());
                 Assert.That(File.Exists(name));
             }
 

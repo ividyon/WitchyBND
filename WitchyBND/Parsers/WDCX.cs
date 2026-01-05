@@ -3,6 +3,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using SoulsFormats;
+using WitchyLib;
 
 namespace WitchyBND.Parsers;
 
@@ -40,20 +41,20 @@ public class WDCX : WSingleFileParser
     {
         string sourceDir = new FileInfo(srcPath).Directory?.FullName!;
         string? location = Configuration.Active.Location;
-        string fileName = Path.GetFileName(srcPath);
+        string fileName = OSPath.GetFileName(srcPath);
         if (!string.IsNullOrEmpty(location) && !recursive)
             sourceDir = location;
-        sourceDir = Path.GetFullPath(sourceDir);
+        sourceDir = OSPath.GetFullPath(sourceDir);
         if (srcPath.ToLower().EndsWith(".dcx"))
-            return Path.Combine(sourceDir, Path.GetFileNameWithoutExtension(srcPath));
-        return Path.Combine(sourceDir, $"{fileName}.undcx");
+            return OSPath.Combine(sourceDir, OSPath.GetFileNameWithoutExtension(srcPath));
+        return OSPath.Combine(sourceDir, $"{fileName}.undcx");
     }
 
     public override string GetRepackDestPath(string srcPath, XElement? xml)
     {
         var path = xml?.Element("sourcePath")?.Value;
         if (path != null)
-            srcPath = Path.Combine(path.Replace('\\', Path.DirectorySeparatorChar), Path.GetFileName(srcPath));
+            srcPath = OSPath.Combine(path.ToOSPath(), OSPath.GetFileName(srcPath));
         if (srcPath.ToLower().EndsWith(".undcx"))
             return srcPath.Substring(0, srcPath.Length - 6);
         return srcPath + ".dcx";

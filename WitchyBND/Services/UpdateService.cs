@@ -192,7 +192,7 @@ public class UpdateService : IUpdateService
             if (Configuration.Stored.LastLaunchedVersion < new Version(2, 9, 0, 0))
             {
                 var userConfig = WBUtil.GetExeLocation("appsettings.user.json");
-                var newConfigPath = Path.Combine(Configuration.AppDataDirectory, "appsettings.user.json");
+                var newConfigPath = OSPath.Combine(Configuration.AppDataDirectory, "appsettings.user.json");
                 if (File.Exists(userConfig))
                     File.Move(userConfig, newConfigPath, true);
             }
@@ -207,7 +207,7 @@ public class UpdateService : IUpdateService
             // 2.11.0.1: Fix old PATH
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Configuration.Stored.LastLaunchedVersion < new Version(2, 11, 0, 1))
             {
-                var exePath = Path.GetDirectoryName(AppContext.BaseDirectory)!;
+                var exePath = OSPath.GetDirectoryName(AppContext.BaseDirectory)!;
                 var name = "PATH";
                 var scope = EnvironmentVariableTarget.User;
                 var oldValue = Environment.GetEnvironmentVariable(name, scope);
@@ -349,9 +349,9 @@ public class UpdateService : IUpdateService
                 }
 
                 await using Stream? data = e.Open();
-                var filePath = Path.Combine(WBUtil.GetExeLocation(),
+                var filePath = OSPath.Combine(WBUtil.GetExeLocation(),
                     e.FullName.Replace('/', Path.DirectorySeparatorChar));
-                var fileDir = Path.GetDirectoryName(filePath)!;
+                var fileDir = OSPath.GetDirectoryName(filePath)!;
 
                 if (File.Exists(filePath))
                     throw new Exception($"File {filePath} already exists and was not removed properly.");

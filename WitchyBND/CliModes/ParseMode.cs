@@ -82,7 +82,7 @@ public static class ParseMode
     {
         var paths = opt.Paths.ToList();
 
-        paths = WBUtil.ProcessPathGlobs(paths).ToList();
+        paths = OSPath.ProcessPathGlobs(paths).ToList();
 
         ParseFiles(paths, false);
     }
@@ -198,7 +198,7 @@ public static class ParseMode
             case true:
                 if (Configuration.Active.Parallel)
                 {
-                    string fileName = Path.GetFileName(path);
+                    string fileName = OSPath.GetFileName(path);
                     if (recursive)
                         output.WriteLine($"Successfully parsed {fileName.PromptPlusEscape()} (recursive).");
                     else
@@ -219,7 +219,7 @@ public static class ParseMode
 
     public static void Unpack(string path, ISoulsFile? file, DCX.CompressionInfo compression, WFileParser? parser, bool recursive)
     {
-        string fileName = Path.GetFileName(path);
+        string fileName = OSPath.GetFileName(path);
 
         if (compression.Type > file?.Compression.Type)
             file.Compression = compression;
@@ -246,7 +246,7 @@ public static class ParseMode
 
     public static void Repack(string path, WFileParser parser, bool recursive)
     {
-        string fileName = Path.GetFileName(path);
+        string fileName = OSPath.GetFileName(path);
 
         switch (parser.Verb)
         {

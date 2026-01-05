@@ -91,7 +91,7 @@ Cancel the dialog to reset the configuration for that format.");
                     break;
                 case "Default":
                     Configuration.Stored.DeferTools[format] =
-                        new DeferConfig(Path.GetFileNameWithoutExtension(openDialog.Path), openDialog.Path, "$name", null);
+                        new DeferConfig(OSPath.GetFileNameWithoutExtension(openDialog.Path), openDialog.Path, "$name", null);
                     break;
                 default:
                     var myArgs = defArgs!.First(a => a.Name == argsVal.Content);
@@ -145,7 +145,7 @@ $fileext - Extension of file being processed (starts with .)");
             }
 
             Configuration.Stored.DeferTools[format] = new DeferConfig(
-                Path.GetFileNameWithoutExtension(openDialog.Path), openDialog.Path, unpackArgsInput.Content,
+                OSPath.GetFileNameWithoutExtension(openDialog.Path), openDialog.Path, unpackArgsInput.Content,
                 repackArgs);
 
             if (breakOut) continue;

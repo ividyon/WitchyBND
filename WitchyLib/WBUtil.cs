@@ -62,100 +62,6 @@ public static class WBUtil
             _ => string.Concat(input[0].ToString().ToUpper(), input.AsSpan(1))
         };
 
-    public static string SanitizeFilename(string path)
-    {
-        return Path.GetInvalidFileNameChars()
-            .Aggregate(path, (current, c) => current.Replace(c, '_'));
-    }
-
-    public static void WriteSanitizedBinderFilePath(this XElement element, string path, string pathElementName = "path")
-    {
-        string dir = Path.GetDirectoryName(path) ?? "";
-        string filename = Path.GetFileName(path);
-        string sanitized = SanitizeFilename(path);
-
-        if (filename == sanitized)
-        {
-            element.Add(new XElement(pathElementName, path));
-        }
-        else
-        {
-            element.Add(new XElement("in" + pathElementName.FirstCharToUpper(), path));
-            element.Add(new XElement("out" + pathElementName.FirstCharToUpper(), Path.Combine(dir, sanitized)));
-        }
-    }
-
-    public static string GetSanitizedBinderFilePath(this XElement element, string pathElementName = "path",
-        bool outName = false)
-    {
-        if (element.Element(pathElementName) != null)
-            return element.Element(pathElementName)!.Value;
-        var otherName =
-            outName ? "out" + pathElementName.FirstCharToUpper() : "in" + pathElementName.FirstCharToUpper();
-        if (element.Element(otherName) != null)
-            return element.Element(otherName)!.Value;
-
-        throw new InvalidDataException("File element is missing path.");
-    }
-    public static List<string> ProcessPathGlobs(List<string> paths)
-    {
-        var processedPaths = new List<string>();
-        foreach (string path in paths.Select(p => {
-                     try
-                     {
-                         return Path.GetFullPath(p);
-                     }
-                     catch (Exception e)
-                     {
-                         Console.WriteLine($"Invalid path: {p} ({e.Message})");
-                         return null;
-                     }
-                 }).Where(p => p != null).Cast<string>()) {
-            if (path.Contains('*'))
-            {
-                var matcher = new Matcher();
-                var rootParts = path.Split(Path.DirectorySeparatorChar).TakeWhile(part => !part.Contains('*')).ToList();
-                var root = string.Join(Path.DirectorySeparatorChar, rootParts);
-                var rest = path.Substring(root.Length + 1);
-
-                matcher = matcher.AddInclude(rest.Replace(Path.DirectorySeparatorChar.ToString(), "/"));
-
-                var rootPath = Path.Combine(Environment.CurrentDirectory, root);
-                if (!Directory.Exists(rootPath))
-                {
-                    Console.Error.WriteLine($"Invalid path: {rootPath}");
-                    continue;
-                }
-                var files = Directory.GetFiles(Path.Combine(Environment.CurrentDirectory, root), "*",
-                    SearchOption.AllDirectories);
-                var fileMatch = matcher.Match(Path.Combine(Environment.CurrentDirectory, root), files);
-                if (fileMatch.HasMatches)
-                {
-                    processedPaths.AddRange(fileMatch.Files.Select(m => Path.Combine(root, m.Path)).Where(globFilter).ToList());
-                }
-
-                var dirs = Directory.GetDirectories(Path.Combine(Environment.CurrentDirectory, root), "*",
-                    SearchOption.AllDirectories);
-                var dirMatch = matcher.Match(Path.Combine(Environment.CurrentDirectory, root), dirs);
-                if (dirMatch.HasMatches)
-                {
-                    processedPaths.AddRange(dirMatch.Files.Select(m => Path.Combine(root, m.Path)).Where(globFilter).ToList());
-                }
-            }
-            else
-            {
-                processedPaths.Add(path);
-            }
-        }
-
-        return processedPaths.Select(path => Path.GetFullPath(path)).ToList();
-
-        bool globFilter(string path)
-        {
-            return !path.EndsWith(".bak");
-        }
-    }
-
     [DllImport("kernel32.dll")]
     public static extern IntPtr GetConsoleWindow();
 
@@ -357,74 +263,6 @@ public static class WBUtil
         }
     }
 
-    private static readonly Regex DriveRx = new Regex(@"^(\w\:\\)(.+)$");
-    private static readonly Regex TraversalRx = new Regex(@"^([(..)\\\/]+)(.+)?$");
-    private static readonly Regex SlashRx = new Regex(@"^(\\+)(.+)$");
-
-
-    /// <summary>
-    /// Finds common path prefix in a list of strings.
-    /// </summary>
-    public static string FindCommonBndRootPath(IEnumerable<string> paths)
-    {
-        string root = "";
-
-        if (paths.Count() == 0) return root;
-
-        var rootPath = new string(
-            paths.First().Substring(0, paths.Min(s => s.Length))
-                .TakeWhile((c, i) => paths.All(s => s[i] == c)).ToArray());
-
-        // For safety, truncate this shared string down to the last slash/backslash.
-        var rootPathIndex = Math.Max(rootPath.LastIndexOf('\\'), rootPath.LastIndexOf('/'));
-
-        if (rootPath != "" && rootPathIndex != -1)
-        {
-            root = rootPath.Substring(0, rootPathIndex);
-        }
-
-        return root;
-    }
-
-    /// <summary>
-    /// Removes common network path roots if present.
-    /// </summary>
-    public static string UnrootBNDPath(string path, string? root)
-    {
-        path = path.Substring(root?.Length ?? 0);
-
-        Match drive = DriveRx.Match(path);
-
-        if (drive.Success)
-        {
-            path = drive.Groups[2].Value;
-        }
-
-        if (string.IsNullOrWhiteSpace(root))
-            return RemoveLeadingBackslashes(path);
-
-        Match traversal = TraversalRx.Match(path);
-        if (traversal.Success)
-        {
-            path = traversal.Groups[2].Value;
-        }
-
-        if (path.Contains("..\\") || path.Contains("../"))
-            throw new InvalidDataException(
-                $"the path {path} contains invalid data, attempting to extract to a different folder.");
-        return RemoveLeadingBackslashes(path);
-    }
-
-    private static string RemoveLeadingBackslashes(string path)
-    {
-        Match slash = SlashRx.Match(path);
-        if (slash.Success)
-        {
-            path = slash.Groups[2].Value;
-        }
-
-        return path;
-    }
 
     public static bool IsInGit(string? path)
     {
@@ -699,18 +537,5 @@ public static class WBUtil
     {
         ExeLocation = Path.GetDirectoryName(AppContext.BaseDirectory);
         LatestKnownRegulationVersions = new();
-    }
-
-    public static string GetFileNameWithoutAnyExtensions(string path)
-    {
-        return Path.GetFileName(path).Split(".").First();
-    }
-
-    public static string GetFullExtensions(string path)
-    {
-        var split = Path.GetFileName(path).Split(".");
-        if (split.Length > 1)
-            return "." + string.Join(".", Path.GetFileName(path).Split(".").Skip(1));
-        return "";
     }
 }
