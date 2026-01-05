@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Globalization;
 using PromptPlusLibrary;
-using PromptPlusLibrary.PublicLibrary;
 using WitchyLib;
 
 namespace WitchyBND.Services;
@@ -9,15 +8,11 @@ namespace WitchyBND.Services;
 public interface IOutputService
 {
     public object ConsoleWriterLock { get; }
-    public (int Left, int Top) WriteLine(
+    public void WriteLine(
         string? value = null,
         Style? style = null,
         bool clearrestofline = true);
-    public (int Left, int Top) WriteLineColor(
-        string? value = null,
-        Overflow overflow = Overflow.Crop,
-        bool clearrestofline = true);
-    public (int Left, int Top) WriteError(
+    public void WriteError(
         string? value = null,
         Style? style = null,
         bool clearrestofline = true);
@@ -56,56 +51,36 @@ public class OutputService : IOutputService
     }
 
     public object ConsoleWriterLock => new();
-    public (int Left, int Top) WriteLine(string? value = null, Style? style = null, bool clearrestofline = true)
+    public void WriteLine(string? value = null, Style? style = null, bool clearrestofline = true)
     {
-        if (Configuration.Active.Silent) return (0, 0);
+        if (Configuration.Active.Silent) return;
         try
         {
-            (int Left, int Top) outCode;
             lock (ConsoleWriterLock)
-                outCode = PromptPlus.Console.Write(value + Environment.NewLine, style, clearrestofline);
-            return outCode;
+                PromptPlus.Console.Write(value + Environment.NewLine, style, clearrestofline);
         }
         catch
         {
-            return (-1, -1);
-        }
-    }
-    public (int Left, int Top) WriteLineColor(string? value = null, Overflow overflow = Overflow.Crop, bool clearrestofline = true)
-    {
-        if (Configuration.Active.Silent) return (0, 0);
-        try
-        {
-            (int Left, int Top) outCode;
-            lock (ConsoleWriterLock)
-                outCode = PromptPlus.Console.WriteColor(value + Environment.NewLine, Overflow.Crop, clearrestofline);
-            return outCode;
-        }
-        catch
-        {
-            return (-1, -1);
+            // ignored
         }
     }
 
-    public (int Left, int Top) WriteError(string? value = null, Style? style = null, bool clearrestofline = true)
+    public void WriteError(string? value = null, Style? style = null, bool clearrestofline = true)
     {
-        if (Configuration.Active.Silent) return (0, 0);
+        if (Configuration.Active.Silent) return;
         try
         {
-            (int Left, int Top) outCode;
             lock (ConsoleWriterLock)
             {
                 using (PromptPlus.Console.OutputError())
                 {
-                    outCode = PromptPlus.Console.Write(value + Environment.NewLine, style, clearrestofline);
+                    PromptPlus.Console.Write(value + Environment.NewLine, style, clearrestofline);
                 }
             }
-
-            return outCode;
         }
         catch
         {
-            return (-1, -1);
+            // ignored
         }
     }
 

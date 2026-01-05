@@ -17,14 +17,14 @@ public enum DeferFormat
     [Display(Name = "GFX")] Gfx
 }
 
-public class DeferArgs(string name, string unpackArgs = "$path", string? repackArgs = null)
+public class DeferArgs(string name, string unpackArgs, string? repackArgs)
 {
     public string Name { get; private set; } = name;
     public string UnpackArgs { get; private set; } = unpackArgs;
     public string? RepackArgs { get; private set; } = repackArgs;
 }
 
-public class DeferConfig(string name, string path, string unpackArgs = "$path", string? repackArgs = null) : DeferArgs(name, unpackArgs, repackArgs)
+public class DeferConfig(string name, string path, string unpackArgs, string? repackArgs) : DeferArgs(name, unpackArgs, repackArgs)
 {
     public string Path { get; private set; } = path;
 }

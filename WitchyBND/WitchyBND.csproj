@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
-        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+        <TargetFramework>net10.0</TargetFramework>
         <PlatformTarget>x64</PlatformTarget>
         <OutputType>Exe</OutputType>
         <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
@@ -56,6 +55,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\PromptPlus\src\PromptPlus.csproj" />
         <ProjectReference Include="..\SoulsFormats\SoulsFormats\SoulsFormats.csproj" />
         <ProjectReference Include="..\SoulsOodleLib\SoulsOodleLib.csproj" />
         <ProjectReference Include="..\WitchyFormats\WitchyFormats.csproj" />
@@ -85,8 +85,8 @@
         <MakeDir Directories="$(PublishDir)" />
     </Target>
 
-    <Target Name="BuildAdditions" AfterTargets="Build">
-        <Message Importance="high" Text="Building additional projects..." />
+    <Target Name="BuildAdditionsWindows" AfterTargets="Build" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+        <Message Importance="high" Text="Building additional Windows projects..." />
         <MSBuild Projects="..\WitchyBND.Shell\WitchyBND.Shell.csproj" BuildInParallel="$(BuildInParallel)" Targets="Build">
             <Output TaskParameter="TargetOutputs" ItemName="BuiltShell" />
         </MSBuild>
@@ -94,7 +94,7 @@
     
     <Target Name="IncludeAdditionsWindows" AfterTargets="Publish" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
         <Message Importance="high"  Text="Including Shell DLL and Updater..." />
-        <Copy SourceFiles="..\WitchyBND.Shell\bin\$(Configuration)\WitchyBND.Shell.dll;..\WitchyBND.Shell\bin\$(Configuration)\SharpShell.dll;..\bin\Release\net8.0-windows\win-x64\x64\libzstd.dll" DestinationFolder="$(PublishDir)" />
+        <Copy SourceFiles="..\WitchyBND.Shell\bin\$(Configuration)\WitchyBND.Shell.dll;..\WitchyBND.Shell\bin\$(Configuration)\SharpShell.dll;..\bin\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\$(PlatformTarget)\libzstd.dll" DestinationFolder="$(PublishDir)" />
 <!--        <Move SourceFiles="$(PublishDir)\WitchyUpdater.exe" DestinationFiles="$(PublishDir)\Updater.exe" />-->
     </Target>
 

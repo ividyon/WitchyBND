@@ -218,12 +218,8 @@ public static class WBUtil
 
     public static string GetParamdexPath(params string[] parts)
     {
+        if (!parts.Any()) return GetParamdexPath();
         return Path.Combine(new[] { GetParamdexPath() }.Union(parts).ToArray());
-    }
-
-    public static string GetParamdexPath(string path = null)
-    {
-        return path == null ? GetParamdexPath() : Path.Combine(GetParamdexPath(), path);
     }
 
     public static string GetParamdexPath(GameType game, params string[]? path)
@@ -631,7 +627,7 @@ public static class WBUtil
             PromptPlus.Controls.WaitTimer(TimeSpan.FromSeconds(1), "Please read carefully, then press any key...");
             // ClearLine();
             PromptPlus.Console.SetCursorPosition(cursor.Left, cursor.Top);
-            PromptPlus.Console.WriteLineColor("");
+            PromptPlus.Console.WriteLine("");
             PromptPlus.Controls.KeyPress("Please read carefully, then press any key...")
                 .Options(a => a.EnabledAbortKey(false))
                 .Run();

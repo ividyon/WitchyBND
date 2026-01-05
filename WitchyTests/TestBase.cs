@@ -60,7 +60,6 @@ public class TestBase
         // PromptPlus.Clear();
         Console.OutputEncoding = Encoding.UTF8;
         Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-        PromptPlus.Config.DefaultCulture = new CultureInfo("en-us");
     }
 
     [SetUp]
