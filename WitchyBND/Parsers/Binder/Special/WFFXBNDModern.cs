@@ -22,9 +22,8 @@ public class WFFXBNDModern : WBinderParser
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
         file = null;
-        path = path.ToLower();
         return Configuration.Active.Bnd &&
-               path.Contains(".ffxbnd") && IsRead<BND4>(path, data, out file);
+               path.ToLower().Contains(".ffxbnd") && IsRead<BND4>(path, data, out file);
     }
 
     public override bool? IsSimple(string path)

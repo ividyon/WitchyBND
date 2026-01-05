@@ -91,17 +91,20 @@
             <Output TaskParameter="TargetOutputs" ItemName="BuiltShell" />
         </MSBuild>
     </Target>
+
+    <Target Name="BuildIncludeAdditionsLinux" AfterTargets="Build" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+        <Message Importance="high" Text="Building additional Linux projects..." />
+        <Copy SourceFiles="Assets\libzstd.so" DestinationFolder="$(OutDir)" />
+    </Target>
     
-    <Target Name="IncludeAdditionsWindows" AfterTargets="Publish" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
-        <Message Importance="high"  Text="Including Shell DLL and Updater..." />
+    <Target Name="PublishIncludeAdditionsWindows" AfterTargets="Publish" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+        <Message Importance="high"  Text="Including Shell DLL and LIBZSTD in publish folder..." />
         <Copy SourceFiles="..\WitchyBND.Shell\bin\$(Configuration)\WitchyBND.Shell.dll;..\WitchyBND.Shell\bin\$(Configuration)\SharpShell.dll;..\bin\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\$(PlatformTarget)\libzstd.dll" DestinationFolder="$(PublishDir)" />
-<!--        <Move SourceFiles="$(PublishDir)\WitchyUpdater.exe" DestinationFiles="$(PublishDir)\Updater.exe" />-->
     </Target>
 
-    <Target Name="IncludeAdditionsLinux" AfterTargets="Publish" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
-        <Message Importance="high"  Text="Including Shell DLL and Updater..." />
+    <Target Name="PublishIncludeAdditionsLinux" AfterTargets="Publish" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+        <Message Importance="high"  Text="Including LIBZSTD in publish folder..." />
         <Copy SourceFiles="Assets\libzstd.so" DestinationFolder="$(PublishDir)" />
-        <!--        <Move SourceFiles="$(PublishDir)\WitchyUpdater.exe" DestinationFiles="$(PublishDir)\Updater.exe" />-->
     </Target>
 
     <Target Name="DeleteSuperfluousFiles" AfterTargets="Publish">
