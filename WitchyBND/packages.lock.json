@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net9.0": {
+    "net10.0": {
       "CommandLineParser": {
         "type": "Direct",
         "requested": "[2.9.1, )",
@@ -32,8 +32,7 @@
           "Microsoft.Extensions.Configuration": "8.0.0-preview.7.23375.6",
           "Microsoft.Extensions.Configuration.Abstractions": "8.0.0-preview.7.23375.6",
           "Microsoft.Extensions.Configuration.FileExtensions": "8.0.0-preview.7.23375.6",
-          "Microsoft.Extensions.FileProviders.Abstractions": "8.0.0-preview.7.23375.6",
-          "System.Text.Json": "8.0.0-preview.7.23375.6"
+          "Microsoft.Extensions.FileProviders.Abstractions": "8.0.0-preview.7.23375.6"
         }
       },
       "Microsoft.Extensions.DependencyInjection": {
@@ -60,9 +59,9 @@
       },
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
-        "requested": "[9.0.10, )",
-        "resolved": "9.0.10",
-        "contentHash": "sseaSJcBxKEpkc59hnB00b3NmJdGvJLfj74HK+nucHxERxbZSUREuWKjC9ywc+HdzJvJyiP2eiyEOROaGSfcPw=="
+        "requested": "[10.0.1, )",
+        "resolved": "10.0.1",
+        "contentHash": "ISahzLHsHY7vrwqr2p1YWZ+gsxoBRtH7gWRDK8fDUst9pp2He0GiesaqEfeX0V8QMCJM3eNEHGGpnIcPjFo2NQ=="
       },
       "NativeFileDialogSharp": {
         "type": "Direct",
@@ -134,8 +133,7 @@
         "contentHash": "JHYCQG7HmugNYUhOl368g+NMxYE/N/AiclCYRNlgCY9eVyiBkOHMwK4x60RYMxv9EL3+rmj1mqHvdCiPpC+D4Q==",
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.0",
-          "Microsoft.Extensions.Options": "8.0.0",
-          "System.Diagnostics.DiagnosticSource": "8.0.0"
+          "Microsoft.Extensions.Options": "8.0.0"
         }
       },
       "Microsoft.Extensions.FileProviders.Abstractions": {
@@ -188,59 +186,27 @@
         "resolved": "13.0.3",
         "contentHash": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ=="
       },
-      "PromptPlus": {
-        "type": "Transitive",
-        "resolved": "5.0.0-IB2",
-        "contentHash": "DPRvXZO2QmUTDDWCSR9vHzyp+/qtgeEnlU9OD02ilvV9q4Fl0ZrPcL+MsdTz0gfg/biyB8c0Ff9OxR+x3E3OPA==",
-        "dependencies": {
-          "EastAsianWidthDotNet": "1.0.1"
-        }
-      },
       "securifybv.PropertyStore": {
         "type": "Transitive",
         "resolved": "0.1.0",
         "contentHash": "N7oMyWl3RCbSi8SFK3vVtBpJD3OompLGZOwO2VQpyw6d8Qk8HTxCSuQzeSB4QzUWewQvMoQu5Qr5QgDQ1z5/5g=="
-      },
-      "System.Diagnostics.DiagnosticSource": {
-        "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "c9xLpVz6PL9lp/djOWtk5KPDZq3cSYpmXoJQY524EOtuFl5z9ZtsotpsyrDW40U1DRnQSYvcPKEUV0X//u6gkQ=="
-      },
-      "System.Text.Encoding.CodePages": {
-        "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "OZIsVplFGaVY90G2SbpgU7EnCoOO5pw1t4ic21dBF3/1omrJFpAGoNAVpPyMVOC90/hvgkGG3VFqR13YgZMQfg=="
-      },
-      "System.Text.Encodings.Web": {
-        "type": "Transitive",
-        "resolved": "8.0.0-preview.7.23375.6",
-        "contentHash": "vCdCGFDzYkDfcnNd5ck7ngX9IUhXoMkfUlLWWw0BWBs/6LOF596LtkoG15pGxLS4s/HuTHsyrQ6USZSZa8blNA=="
-      },
-      "System.Text.Json": {
-        "type": "Transitive",
-        "resolved": "8.0.0-preview.7.23375.6",
-        "contentHash": "xsCKwwq+cK/VwE61P1vr9yZh0p5LEQ+hG1MGKzpheA1gJgSKIQ6ArNp9nIYwoDX5WR+ichovXq117O0wHAZNLA==",
-        "dependencies": {
-          "System.Text.Encodings.Web": "8.0.0-preview.7.23375.6"
-        }
-      },
-      "System.ValueTuple": {
-        "type": "Transitive",
-        "resolved": "4.5.0",
-        "contentHash": "okurQJO6NRE/apDIP23ajJ0hpiNmJ+f0BwOlB/cSqTLQlw5upkf+5+96+iG2Jw40G1fCVCyPz/FhIABUjMR+RQ=="
       },
       "ZstdNet": {
         "type": "Transitive",
         "resolved": "1.4.5",
         "contentHash": "fi9aP1QY3ZenIMUW1pxdSjku6lYAUjScrwfXSXT1qyKtTdLxOIzeBMe+w/hQm0vMsvQnjcFInByMrIT7AlXUHA=="
       },
+      "promptplus": {
+        "type": "Project",
+        "dependencies": {
+          "EastAsianWidthDotNet": "[1.0.1, )"
+        }
+      },
       "soulsformats": {
         "type": "Project",
         "dependencies": {
           "BouncyCastle.Cryptography": "[2.4.0, )",
           "DrSwizzler": "[1.1.1, )",
-          "System.Text.Encoding.CodePages": "[8.0.0, )",
-          "System.ValueTuple": "[4.5.0, )",
           "ZstdNet": "[1.4.5, )"
         }
       },
@@ -261,30 +227,11 @@
       "witchylib": {
         "type": "Project",
         "dependencies": {
-          "Microsoft.CSharp": "[4.7.0, )",
           "Microsoft.Extensions.FileSystemGlobbing": "[8.0.0-preview.2.23128.3, )",
           "Newtonsoft.Json": "[13.0.3, )",
-          "PromptPlus": "[5.0.0-IB2, )",
+          "PromptPlus": "[5.0.1, )",
           "WitchyFormats": "[2.17.0, )"
         }
-      }
-    },
-    "net9.0/win-x64": {
-      "NativeFileDialogSharp": {
-        "type": "Direct",
-        "requested": "[0.6.0-alpha, )",
-        "resolved": "0.6.0-alpha",
-        "contentHash": "2JvfxgAMWEGA9rIuYw+/vcj8eisBJbb4fzviJU47urU72z7m6BW2SykaMRtQorr06Xh3ZxG+gykiqV3D4crfLA=="
-      },
-      "System.Text.Encoding.CodePages": {
-        "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "OZIsVplFGaVY90G2SbpgU7EnCoOO5pw1t4ic21dBF3/1omrJFpAGoNAVpPyMVOC90/hvgkGG3VFqR13YgZMQfg=="
-      },
-      "System.Text.Encodings.Web": {
-        "type": "Transitive",
-        "resolved": "8.0.0-preview.7.23375.6",
-        "contentHash": "vCdCGFDzYkDfcnNd5ck7ngX9IUhXoMkfUlLWWw0BWBs/6LOF596LtkoG15pGxLS4s/HuTHsyrQ6USZSZa8blNA=="
       }
     }
   }

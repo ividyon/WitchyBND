@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
         <IsPackable>false</IsPackable>
         <Title>WitchyLib</Title>
@@ -18,7 +18,7 @@
         <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="8.0.0-preview.2.23128.3" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="..\PromptPlus\src\PromptPlus.csproj" />
+        <ProjectReference Include="..\PromptPlus\src\PromptPlus.csproj" Version="5.0.1" />
         <ProjectReference Include="..\WitchyFormats\WitchyFormats.csproj" />
     </ItemGroup>
 </Project>

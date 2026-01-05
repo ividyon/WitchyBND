@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Run Tests": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "test -v",
+      "workingDirectory": "$(SolutionDir)"
+    }
+  }
+}

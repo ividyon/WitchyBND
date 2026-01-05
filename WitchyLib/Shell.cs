@@ -14,14 +14,11 @@ public static class Shell
         Root = Registry.CurrentUser;
     }
 
-    private static readonly string exePath = Path.GetDirectoryName(AppContext.BaseDirectory)!;
+    private static readonly string ExePath = Path.GetDirectoryName(AppContext.BaseDirectory)!;
     const int WmUser = 0x0400; //http://msdn.microsoft.com/en-us/library/windows/desktop/ms644931(v=vs.85).aspx
 
-    private static RegistryKey Root;
-    private static string ClassesKey = @"Software\Classes";
-    private static string ProgIdQuick = "WitchyBND.A";
-    private static string ProgId = "WitchyBND.B";
-    public static readonly string WitchyPath = Path.Combine(exePath, "WitchyBND.exe");
+    private static readonly RegistryKey Root;
+    public static readonly string WitchyPath = Path.Combine(ExePath, "WitchyBND.exe");
 
     private const string ClsidRegistryKey = @"Software\Classes\CLSID";
     private const string ClassesRegistryKey = @"Software\Classes";
@@ -32,6 +29,7 @@ public static class Shell
 
     public static bool ComplexContextMenuIsRegistered(string path = null)
     {
+        if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException();
         if (path != null)
             path = $"file:///{path.Replace(Path.DirectorySeparatorChar, '/').TrimEnd('/')}/WitchyBND.Shell.dll";
         var probeKey = string.Join(Path.DirectorySeparatorChar, [ClsidRegistryKey, ComplexMenuGuid, "InprocServer32"]);
@@ -41,7 +39,8 @@ public static class Shell
 
     public static void RegisterComplexContextMenu()
     {
-        var assemblyPath = $"file:///{exePath.Replace(Path.DirectorySeparatorChar, '/').TrimEnd('/')}/WitchyBND.Shell.dll";
+        if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException();
+        var assemblyPath = $"file:///{ExePath.Replace(Path.DirectorySeparatorChar, '/').TrimEnd('/')}/WitchyBND.Shell.dll";
         var runtimeVersion = "v4.0.30319";
         var version = "1.0.0.0";
         var assemblyFullName = $"WitchyBND.Shell, Version={version}, Culture=neutral, PublicKeyToken=1eff254c75ae9a19";
@@ -115,6 +114,7 @@ public static class Shell
 
     public static void UnregisterComplexContextMenu()
     {
+        if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException();
         using (RegistryKey key = Root.OpenSubKey(ClassesRegistryKey, true))
         {
             if (key != null)
@@ -145,6 +145,7 @@ public static class Shell
 
     public static void RestartExplorer()
     {
+        if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException();
         RestartExplorer restartExplorer = new RestartExplorer();
         restartExplorer.Execute(() => {
         });
@@ -156,7 +157,7 @@ public static class Shell
         var name = "PATH";
         var scope = EnvironmentVariableTarget.User;
         var oldValue = Environment.GetEnvironmentVariable(name, scope);
-        var newValue  = oldValue + $";{exePath}";
+        var newValue  = oldValue + $";{ExePath}";
         Environment.SetEnvironmentVariable(name, newValue, scope);
     }
 
@@ -165,12 +166,13 @@ public static class Shell
         var name = "PATH";
         var scope = EnvironmentVariableTarget.User;
         var oldValue = Environment.GetEnvironmentVariable(name, scope);
-        var newValue = oldValue.Replace($";{exePath}", "");
+        var newValue = oldValue.Replace($";{ExePath}", "");
         Environment.SetEnvironmentVariable(name, newValue, scope);
     }
 
     private static RegistryKey EnsureSubKey(RegistryKey root, string name)
     {
+        if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException();
         RegistryKey key = root.OpenSubKey(name, true);
         if (key != null)
             return key;
@@ -187,6 +189,7 @@ public static class Shell
 
     private static RegistryKey EnsureSubKey(params string[] name)
     {
+        if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException();
         var joinedName = string.Join(Path.DirectorySeparatorChar, name);
         RegistryKey key = Root.OpenSubKey(joinedName, true);
         if (key != null)

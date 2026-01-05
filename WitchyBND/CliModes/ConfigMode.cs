@@ -107,7 +107,7 @@ Press any key to continue to the configuration screen...");
         {
             output.Clear();
             output.DoubleDash("Configuration menu");
-            output.WriteLineColor("This menu is [YELLOW]paged[/]; scroll down to find more options.");
+            output.WriteLine("This menu is [YELLOW]paged[/]; scroll down to find more options.");
             output.WriteLine();
             var select = output.Select<ConfigMenuItem>("Choose an option")
                 .TextSelector(a => {

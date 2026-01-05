@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Settings": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "\"$(SolutionDir)/bin/$(Configuration)/$(TargetFramework)/$(RuntimeIdentifier)/WitchyBND.dll\"",
+      "workingDirectory": "$(SolutionDir)"
+    }
+  }
+}

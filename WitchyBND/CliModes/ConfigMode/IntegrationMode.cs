@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.InteropServices;
 using Microsoft.Win32;
 using PromptPlusLibrary;
 using WitchyBND.Services;
@@ -39,6 +40,7 @@ public static class IntegrationMode
 
     public static void CliShellIntegrationMode(CliOptions opt)
     {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
         while (true)
         {
             output.Clear();
@@ -89,6 +91,7 @@ Your taskbar will briefly disappear for a few seconds. Witchy will try to restor
 
     public static void UnregisterYabberContext()
     {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
         RegistryKey classes = Registry.CurrentUser.OpenSubKey("Software\\Classes", true);
         classes.DeleteSubKeyTree("*\\shell\\yabber", false);
         classes.DeleteSubKeyTree("directory\\shell\\yabber", false);
@@ -97,12 +100,14 @@ Your taskbar will briefly disappear for a few seconds. Witchy will try to restor
 
     public static void UnregisterContext()
     {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
         Shell.UnregisterComplexContextMenu();
         SendTo.DeleteSendToShortcuts();
     }
 
     public static void RegisterContext()
     {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
         UnregisterContext();
         Shell.RegisterComplexContextMenu();
         SendTo.AddSendToShortcuts();

@@ -7,20 +7,12 @@ public class SilentOutputService : IOutputService
 {
     public object ConsoleWriterLock { get; }
 
-    public (int, int) WriteLine(string? value = null, Style? style = null, bool clearrestofline = true)
+    public void WriteLine(string? value = null, Style? style = null, bool clearrestofline = true)
     {
-        return (-1, -1);
     }
 
-    public (int Left, int Top) WriteLineColor(string? value = null, Overflow overflow = Overflow.Crop,
-        bool clearrestofline = true)
+    public void WriteError(string? value = null, Style? style = null, bool clearrestofline = true)
     {
-        throw new NotImplementedException();
-    }
-
-    public (int, int) WriteError(string? value = null, Style? style = null, bool clearrestofline = true)
-    {
-        return (-1, -1);
     }
 
     public void DoubleDash(string value, DashOptions dashOptions = DashOptions.AsciiSingleBorder, int extralines = 0,

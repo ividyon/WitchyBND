@@ -153,7 +153,6 @@ public class WANIBND4 : WBinderParser
         {
             var pathDir = filePath.Substring(srcPath.Length + 1);
             var binderPath = Path.Combine(root, pathDir);
-            if (pathsToSkip.Contains(binderPath)) return;
             RecursiveRepackFile(filePath, recursive);
 
             string fileName = Path.GetFileNameWithoutExtension(filePath);
@@ -242,6 +241,11 @@ public class WANIBND4 : WBinderParser
         void ExtensionCallback(string ext)
         {
             var files = Directory.EnumerateFiles(srcPath, $"*{ext}", SearchOption.AllDirectories).ToList();
+            files = files.Where(filePath => {
+                var pathDir = filePath.Substring(srcPath.Length + 1);
+                var binderPath = Path.Combine(root, pathDir);
+                return !pathsToSkip.Contains(binderPath);
+            }).ToList();
             var dupes = files.GroupBy(f => Path.GetFileName(f)).Where(g => g.Count() > 1).ToList();
             if (dupes.Any())
             {
