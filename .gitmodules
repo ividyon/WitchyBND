@@ -1,3 +1,8 @@
 [submodule "SoulsFormats"]
 	path = SoulsFormats
 	url = https://github.com/soulsmods/SoulsFormatsNEXT
+	shallow = true
+[submodule "PromptPlus"]
+	path = PromptPlus
+	url = https://github.com/FRACerqueira/PromptPlus
+	shallow = true

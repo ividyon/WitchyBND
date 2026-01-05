@@ -16,9 +16,9 @@
         <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
         <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="8.0.0-preview.2.23128.3" />
-        <PackageReference Include="PromptPlus" Version="5.0.0-IB2" />
     </ItemGroup>
     <ItemGroup>
+        <PackageReference Include="..\PromptPlus\src\PromptPlus.csproj" />
         <ProjectReference Include="..\WitchyFormats\WitchyFormats.csproj" />
     </ItemGroup>
 </Project>
