@@ -32,9 +32,8 @@ public class WANIBND4 : WBinderParser
     public override bool Is(string path, byte[]? data, out ISoulsFile? file)
     {
         file = null;
-        path = path.ToLower();
         return Configuration.Active.Bnd &&
-               path.Contains(".anibnd") && IsRead<BND4>(path, data, out file);
+               path.ToLower().Contains(".anibnd") && IsRead<BND4>(path, data, out file);
     }
 
     public override bool? IsSimple(string path)
@@ -85,8 +84,8 @@ public class WANIBND4 : WBinderParser
             var ext = Path.GetExtension(bndFile.Name);
             if (!ProcessedExtensions.Contains(ext) ||
                 bndFile.ID >= 7000000 && bndFile.ID <= 7999999 || // BB behaviors
-                (bndFile.Name.EndsWith(".hkx") && bndFile.Name.ToLower().Contains("skeleton")) ||
-                (bndFile.Name.EndsWith(".tae") && Path.GetFileName(bndFile.Name).StartsWith("c"))
+                (bndFile.Name.ToLower().EndsWith(".hkx") && bndFile.Name.ToLower().Contains("skeleton")) ||
+                (bndFile.Name.ToLower().EndsWith(".tae") && Path.GetFileName(bndFile.Name).ToLower().StartsWith("c"))
                )
             {
                 newFiles.Add(bndFile);
@@ -240,7 +239,7 @@ public class WANIBND4 : WBinderParser
 
         void ExtensionCallback(string ext)
         {
-            var files = Directory.EnumerateFiles(srcPath, $"*{ext}", SearchOption.AllDirectories).ToList();
+            var files = Directory.EnumerateFiles(srcPath, "*", SearchOption.AllDirectories).Where(f => Path.GetExtension(f).ToLower() == ext).ToList();
             files = files.Where(filePath => {
                 var pathDir = filePath.Substring(srcPath.Length + 1);
                 var binderPath = Path.Combine(root, pathDir);

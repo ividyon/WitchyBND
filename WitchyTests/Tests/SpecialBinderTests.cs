@@ -156,7 +156,7 @@ public class SpecialBinderTests : TestBase
             Assert.That(File.Exists(repackDestPath));
             var bnd2 = BND4.Read(repackDestPath);
             var mismatches = bnd.Files.Where(f =>
-                !WBUtil.MorphemeExtensions.Contains(Path.GetExtension(f.Name)) && bnd2.Files.FirstOrDefault(f2 => f.ID == f2.ID && f.Name == f2.Name) == null).ToList();
+                !WBUtil.MorphemeExtensions.Contains(Path.GetExtension(f.Name).ToLower()) && bnd2.Files.FirstOrDefault(f2 => f.ID == f2.ID && f.Name.ToLower() == f2.Name.ToLower()) == null).ToList();
             Assert.That(mismatches.Count, Is.Zero,
                 $"{Path.GetFileName(path)} has {mismatches.Count} mismatches in ID/Name:\n{string.Join("\n",mismatches.Select(a => {
                     return a.Name; }))}");
