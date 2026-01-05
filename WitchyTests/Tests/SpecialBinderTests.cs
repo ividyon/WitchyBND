@@ -67,7 +67,7 @@ public class SpecialBinderTests : TestBase
             foreach (BinderFile file in bnd.Files)
             {
                 string name = Path.Combine(destPath,
-                    !string.IsNullOrEmpty(root) ? Path.GetRelativePath(root, file.Name) : file.Name);
+                    !string.IsNullOrEmpty(root) ? Path.GetRelativePath(root, file.Name).Replace('\\', Path.DirectorySeparatorChar) : file.Name.Replace('\\', Path.DirectorySeparatorChar));
                 Assert.That(File.Exists(name));
             }
 
@@ -106,7 +106,7 @@ public class SpecialBinderTests : TestBase
             foreach (BinderFile file in bnd.Files)
             {
                 string name = Path.Combine(destPath,
-                    !string.IsNullOrEmpty(root) ? Path.GetRelativePath(root, file.Name) : file.Name);
+                    !string.IsNullOrEmpty(root) ? Path.GetRelativePath(root, file.Name).Replace('\\', Path.DirectorySeparatorChar) : file.Name.Replace('\\', Path.DirectorySeparatorChar));
                 Assert.That(File.Exists(name));
             }
 
@@ -145,7 +145,7 @@ public class SpecialBinderTests : TestBase
             foreach (BinderFile file in bnd.Files)
             {
                 string name = Path.Combine(destPath,
-                    WBUtil.UnrootBNDPath(file.Name, root));
+                    WBUtil.UnrootBNDPath(file.Name, root).Replace('\\', Path.DirectorySeparatorChar));
                 Assert.That(File.Exists(name));
             }
 

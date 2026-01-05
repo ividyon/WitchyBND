@@ -1,0 +1,2 @@
+dotnet restore -f --force-evaluate --no-cache -r linux-x64 --lock-file-path packages.linux-x64.lock.json
+dotnet restore -f --force-evaluate --no-cache -r win-x64 --lock-file-path packages.win-x64.lock.json

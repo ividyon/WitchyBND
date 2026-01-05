@@ -183,7 +183,7 @@ public class WPARAMBND4 : WBinderParser
             var filePaths = files.Select(file => {
                 var path = file.Element("path");
                 if (path == null) throw new XmlException($"File element {files.ToList().IndexOf(file)} has no path.");
-                return path.Value;
+                return path.Value.Replace('\\', Path.DirectorySeparatorChar);
             });
 
             foreach (string filePath in filePaths)
