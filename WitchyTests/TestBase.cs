@@ -49,7 +49,7 @@ public class TestBase
     public void StartUp()
     {
         Configuration.SwapOutConfig(new ConfigurationBuilder()
-            .AddJsonFile(Path.Combine(TestContext.CurrentContext.TestDirectory, "appsettings.json"))
+            .AddJsonFile(OSPath.Combine(TestContext.CurrentContext.TestDirectory, "appsettings.json"))
             .Build());
         Configuration.Active.Passive = true;
         Configuration.IsTest = true;
@@ -66,15 +66,15 @@ public class TestBase
     public void Init()
     {
         Configuration.Active.Location = null;
-        if (Directory.Exists(Path.Combine(TestContext.CurrentContext.TestDirectory, "Results")))
-            Directory.Delete(Path.Combine(TestContext.CurrentContext.TestDirectory, "Results"), true);
+        if (Directory.Exists(OSPath.Combine(TestContext.CurrentContext.TestDirectory, "Results")))
+            Directory.Delete(OSPath.Combine(TestContext.CurrentContext.TestDirectory, "Results"), true);
     }
 
     protected void SetLocation(string path)
     {
         if (Location)
         {
-            Configuration.Active.Location = Path.Combine(Path.GetDirectoryName(path)!, "Target");
+            Configuration.Active.Location = OSPath.Combine(Path.GetDirectoryName(path)!, "Target");
             Directory.CreateDirectory(Configuration.Active.Location);
             return;
         }
@@ -85,19 +85,19 @@ public class TestBase
 
     protected static IEnumerable<string> GetSamples(string sampleDir, string pattern = "*")
     {
-        return Directory.GetFiles(Path.Combine(TestContext.CurrentContext.TestDirectory, "Samples", sampleDir), pattern,
+        return Directory.GetFiles(OSPath.Combine(TestContext.CurrentContext.TestDirectory, "Samples", sampleDir), pattern,
             SearchOption.AllDirectories);
     }
     protected static IEnumerable<string> GetAllSamples(string pattern = "*")
     {
-        return Directory.GetFiles(Path.Combine(TestContext.CurrentContext.TestDirectory, "Samples"), pattern,
+        return Directory.GetFiles(OSPath.Combine(TestContext.CurrentContext.TestDirectory, "Samples"), pattern,
             SearchOption.AllDirectories);
     }
 
     protected static string GetCopiedPath(string path)
     {
         var newPath = path.Replace("Samples", "Results");
-        Directory.CreateDirectory(Path.GetDirectoryName(newPath)!);
+        Directory.CreateDirectory(OSPath.GetDirectoryName(newPath)!);
         File.Copy(path, newPath, true);
         return newPath;
     }

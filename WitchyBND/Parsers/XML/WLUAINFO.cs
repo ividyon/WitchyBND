@@ -18,7 +18,7 @@ public class WLUAINFO : WXMLParser
 
     public override bool? IsSimple(string path)
     {
-        string filename = Path.GetFileName(path);
+        string filename = OSPath.GetFileName(path);
         return filename.EndsWith(".luainfo");
     }
 

@@ -20,7 +20,7 @@ public class WMTD : WSerializedXMLParser
 
     public override bool? IsSimple(string path)
     {
-        string filename = Path.GetFileName(path);
+        string filename = OSPath.GetFileName(path).ToLower();
         return filename.EndsWith(".mtd") || filename.EndsWith(".mtd.dcx");
     }
 }

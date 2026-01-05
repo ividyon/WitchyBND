@@ -19,7 +19,7 @@ public partial class WTAEFolder
 
     public override bool? IsSimple(string path)
     {
-        string filename = Path.GetFileName(path).ToLower();
+        string filename = OSPath.GetFileName(path).ToLower();
         return Configuration.Active.TaeFolder && filename.EndsWith(".tae");
     }
 
@@ -133,6 +133,6 @@ public partial class WTAEFolder
         }));
 
         var digits = addDigits ? anim.ID.ToString("000000000") : anim.ID.ToString("000000");
-        xDoc.Save(Path.Combine(destDir, $"anim-{digits}.xml"));
+        xDoc.Save(OSPath.Combine(destDir, $"anim-{digits}.xml"));
     }
 }

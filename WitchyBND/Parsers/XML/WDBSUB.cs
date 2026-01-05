@@ -21,8 +21,8 @@ namespace WitchyBND.Parsers
 
         public override bool? IsSimple(string path)
         {
-            var filename = Path.GetFileName(path).ToLower();
-            return Path.GetExtension(filename) == ".bin" && (filename.StartsWith("chapter_") ||
+            var filename = OSPath.GetFileName(path).ToLower();
+            return OSPath.GetExtension(filename) == ".bin" && (filename.StartsWith("chapter_") ||
                                                              filename.EndsWith("_b0.bin") ||
                                                              filename.EndsWith("_d0.bin"));
         }

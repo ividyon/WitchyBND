@@ -104,7 +104,7 @@ public class GameService : IGameService
 
     public void PopulateTentativeAC6Types()
     {
-        var tentativeTypePath = Path.Combine(WBUtil.GetParamdexPath(), "AC6", "Defs", "TentativeParamType.csv");
+        var tentativeTypePath = OSPath.Combine(WBUtil.GetParamdexPath(), "AC6", "Defs", "TentativeParamType.csv");
 
         if (File.Exists(tentativeTypePath))
         {
@@ -122,7 +122,7 @@ public class GameService : IGameService
         WBUtil.GameType? game = null, ulong regVer = 0)
     {
         UnpackParamdex();
-        string knownPath = File.Exists(path) ? Path.GetDirectoryName(path)! : path;
+        string knownPath = File.Exists(path) ? OSPath.GetDirectoryName(path)! : path;
 
         // Determine what kind of PARAM we're dealing with here
         if (type == IGameService.GameDeterminationType.PARAM || type == IGameService.GameDeterminationType.PARAMBND)
@@ -152,7 +152,7 @@ public class GameService : IGameService
                     }
                 }
 
-                knownPath = Path.GetDirectoryName(xmlPath);
+                knownPath = OSPath.GetDirectoryName(xmlPath);
             }
         }
         else
@@ -174,7 +174,7 @@ public class GameService : IGameService
                         Regex.Match(s, @"\s*?""GameType"":\s(.*?),")).FirstOrDefault(s => s.Success);
                     var dsmsGameType = Enum.Parse<DsmsGameType>(gameType.Groups[1].Value);
                     game = DsmsGameTypeToWitchyGameType(dsmsGameType);
-                    knownPath = Path.GetDirectoryName(pJsonPath);
+                    knownPath = OSPath.GetDirectoryName(pJsonPath);
                 }
                 catch (Exception e)
                 {
@@ -192,7 +192,7 @@ public class GameService : IGameService
                 if (traversePath != null)
                 {
                     game = exeGame;
-                    knownPath = Path.GetDirectoryName(traversePath)!;
+                    knownPath = OSPath.GetDirectoryName(traversePath)!;
                 }
             }
         }
@@ -215,7 +215,7 @@ public class GameService : IGameService
                 }
 
                 game = select.Content;
-                knownPath = Path.GetDirectoryName(path);
+                knownPath = OSPath.GetDirectoryName(path);
             }
             else
             {
@@ -320,7 +320,7 @@ Enter 0, or leave it empty, to use the latest available paramdef.");
             throw new DirectoryNotFoundException($"Could not locate Assets{Path.DirectorySeparatorChar}Paramdex folder.");
 
         var gameName = game.ToString();
-        var paramdefPath = Path.Combine(paramdexPath, gameName, "Defs");
+        var paramdefPath = OSPath.Combine(paramdexPath, gameName, "Defs");
 
         if (!Directory.Exists(paramdefPath))
         {
@@ -389,7 +389,7 @@ Enter 0, or leave it empty, to use the latest available paramdef.");
             return;
 
         var gameName = game.ToString();
-        var namePath = Path.Combine(WBUtil.GetParamdexPath($@"{gameName}\Names\{paramName}.txt"));
+        var namePath = OSPath.Combine(WBUtil.GetParamdexPath(OSPath.Combine(gameName, "Names", $"{paramName}.txt")));
 
         if (!File.Exists(namePath))
         {
@@ -418,7 +418,7 @@ Enter 0, or leave it empty, to use the latest available paramdef.");
             }
             catch (Exception e)
             {
-                throw new InvalidDataException($"There was something wrong with the Paramdex names at \"{name}\" in {Path.GetFileNameWithoutExtension(namePath)}",
+                throw new InvalidDataException($"There was something wrong with the Paramdex names at \"{name}\" in {OSPath.GetFileNameWithoutExtension(namePath)}",
                     e);
             }
         }

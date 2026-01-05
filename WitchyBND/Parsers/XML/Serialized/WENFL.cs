@@ -1,6 +1,6 @@
 ﻿using System;
-using System.IO;
 using SoulsFormats;
+using WitchyLib;
 
 namespace WitchyBND.Parsers;
 
@@ -15,7 +15,7 @@ public class WENFL : WSerializedXMLParser
 
     public override bool? IsSimple(string path)
     {
-        string filename = Path.GetFileName(path).ToLower();
+        string filename = OSPath.GetFileName(path).ToLower();
         return filename.EndsWith(".entryfilelist");
     }
 

@@ -134,26 +134,26 @@ public abstract class WFileParser
         string? location = Configuration.Active.Location;
         if (!string.IsNullOrEmpty(location) && !recursive)
         {
-            string srcPath = Path.GetDirectoryName(path)!;
+            string srcPath = OSPath.GetDirectoryName(path)!;
             if (location.StartsWith(srcPath))
-                srcPath = Path.GetRelativePath(location, srcPath);
-            xw.WriteElementString("sourcePath", srcPath.Replace(Path.DirectorySeparatorChar, '\\'));
+                srcPath = OSPath.GetRelativePath(location, srcPath);
+            xw.WriteElementString("sourcePath", srcPath.ToBndPath());
         }
         if (!skipFilename)
-            xw.WriteElementString("filename",  Path.GetFileName(path));
+            xw.WriteElementString("filename",  OSPath.GetFileName(path));
     }
     public static void AddLocationToXml(string path, bool recursive, XElement xml, bool skipFilename = false)
     {
         string? location = Configuration.Active.Location;
         if (!string.IsNullOrEmpty(location) && !recursive)
         {
-            string srcPath = Path.GetDirectoryName(path)!;
+            string srcPath = OSPath.GetDirectoryName(path)!;
             if (location.StartsWith(srcPath))
-                srcPath = Path.GetRelativePath(location, srcPath);
-            xml.AddFirst(new XElement("sourcePath", srcPath.Replace(Path.DirectorySeparatorChar, '\\')));
+                srcPath = OSPath.GetRelativePath(location, srcPath);
+            xml.AddFirst(new XElement("sourcePath", srcPath));
         }
         if (!skipFilename)
-            xml.AddFirst(new XElement("filename", Path.GetFileName(path)));
+            xml.AddFirst(new XElement("filename", OSPath.GetFileName(path)));
     }
 
     public static WBUtil.GameType GetGameTypeFromXml(XElement xml)
@@ -359,7 +359,7 @@ public abstract class WDeferredFileParser : WSingleFileParser
     public override bool Is(string path, byte[]? _, out ISoulsFile? file)
     {
         file = null;
-        var extension = WBUtil.GetFullExtensions(path).ToLower();
+        var extension = OSPath.GetFullExtensions(path).ToLower();
         var cond = UnpackExtensions.Contains(extension);
         if (cond && !Configuration.Active.DeferTools.ContainsKey(DeferFormat))
             throw new DeferToolPathException(DeferFormat);
@@ -373,7 +373,7 @@ public abstract class WDeferredFileParser : WSingleFileParser
 
     public override bool IsUnpacked(string path)
     {
-        var extension = WBUtil.GetFullExtensions(path).ToLower();
+        var extension = OSPath.GetFullExtensions(path).ToLower();
         var cond = RepackExtensions.Contains(extension);
         if (cond && !Configuration.Active.DeferTools.ContainsKey(DeferFormat))
             throw new DeferToolPathException(DeferFormat);
@@ -411,8 +411,8 @@ public abstract class WXMLParser : WSingleFileParser
         string? location = Configuration.Active.Location;
         if (!string.IsNullOrEmpty(location) && !recursive)
             sourceDir = location;
-        sourceDir = Path.GetFullPath(sourceDir);
-        return Path.Combine(sourceDir, $"{Path.GetFileName(srcPath)}.xml");
+        sourceDir = OSPath.GetFullPath(sourceDir);
+        return OSPath.Combine(sourceDir, $"{OSPath.GetFileName(srcPath)}.xml");
     }
 
     public override string GetRepackDestPath(string srcPath, XElement xml)
@@ -420,15 +420,14 @@ public abstract class WXMLParser : WSingleFileParser
         var path = xml.Element("sourcePath")?.Value;
         if (path != null)
         {
-            path = path.Replace('\\', Path.DirectorySeparatorChar);
-            return Path.Combine(path, Path.GetFileName(srcPath).Replace(".xml", String.Empty));
+            return OSPath.Combine(path, OSPath.GetFileName(srcPath).Replace(".xml", String.Empty).Replace(".XML", String.Empty));
         }
-        return srcPath.Replace(".xml", "");
+        return srcPath.Replace(".xml", "").Replace(".XML", "");
     }
 
     public override bool IsUnpacked(string path)
     {
-        if (Path.GetExtension(path) != ".xml")
+        if (OSPath.GetExtension(path).ToLower() != ".xml")
             return false;
 
         var doc = XDocument.Load(path);

@@ -72,7 +72,7 @@ public partial class WTAEFolder
 
     private TAE.Animation RepackAnim(string file, TAE tae, TAE.Template template)
     {
-            var id = int.Parse(new string(Path.GetFileNameWithoutExtension(file).Where(c => char.IsDigit(c)).ToArray()));
+            var id = int.Parse(new string(OSPath.GetFileNameWithoutExtension(file).Where(c => char.IsDigit(c)).ToArray()));
             var animXml = XDocument.Load(file).Root!;
             var animName = animXml.Element("name")!.Value;
             var headerEl = animXml.Element("header")!;

@@ -21,7 +21,7 @@ public partial class WTAEFile
 
     public override bool? IsSimple(string path)
     {
-        string filename = Path.GetFileName(path).ToLower();
+        string filename = OSPath.GetFileName(path).ToLower();
         return !Configuration.Active.TaeFolder && filename.EndsWith(".tae");
     }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using PromptPlusLibrary;
@@ -28,19 +29,19 @@ public class WPARAMBND4 : WBinderParser
 
     private static bool FilenameIsDS2SRegulation(string path)
     {
-        var filename = Path.GetFileName(path).ToLower();
+        var filename = OSPath.GetFileName(path).ToLower();
         return filename.Contains("enc_regulation") && (filename.EndsWith(".bnd.dcx") || filename.EndsWith(".bnd"));
     }
 
     private static bool FilenameIsDS3Regulation(string path)
     {
-        var filename = Path.GetFileName(path).ToLower();
+        var filename = OSPath.GetFileName(path).ToLower();
         return filename.StartsWith("data0") && filename.EndsWith(".bdt");
     }
 
     private static bool FilenameIsModernRegulation(string path)
     {
-        string filename = Path.GetFileName(path).ToLower();
+        string filename = OSPath.GetFileName(path).ToLower();
         return filename.Contains("regulation") && filename.EndsWith(".bin");
     }
 
@@ -113,7 +114,7 @@ public class WPARAMBND4 : WBinderParser
     {
         if (!Directory.Exists(path)) return false;
 
-        string xmlPath = Path.Combine(path, GetFolderXmlFilename("bnd4"));
+        string xmlPath = OSPath.Combine(path, GetFolderXmlFilename("bnd4"));
         if (!File.Exists(xmlPath)) return false;
 
         var doc = XDocument.Load(xmlPath);
@@ -183,20 +184,32 @@ public class WPARAMBND4 : WBinderParser
             var filePaths = files.Select(file => {
                 var path = file.Element("path");
                 if (path == null) throw new XmlException($"File element {files.ToList().IndexOf(file)} has no path.");
-                return path.Value.Replace('\\', Path.DirectorySeparatorChar);
+                return path.Value.ToOSPath();
             });
 
-            foreach (string filePath in filePaths)
-            {
+            var sanityCheckCallback = (string filePath) => {
+
                 try
                 {
-                    paramParser.Unpack(Path.Combine(srcPath, filePath), null, recursive, true, (game, regVer));
+                    paramParser.Unpack(OSPath.Combine(srcPath, filePath), null, false, true, (game, regVer));
                 }
                 catch (Exception e) when (!Configuration.IsDebug)
                 {
                     throw new MalformedBinderException(
-                        @$"The regulation binder is malformed: {Path.GetFileNameWithoutExtension(filePath)} has thrown an exception during read.",
+                        @$"The regulation binder is malformed: {OSPath.GetFileNameWithoutExtension(filePath)} has thrown an exception during read.",
                         e);
+                }
+            };
+
+            if (Configuration.Active.Parallel)
+            {
+                Parallel.ForEach(filePaths, sanityCheckCallback);
+            }
+            else
+            {
+                foreach (var filePath in filePaths)
+                {
+                    sanityCheckCallback(filePath);
                 }
             }
         }

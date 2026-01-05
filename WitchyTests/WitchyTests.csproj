@@ -46,9 +46,9 @@
       <Folder Include="Samples\PARAMBND3\" />
     </ItemGroup>
 
-    <Target Name="BuildIncludeAdditionsLinux" AfterTargets="Build" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+    <Target Name="BuildIncludeAdditionsLinux" AfterTargets="AfterBuild">
         <Message Importance="high" Text="Moving LIBZSTD to build output..." />
-        <Move SourceFiles="$(OutDir)\Assets\libzstd.so" DestinationFolder="$(OutDir)" />
+        <Move SourceFiles="$(OutDir)/Assets/libzstd.so" DestinationFolder="$(OutDir)" />
     </Target>
 
 </Project>

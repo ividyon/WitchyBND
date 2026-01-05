@@ -13,8 +13,8 @@ public static class ProcessHandling
     {
         Process process = new Process();
         // Configure the process using the StartInfo properties.
-        process.StartInfo.FileName = Path.GetFullPath(exePath);
-        process.StartInfo.WorkingDirectory = workingDir ?? Path.GetDirectoryName(exePath)!;
+        process.StartInfo.FileName = OSPath.GetFullPath(exePath);
+        process.StartInfo.WorkingDirectory = workingDir ?? OSPath.GetDirectoryName(exePath)!;
         process.StartInfo.Arguments = args;
         process.StartInfo.RedirectStandardOutput = true;
         process.StartInfo.RedirectStandardError = true;

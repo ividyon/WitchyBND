@@ -55,7 +55,7 @@ public class WANIBND4 : WBinderParser
         var root = "";
         if (Binder.HasNames(bnd.Format))
         {
-            root = WBUtil.FindCommonBndRootPath(bnd.Files.Select(bndFile => bndFile.Name));
+            root = BndPath.FindCommonBndRootPath(bnd.Files.Select(bndFile => bndFile.Name));
         }
 
         var xml = PrepareXmlManifest(srcPath, recursive, false, bnd.Compression, out XDocument xDoc, root);
@@ -81,11 +81,11 @@ public class WANIBND4 : WBinderParser
 
         void Callback(BinderFile bndFile)
         {
-            var ext = Path.GetExtension(bndFile.Name);
+            var ext = BndPath.GetExtension(bndFile.Name).ToLower();
             if (!ProcessedExtensions.Contains(ext) ||
                 bndFile.ID >= 7000000 && bndFile.ID <= 7999999 || // BB behaviors
                 (bndFile.Name.ToLower().EndsWith(".hkx") && bndFile.Name.ToLower().Contains("skeleton")) ||
-                (bndFile.Name.ToLower().EndsWith(".tae") && Path.GetFileName(bndFile.Name).ToLower().StartsWith("c"))
+                (bndFile.Name.ToLower().EndsWith(".tae") && BndPath.GetFileName(bndFile.Name).ToLower().StartsWith("c"))
                )
             {
                 newFiles.Add(bndFile);
@@ -93,11 +93,11 @@ public class WANIBND4 : WBinderParser
             }
 
             byte[] bytes = bndFile.Bytes;
-            var path = WBUtil.UnrootBNDPath(bndFile.Name, root);
-            path = path.Replace('\\', Path.DirectorySeparatorChar);
-            var destPath = Path.Combine(destDir, path);
-            if (!Directory.Exists(Path.GetDirectoryName(destPath)))
-                Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
+            var path = BndPath.Unroot(bndFile.Name, root);
+            path = path.ToOSPath();
+            var destPath = OSPath.Combine(destDir, path);
+            if (!Directory.Exists(OSPath.GetDirectoryName(destPath)))
+                Directory.CreateDirectory(OSPath.GetDirectoryName(destPath)!);
             File.WriteAllBytes(destPath, bytes);
             resultingPaths.Push(destPath);
         }
@@ -143,7 +143,7 @@ public class WANIBND4 : WBinderParser
         if (filesElement != null)
             ReadBinderFiles(bnd, filesElement, srcPath, root, recursive);
         var pathsToSkip = filesElement != null
-            ? filesElement.Elements("file").Select(file => Path.Combine(root, file.Element("path")!.Value)).ToList()
+            ? filesElement.Elements("file").Select(file => BndPath.Combine(root, file.Element("path")!.Value)).ToList()
             : new List<string>();
 
         ConcurrentBag<BinderFile> fileBag = new();
@@ -151,10 +151,10 @@ public class WANIBND4 : WBinderParser
         void FileCallback(string ext, string filePath)
         {
             var pathDir = filePath.Substring(srcPath.Length + 1);
-            var binderPath = Path.Combine(root, pathDir);
+            var binderPath = BndPath.Combine(root, pathDir.ToBndPath());
             RecursiveRepackFile(filePath, recursive);
 
-            string fileName = Path.GetFileNameWithoutExtension(filePath);
+            string fileName = OSPath.GetFileNameWithoutExtension(filePath);
             var regex = Regex.Match(pathDir.ToLower(), "c[1-9][0-9][0-9][0-9]");
             bool isEnemy = regex.Success;
             bool isPlayer = pathDir.ToLower().Contains("c0000");
@@ -239,13 +239,13 @@ public class WANIBND4 : WBinderParser
 
         void ExtensionCallback(string ext)
         {
-            var files = Directory.EnumerateFiles(srcPath, "*", SearchOption.AllDirectories).Where(f => Path.GetExtension(f).ToLower() == ext).ToList();
+            var files = Directory.EnumerateFiles(srcPath, "*", SearchOption.AllDirectories).Where(f => OSPath.GetExtension(f).ToLower() == ext).ToList();
             files = files.Where(filePath => {
                 var pathDir = filePath.Substring(srcPath.Length + 1);
-                var binderPath = Path.Combine(root, pathDir);
+                var binderPath = BndPath.Combine(root, pathDir.ToBndPath());
                 return !pathsToSkip.Contains(binderPath);
             }).ToList();
-            var dupes = files.GroupBy(f => Path.GetFileName(f)).Where(g => g.Count() > 1).ToList();
+            var dupes = files.GroupBy(f => OSPath.GetFileName(f).ToLower()).Where(g => g.Count() > 1).ToList();
             if (dupes.Any())
             {
                 throw new DuplicateNameException(@$"Found the following duplicate files across different folders:

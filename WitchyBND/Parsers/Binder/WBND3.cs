@@ -36,7 +36,7 @@ public class WBND3 : WBinderParser
         var root = "";
         if (Binder.HasNames(bnd.Format))
         {
-            root = WBUtil.FindCommonBndRootPath(bnd.Files.Select(bndFile => bndFile.Name));
+            root = BndPath.FindCommonBndRootPath(bnd.Files.Select(bndFile => bndFile.Name));
         }
 
         XElement files = WriteBinderFiles(bnd, destDir, root);

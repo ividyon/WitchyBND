@@ -63,7 +63,7 @@ public class WPARAMBND3 : WBinderParser
     {
         if (!Directory.Exists(path)) return false;
 
-        string xmlPath = Path.Combine(path, GetFolderXmlFilename("bnd3"));
+        string xmlPath = OSPath.Combine(path, GetFolderXmlFilename("bnd3"));
         if (!File.Exists(xmlPath)) return false;
 
         var doc = XDocument.Load(xmlPath);
@@ -83,7 +83,7 @@ public class WPARAMBND3 : WBinderParser
         else if (IsACFARegulation(bnd) || IsACFABoot(bnd))
             game = WBUtil.GameType.ACFA;
         else
-            throw new InvalidDataException($"Could not determine param type for {Path.GetFileName(srcPath)}.");
+            throw new InvalidDataException($"Could not determine param type for {OSPath.GetFileName(srcPath)}.");
 
         ParseMode.GetParser<WBND3>().Unpack(srcPath, file, recursive, game);
     }

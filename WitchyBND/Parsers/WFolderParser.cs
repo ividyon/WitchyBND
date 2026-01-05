@@ -44,16 +44,16 @@ Simply replace the compression level in the {GetFolderXmlFilename()} file to thi
     {
         string sourceDir = new FileInfo(srcPath).Directory?.FullName!;
         string? location = Configuration.Active.Location;
-        string fileName = Path.GetFileName(srcPath);
+        string fileName = OSPath.GetFileName(srcPath);
         if (!string.IsNullOrEmpty(location) && !recursive)
             sourceDir = location;
-        sourceDir = Path.GetFullPath(sourceDir);
+        sourceDir = OSPath.GetFullPath(sourceDir);
         string tarDir = fileName.Replace('.', '-');
         if (fileName == tarDir)
         {
             tarDir += "-unpacked";
         }
-        return Path.Combine(sourceDir, tarDir);
+        return OSPath.Combine(sourceDir, tarDir);
     }
 
     public override XElement PrepareXmlManifest(string srcPath, bool recursive, bool skipFilename,
@@ -83,10 +83,10 @@ Simply replace the compression level in the {GetFolderXmlFilename()} file to thi
         var sourceDir = xml.Element("sourcePath")?.Value;
         if (sourceDir != null)
         {
-            return Path.GetFullPath(Path.Combine(srcDirPath, "..", sourceDir.Replace('\\', Path.DirectorySeparatorChar), filename));
+            return OSPath.GetFullPath(OSPath.Combine(srcDirPath, "..", sourceDir.ToOSPath(), filename));
         }
         string targetDir = new DirectoryInfo(srcDirPath).Parent?.FullName!;
-        return Path.GetFullPath(Path.Combine(targetDir, filename));
+        return OSPath.GetFullPath(OSPath.Combine(targetDir, filename));
     }
     // public virtual string GetRepackDestPath(string srcDirPath, string destFileName)
     // {
@@ -108,7 +108,7 @@ Simply replace the compression level in the {GetFolderXmlFilename()} file to thi
     {
         if (!Directory.Exists(path)) return false;
 
-        string xmlPath = Path.Combine(path, GetFolderXmlFilename());
+        string xmlPath = OSPath.Combine(path, GetFolderXmlFilename());
         if (!File.Exists(xmlPath)) return false;
 
         var doc = XDocument.Load(xmlPath);
@@ -124,7 +124,7 @@ Simply replace the compression level in the {GetFolderXmlFilename()} file to thi
     public virtual string GetFolderXmlPath(string dir, string? name = null)
     {
         name ??= XmlTag.ToLower();
-        return Path.Combine(dir, GetFolderXmlFilename(name));
+        return OSPath.Combine(dir, GetFolderXmlFilename(name));
     }
 
     public static List<string> GetFolderFilePaths(XElement filesElement, string srcDirPath)
@@ -135,7 +135,7 @@ Simply replace the compression level in the {GetFolderXmlFilename()} file to thi
                 throw new FriendlyException("File node missing path tag.");
             string path = pathEl.Value;
             string suffix = file.Element("suffix")?.Value ?? "";
-            string inPath = Path.Combine(srcDirPath, Path.GetDirectoryName(path)!, $"{Path.GetFileNameWithoutExtension(path)}{suffix}{Path.GetExtension(path)}");
+            string inPath = OSPath.Combine(srcDirPath, OSPath.GetDirectoryName(path)!, $"{OSPath.GetFileNameWithoutExtension(path)}{suffix}{OSPath.GetExtension(path)}");
             if (!File.Exists(inPath))
                 throw new FriendlyException($"File not found: {inPath}");
             return inPath;

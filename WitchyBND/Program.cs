@@ -143,7 +143,7 @@ internal static class Program
 
                         if (!string.IsNullOrEmpty(location))
                         {
-                            location = Path.GetFullPath(location);
+                            location = OSPath.GetFullPath(location);
 
                             if (!Directory.Exists(location))
                             {
@@ -299,7 +299,7 @@ internal static class Program
     public static void DisplayHelp<T>(ParserResult<T> result = null, IEnumerable<Error> errors = null)
     {
         var assembly = Assembly.GetExecutingAssembly();
-        var versionInfo = FileVersionInfo.GetVersionInfo(Path.Combine(AppContext.BaseDirectory, "WitchyBND.exe"));
+        var versionInfo = FileVersionInfo.GetVersionInfo(OSPath.Combine(AppContext.BaseDirectory, "WitchyBND.exe"));
         var companyName = versionInfo.CompanyName;
 
         if (result == null)

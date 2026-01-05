@@ -14,7 +14,7 @@ public class WFMG : WXMLParser
     public override bool Is(string path, byte[]? _, out ISoulsFile? file)
     {
         file = null;
-        return Path.GetExtension(path).ToLower() == ".fmg";
+        return OSPath.GetExtension(path).ToLower() == ".fmg";
     }
 
     public override bool? IsSimple(string path)

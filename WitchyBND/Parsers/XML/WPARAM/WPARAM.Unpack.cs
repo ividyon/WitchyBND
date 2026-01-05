@@ -33,7 +33,7 @@ public partial class WPARAM
 
         var param = (file as FsParam)!;
         string? paramTypeToParamdef = param.ParamType;
-        string paramName = Path.GetFileNameWithoutExtension(srcPath);
+        string paramName = OSPath.GetFileNameWithoutExtension(srcPath);
 
         // Fixed cell style for now.
         CellStyle cellStyle = Configuration.Active.ParamCellStyle;

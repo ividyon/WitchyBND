@@ -39,7 +39,7 @@ public class WTPF : WFolderParser
 
     public override bool? IsSimple(string path)
     {
-        string filename = Path.GetFileName(path).ToLower();
+        string filename = OSPath.GetFileName(path).ToLower();
         return filename.EndsWith(".tpf") || filename.EndsWith(".tpf.dcx");
     }
 
@@ -81,7 +81,7 @@ public class WTPF : WFolderParser
                 texElement.Add(floatStruct);
             }
 
-            File.WriteAllBytes(Path.Combine(destDir, $"{WBUtil.SanitizeFilename(texture.Name)}.dds"), texture.Headerize());
+            File.WriteAllBytes(OSPath.Combine(destDir, $"{OSPath.SanitizeFilename(texture.Name.ToOSPath())}.dds"), texture.Headerize());
             textures.Add(texElement);
         }
 
@@ -122,8 +122,8 @@ public class WTPF : WFolderParser
 
         foreach (XElement texNode in xml.Element("textures")!.Elements("texture"))
         {
-            string inName = Path.GetFileNameWithoutExtension(texNode.GetSanitizedBinderFilePath("name"));
-            string outName = Path.GetFileNameWithoutExtension(texNode.GetSanitizedBinderFilePath("name", true));
+            string inName = BndPath.GetFileNameWithoutExtension(texNode.GetSanitizedBinderFilePath("name"));
+            string outName = BndPath.GetFileNameWithoutExtension(texNode.GetSanitizedBinderFilePath("name", true));
             byte format = Convert.ToByte(texNode.Element("format")!.Value);
             byte flags1 = Convert.ToByte(texNode.Element("flags1")!.Value, 16);
 
@@ -137,7 +137,7 @@ public class WTPF : WFolderParser
                     floatStruct.Values.Add(float.Parse(valueNode.Value));
             }
 
-            byte[] bytes = File.ReadAllBytes(Path.Combine(srcPath, $"{outName}.dds"));
+            byte[] bytes = File.ReadAllBytes(OSPath.Combine(srcPath, $"{outName}.dds"));
             var texture = new TPF.Texture(inName, format, flags1, bytes, platform);
             if (platform == TPF.TPFPlatform.PS4)
             {

@@ -2,6 +2,7 @@
 using System.IO;
 using SoulsFormats;
 using SoulsFormats.Other;
+using WitchyLib;
 
 namespace WitchyBND.Parsers;
 
@@ -12,7 +13,7 @@ public class WZERO3 : WFolderParser
     public override bool Is(string path, byte[]? _, out ISoulsFile? file)
     {
         file = null;
-        return Path.GetExtension(path) == ".000";
+        return OSPath.GetExtension(path) == ".000";
     }
 
     public override bool? IsSimple(string path)
@@ -31,8 +32,8 @@ public class WZERO3 : WFolderParser
         var targetDir = GetUnpackDestPath(srcPath, recursive);
         foreach (Zero3.File file in z3.Files)
         {
-            string outPath = $@"{targetDir}{Path.DirectorySeparatorChar}{file.Name.Replace('/', Path.DirectorySeparatorChar)}";
-            Directory.CreateDirectory(Path.GetDirectoryName(outPath));
+            string outPath = OSPath.Combine(targetDir, file.Name.ToOSPath());
+            Directory.CreateDirectory(OSPath.GetDirectoryName(outPath)!);
             File.WriteAllBytes(outPath, file.Bytes);
         }
     }

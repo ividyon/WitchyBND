@@ -28,27 +28,27 @@ public class WBXF4 : WBinderParser
         string bdtName;
         string bhdPath;
         string bhdName;
-        string srcDirPath = Path.GetDirectoryName(srcPath);
-        string nameWithoutExt = Path.GetFileNameWithoutExtension(srcPath);
+        string srcDirPath = OSPath.GetDirectoryName(srcPath)!;
+        string nameWithoutExt = OSPath.GetFileNameWithoutExtension(srcPath);
         string destDir = GetUnpackDestPath(srcPath, recursive);
 
         if (BXF4.IsHeader(srcPath))
         {
             bhdPath = srcPath;
-            bhdName = Path.GetFileName(srcPath);
+            bhdName = OSPath.GetFileName(srcPath);
 
-            string bdtExtension = Path.GetExtension(srcPath).Replace("bhd", "bdt");
+            string bdtExtension = OSPath.GetExtension(srcPath).Replace("bhd", "bdt");
             bdtName = $"{nameWithoutExt}{bdtExtension}";
-            bdtPath = Path.Combine(srcDirPath, bdtName);
+            bdtPath = OSPath.Combine(srcDirPath, bdtName);
         }
         else
         {
             bdtPath = srcPath;
-            bdtName = Path.GetFileName(srcPath);
+            bdtName = OSPath.GetFileName(srcPath);
 
-            string bhdExtension = Path.GetExtension(srcPath).Replace("bdt", "bhd");
+            string bhdExtension = OSPath.GetExtension(srcPath).Replace("bdt", "bhd");
             bhdName = $"{nameWithoutExt}{bhdExtension}";
-            bhdPath = Path.Combine(srcDirPath, bhdName);
+            bhdPath = OSPath.Combine(srcDirPath, bhdName);
         }
 
         var bxf = BXF4.Read(bhdPath, bdtPath);
@@ -57,7 +57,7 @@ public class WBXF4 : WBinderParser
         var root = "";
         if (Binder.HasNames(bxf.Format))
         {
-            root = WBUtil.FindCommonBndRootPath(bxf.Files.Select(bxfFile => bxfFile.Name));
+            root = BndPath.FindCommonBndRootPath(bxf.Files.Select(bxfFile => bxfFile.Name));
         }
 
         XElement files = WriteBinderFiles(bxf, destDir, root);
