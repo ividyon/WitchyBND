@@ -70,33 +70,33 @@ public class XMLTests : TestBase
         }
     }
 
-    [Test]
-    public void GPARAM()
-    {
-        IEnumerable<string> paths = GetSamples("GPARAM");
-
-        var parser = new WGPARAM();
-
-        foreach (string path in paths.Select(GetCopiedPath))
-        {
-            SetLocation(path);
-            Assert.That(parser.Exists(path));
-            Assert.That(parser.Is(path, null, out var file));
-
-            parser.Unpack(path, file, false);
-            string? destPath = parser.GetUnpackDestPath(path, false);
-
-            File.Delete(path);
-
-            Assert.That(File.Exists(destPath));
-            Assert.That(parser.ExistsUnpacked(destPath));
-            Assert.That(parser.IsUnpacked(destPath));
-            parser.Repack(destPath, false);
-
-            var xml = WFileParser.LoadXml(destPath);
-            Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
-        }
-    }
+    // [Test]
+    // public void GPARAM()
+    // {
+    //     IEnumerable<string> paths = GetSamples("GPARAM");
+    //
+    //     var parser = new WGPARAM();
+    //
+    //     foreach (string path in paths.Select(GetCopiedPath))
+    //     {
+    //         SetLocation(path);
+    //         Assert.That(parser.Exists(path));
+    //         Assert.That(parser.Is(path, null, out var file));
+    //
+    //         parser.Unpack(path, file, false);
+    //         string? destPath = parser.GetUnpackDestPath(path, false);
+    //
+    //         File.Delete(path);
+    //
+    //         Assert.That(File.Exists(destPath));
+    //         Assert.That(parser.ExistsUnpacked(destPath));
+    //         Assert.That(parser.IsUnpacked(destPath));
+    //         parser.Repack(destPath, false);
+    //
+    //         var xml = WFileParser.LoadXml(destPath);
+    //         Assert.That(File.Exists(parser.GetRepackDestPath(destPath, xml)));
+    //     }
+    // }
 
     [Test]
     public void MQB()

@@ -57,7 +57,7 @@ public static class ParseMode
             new WBXF4(),
             new WFFXDLSE(),
             new WFMG(),
-            new WGPARAM(),
+            // new WGPARAM(),
             new WLUAGNL(),
             new WLUAINFO(),
             new WTPF(),
