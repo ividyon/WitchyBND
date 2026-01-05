@@ -65,15 +65,13 @@ jobs:
         run: dotnet restore -r win-x64 --locked-mode ./WitchyBND.sln --lock-file-path packages.win-x64.lock.json
 
       - name: Build
-        run: dotnet build -r win-x64 -c Release --no-restore ./WitchyTests/WitchyTests.csproj # Builds WitchyTests which builds WitchyBND which builds WitchyBND.Shell
+        run: dotnet build -r win-x64 -c Release --no-restore WitchyTests # Builds WitchyTests which builds WitchyBND which builds WitchyBND.Shell
 
       - name: Run unit tests
         run: dotnet test -c Release -r win-x64 --no-build --filter TestCategory!=SkipOnGitHubAction
 
       - name: Publish application
-        run: |
-          cd WitchyBND
-          dotnet publish -r win-x64 -c Release --no-build
+        run: dotnet publish -r win-x64 -c Release --no-build WitchyBND
 
       - name: Archive release
         uses: thedoctor0/zip-release@main
@@ -132,15 +130,13 @@ jobs:
         run: dotnet restore -r linux-x64 --locked-mode ./WitchyBND.sln --lock-file-path packages.linux-x64.lock.json
 
       - name: Build
-        run: dotnet build -c Release -r linux-x64 --no-restore ./WitchyTests/WitchyTests.csproj # Builds WitchyTests which builds WitchyBND which builds WitchyBND.Shell
+        run: dotnet build -c Release -r linux-x64 --no-restore WitchyTests # Builds WitchyTests which builds WitchyBND which builds WitchyBND.Shell
 
       - name: Run unit tests
         run: dotnet test -c Release -r linux-x64 --no-build --filter TestCategory!=SkipOnGitHubAction
 
       - name: Publish application
-        run: |
-          cd WitchyBND
-          dotnet publish -c Release -r linux-x64 --no-build
+        run:  dotnet publish -c Release -r linux-x64 --no-build WitchyBND
 
       - name: Archive release
         uses: thedoctor0/zip-release@main

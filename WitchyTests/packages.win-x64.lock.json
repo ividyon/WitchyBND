@@ -292,6 +292,7 @@
       "witchylib": {
         "type": "Project",
         "dependencies": {
+          "EastAsianWidthDotNet": "[1.0.1, )",
           "Microsoft.Extensions.FileSystemGlobbing": "[8.0.0-preview.2.23128.3, )",
           "Newtonsoft.Json": "[13.0.3, )",
           "PromptPlus": "[5.0.1, )",
