@@ -298,7 +298,7 @@ public abstract class WUnsortedBinderParser : WBinderParser
                 throw new InvalidDataException(
                     $"File {filename} passed pattern checks, but was not found among formats.");
             string name = !string.IsNullOrEmpty(root)
-                ? BndPath.Combine(root, BndPath.GetRelativePath(srcDirPath.ToBndPath(), filePath.ToBndPath()))
+                ? BndPath.Combine(root, OSPath.GetRelativePath(srcDirPath, filePath).ToBndPath())
                 : filePath;
 
             RecursiveRepackFile(filePath, recursive);

@@ -648,7 +648,7 @@ public static class BndPath
         // Expand with current directory if necessary
         if (!IsPathRooted(path))
         {
-            path = Combine(WBUtil.GetExecutablePath(), path);
+            path = Combine(WBUtil.GetExecutablePath().ToBndPath(), path);
         }
 
         // We would ideally use realpath to do this, but it resolves symlinks and requires that the file actually exist.
