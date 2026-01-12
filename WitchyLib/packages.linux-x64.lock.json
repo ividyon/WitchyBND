@@ -58,7 +58,7 @@
       "witchyformats": {
         "type": "Project",
         "dependencies": {
-          "SoulsFormats": "[2.17.0, )"
+          "SoulsFormats": "[3.0.0, )"
         }
       }
     },
