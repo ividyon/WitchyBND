@@ -245,17 +245,13 @@ public class UpdateService : IUpdateService
             JObject doc = (JObject)JsonConvert.DeserializeObject(jsonString.Result)!;
 
             var version = Version.Parse(String.Concat(doc.Value<string>("tag_name")!.Skip(1)));
-            var url = doc.Value<JArray>("assets")!.First(a => a.Value<string>("browser_download_url")!.EndsWith(".zip"))
+            var url = doc.Value<JArray>("assets")!.First(a => {
+                    var url = a.Value<string>("browser_download_url")!.ToLower();
+                    return url.EndsWith(".zip") && url.Contains("win-x64");
+                })
                 .Value<string>("browser_download_url")!;
 
             return (version, url);
-        }
-
-        Version getLocalVersion()
-        {
-            var exePath = WBUtil.GetExeLocation("WitchyBND.exe");
-            var exe = FileVersionInfo.GetVersionInfo(exePath);
-            return Version.Parse(exe.FileVersion!);
         }
 
         void unregisterShell()
