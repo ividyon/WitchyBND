@@ -94,7 +94,6 @@ namespace SoulsOodleLib
             string? librariesPath = GetSteamPath("steamapps", "libraryfolders.vdf");
             if (librariesPath == null || !File.Exists(librariesPath))
             {
-                Console.WriteLine("Could not find libraryfolders.vdf");
                 return new();
             }
 

@@ -41,7 +41,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Samples\FFXBNDModern\" />
       <Folder Include="Samples\MATBINBND\AC6\" />
       <Folder Include="Samples\PARAMBND3\" />
     </ItemGroup>

@@ -167,7 +167,7 @@ internal static class Program
                             Stopwatch watch = new Stopwatch();
 
                             watch.Start();
-                            Oodle.GrabOodle(message => _output.WriteLine(message), false, true);
+                            Oodle.GrabOodle(_ => { }, false, true);
                             ParseMode.CliParseMode(opt);
                             watch.Stop();
 
