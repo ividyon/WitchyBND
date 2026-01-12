@@ -26,6 +26,8 @@ env:
 jobs:
   get-version:
     runs-on: ubuntu-latest # Cannot use windows
+    outputs:
+        version: ${{ steps.get-version.outputs.version }}
     steps:
       - name: Get version
         id: get-version
@@ -40,7 +42,7 @@ jobs:
         version-keys: Version
         
   build-windows:
-    needs: [ get-version ]
+    needs: get-version
     runs-on: windows-latest
     steps:
       - name: Checkout code
@@ -95,7 +97,7 @@ jobs:
         uses: thedoctor0/zip-release@main
         with:
           type: 'zip'
-          filename: '../../../WitchyBND-${{ github.ref_name }}-win-x64.zip'
+          filename: '../../../WitchyBND-${{ needs.get-version.outputs.version }}-win-x64.zip'
           directory: './bin/publish/win-x64'
           path: '.'
 
@@ -103,10 +105,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: 'WitchyBND-SHA${{ github.sha }}-win-x64'
-          path: WitchyBND-${{ github.ref_name }}-win-x64.zip
+          path: WitchyBND-${{ needs.get-version.outputs.version }}-win-x64.zip
 
   build-linux:
-    needs: [ get-version ]
+    needs: get-version
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -161,7 +163,7 @@ jobs:
         uses: thedoctor0/zip-release@main
         with:
           type: 'zip'
-          filename: '../../../WitchyBND-${{ github.ref_name }}-linux-x64.zip'
+          filename: '../../../WitchyBND-${{ needs.get-version.outputs.version }}-linux-x64.zip'
           directory: './bin/publish/linux-x64'
           path: '.'
 
@@ -169,16 +171,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: 'WitchyBND-SHA${{ github.sha }}-linux-x64'
-          path: WitchyBND-${{ github.ref_name }}-linux-x64.zip
+          path: WitchyBND-${{ needs.get-version.outputs.version }}-linux-x64.zip
 
   release:
     if: github.ref == 'refs/heads/main'
-    needs: [build-windows, build-linux]
+    needs: [ get-version, build-windows, build-linux ]
     runs-on: windows-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
@@ -187,8 +186,8 @@ jobs:
       - name: Upload Release
         uses: ncipollo/release-action@v1
         with:
-          tag: '${{ steps.get-version.outputs.version }}'
-          artifacts: 'WitchyBND-SHA${{ github.sha }}-win-x64\WitchyBND-${{ steps.get-version.outputs.version }}-win-x64.zip,WitchyBND-SHA${{ github.sha }}-linux-x64\WitchyBND-${{ steps.get-version.outputs.version }}-linux-x64.zip'
+          tag: '${{ needs.get-version.outputs.version }}'
+          artifacts: 'WitchyBND-SHA${{ github.sha }}-win-x64\WitchyBND-${{ needs.get-version.outputs.version }}-win-x64.zip,WitchyBND-SHA${{ github.sha }}-linux-x64\WitchyBND-${{ needs.get-version.outputs.version }}-linux-x64.zip'
           bodyFile: "./NOTES.md"
           token: ${{ secrets.GITHUB_TOKEN }}
           draft: true
