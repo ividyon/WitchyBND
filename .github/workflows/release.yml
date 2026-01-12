@@ -77,7 +77,7 @@ jobs:
         uses: thedoctor0/zip-release@main
         with:
           type: 'zip'
-          filename: '../../WitchyBND-${{ github.ref_name }}-win-x64.zip'
+          filename: '../../../WitchyBND-${{ github.ref_name }}-win-x64.zip'
           directory: './bin/publish/win-x64'
           path: '.'
 
@@ -142,7 +142,7 @@ jobs:
         uses: thedoctor0/zip-release@main
         with:
           type: 'zip'
-          filename: '../../WitchyBND-${{ github.ref_name }}-linux-x64.zip'
+          filename: '../../../WitchyBND-${{ github.ref_name }}-linux-x64.zip'
           directory: './bin/publish/linux-x64'
           path: '.'
 
