@@ -78,7 +78,7 @@ jobs:
         with:
           type: 'zip'
           filename: '../../WitchyBND-${{ github.ref_name }}-win-x64.zip'
-          directory: './bin/publish'
+          directory: './bin/publish/win-x64'
           path: '.'
 
       - name: Upload artifact
@@ -136,14 +136,14 @@ jobs:
         run: dotnet test -c Release -r linux-x64 --no-build --filter TestCategory!=SkipOnGitHubAction
 
       - name: Publish application
-        run:  dotnet publish -c Release -r linux-x64 --no-build WitchyBND
+        run: dotnet publish -c Release -r linux-x64 --no-build WitchyBND
 
       - name: Archive release
         uses: thedoctor0/zip-release@main
         with:
           type: 'zip'
           filename: '../../WitchyBND-${{ github.ref_name }}-linux-x64.zip'
-          directory: './bin/publish'
+          directory: './bin/publish/linux-x64'
           path: '.'
 
       - name: Upload artifact
