@@ -7,6 +7,13 @@ concurrency:
   group: build
   cancel-in-progress: true
 
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches: [ "main" ]
+
 permissions:
   contents: write
 
