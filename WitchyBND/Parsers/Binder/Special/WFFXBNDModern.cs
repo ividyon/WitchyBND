@@ -175,15 +175,15 @@ public class WFFXBNDModern : WBinderParser
 
         XElement? resDirElement = xml.Element("resDir");
 
-        List<string> effectPaths = Directory.GetFiles(srcPath, "*.fxr;*.FXR", SearchOption.AllDirectories)
+        List<string> effectPaths = Directory.GetFiles(srcPath, "*.fxr", SearchOption.AllDirectories)
             .OrderBy(OSPath.GetFileName).ToList();
-        List<string> texturePaths = Directory.GetFiles(srcPath, "*.dds;*.DDS", SearchOption.AllDirectories)
+        List<string> texturePaths = Directory.GetFiles(srcPath, "*.dds", SearchOption.AllDirectories)
             .OrderBy(OSPath.GetFileName).ToList();
-        List<string> modelPaths = Directory.GetFiles(srcPath, "*.flver;*.FLVER", SearchOption.AllDirectories)
+        List<string> modelPaths = Directory.GetFiles(srcPath, "*.flver", SearchOption.AllDirectories)
             .OrderBy(OSPath.GetFileName).ToList();
-        List<string> animPaths = Directory.GetFiles(srcPath, "*.anibnd;*.ANIBND", SearchOption.AllDirectories)
+        List<string> animPaths = Directory.GetFiles(srcPath, "*.anibnd", SearchOption.AllDirectories)
             .OrderBy(OSPath.GetFileName).ToList();
-        List<string> resPaths = Directory.GetFiles(srcPath, "*.ffxreslist;*.FFXRESLIST", SearchOption.AllDirectories)
+        List<string> resPaths = Directory.GetFiles(srcPath, "*.ffxreslist", SearchOption.AllDirectories)
             .OrderBy(OSPath.GetFileName).ToList();
 
         // Sanity check duplicate file names
@@ -301,19 +301,18 @@ Consider tidying up the unpacked archive folder.");
                 tpf.Flag2 = 0x03;
                 tpf.Platform = platform;
 
-                var tex = new TPF.Texture();
-                tex.Name = OSPath.GetFileNameWithoutExtension(fileName).Trim();
-                tex.Format = 0;
-                if (fileName.ToLower().EndsWith("_m"))
+                string texName = OSPath.GetFileNameWithoutExtension(fileName).Trim();
+                byte texFormat = 0;
+                if (fileName.ToLower().EndsWith("_m") || fileName.ToLower().EndsWith("_r"))
                 {
-                    tex.Format = 103;
+                    texFormat = 103;
                 }
                 else if (fileName.ToLower().EndsWith("_n"))
                 {
-                    tex.Format = 106;
+                    texFormat = 106;
                 }
 
-                tex.Bytes = bytes;
+                var tex = new TPF.Texture(texName, texFormat, 0x0, bytes, platform);
 
                 tpf.Textures.Add(tex);
 
