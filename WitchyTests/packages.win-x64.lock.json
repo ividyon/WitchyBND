@@ -263,7 +263,7 @@
         "dependencies": {
           "BouncyCastle.Cryptography": "[2.4.0, )",
           "NativeFileDialogSharp": "[0.6.0-alpha, )",
-          "SoulsFormats": "[3.0.0, )"
+          "SoulsFormats": "[3.0.0.1, )"
         }
       },
       "witchybnd": {
@@ -276,17 +276,17 @@
           "Microsoft.Extensions.Hosting.Abstractions": "[8.0.0, )",
           "NativeFileDialogSharp": "[0.6.0-alpha, )",
           "PromptPlus": "[5.0.1, )",
-          "SoulsFormats": "[3.0.0, )",
-          "SoulsOodleLib": "[3.0.0, )",
-          "WitchyFormats": "[3.0.0, )",
-          "WitchyLib": "[3.0.0, )",
+          "SoulsFormats": "[3.0.0.1, )",
+          "SoulsOodleLib": "[3.0.0.1, )",
+          "WitchyFormats": "[3.0.0.1, )",
+          "WitchyLib": "[3.0.0.1, )",
           "securifybv.ShellLink": "[0.1.0, )"
         }
       },
       "witchyformats": {
         "type": "Project",
         "dependencies": {
-          "SoulsFormats": "[3.0.0, )"
+          "SoulsFormats": "[3.0.0.1, )"
         }
       },
       "witchylib": {
@@ -296,7 +296,7 @@
           "Microsoft.Extensions.FileSystemGlobbing": "[8.0.0-preview.2.23128.3, )",
           "Newtonsoft.Json": "[13.0.3, )",
           "PromptPlus": "[5.0.1, )",
-          "WitchyFormats": "[3.0.0, )"
+          "WitchyFormats": "[3.0.0.1, )"
         }
       }
     },
