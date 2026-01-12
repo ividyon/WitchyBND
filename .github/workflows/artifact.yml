@@ -107,6 +107,12 @@ jobs:
           name: 'WitchyBND-SHA${{ github.sha }}-win-x64'
           path: WitchyBND-${{ needs.get-version.outputs.version }}-win-x64.zip
 
+      - name: Upload notes
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'WitchyBND-SHA${{ github.sha }}-NOTES'
+          path: NOTES.md
+
   build-linux:
     needs: get-version
     runs-on: ubuntu-latest
@@ -188,7 +194,7 @@ jobs:
         with:
           tag: '${{ needs.get-version.outputs.version }}'
           artifacts: 'WitchyBND-SHA${{ github.sha }}-win-x64\WitchyBND-${{ needs.get-version.outputs.version }}-win-x64.zip,WitchyBND-SHA${{ github.sha }}-linux-x64\WitchyBND-${{ needs.get-version.outputs.version }}-linux-x64.zip'
-          bodyFile: "./NOTES.md"
+          bodyFile: 'WitchyBND-SHA${{ github.sha }}-NOTES\NOTES.md'
           token: ${{ secrets.GITHUB_TOKEN }}
           draft: true
           allowUpdates: true
