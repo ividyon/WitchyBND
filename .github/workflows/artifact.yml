@@ -33,13 +33,13 @@ jobs:
         id: get-version
         uses: KinsonDigital/VersionMiner@v1.0.0-preview.2
         with:
-        repo-owner: ividyon
-        repo-name: WitchyBND
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-        branch-name: main
-        file-format: xml # Not case sensitive
-        file-path: "Directory.Build.props"
-        version-keys: Version
+          repo-owner: ividyon
+          repo-name: WitchyBND
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          branch-name: main
+          file-format: xml # Not case sensitive
+          file-path: "Directory.Build.props"
+          version-keys: Version
         
   build-windows:
     needs: get-version
