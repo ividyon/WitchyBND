@@ -65,7 +65,7 @@ public partial class WTAEFile
             tae.Animations = bag.OrderBy(a => a.ID).ToList();
         }
 
-        tae.ApplyTemplate(template);
+        tae.ApplyTemplate(template, false);
 
         string outPath = GetRepackDestPath(srcPath, xml);
         Backup(outPath);

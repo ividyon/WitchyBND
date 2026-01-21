@@ -275,7 +275,7 @@
           "Microsoft.Extensions.DependencyInjection": "[8.0.0, )",
           "Microsoft.Extensions.Hosting.Abstractions": "[8.0.0, )",
           "NativeFileDialogSharp": "[0.6.0-alpha, )",
-          "PromptPlus": "[5.0.1, )",
+          "PromptPlus": "[5.0.4, )",
           "SoulsFormats": "[3.0.0.1, )",
           "SoulsOodleLib": "[3.0.0.1, )",
           "WitchyFormats": "[3.0.0.1, )",
@@ -295,7 +295,7 @@
           "EastAsianWidthDotNet": "[1.0.1, )",
           "Microsoft.Extensions.FileSystemGlobbing": "[8.0.0-preview.2.23128.3, )",
           "Newtonsoft.Json": "[13.0.3, )",
-          "PromptPlus": "[5.0.1, )",
+          "PromptPlus": "[5.0.4, )",
           "WitchyFormats": "[3.0.0.1, )"
         }
       }

@@ -27,16 +27,16 @@ public interface IOutputService
 
     // public IDisposable EscapeColorTokens();
 
-    public IKeyPressControl Confirm(string prompt, Action<IControlOptions> config = null);
+    public IKeyPressControl Confirm(string prompt, Action<IControlOptions>? opt = null);
     public void SingleDash(
         string value,
         DashOptions dashOptions = DashOptions.AsciiSingleBorder,
         int extralines = 0,
         Style? style = null);
 
-    public IInputControl Input(string prompt, Action<IControlOptions> config = null);
+    public IInputControl Input(string prompt, Action<IControlOptions>? opt = null);
     public IKeyPressControl KeyPress();
-    public IKeyPressControl KeyPress(string prompt, Action<IControlOptions> config = null);
+    public IKeyPressControl KeyPress(string prompt, Action<IControlOptions>? opt = null);
     public ConsoleKeyInfo ReadKey(bool intercept = false);
 }
 public class OutputService : IOutputService
@@ -110,8 +110,9 @@ public class OutputService : IOutputService
     //     return PromptPlus.Config.EscapeColorTokens();
     // }
 
-    public IKeyPressControl Confirm(string prompt, Action<IControlOptions> opt = null)
+    public IKeyPressControl Confirm(string prompt, Action<IControlOptions>? opt = null)
     {
+        opt ??= _ => {};
         lock (ConsoleWriterLock)
             return PromptPlus.Controls.Confirm(prompt).Options(opt);
     }
@@ -124,8 +125,9 @@ public class OutputService : IOutputService
             PromptPlus.Widgets.SingleDash(value, dashOptions, extralines, style);
     }
 
-    public IInputControl Input(string prompt, Action<IControlOptions> opt = null)
+    public IInputControl Input(string prompt, Action<IControlOptions>? opt = null)
     {
+        opt ??= _ => {};
         lock (ConsoleWriterLock)
             return PromptPlus.Controls.Input(prompt).Options(opt);
     }
@@ -138,7 +140,7 @@ public class OutputService : IOutputService
 
     public IKeyPressControl KeyPress(string prompt, Action<IControlOptions>? opt = null)
     {
-        opt ??= _ => { };
+        opt ??= _ => {};
         lock (ConsoleWriterLock)
             return PromptPlus.Controls.KeyPress(prompt).Options(opt);
     }

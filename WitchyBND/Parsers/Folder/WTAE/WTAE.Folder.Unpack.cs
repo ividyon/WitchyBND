@@ -30,7 +30,7 @@ public partial class WTAEFolder
         var game = gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.Other).Item1;
 
         var template = gameService.GetTAETemplate(game);
-        tae.ApplyTemplate(template);
+        tae.ApplyTemplate(template, false);
         string destDir = GetUnpackDestPath(srcPath, recursive);
 
         var xml = PrepareXmlManifest(srcPath, recursive, false, tae.Compression, out XDocument xDoc, null);

@@ -63,7 +63,7 @@ public partial class WTAEFolder
 
         tae.Animations = bag.ToList();
 
-        tae.ApplyTemplate(gameService.GetTAETemplate(game));
+        tae.ApplyTemplate(gameService.GetTAETemplate(game), false);
 
         string outPath = GetRepackDestPath(srcPath, xml);
         Backup(outPath);

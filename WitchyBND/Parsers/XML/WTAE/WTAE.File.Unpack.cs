@@ -31,7 +31,7 @@ public partial class WTAEFile
 
         var game = gameService.DetermineGameType(srcPath, IGameService.GameDeterminationType.Other).Item1;
         var template = gameService.GetTAETemplate(game);
-        tae.ApplyTemplate(template);
+        tae.ApplyTemplate(template, false);
 
         var xml = PrepareXmlManifest(srcPath, recursive, false, tae.Compression, out XDocument xDoc, null);
         xml.AddE("id", tae.ID);
