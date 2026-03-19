@@ -207,7 +207,7 @@ public class WANIBND4 : WBinderParser
             else if (ext == ".tae")
             {
                 var split = fileName.Split("_");
-                bool namedByTaeId = split.Length == 1 && split[0].First() == 'a';
+                bool namedByTaeId = split.Length == 1 && split[0].First() == 'a' && split[0] != "a0000";
                 if (namedByTaeId)
                 {
                     int taeId;

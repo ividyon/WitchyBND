@@ -93,6 +93,12 @@ WitchyBND is built using the following licensed works:
 # Changelog
 ## WitchyBND
 
+### 3.0.0.1
+
+* TAEs may now be unpacked even with unknown event types.
+* Fixed a crash issue when confirming certain prompts.
+* Potentially fixed a repack issue with ANIBNDs contained in PARTSBNDs from ARMORED CORE VI.
+
 ### 3.0.0.0
 
 * Added cross-platform capability, with Linux support.

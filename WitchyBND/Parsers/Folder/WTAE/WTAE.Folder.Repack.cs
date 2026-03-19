@@ -61,7 +61,7 @@ public partial class WTAEFolder
             animFiles.ForEach(Callback);
         }
 
-        tae.Animations = bag.ToList();
+        tae.Animations = bag.OrderBy(a => a.ID).ToList();
 
         tae.ApplyTemplate(gameService.GetTAETemplate(game), false);
 
