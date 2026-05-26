@@ -10,12 +10,12 @@ WitchyBND is an unpacking/repacking/serializing software for common file formats
 A successor to **Yabber**, the FromSoftware file format unpacker and serializer by TKGP, featuring a comprehensive rewrite, added features and comfort, and bundled contributions by the community.
 
 # Requirements
-The game archives need to be unpacked with [UXM Selective Unpacker](https://github.com/Nordgaren/UXM-Selective-Unpack) to access the files that Witchy can work with.
+The game archives need to be unpacked with [Nuxe](https://github.com/JKAnderson/Nuxe/releases) to access the files that Witchy can work with.
 
 WitchyBND should run out-of-the-box on Windows versions newer than Windows 8.
 
 * For older versions, WitchyBND's context menu integration may require [.NET Framework 4.6](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net46).
-* In case of unexpected issues, or if using Wine on Linux, [.NET Desktop Runtime 8.0](https://aka.ms/dotnet/8.0/windowsdesktop-runtime-win-x64.exe) may be necessary.
+* In case of unexpected issues, or if using Wine on Linux, [.NET Desktop Runtime 10.0](https://aka.ms/dotnet/10.0/windowsdesktop-runtime-win-x64.exe) may be necessary.
 
 # Updating WitchyBND
 
@@ -28,7 +28,7 @@ After the update, you can re-register the context menu again.
 [Read here how to configure the context menu integration.](https://github.com/ividyon/WitchyBND#right-click-context-menu-integration)
 
 # How to use
-Information on using Yabber (and therefore Witchy) is spread widely across the community. Visit the [Souls Modding Wiki](http://soulsmodding.wikidot.com/) or [?ServerName? Discord](http://discord.gg/servername) to get started.
+Information on using Yabber (and therefore Witchy) is spread widely across the community. Visit the [Souls Modding Wiki](http://soulsmodding.com/) or [?ServerName? Discord](http://discord.gg/servername) to get started.
 
 ## Right-click context menu integration
 The most comfortable integration of WitchyBND is found in the context menu. Witchy does not come with an installer, so you need to briefly launch it and register the context menu with Windows yourself.
@@ -42,7 +42,7 @@ From now on, **WitchyBND** menu options should appear when you right-click files
 To remove the context menu options, simply use the **"Unregister WitchyBND context menu"** option. You may need to restart Explorer afterwards.
 
 ## Basic workflow
-* Unpack the game files using a tool like [UXM Selective Unpacker](https://www.nexusmods.com/eldenring/mods/1651).
+* Unpack the game files using a tool like [Nuxe](https://github.com/JKAnderson/Nuxe/releases).
 * Find the files you'd like to extract.
 * Use the right-click context menu "WitchyBND" option to process the selected files.
   * If processing over 15 files, you may need to use the "Send to..." menu. 
@@ -92,6 +92,10 @@ WitchyBND is built using the following licensed works:
 
 # Changelog
 ## WitchyBND
+
+### 3.0.1.0
+
+* Re-added GPARAM support, now including Armored Core VI.
 
 ### 3.0.0.1
 
