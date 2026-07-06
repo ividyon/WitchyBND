@@ -121,7 +121,8 @@ public static class Configuration
     public static StoredConfig Default;
     public static ActiveConfig Active;
 
-    public static string AppDataDirectory => OSPath.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "WitchyBND");
+    public static string AppDataDirectory =>
+        OSPath.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "WitchyBND");
 
     public static OSPlatform Platform { get; set; }
     public static bool ParamDefaultValues => Active.ParamDefaultValueThreshold > 0f;
@@ -169,24 +170,61 @@ public static class Configuration
                     builder.AddJsonFile(userSettingsPath, true);
 
                 builder.AddJsonFile(overrideSettingsPath, true);
-
-                breakOut = true;
                 config = builder.Build();
+
                 Stored = config.Get<StoredConfig>() ?? new StoredConfig();
                 ActivateStoredConfiguration();
+                breakOut = true;
             }
-            catch (JsonReaderException e)
+            catch (Exception e) when (e is JsonReaderException or TypeInitializationException or InvalidDataException)
             {
-                if (IsDebug || IsTest)
+                // Failed to load config, go over the loaded settings one by one and empty them if needed
+                var crashBuilder = new ConfigurationBuilder();
+                crashBuilder.AddJsonFile(defaultSettingsPath, true);
+                try
                 {
-                    if (File.Exists(debugSettingsPath))
-                        File.Delete(debugSettingsPath);
+                    crashBuilder.Build();
                 }
-                else
+                catch (Exception ie) when (ie is JsonReaderException or TypeInitializationException or InvalidDataException)
                 {
-                    if (File.Exists(userSettingsPath))
-                        File.Delete(userSettingsPath);
+                    // Default settings are broken
+                    if (File.Exists(defaultSettingsPath))
+                    {
+                        File.Delete(defaultSettingsPath);
+                    }
                 }
+
+                var testPath = IsDebug || IsTest ? debugSettingsPath : userSettingsPath;
+                if (File.Exists(testPath))
+                {
+                    crashBuilder = new ConfigurationBuilder();
+                    crashBuilder.AddJsonFile(testPath, true);
+                    try
+                    {
+                        crashBuilder.Build();
+                    }
+                    catch (Exception ie) when (ie is JsonReaderException or TypeInitializationException or InvalidDataException)
+                    {
+                        // User or debug settings are broken
+                        File.Delete(testPath);
+                    }
+                }
+
+                if (File.Exists(overrideSettingsPath))
+                {
+                    crashBuilder = new ConfigurationBuilder();
+                    crashBuilder.AddJsonFile(overrideSettingsPath, true);
+                    try
+                    {
+                        crashBuilder.Build();
+                    }
+                    catch (Exception ie) when (ie is JsonReaderException or TypeInitializationException or InvalidDataException)
+                    {
+                        // Override settings are broken
+                        File.Delete(overrideSettingsPath);
+                    }
+                }
+
                 breakOut = false;
             }
         }

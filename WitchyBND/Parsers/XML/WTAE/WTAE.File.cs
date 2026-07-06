@@ -11,6 +11,7 @@ public partial class WTAEFile : WXMLParser
     public override string XmlTag => "taeFile";
     public override bool HasPreprocess => true;
     public override WFileParserVerb Verb => WFileParserVerb.Serialize;
+    public override int Version => WBUtil.WitchyVersionToInt("3.0.1.0");
     public override bool Preprocess(string srcPath, bool recursive, ref Dictionary<string, (WFileParser, ISoulsFile)> files)
     {
         ISoulsFile? file = null;

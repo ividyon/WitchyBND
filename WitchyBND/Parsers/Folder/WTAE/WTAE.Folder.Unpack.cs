@@ -91,6 +91,7 @@ public partial class WTAEFolder
             eventEl.AddE("unk04", ev.Unk04);
             eventEl.AddE("startTime", ev.StartTime);
             eventEl.AddE("endTime", ev.EndTime);
+            eventEl.AddE("group", anim.EventGroups.IndexOf(ev.Group));
 
             if (ev.Parameters != null && ev.Parameters.Template != null)
             {
@@ -119,16 +120,6 @@ public partial class WTAEFolder
             groupEl.AddE("cutsceneEntityType", group.GroupData.CutsceneEntityType);
             groupEl.AddE("cutsceneEntityId1", group.GroupData.CutsceneEntityIDPart1);
             groupEl.AddE("cutsceneEntityId2", group.GroupData.CutsceneEntityIDPart2);
-            var events = anim.Events.Where(a => a.Group == group).ToList();
-            if (events.Any())
-            {
-                groupEl.AddE("events", events.Select(ev => {
-                    var idx = anim.Events.IndexOf(ev);
-                    var eventEl = new XElement("event");
-                    eventEl.SetAttributeValue("index", idx.ToString());
-                    return eventEl;
-                }));
-            }
             return groupEl;
         }));
 

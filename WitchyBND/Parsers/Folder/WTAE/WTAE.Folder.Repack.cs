@@ -104,40 +104,6 @@ public partial class WTAEFolder
             anim.Events = new();
             anim.EventGroups = new();
 
-            foreach (XElement evEl in animXml.Element("events")!.Elements("event"))
-            {
-                    var evType = int.Parse(evEl.Element("type")!.Value);
-                    var unk04 = int.Parse(evEl.Element("unk04")!.Value);
-                    var startTime = float.Parse(evEl.Element("startTime")!.Value);
-                    var endTime = float.Parse(evEl.Element("endTime")!.Value);
-                    var isUnk = bool.Parse(evEl.Element("isUnk")?.Value ?? "False");
-                    var hasTemplate = template.Any(t => t.Value.ContainsKey(evType));
-                    if (!hasTemplate)
-                        errorService.RegisterNotice($"Missing template for TAE event type {evType}.");
-                    if (!isUnk && hasTemplate)
-                    {
-                        var ev = new TAE.Event(startTime, endTime, evType, unk04, tae.BigEndian, template.First(t => t.Value.ContainsKey(evType)).Value[evType]);
-
-                        var paramsEl = evEl.Element("params");
-                        if (paramsEl != null)
-                        {
-                            foreach (XElement paramEl in paramsEl.Elements("param"))
-                            {
-                                var key = paramEl.Attribute("name")!.Value;
-                                var value = paramEl.Attribute("value")!.Value;
-
-                                ev.Parameters[key] = ev.Parameters.Template[key].StorageToValue(value);
-                            }
-                        }
-                        anim.Events.Add(ev);
-                    }
-                    else
-                    {
-                        var paramBytes = evEl.Element("unkParams")!.Value.Split(",").Select(s => byte.Parse(s)).ToArray();
-                        var ev = new TAE.Event(startTime, endTime, evType, unk04, paramBytes, tae.BigEndian);
-                        anim.Events.Add(ev);
-                    }
-            }
             foreach (XElement groupEl in animXml.Element("eventGroups")!.Elements("eventGroup"))
             {
                 var type = int.Parse(groupEl.Element("type")!.Value);
@@ -154,16 +120,43 @@ public partial class WTAEFolder
                 group.GroupData = data;
 
                 anim.EventGroups.Add(group);
+            }
 
-                var eventsEl = groupEl.Element("events");
-                if (eventsEl != null)
+            foreach (XElement evEl in animXml.Element("events")!.Elements("event"))
+            {
+                var evType = int.Parse(evEl.Element("type")!.Value);
+                var unk04 = int.Parse(evEl.Element("unk04")!.Value);
+                var startTime = float.Parse(evEl.Element("startTime")!.Value);
+                var endTime = float.Parse(evEl.Element("endTime")!.Value);
+                var isUnk = bool.Parse(evEl.Element("isUnk")?.Value ?? "False");
+                var hasTemplate = template.Any(t => t.Value.ContainsKey(evType));
+                if (!hasTemplate)
+                    errorService.RegisterNotice($"Missing template for TAE event type {evType}.");
+                var groupIdx = int.Parse(evEl.Element("group")!.Value);
+                if (!isUnk && hasTemplate)
                 {
-                    foreach (XElement evEl in eventsEl.Elements("event"))
+                    var ev = new TAE.Event(startTime, endTime, evType, unk04, tae.BigEndian, template.First(t => t.Value.ContainsKey(evType)).Value[evType]);
+                    ev.Group = anim.EventGroups[groupIdx];
+
+                    var paramsEl = evEl.Element("params");
+                    if (paramsEl != null)
                     {
-                        var idx = int.Parse(evEl.Attribute("index")!.Value);
-                        var ev = anim.Events.ElementAt(idx)!;
-                        ev.Group = group;
+                        foreach (XElement paramEl in paramsEl.Elements("param"))
+                        {
+                            var key = paramEl.Attribute("name")!.Value;
+                            var value = paramEl.Attribute("value")!.Value;
+
+                            ev.Parameters[key] = ev.Parameters.Template[key].StorageToValue(value);
+                        }
                     }
+                    anim.Events.Add(ev);
+                }
+                else
+                {
+                    var paramBytes = evEl.Element("unkParams")!.Value.Split(",").Select(s => byte.Parse(s)).ToArray();
+                    var ev = new TAE.Event(startTime, endTime, evType, unk04, paramBytes, tae.BigEndian);
+                    ev.Group = anim.EventGroups[groupIdx];
+                    anim.Events.Add(ev);
                 }
             }
 

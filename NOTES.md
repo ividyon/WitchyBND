@@ -1,1 +1,6 @@
+* Removed the warnings from the PARAM and TAE parsers, as they have been in personal use for years without major issues.
+* Updated the TAE parser slightly. It will now assign group indices to events, rather than event indices to groups, to make the XML way more easily editable. This updates the TAE parser version.
 * Re-added GPARAM support, now including Armored Core VI.
+* Unpacking a DS2 FFXBND will now fall back on the default BND4 parser, as they differ too much from FFXBNDs from BB onward.
+* Made the file watcher mode more robust; it will now retry processing a change up to 5 times while a file is used by another process.
+* Made the configuration load more robust; it will now individually test and recreate any corrupted configuration files.

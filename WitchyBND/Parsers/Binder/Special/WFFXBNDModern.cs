@@ -40,6 +40,13 @@ public class WFFXBNDModern : WBinderParser
     public override void Unpack(string srcPath, ISoulsFile? file, bool recursive)
     {
         BND4 bnd = (file as BND4)!;
+        if (bnd.Files.FirstOrDefault()?.Name.StartsWith("N:\\FRPG2") ?? false)
+        {
+            output.WriteLine("Detected DS2 FFXBND; processing as regular BND4.");
+            ParseMode.GetParser<WBND4>().Unpack(srcPath, file, recursive);
+            return;
+        }
+
         var destDir = GetUnpackDestPath(srcPath, recursive);
         Directory.CreateDirectory(destDir);
 

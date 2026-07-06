@@ -16,7 +16,8 @@ public static class WatcherMode
 {
     private static readonly IErrorService errorService;
 
-    private const int ProcessDelay = 200; // Guard against IOExceptions when other programs aren't done editing (FLVER Editor)
+    private const int ProcessDelay = 1000; // Guard against IOExceptions when other programs aren't done editing (FLVER Editor)
+    private const int ProcessRetries = 5; // Guard against IOExceptions when other programs aren't done editing (FLVER Editor)
     private const int EventRepeatThreshold = 200; // Guard against double change event bug in FileSystemWatcher
 
     private static readonly IOutputService output;
@@ -198,11 +199,18 @@ public static class WatcherMode
     private static void WatchUnpack(object sender, FileSystemEventArgs e)
     {
         var file = _watchedFiles[e.FullPath] as WatchedFileUnpack;
+        var fileInfo = new FileInfo(file!.Path);
         if (DateTime.Now.Subtract(file.LastChange).TotalMilliseconds < EventRepeatThreshold)
             return;
         file.LastChange = DateTime.Now; // In case of exceptions
-        Thread.Sleep(ProcessDelay);
         output.WriteLine($"[{DateTime.Now:T}] Detected change in {e.Name}.".PromptPlusEscape());
+        int waitAttempts = 0;
+        while (WBUtil.IsFileLocked(fileInfo) && waitAttempts < ProcessRetries)
+        {
+            output.WriteLine($"[{DateTime.Now:T}] {e.Name} is locked, waiting (#{waitAttempts + 1})...".PromptPlusEscape());
+            Thread.Sleep(ProcessDelay);
+            waitAttempts++;
+        }
         bool parsed = errorService.Catch(() => {
                 ParseMode.Unpack(e.FullPath, file!.File, file.File.Compression, file.Parser, false);
                 return true;
@@ -215,11 +223,18 @@ public static class WatcherMode
     private static void WatchRepack(object sender, FileSystemEventArgs e)
     {
         var file = _watchedFiles[e.FullPath];
+        var fileInfo = new FileInfo(file!.Path);
         if (DateTime.Now.Subtract(file.LastChange).TotalMilliseconds < EventRepeatThreshold)
             return;
         file.LastChange = DateTime.Now; // In case of exceptions
-        Thread.Sleep(ProcessDelay);
         output.WriteLine($"[{DateTime.Now:T}] Detected change in {e.Name}.".PromptPlusEscape());
+        int waitAttempts = 0;
+        while (WBUtil.IsFileLocked(fileInfo) && waitAttempts < ProcessRetries)
+        {
+            output.WriteLine($"[{DateTime.Now:T}] {e.Name} is locked, waiting (#{waitAttempts + 1})...".PromptPlusEscape());
+            Thread.Sleep(ProcessDelay);
+            waitAttempts++;
+        }
         bool parsed = errorService.Catch(() => {
             ParseMode.Repack(e.FullPath, file.Parser, false);
             return true;

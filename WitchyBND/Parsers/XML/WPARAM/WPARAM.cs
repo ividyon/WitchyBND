@@ -68,21 +68,23 @@ public partial class WPARAM : WXMLParser
 
     public static bool WarnAboutParams()
     {
-        if (Configuration.Active.Expert || Configuration.Active.Passive) return true;
-        if (WarnedAboutParams != null) return WarnedAboutParams.Value;
+        return true;
 
-        List<string> lines = new()
-        {
-            "[RED]Editing PARAMs using WitchyBND is highly discouraged.[/]",
-            @"For PARAM editing, DSMapStudio is the recommended application. It can be downloaded from GitHub.
-If DSMapStudio does not yet support this game or regulation version, an experimental build may be available at ?ServerName? Discord.",
-            "Editing, merging and upgrading of new PARAM entries should all be done in DSMapStudio.",
-            "Merging outdated PARAMs (from a previous regulation) with WitchyBND is guaranteed to cause issues.",
-            "WitchyBND is not capable of upgrading outdated PARAMs to a newer regulation version under ANY circumstances!",
-        };
-        var warned = WBUtil.ObnoxiousWarning(lines);
-        WarnedAboutParams = warned;
-        return warned;
+//         if (Configuration.Active.Expert || Configuration.Active.Passive) return true;
+//         if (WarnedAboutParams != null) return WarnedAboutParams.Value;
+//
+//         List<string> lines = new()
+//         {
+//             "[RED]Editing PARAMs using WitchyBND is highly discouraged.[/]",
+//             @"For PARAM editing, DSMapStudio is the recommended application. It can be downloaded from GitHub.
+// If DSMapStudio does not yet support this game or regulation version, an experimental build may be available at ?ServerName? Discord.",
+//             "Editing, merging and upgrading of new PARAM entries should all be done in DSMapStudio.",
+//             "Merging outdated PARAMs (from a previous regulation) with WitchyBND is guaranteed to cause issues.",
+//             "WitchyBND is not capable of upgrading outdated PARAMs to a newer regulation version under ANY circumstances!",
+//         };
+//         var warned = WBUtil.ObnoxiousWarning(lines);
+//         WarnedAboutParams = warned;
+//         return warned;
     }
 
     private class WPARAMRow
