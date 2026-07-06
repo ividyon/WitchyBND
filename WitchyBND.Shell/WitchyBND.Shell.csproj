@@ -10,7 +10,7 @@
         <RootNamespace>WitchyBND.Shell</RootNamespace>
         <AssemblyName>WitchyBND.Shell</AssemblyName>
         <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-        <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+        <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
         <SignAssembly>true</SignAssembly>
         <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
