@@ -20,6 +20,11 @@
 [Rr]eleases/
 x64/
 x86/
+!third_party/ooz/simde/x86/
+third_party/ooz/simde/x86/*
+!third_party/ooz/simde/x86/mmx.h
+!third_party/ooz/simde/x86/sse.h
+!third_party/ooz/simde/x86/sse2.h
 bld/
 [Bb]in/
 [Oo]bj/
