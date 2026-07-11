@@ -14,13 +14,15 @@ public static class ServiceProvider
         return _provider.GetRequiredService<T>();
     }
 
-    public static IServiceProvider CreateProvider()
+    public static IServiceProvider CreateProvider(bool plainOutput = false)
     {
         var silent = Configuration.Active.Silent;
         var platform = Configuration.Platform;
         IOutputService output;
             if (silent || (platform == OSPlatform.Windows && WBUtil.GetConsoleWindow() == IntPtr.Zero))
                 output = new SilentOutputService();
+            else if (plainOutput)
+                output = new PlainOutputService();
             else if (platform == OSPlatform.Linux)
                 output = new OutputService();
             else
@@ -45,8 +47,8 @@ public static class ServiceProvider
         _provider = provider;
     }
 
-    public static void InitializeProvider()
+    public static void InitializeProvider(bool plainOutput = false)
     {
-        _provider = CreateProvider();
+        _provider = CreateProvider(plainOutput);
     }
 }

@@ -460,6 +460,6 @@ Consider tidying up the unpacked archive folder.");
 
         WarnAboutKrak(bnd.Compression, bnd.Files.Count);
 
-        bnd.Write(destPath);
+        WriteSafely(destPath, bnd.Write);
     }
 }

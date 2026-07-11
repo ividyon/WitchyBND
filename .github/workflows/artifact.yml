@@ -88,7 +88,7 @@ jobs:
         run: dotnet build -r win-x64 -c Release --no-restore WitchyTests # Builds WitchyTests which builds WitchyBND which builds WitchyBND.Shell
 
       - name: Run unit tests
-        run: dotnet test -c Release -r win-x64 --no-build --filter TestCategory!=SkipOnGitHubAction
+        run: dotnet test -c Release -r win-x64 --no-build --filter "TestCategory!=SkipOnGitHubAction&TestCategory!=LocalGameFixture&TestCategory!=NativeMacOoz"
 
       - name: Publish application
         run: dotnet publish -r win-x64 -c Release --no-build WitchyBND
@@ -160,7 +160,7 @@ jobs:
         run: dotnet build -c Release -r linux-x64 --no-restore WitchyTests # Builds WitchyTests which builds WitchyBND which builds WitchyBND.Shell
 
       - name: Run unit tests
-        run: dotnet test -c Release -r linux-x64 --no-build --filter TestCategory!=SkipOnGitHubAction
+        run: dotnet test -c Release -r linux-x64 --no-build --filter "TestCategory!=SkipOnGitHubAction&TestCategory!=LocalGameFixture&TestCategory!=NativeMacOoz"
 
       - name: Publish application
         run: dotnet publish -c Release -r linux-x64 --no-build WitchyBND
@@ -179,9 +179,111 @@ jobs:
           name: 'WitchyBND-SHA${{ github.sha }}-linux-x64'
           path: WitchyBND-${{ needs.get-version.outputs.version }}-linux-x64.zip
 
+  build-oodle-helper:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install MinGW
+        run: sudo apt-get update && sudo apt-get install -y gcc-mingw-w64-x86-64
+
+      - name: Build native Oodle Wine helper
+        run: WitchyOodleHelper.Native/build.sh
+
+      - name: Inspect helper
+        run: file bin/helper/win-x64/WitchyOodleHelper.exe
+
+      - name: Upload helper
+        uses: actions/upload-artifact@v4
+        with:
+          name: oodle-helper-${{ github.sha }}
+          path: bin/helper/win-x64/WitchyOodleHelper.exe
+
+  build-macos:
+    needs: [get-version, build-oodle-helper]
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - rid: osx-arm64
+            platform: ARM64
+            runner: macos-15
+          - rid: osx-x64
+            platform: x64
+            runner: macos-15-intel
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Install zstd
+        run: brew install zstd
+
+      - name: Download native Oodle Wine helper
+        uses: actions/download-artifact@v4
+        with:
+          name: oodle-helper-${{ github.sha }}
+          path: bin/helper/win-x64
+
+      - name: Restore packages
+        run: dotnet restore -r ${{ matrix.rid }} --locked-mode ./WitchyBND.sln --lock-file-path packages.${{ matrix.rid }}.lock.json
+
+      - name: Build
+        run: dotnet build -c Release -r ${{ matrix.rid }} --no-restore WitchyTests -p:PlatformTarget=${{ matrix.platform }} -p:MacZstdLibrary="$(brew --prefix zstd)/lib/libzstd.dylib"
+
+      - name: Run unit tests
+        run: dotnet test -c Release -r ${{ matrix.rid }} --no-build --filter "TestCategory!=SkipOnGitHubAction&TestCategory!=LocalGameFixture"
+
+      - name: Publish application
+        run: dotnet publish -c Release -r ${{ matrix.rid }} --no-build WitchyBND -p:PlatformTarget=${{ matrix.platform }} -p:MacZstdLibrary="$(brew --prefix zstd)/lib/libzstd.dylib"
+
+      - name: Import signing certificate
+        if: github.ref == 'refs/heads/main'
+        env:
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.MACOS_KEYCHAIN_PASSWORD }}
+        run: |
+          echo "$MACOS_CERTIFICATE" | base64 --decode > /tmp/witchybnd-signing.p12
+          security create-keychain -p "$KEYCHAIN_PASSWORD" /tmp/witchybnd-signing.keychain-db
+          security default-keychain -s /tmp/witchybnd-signing.keychain-db
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" /tmp/witchybnd-signing.keychain-db
+          security import /tmp/witchybnd-signing.p12 -k /tmp/witchybnd-signing.keychain-db -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" /tmp/witchybnd-signing.keychain-db
+
+      - name: Sign and notarize application
+        if: github.ref == 'refs/heads/main'
+        env:
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+        run: dev/sign-notarize-macos.sh bin/publish/${{ matrix.rid }} /tmp/WitchyBND-${{ matrix.rid }}-notary.zip
+
+      - name: Inspect application artifact
+        env:
+          REQUIRE_SIGNED: ${{ github.ref == 'refs/heads/main' && '1' || '0' }}
+        run: dev/validate-macos-artifact.sh bin/publish/${{ matrix.rid }}
+
+      - name: Archive release
+        run: tar -czf WitchyBND-${{ needs.get-version.outputs.version }}-${{ matrix.rid }}.tar.gz -C bin/publish/${{ matrix.rid }} .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WitchyBND-SHA${{ github.sha }}-${{ matrix.rid }}
+          path: WitchyBND-${{ needs.get-version.outputs.version }}-${{ matrix.rid }}.tar.gz
+
   release:
     if: github.ref == 'refs/heads/main'
-    needs: [ get-version, build-windows, build-linux ]
+    needs: [ get-version, build-windows, build-linux, build-macos ]
     runs-on: windows-latest
     steps:
       - name: Download artifact
@@ -193,7 +295,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: '${{ needs.get-version.outputs.version }}'
-          artifacts: 'WitchyBND-SHA${{ github.sha }}-win-x64\WitchyBND-${{ needs.get-version.outputs.version }}-win-x64.zip,WitchyBND-SHA${{ github.sha }}-linux-x64\WitchyBND-${{ needs.get-version.outputs.version }}-linux-x64.zip'
+          artifacts: 'WitchyBND-SHA${{ github.sha }}-win-x64\WitchyBND-${{ needs.get-version.outputs.version }}-win-x64.zip,WitchyBND-SHA${{ github.sha }}-linux-x64\WitchyBND-${{ needs.get-version.outputs.version }}-linux-x64.zip,WitchyBND-SHA${{ github.sha }}-osx-arm64\WitchyBND-${{ needs.get-version.outputs.version }}-osx-arm64.tar.gz,WitchyBND-SHA${{ github.sha }}-osx-x64\WitchyBND-${{ needs.get-version.outputs.version }}-osx-x64.tar.gz'
           bodyFile: 'WitchyBND-SHA${{ github.sha }}-NOTES\NOTES.md'
           token: ${{ secrets.GITHUB_TOKEN }}
           draft: true

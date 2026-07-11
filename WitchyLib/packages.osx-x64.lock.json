@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net10.0": {
+      "EastAsianWidthDotNet": {
+        "type": "Direct",
+        "requested": "[1.0.1, )",
+        "resolved": "1.0.1",
+        "contentHash": "vCn17XpsjpqAQvWCa5oUh81d/AVytUcBG9frXoDa+f66iuAiq9T4kDcqQnyp3dbN9cJ0cJA6ML98glpf315haQ=="
+      },
+      "Microsoft.Extensions.FileSystemGlobbing": {
+        "type": "Direct",
+        "requested": "[8.0.0-preview.2.23128.3, )",
+        "resolved": "8.0.0-preview.2.23128.3",
+        "contentHash": "YfBY7fX0WRLa67zWQau09+zh0AQHBb7KmCuNd1OSCQoLGgKcHnu0IXoGm/Ueer0GhHreJFU7Gn3vwZr4YxwciQ=="
+      },
+      "Newtonsoft.Json": {
+        "type": "Direct",
+        "requested": "[13.0.3, )",
+        "resolved": "13.0.3",
+        "contentHash": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ=="
+      },
+      "System.Text.Encodings.Web": {
+        "type": "Direct",
+        "requested": "[10.0.0, )",
+        "resolved": "10.0.0",
+        "contentHash": "257hh1ep1Gqm1Lm0ulxf7vVBVMJuGN6EL4xSWjpi46DffXzm1058IiWsfSC06zSm7SniN+Tb5160UnXsSa8rRg=="
+      },
+      "BouncyCastle.Cryptography": {
+        "type": "Transitive",
+        "resolved": "2.4.0",
+        "contentHash": "SwXsAV3sMvAU/Nn31pbjhWurYSjJ+/giI/0n6tCrYoupEK34iIHCuk3STAd9fx8yudM85KkLSVdn951vTng/vQ=="
+      },
+      "DrSwizzler": {
+        "type": "Transitive",
+        "resolved": "1.1.1",
+        "contentHash": "9zB7kjdI8CVxNXuMYkoNOr0xwIa9KGWQ/+A0ICAF9J1UQ8SbS8DgYebfSfMsr5JsaRM6PNH1JOSowjvdq/6XPA=="
+      },
+      "ZstdNet": {
+        "type": "Transitive",
+        "resolved": "1.4.5",
+        "contentHash": "fi9aP1QY3ZenIMUW1pxdSjku6lYAUjScrwfXSXT1qyKtTdLxOIzeBMe+w/hQm0vMsvQnjcFInByMrIT7AlXUHA=="
+      },
+      "promptplus": {
+        "type": "Project",
+        "dependencies": {
+          "EastAsianWidthDotNet": "[1.0.1, )"
+        }
+      },
+      "soulsformats": {
+        "type": "Project",
+        "dependencies": {
+          "BouncyCastle.Cryptography": "[2.4.0, )",
+          "DrSwizzler": "[1.1.1, )",
+          "ZstdNet": "[1.4.5, )"
+        }
+      },
+      "witchyformats": {
+        "type": "Project",
+        "dependencies": {
+          "SoulsFormats": "[3.0.1, )"
+        }
+      }
+    },
+    "net10.0/osx-x64": {
+      "System.Text.Encodings.Web": {
+        "type": "Direct",
+        "requested": "[10.0.0, )",
+        "resolved": "10.0.0",
+        "contentHash": "257hh1ep1Gqm1Lm0ulxf7vVBVMJuGN6EL4xSWjpi46DffXzm1058IiWsfSC06zSm7SniN+Tb5160UnXsSa8rRg=="
+      }
+    }
+  }
+}

@@ -8,6 +8,25 @@
     <PropertyGroup Condition="$(RuntimeIdentifier) != ''" >
         <NuGetLockFilePath>packages.$(RuntimeIdentifier).lock.json</NuGetLockFilePath>
     </PropertyGroup>
+    <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'osx-arm64'">
+        <MacZstdLibrary Condition="'$(MacZstdLibrary)' == ''">/opt/homebrew/opt/zstd/lib/libzstd.dylib</MacZstdLibrary>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'osx-x64'">
+        <MacZstdLibrary Condition="'$(MacZstdLibrary)' == ''">/usr/local/opt/zstd/lib/libzstd.dylib</MacZstdLibrary>
+    </PropertyGroup>
+    <PropertyGroup Condition="$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('osx-'))">
+        <MacOodleHelperDir Condition="'$(MacOodleHelperDir)' == ''">$(MSBuildThisFileDirectory)bin/helper/win-x64/</MacOodleHelperDir>
+        <MacOodleHelperPath Condition="'$(MacOodleHelperPath)' == ''">$(MacOodleHelperDir)WitchyOodleHelper.exe</MacOodleHelperPath>
+        <MacOozSourceDir Condition="'$(MacOozSourceDir)' == ''">$(MSBuildThisFileDirectory)third_party/ooz</MacOozSourceDir>
+        <MacOozBuildDir Condition="'$(MacOozBuildDir)' == ''">$(MSBuildThisFileDirectory)bin/native/$(RuntimeIdentifier)/ooz</MacOozBuildDir>
+        <MacOozLibrary Condition="'$(MacOozLibrary)' == ''">$(MacOozBuildDir)/libwitchy_ooz.dylib</MacOozLibrary>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'osx-arm64'">
+        <MacArchitecture>arm64</MacArchitecture>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'osx-x64'">
+        <MacArchitecture>x86_64</MacArchitecture>
+    </PropertyGroup>
     <PropertyGroup>
         <SolutionDir Condition="'$(SolutionDir)'==''">
             $(MSBuildThisFileDirectory)

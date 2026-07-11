@@ -66,8 +66,18 @@ public class TestBase
     public void Init()
     {
         Configuration.Active.Location = null;
-        if (Directory.Exists(OSPath.Combine(TestContext.CurrentContext.TestDirectory, "Results")))
-            Directory.Delete(OSPath.Combine(TestContext.CurrentContext.TestDirectory, "Results"), true);
+        string results = OSPath.Combine(TestContext.CurrentContext.TestDirectory, "Results");
+        if (Directory.Exists(results))
+        {
+            try
+            {
+                Directory.Delete(results, true);
+            }
+            catch (DirectoryNotFoundException)
+            {
+                // Another recursive removal already removed a child on this filesystem.
+            }
+        }
     }
 
     protected void SetLocation(string path)

@@ -83,6 +83,6 @@ public class WBND3 : WBinderParser
         var destPath = GetRepackDestPath(srcPath, xml);
 
         Backup(destPath);
-        bnd.Write(destPath);
+        WriteSafely(destPath, bnd.Write);
     }
 }

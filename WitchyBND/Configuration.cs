@@ -32,6 +32,10 @@ public interface IStoredConfig
 
     public bool Flexible { get; set; }
 
+    public string? OodleLibrary { get; set; }
+    public string? WineExecutable { get; set; }
+    public string? OodleHelper { get; set; }
+
     public WBUtil.BackupMethod BackupMethod { get; set; }
 }
 
@@ -53,6 +57,9 @@ public interface ITempConfig
 
     public bool Silent { get; set; }
     public string? Location { get; set; }
+    public string? OodleLibrary { get; set; }
+    public string? WineExecutable { get; set; }
+    public string? OodleHelper { get; set; }
 }
 
 public static class Configuration
@@ -78,6 +85,10 @@ public static class Configuration
         public Dictionary<DeferFormat, DeferConfig> DeferTools { get; set; } = new();
 
         public bool Flexible { get; set; }
+
+        public string? OodleLibrary { get; set; }
+        public string? WineExecutable { get; set; }
+        public string? OodleHelper { get; set; }
 
         public DateTime LastUpdateCheck { get; set; }
 
@@ -105,8 +116,11 @@ public static class Configuration
         public bool TaeFolder { get; set; }
         public Dictionary<DeferFormat, DeferConfig> DeferTools { get; set; }
         public bool Flexible { get; set; }
+        public string? OodleLibrary { get; set; }
+        public string? WineExecutable { get; set; }
+        public string? OodleHelper { get; set; }
 
-        // The following are args-only or otherwise temporary
+        // The following are args-only or temporary.
         public bool UnpackOnly { get; set; }
         public bool RepackOnly { get; set; }
         public bool Passive { get; set; }
@@ -121,8 +135,7 @@ public static class Configuration
     public static StoredConfig Default;
     public static ActiveConfig Active;
 
-    public static string AppDataDirectory =>
-        OSPath.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "WitchyBND");
+    public static string AppDataDirectory { get; }
 
     public static OSPlatform Platform { get; set; }
     public static bool ParamDefaultValues => Active.ParamDefaultValueThreshold > 0f;
@@ -137,12 +150,11 @@ public static class Configuration
     {
         Active = new ActiveConfig();
 
+        Platform = PlatformInfo.Detect();
+        AppDataDirectory = PlatformInfo.ResolveAppDataDirectory(Platform);
+
         if (!Directory.Exists(AppDataDirectory))
             Directory.CreateDirectory(AppDataDirectory);
-
-        Platform = OSPlatform.Windows;
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            Platform = OSPlatform.Linux;
 
         LoadConfiguration();
     }
@@ -254,6 +266,9 @@ public static class Configuration
         Active.TaeFolder = stored.TaeFolder;
         Active.DeferTools = stored.DeferTools;
         Active.Flexible = stored.Flexible;
+        Active.OodleLibrary = stored.OodleLibrary;
+        Active.WineExecutable = stored.WineExecutable;
+        Active.OodleHelper = stored.OodleHelper;
         Active.BackupMethod = stored.BackupMethod;
         Active.GitBackup = stored.GitBackup;
     }
@@ -303,6 +318,25 @@ public class CliOptions
 
     [Option('d', "dcx", HelpText = "Simply decompress DCX files instead of unpacking their content.")]
     public bool Dcx { get; set; }
+
+    [Option("oodle-dll", HelpText = "Path to a user-owned oo2core_*_win64.dll for Oodle operations on macOS.")]
+    public string? OodleLibrary { get; set; }
+
+    [Option("wine", HelpText = "Path to a Wine or CrossOver wine executable.")]
+    public string? WineExecutable { get; set; }
+
+    [Option("oodle-helper", HelpText = "Override the bundled Windows Oodle helper path.")]
+    public string? OodleHelper { get; set; }
+
+    [Option("oodle-native-compression",
+        HelpText = "Opt in to experimental native ooz compression. Decompression still requires Wine.")]
+    public bool NativeOozCompression { get; set; }
+
+    [Option("oodle-native-library", HelpText = "Override the bundled experimental native ooz library path.")]
+    public string? NativeOozLibrary { get; set; }
+
+    [Option("doctor", HelpText = "Report macOS Oodle backend dependency status.")]
+    public bool Doctor { get; set; }
 
     [Option('b', "bnd",
         HelpText = "Perform basic unpacking of BND instead of using special Witchy methods, where present")]

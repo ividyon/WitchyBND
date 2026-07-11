@@ -1,8 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
-        <PlatformTarget>x64</PlatformTarget>
-        <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
+        <PlatformTarget Condition="'$(RuntimeIdentifier)' != 'osx-arm64'">x64</PlatformTarget>
+        <PlatformTarget Condition="'$(RuntimeIdentifier)' == 'osx-arm64'">ARM64</PlatformTarget>
+        <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>
         <OutputType>Exe</OutputType>
         <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
         <IsPackable>false</IsPackable>
@@ -25,6 +26,14 @@
 
     <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
         <PublishDir>..\bin\publish\linux-x64</PublishDir>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'osx-x64'">
+        <PublishDir>..\bin\publish\osx-x64</PublishDir>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'osx-arm64'">
+        <PublishDir>..\bin\publish\osx-arm64</PublishDir>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
@@ -74,7 +83,7 @@
         <Content Include="Assets\**">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
-        <None Include="..\WitchyBND.Shell\bin\Release\**">
+        <None Include="..\WitchyBND.Shell\bin\Release\**" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
@@ -105,6 +114,31 @@
     <Target Name="PublishIncludeAdditionsLinux" AfterTargets="Publish" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
         <Message Importance="high"  Text="Including LIBZSTD in publish folder..." />
         <Copy SourceFiles="Assets\libzstd.so" DestinationFolder="$(PublishDir)" />
+    </Target>
+
+    <Target Name="BuildIncludeAdditionsMacOS" AfterTargets="Build" Condition="$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('osx-'))">
+        <Error Condition="!Exists('$(MacZstdLibrary)')" Text="macOS zstd library not found at $(MacZstdLibrary). Install zstd or set MacZstdLibrary." />
+        <Copy SourceFiles="$(MacZstdLibrary)" DestinationFiles="$(OutDir)libzstd.dylib" />
+        <Copy SourceFiles="$(MacOozLibrary)" DestinationFiles="$(OutDir)libwitchy_ooz.dylib" />
+    </Target>
+
+    <Target Name="BuildNativeOozMacOS" BeforeTargets="Build" Condition="$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('osx-'))">
+        <Exec Command="cmake -S &quot;$(MacOozSourceDir)&quot; -B &quot;$(MacOozBuildDir)&quot; -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=$(MacArchitecture)" />
+        <Exec Command="cmake --build &quot;$(MacOozBuildDir)&quot; --config Release --parallel" />
+        <Error Condition="!Exists('$(MacOozLibrary)')" Text="Native ooz library was not produced at $(MacOozLibrary)." />
+    </Target>
+
+    <Target Name="PublishIncludeAdditionsMacOS" AfterTargets="Publish" Condition="$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('osx-'))">
+        <Error Condition="!Exists('$(MacZstdLibrary)')" Text="macOS zstd library not found at $(MacZstdLibrary). Install zstd or set MacZstdLibrary." />
+        <Copy SourceFiles="$(MacZstdLibrary)" DestinationFiles="$(PublishDir)libzstd.dylib" />
+        <Copy SourceFiles="$(MacOozLibrary)" DestinationFiles="$(PublishDir)libwitchy_ooz.dylib" />
+        <Error Condition="!Exists('$(MacOodleHelperPath)')" Text="Windows Oodle helper not found at $(MacOodleHelperPath). Publish WitchyOodleHelper or set MacOodleHelperPath." />
+        <RemoveDir Directories="$(PublishDir)Tools" />
+        <MakeDir Directories="$(PublishDir)Tools" />
+        <ItemGroup>
+            <MacOodleHelperFiles Include="$(MacOodleHelperDir)**/*" />
+        </ItemGroup>
+        <Copy SourceFiles="@(MacOodleHelperFiles)" DestinationFiles="@(MacOodleHelperFiles->'$(PublishDir)Tools/%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
 
     <Target Name="DeleteSuperfluousFiles" AfterTargets="Publish">

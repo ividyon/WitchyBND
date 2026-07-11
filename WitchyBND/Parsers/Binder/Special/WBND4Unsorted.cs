@@ -75,7 +75,7 @@ public abstract class WBND4Unsorted : WUnsortedBinderParser
 
         WarnAboutKrak(bnd.Compression, bnd.Files.Count);
 
-        bnd.Write(destPath);
+        WriteSafely(destPath, bnd.Write);
     }
 
     public override string GetUnpackDestPath(string srcPath, bool recursive)

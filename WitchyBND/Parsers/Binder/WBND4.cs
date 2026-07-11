@@ -88,6 +88,6 @@ public class WBND4 : WBinderParser
 
         WarnAboutKrak(bnd.Compression, bnd.Files.Count);
 
-        bnd.Write(destPath);
+        WriteSafely(destPath, bnd.Write);
     }
 }

@@ -6,13 +6,14 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Runtime.Versioning;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using CommandLine;
 using CommandLine.Text;
 using NativeFileDialogSharp;
 using SoulsFormats;
+using SoulsOodleLib;
 using WitchyBND.CliModes;
 using WitchyBND.Services;
 using WitchyLib;
@@ -20,7 +21,6 @@ using Oodle = SoulsOodleLib.Oodle;
 
 namespace WitchyBND;
 
-[SupportedOSPlatform("windows")]
 internal static class Program
 {
     public static int ProcessedItems = 0;
@@ -37,6 +37,7 @@ internal static class Program
     [STAThread]
     static int Main(string[] args)
     {
+        int exitCode = 0;
         Console.OutputEncoding = Encoding.UTF8;
         Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
@@ -44,12 +45,17 @@ internal static class Program
         // AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
 
         var parser = new Parser(with => {
-            // with.AutoHelp = false;
-            // with.AutoVersion = false;
+            with.AutoHelp = false;
+            with.AutoVersion = false;
         });
 
         RuntimeHelpers.RunClassConstructor(typeof(Configuration).TypeHandle);
-        ServiceProvider.InitializeProvider();
+        if (CliBootstrap.IsSilentRequested(args))
+        {
+            Configuration.Active.Silent = true;
+            Configuration.Active.Passive = true;
+        }
+        ServiceProvider.InitializeProvider(CliBootstrap.IsPlainOutputRequested(args));
         _errorService = ServiceProvider.GetService<IErrorService>();
         _updateService = ServiceProvider.GetService<IUpdateService>();
         _output = ServiceProvider.GetService<IOutputService>();
@@ -76,6 +82,15 @@ internal static class Program
                         var assembly = Assembly.GetExecutingAssembly();
                         _output.WriteLine($"{assembly.GetName().Name} v{assembly.GetName().Version.ToString()}"
                             .PromptPlusEscape());
+                        return;
+                    }
+
+                    if (opt.Doctor)
+                    {
+                        OodleDoctorReport report = OodleDoctor.Inspect(opt);
+                        foreach (string line in report.Lines)
+                            _output.WriteLine(line);
+                        exitCode = OodleDoctor.ExitCode(report);
                         return;
                     }
 
@@ -115,6 +130,9 @@ internal static class Program
                         TAE.ValidateEventBank = false;
                     }
 
+                    if (Configuration.Platform == OSPlatform.OSX)
+                        OodleBackendConfigurator.ConfigureMacOS(opt);
+
                     _output.DoubleDash($"{assembly.GetName().Name} {assembly.GetName().Version}");
 
                     if (!string.IsNullOrWhiteSpace(opt.Location))
@@ -124,6 +142,9 @@ internal static class Program
                         {
                             if (Configuration.Active.Passive)
                                 throw new Exception("Cannot supply both \"passive\" and \"location\" options.");
+                            if (Configuration.Platform == OSPlatform.OSX)
+                                throw new PlatformNotSupportedException(
+                                    "The folder picker is unavailable in the macOS CLI. Pass an explicit --location path.");
                             _output.WriteLine("Prompting user for target directory...");
 
                             DialogResult dialogResult =
@@ -154,7 +175,7 @@ internal static class Program
                         }
                     }
 
-                    if (!Configuration.Active.Passive)
+                    if (!Configuration.Active.Passive && Configuration.Platform != OSPlatform.OSX)
                         _updateService.CheckForUpdates(args);
                     _updateService.PostUpdateActions();
 
@@ -167,7 +188,8 @@ internal static class Program
                             Stopwatch watch = new Stopwatch();
 
                             watch.Start();
-                            Oodle.GrabOodle(_ => { }, false, true);
+                            if (OodleBackendRegistry.Current == null)
+                                Oodle.GrabOodle(_ => { }, false, true);
                             ParseMode.CliParseMode(opt);
                             watch.Stop();
 
@@ -186,7 +208,8 @@ internal static class Program
                             break;
                         case CliMode.Watch:
                             PrintConfiguration(mode);
-                            Oodle.GrabOodle(_ => { }, false, true);
+                            if (OodleBackendRegistry.Current == null)
+                                Oodle.GrabOodle(_ => { }, false, true);
                             WatcherMode.CliWatcherMode(opt);
                             PrintIssues();
                             PrintFinale();
@@ -208,7 +231,7 @@ internal static class Program
             .WithNotParsed(errors => { DisplayHelp(parserResult, errors); });
         if (_errorService.HasErrors)
             return -1;
-        return 0;
+        return exitCode;
     }
 
     // private static Assembly? CurrentDomainOnAssemblyResolve(object? sender, ResolveEventArgs args)
@@ -299,7 +322,8 @@ internal static class Program
     public static void DisplayHelp<T>(ParserResult<T> result = null, IEnumerable<Error> errors = null)
     {
         var assembly = Assembly.GetExecutingAssembly();
-        var versionInfo = FileVersionInfo.GetVersionInfo(OSPath.Combine(AppContext.BaseDirectory, "WitchyBND.exe"));
+        string executablePath = Environment.ProcessPath ?? assembly.Location;
+        var versionInfo = FileVersionInfo.GetVersionInfo(executablePath);
         var companyName = versionInfo.CompanyName;
 
         if (result == null)

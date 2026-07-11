@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net10.0": {
+      "BouncyCastle.Cryptography": {
+        "type": "Transitive",
+        "resolved": "2.4.0",
+        "contentHash": "SwXsAV3sMvAU/Nn31pbjhWurYSjJ+/giI/0n6tCrYoupEK34iIHCuk3STAd9fx8yudM85KkLSVdn951vTng/vQ=="
+      },
+      "DrSwizzler": {
+        "type": "Transitive",
+        "resolved": "1.1.1",
+        "contentHash": "9zB7kjdI8CVxNXuMYkoNOr0xwIa9KGWQ/+A0ICAF9J1UQ8SbS8DgYebfSfMsr5JsaRM6PNH1JOSowjvdq/6XPA=="
+      },
+      "ZstdNet": {
+        "type": "Transitive",
+        "resolved": "1.4.5",
+        "contentHash": "fi9aP1QY3ZenIMUW1pxdSjku6lYAUjScrwfXSXT1qyKtTdLxOIzeBMe+w/hQm0vMsvQnjcFInByMrIT7AlXUHA=="
+      },
+      "soulsformats": {
+        "type": "Project",
+        "dependencies": {
+          "BouncyCastle.Cryptography": "[2.4.0, )",
+          "DrSwizzler": "[1.1.1, )",
+          "ZstdNet": "[1.4.5, )"
+        }
+      }
+    },
+    "net10.0/osx-x64": {}
+  }
+}

@@ -1,8 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
-        <PlatformTarget>x64</PlatformTarget>
-        <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
+        <PlatformTarget Condition="'$(RuntimeIdentifier)' != 'osx-arm64'">x64</PlatformTarget>
+        <PlatformTarget Condition="'$(RuntimeIdentifier)' == 'osx-arm64'">ARM64</PlatformTarget>
+        <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
 
@@ -45,9 +46,15 @@
       <Folder Include="Samples\PARAMBND3\" />
     </ItemGroup>
 
-    <Target Name="BuildIncludeAdditionsLinux" AfterTargets="AfterBuild">
+    <Target Name="BuildIncludeAdditionsLinux" AfterTargets="AfterBuild" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
         <Message Importance="high" Text="Moving LIBZSTD to build output..." />
         <Move SourceFiles="$(OutDir)/Assets/libzstd.so" DestinationFolder="$(OutDir)" />
+    </Target>
+
+    <Target Name="BuildIncludeAdditionsMacOS" AfterTargets="AfterBuild" Condition="$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('osx-'))">
+        <Error Condition="!Exists('$(MacZstdLibrary)')" Text="macOS zstd library not found at $(MacZstdLibrary). Install zstd or set MacZstdLibrary." />
+        <Copy SourceFiles="$(MacZstdLibrary)" DestinationFiles="$(OutDir)libzstd.dylib" />
+        <Copy SourceFiles="$(MacOozLibrary)" DestinationFiles="$(OutDir)libwitchy_ooz.dylib" />
     </Target>
 
 </Project>

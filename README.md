@@ -14,6 +14,13 @@ The game archives need to be unpacked with [Nuxe](https://github.com/JKAnderson/
 
 WitchyBND should run out-of-the-box on Windows versions newer than Windows 8.
 
+Native command-line builds are also available for macOS arm64 and x86-64. Most
+formats, including the Elden Ring root `regulation.bin`, run natively. Oodle
+Kraken-compressed files require Wine or CrossOver plus a legally obtained,
+user-supplied 64-bit Windows `oo2core_6_win64.dll`, `oo2core_8_win64.dll`, or
+`oo2core_9_win64.dll`. WitchyBND does not include or download Wine, CrossOver,
+Rosetta, or an Oodle DLL.
+
 * For older versions, WitchyBND's context menu integration may require [.NET Framework 4.6](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net46).
 * In case of unexpected issues, or if using Wine on Linux, [.NET Desktop Runtime 10.0](https://aka.ms/dotnet/10.0/windowsdesktop-runtime-win-x64.exe) may be necessary.
 
@@ -30,7 +37,43 @@ After the update, you can re-register the context menu again.
 # How to use
 Information on using Yabber (and therefore Witchy) is spread widely across the community. Visit the [Souls Modding Wiki](http://soulsmodding.com/) or [?ServerName? Discord](http://discord.gg/servername) to get started.
 
-## Right-click context menu integration
+## macOS command line
+
+Extract the matching tarball and invoke `WitchyBND` with one or more files or
+unpacked Witchy directories:
+
+```sh
+./WitchyBND --passive /path/to/regulation.bin
+./WitchyBND --passive /path/to/regulation-bin
+```
+
+For Oodle files, install Wine or CrossOver yourself and pass the Oodle DLL from
+your own game installation:
+
+```sh
+./WitchyBND --doctor --oodle-dll /path/to/oo2core_6_win64.dll
+./WitchyBND --passive --oodle-dll /path/to/oo2core_6_win64.dll file.anibnd.dcx
+```
+
+Repacking Kraken archives can optionally use the bundled experimental native
+compressor instead of Wine:
+
+```sh
+./WitchyBND --passive --oodle-native-compression unpacked-anibnd-folder
+```
+
+The native compressor is opt-in. Compression levels above 4 are clamped to 4
+because the pinned open-source implementation is unstable at its optimal
+levels on large Elden Ring inputs. Open-source decompression remains disabled;
+use Wine and your Oodle DLL to unpack Kraken files.
+
+Use `--wine` for a nonstandard Wine executable and `--oodle-helper` only when
+testing a replacement helper. The bundled helper is a small native Windows
+executable that loads the user-supplied DLL, but contains no proprietary Oodle
+code. Folder pickers,
+Explorer integration, and automatic self-update are unavailable on macOS.
+
+## Right-click context menu integration (Windows)
 The most comfortable integration of WitchyBND is found in the context menu. Witchy does not come with an installer, so you need to briefly launch it and register the context menu with Windows yourself.
 
 * Launch WitchyBND.exe in the Witchy folder.

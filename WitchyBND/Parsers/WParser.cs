@@ -299,6 +299,25 @@ public abstract class WFileParser
         WBUtil.Backup(path, Configuration.Active.BackupMethod);
     }
 
+    public static void WriteSafely(string destinationPath, Action<string> write)
+    {
+        string fullDestination = OSPath.GetFullPath(destinationPath);
+        string directory = OSPath.GetDirectoryName(fullDestination)!;
+        string temporaryPath = OSPath.Combine(
+            directory,
+            $".witchy-{Guid.NewGuid():N}-{OSPath.GetFileName(fullDestination)}");
+        try
+        {
+            write(temporaryPath);
+            File.Move(temporaryPath, fullDestination, true);
+        }
+        finally
+        {
+            if (File.Exists(temporaryPath))
+                File.Delete(temporaryPath);
+        }
+    }
+
     private static bool IsRead<TFormat>(string path, out ISoulsFile? file) where TFormat : SoulsFile<TFormat>, new()
     {
         if (SoulsFile<TFormat>.IsRead(path, out TFormat format))
@@ -472,6 +491,6 @@ public abstract class WSerializedXMLParser : WXMLParser
 
         string outPath = GetRepackDestPath(srcPath, xml);
         Backup(outPath);
-        file.Write(outPath);
+        WriteSafely(outPath, file.Write);
     }
 }
