@@ -85,6 +85,30 @@ public class PlatformInfoTests
     }
 
     [Test]
+    public void GameOverrideSeedsHeadlessSourceDirectory()
+    {
+        string root = Path.Combine(Path.GetTempPath(), $"witchy-game-override-{Guid.NewGuid():N}");
+        string sourceDirectory = Path.Combine(root, "chr");
+        string source = Path.Combine(sourceDirectory, "c0000.anibnd.dcx");
+        Directory.CreateDirectory(sourceDirectory);
+        File.WriteAllBytes(source, []);
+        try
+        {
+            var output = new Services.TestOutputService();
+            var gameService = new GameService(new ErrorService(output), output);
+            var options = new CliOptions { Game = WitchyLib.WBUtil.GameType.ER, Paths = [source] };
+
+            CliBootstrap.ApplyGameOverride(options, gameService);
+
+            Assert.That(gameService.KnownGamePaths[sourceDirectory], Is.EqualTo(WitchyLib.WBUtil.GameType.ER));
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Test]
     public void ServiceProviderUsesPlainOutputWithoutPromptPlus()
     {
         bool previousSilent = Configuration.Active.Silent;

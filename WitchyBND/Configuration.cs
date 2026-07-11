@@ -319,6 +319,10 @@ public class CliOptions
     [Option('d', "dcx", HelpText = "Simply decompress DCX files instead of unpacking their content.")]
     public bool Dcx { get; set; }
 
+    [Option("game",
+        HelpText = "Override automatic game detection for headless processing (for example: ER).")]
+    public WBUtil.GameType? Game { get; set; }
+
     [Option("oodle-dll", HelpText = "Path to a user-owned oo2core_*_win64.dll for Oodle operations on macOS.")]
     public string? OodleLibrary { get; set; }
 

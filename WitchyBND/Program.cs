@@ -99,6 +99,8 @@ internal static class Program
                     if (!opt.Paths.Any())
                         mode = CliMode.Config;
 
+                    CliBootstrap.ApplyGameOverride(opt, ServiceProvider.GetService<IGameService>());
+
                     if (mode != CliMode.Config)
                     {
                         if (opt.Dcx)

@@ -47,6 +47,13 @@ unpacked Witchy directories:
 ./WitchyBND --passive /path/to/regulation-bin
 ```
 
+When processing extracted files outside a detected game or mod-project root,
+pass the game explicitly. This keeps recursive TAE processing noninteractive:
+
+```sh
+./WitchyBND --passive --recursive --game ER /path/to/c0000.anibnd.dcx
+```
+
 For Oodle files, install Wine or CrossOver yourself and pass the Oodle DLL from
 your own game installation:
 
