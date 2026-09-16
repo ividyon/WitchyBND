@@ -141,9 +141,14 @@ public static class Configuration
             Directory.CreateDirectory(AppDataDirectory);
 
         Platform = OSPlatform.Windows;
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            Platform = OSPlatform.OSX;
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             Platform = OSPlatform.Linux;
-
+#if MACOS
+        WBUtil.ExeLocation = Path.TrimEndingDirectorySeparator(Foundation.NSBundle.MainBundle.ResourcePath);
+#endif
         LoadConfiguration();
     }
 

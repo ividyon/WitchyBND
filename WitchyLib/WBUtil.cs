@@ -557,7 +557,7 @@ public static class WBUtil
 
     static WBUtil()
     {
-        ExeLocation = Path.GetDirectoryName(AppContext.BaseDirectory);
+        ExeLocation = Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory);
         LatestKnownRegulationVersions = new();
     }
 }

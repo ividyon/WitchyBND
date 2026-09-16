@@ -1,8 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <PlatformTarget>x64</PlatformTarget>
-        <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
+        <TargetFrameworks Condition="$(BuildMac) == 'true' or '$(BuildingInsideVisualStudio)' == 'true'">net10.0;net10.0-macos</TargetFrameworks>
+        <TargetFrameworks Condition="'$(BuildMac)' != 'true' and '$(BuildingInsideVisualStudio)' != 'true'">net10.0</TargetFrameworks>
+        <IsMac>$(TargetFramework.Equals('net10.0-macos'))</IsMac>
+        <PlatformTargets>arm64;x64</PlatformTargets>
+        <RuntimeIdentifiers Condition="!$(IsMac)">win-x64;linux-x64</RuntimeIdentifiers>
+        <RuntimeIdentifiers Condition="$(IsMac)">osx-arm64;osx-x64</RuntimeIdentifiers>
         <OutputType>Exe</OutputType>
         <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
         <IsPackable>false</IsPackable>
@@ -10,30 +13,32 @@
         <Title>WitchyBND</Title>
         <Nullable>enable</Nullable>
         <PublishTrimmed>True</PublishTrimmed>
-        <PublishReadyToRun>true</PublishReadyToRun>
+        <!-- net11.0 might have R2R fixed -->
+        <PublishReadyToRun Condition="'$(RuntimeIdentifier)' != '' or '$(TargetFramework)' != 'net10.0-macos'">true</PublishReadyToRun>
         <TrimMode>partial</TrimMode>
         <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
         <DeleteExistingFiles>true</DeleteExistingFiles>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
         <CETCompat>false</CETCompat>
+        <IsMacEnabled>$([MSBuild]::IsOSPlatform('OSX'))</IsMacEnabled>
+        <AppManifestDetectionEnabled>$([MSBuild]::IsOSPlatform('OSX'))</AppManifestDetectionEnabled>
+        <ApplicationId>com.ividyon.WitchyBND</ApplicationId>
+        <SupportedOSPlatformVersion Condition="$(IsMac)">14.0</SupportedOSPlatformVersion>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">
-        <PublishDir>..\bin\publish\win-x64</PublishDir>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
-        <PublishDir>..\bin\publish\linux-x64</PublishDir>
+    <PropertyGroup>
+        <PublishDir>..\bin\publish\$(RuntimeIdentifier)</PublishDir>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
         <OutputPath>..\bin\Debug\</OutputPath>
+        <SelfContained>$(IsMac)</SelfContained>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
         <OutputPath>..\bin\Release\</OutputPath>
         <DebugType>embedded</DebugType>
-        <PublishSingleFile>True</PublishSingleFile>
+        <PublishSingleFile>!$(IsMac)</PublishSingleFile>
         <SelfContained>true</SelfContained>
     </PropertyGroup>
     <PropertyGroup>
@@ -71,10 +76,10 @@
         <Content Include="appsettings.json">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
-        <Content Include="Assets\**">
+        <Content Include="Assets\**" Exclude="Assets\*.icns;Assets\*.dylib;Assets\*.so">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
-        <None Include="..\WitchyBND.Shell\bin\Release\**">
+        <None Include="..\WitchyBND.Shell\bin\Release\**" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
@@ -92,6 +97,22 @@
         </MSBuild>
     </Target>
 
+    <ItemGroup Condition="$(IsMac)">
+        <BundleResource Remove="nfd.dll" />
+        <BundleResource Remove="nfd_x86.dll" />
+        <BundleResource Remove="Assets\icon.ico" />
+        <BundleResource Include="Assets\icon.icns" Link="icon.icns" />
+        <NativeReference Include="Assets\libzstd.1.4.5.dylib" Kind="Dynamic" RelativePath="Contents/MonoBundle/libzstd.dylib" />
+        <NativeReference Include="Assets\liboo2coremac64*.2.6.*.dylib" Kind="Dynamic" RelativePath="Contents/MonoBundle/liboo2coremac64.2.6.dylib" />
+        <NativeReference Include="Assets\liboo2coremac64*.2.8.*.dylib" Kind="Dynamic" RelativePath="Contents/MonoBundle/liboo2coremac64.2.8.dylib" />
+        <NativeReference Include="Assets\liboo2coremac64*.2.9.*.dylib" Kind="Dynamic" RelativePath="Contents/MonoBundle/liboo2coremac64.2.9.dylib" />
+    </ItemGroup>
+
+    <Target Name="BuildIncludeAdditionsMacOS" AfterTargets="Build" Condition="'!$(IsMac)' and ('$(RuntimeIdentifier)' == 'osx-arm64' or '$(RuntimeIdentifier)' == 'osx-x64')">
+        <Message Importance="high" Text="Building additional MacOS projects..." />
+        <Copy SourceFiles="Assets\libzstd.1.4.5.dylib" DestinationFiles="$(OutDir)/libzstd.dylib" />
+    </Target>
+
     <Target Name="BuildIncludeAdditionsLinux" AfterTargets="Build" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
         <Message Importance="high" Text="Building additional Linux projects..." />
         <Copy SourceFiles="Assets\libzstd.so" DestinationFolder="$(OutDir)" />
@@ -102,6 +123,11 @@
         <Copy SourceFiles="..\WitchyBND.Shell\bin\$(Configuration)\WitchyBND.Shell.dll;..\WitchyBND.Shell\bin\$(Configuration)\SharpShell.dll;..\bin\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\$(PlatformTarget)\libzstd.dll" DestinationFolder="$(PublishDir)" />
     </Target>
 
+    <Target Name="PublishIncludeAdditionsMacOS" AfterTargets="Publish" Condition="'!$(IsMac)' and ('$(RuntimeIdentifier)' == 'osx-arm64' or '$(RuntimeIdentifier)' == 'osx-x64')">
+        <Message Importance="high"  Text="Including LIBZSTD in publish folder..." />
+        <Copy SourceFiles="Assets\libzstd.1.4.5.dylib" DestinationFiles="$(PublishDir)/libzstd.dylib" />
+    </Target>
+
     <Target Name="PublishIncludeAdditionsLinux" AfterTargets="Publish" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
         <Message Importance="high"  Text="Including LIBZSTD in publish folder..." />
         <Copy SourceFiles="Assets\libzstd.so" DestinationFolder="$(PublishDir)" />
@@ -109,16 +135,16 @@
 
     <Target Name="DeleteSuperfluousFiles" AfterTargets="Publish">
         <Message Importance="high"  Text="Removing superfluous files..." />
-        <Delete Files="$(PublishDir)nfd.lib;$(PublishDir)nfd.pdb;$(PublishDir)SharpShell.xml;$(PublishDir)Assets/libzstd.so;$(PublishDir)PromptPlus.pdb;$(PublishDir)PromptPlus.xml" />
+        <Delete Files="$(PublishDir)nfd.lib;$(PublishDir)nfd.pdb;$(PublishDir)SharpShell.xml;$(PublishDir)PromptPlus.pdb;$(PublishDir)PromptPlus.xml" />
         <RemoveDir Directories="$(PublishDir)x64;$(PublishDir)x86" />
     </Target>
 
-    <Target Name="ZipParamdex" AfterTargets="Publish">
+    <Target Name="ZipParamdex" AfterTargets="Publish" Condition="!$(IsMac)">
         <Message Importance="high" Text="Zipping Paramdex..." />
         <ZipDirectory DestinationFile="$(PublishDir)Assets\Paramdex.zip" SourceDirectory="$(PublishDir)Assets\Paramdex" Overwrite="true" />
     </Target>
 
-    <Target Name="DeleteParamdex" DependsOnTargets="ZipParamdex" AfterTargets="ZipParamdex">
+    <Target Name="DeleteParamdex" DependsOnTargets="ZipParamdex" AfterTargets="ZipParamdex" Condition="!$(IsMac)">
         <Message Text="Deleting Paramdex loose files..." />
         <RemoveDir Directories="$(PublishDir)Assets\Paramdex" />
     </Target>

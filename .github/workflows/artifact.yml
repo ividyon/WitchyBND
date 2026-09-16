@@ -91,7 +91,7 @@ jobs:
         run: dotnet test -c Release -r win-x64 --no-build --filter TestCategory!=SkipOnGitHubAction
 
       - name: Publish application
-        run: dotnet publish -r win-x64 -c Release --no-build WitchyBND
+        run: dotnet publish -r win-x64 -c Release -f net10.0 --no-build WitchyBND
 
       - name: Archive release
         uses: thedoctor0/zip-release@main
@@ -163,7 +163,7 @@ jobs:
         run: dotnet test -c Release -r linux-x64 --no-build --filter TestCategory!=SkipOnGitHubAction
 
       - name: Publish application
-        run: dotnet publish -c Release -r linux-x64 --no-build WitchyBND
+        run: dotnet publish -c Release -r linux-x64 -f net10.0 --no-build WitchyBND
 
       - name: Archive release
         uses: thedoctor0/zip-release@main
@@ -178,10 +178,127 @@ jobs:
         with:
           name: 'WitchyBND-SHA${{ github.sha }}-linux-x64'
           path: WitchyBND-${{ needs.get-version.outputs.version }}-linux-x64.zip
+          
+  build-macos:
+    needs: [ get-version ]
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+
+      - name: Dotnet cache
+        id: cache-dotnet-core
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/.dotnet
+          key: ${{ runner.os }}-dotnet-${{ env.DOTNET_VERSION }}
+
+      - name: NuGet cache
+        id: cache-nuget
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ github.workspace }}/.nuget/packages
+            ${{ github.workspace }}/packages
+            ${{ github.workspace }}/PromptPlus/**/obj
+            ${{ github.workspace }}/WitchyBND/**/obj
+            ${{ github.workspace }}/WitchyBND.Shell/**/obj
+            ${{ github.workspace }}/WitchyFormats/**/obj
+            ${{ github.workspace }}/WitchyLib/**/obj
+            ${{ github.workspace }}/WitchyTests/**/obj
+            ${{ github.workspace }}/SoulsFormats/**/obj
+            ${{ github.workspace }}/SoulsOodleLib/**/obj
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.osx-universal.lock.json') }}
+
+      - name: Setup XCode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: 26.1
+
+      - name: Setup .NET (x64)
+        if: ${{ steps.cache-dotnet-core.outputs.cache-hit != 'true' }}
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+          architecture: x64
+          
+      - name: Record install location
+        run: |
+          echo "DOTNET_ROOT_X64=$DOTNET_ROOT" >> "$GITHUB_ENV"
+
+      - name: Setup .NET (arm64)
+        if: ${{ steps.cache-dotnet-core.outputs.cache-hit != 'true' }}
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+          architecture: arm64
+          
+      - name: Install macOS workload
+        if: ${{ steps.cache-dotnet-core.outputs.cache-hit != 'true' }}
+        run: dotnet workload install macos --version ${{ env.DOTNET_VERSION }}
+
+      - name: Restore packages
+        if: ${{ steps.cache-nuget.outputs.cache-hit != 'true' }}
+        run: dotnet restore --locked-mode ./WitchyBND.sln --lock-file-path packages.osx-universal.lock.json /p:BuildMac=true
+
+      - name: Build
+        run: |
+          dotnet build -c Release -r osx-arm64 --no-restore WitchyTests
+          dotnet build -c Release -r osx-x64 --no-restore WitchyTests
+
+      - name: Run unit tests
+        run: |
+          dotnet test -c Release -r osx-arm64 --no-build --filter TestCategory!=SkipOnGitHubAction
+          dotnet test -c Release -r osx-x64 --no-build --filter TestCategory!=SkipOnGitHubAction
+
+      - name: Publish universal package
+        run: dotnet publish -c Release -f net10.0-macos --no-restore WitchyBND
+
+      - name: Publish application
+        run: |
+          dotnet publish -c Release -r osx-arm64 -f net10.0 --no-build WitchyBND
+          dotnet publish -c Release -r osx-x64 -f net10.0 --no-build WitchyBND
+
+      - name: Archive release (arm64)
+        uses: thedoctor0/zip-release@main
+        with:
+          type: 'zip'
+          filename: '../../../WitchyBND-${{ needs.get-version.outputs.version }}-osx-arm64.zip'
+          directory: './bin/publish/osx-arm64'
+          path: '.'
+
+      - name: Archive release (x64)
+        uses: thedoctor0/zip-release@main
+        with:
+          type: 'zip'
+          filename: '../../../WitchyBND-${{ needs.get-version.outputs.version }}-osx-x64.zip'
+          directory: './bin/publish/osx-x64'
+          path: '.'
+
+      - name: Upload artifacts (arm64)
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'WitchyBND-SHA${{ github.sha }}-osx-arm64'
+          path: WitchyBND-${{ needs.get-version.outputs.version }}-osx-arm64.zip
+          
+      - name: Upload artifacts (x64)
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'WitchyBND-SHA${{ github.sha }}-osx-x64'
+          path: WitchyBND-${{ needs.get-version.outputs.version }}-osx-x64.zip
+          
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: 'WitchyBND-SHA${{ github.sha }}-osx-universal'
+          path: ./bin/publish/WitchyBND-${{ needs.get-version.outputs.version }}.pkg
+          archive: false
 
   release:
     if: github.ref == 'refs/heads/main'
-    needs: [ get-version, build-windows, build-linux ]
+    needs: [ get-version, build-windows, build-linux, build-macos ]
     runs-on: windows-latest
     steps:
       - name: Download artifact
@@ -189,11 +306,16 @@ jobs:
         with:
           pattern: WitchyBND-SHA*
 
+      - name: Download package artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: WitchyBND-${{ needs.get-version.outputs.version }}.pkg
+
       - name: Upload Release
         uses: ncipollo/release-action@v1
         with:
           tag: '${{ needs.get-version.outputs.version }}'
-          artifacts: 'WitchyBND-SHA${{ github.sha }}-win-x64\WitchyBND-${{ needs.get-version.outputs.version }}-win-x64.zip,WitchyBND-SHA${{ github.sha }}-linux-x64\WitchyBND-${{ needs.get-version.outputs.version }}-linux-x64.zip'
+          artifacts: 'WitchyBND-SHA${{ github.sha }}-win-x64\WitchyBND-${{ needs.get-version.outputs.version }}-win-x64.zip,WitchyBND-SHA${{ github.sha }}-linux-x64\WitchyBND-${{ needs.get-version.outputs.version }}-linux-x64.zip,WitchyBND-SHA${{ github.sha }}-osx-arm64\WitchyBND-${{ needs.get-version.outputs.version }}-osx-arm64.zip,WitchyBND-SHA${{ github.sha }}-osx-x64\WitchyBND-${{ needs.get-version.outputs.version }}-osx-x64.zip,WitchyBND-${{ needs.get-version.outputs.version }}.pkg'
           bodyFile: 'WitchyBND-SHA${{ github.sha }}-NOTES\NOTES.md'
           token: ${{ secrets.GITHUB_TOKEN }}
           draft: true

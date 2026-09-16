@@ -86,12 +86,12 @@ public class TestBase
     protected static IEnumerable<string> GetSamples(string sampleDir, string pattern = "*")
     {
         return Directory.GetFiles(OSPath.Combine(TestContext.CurrentContext.TestDirectory, "Samples", sampleDir), pattern,
-            SearchOption.AllDirectories);
+            SearchOption.AllDirectories).Where(s => OSPath.GetFileName(s) != ".DS_Store");
     }
     protected static IEnumerable<string> GetAllSamples(string pattern = "*")
     {
         return Directory.GetFiles(OSPath.Combine(TestContext.CurrentContext.TestDirectory, "Samples"), pattern,
-            SearchOption.AllDirectories);
+            SearchOption.AllDirectories).Where(s => OSPath.GetFileName(s) != ".DS_Store");
     }
 
     protected static string GetCopiedPath(string path)

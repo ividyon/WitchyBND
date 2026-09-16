@@ -3,6 +3,8 @@
         <Authors>ividyon</Authors>
         <Company>ividyon</Company>
         <Version>3.0.1.0</Version>
+        <ApplicationVersion>$(Version)</ApplicationVersion>
+        <ApplicationDisplayVersion>$(Version)</ApplicationDisplayVersion>
         <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=./</PathMap>
     </PropertyGroup>
     <PropertyGroup Condition="$(RuntimeIdentifier) != ''" >

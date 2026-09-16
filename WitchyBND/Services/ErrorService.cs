@@ -186,6 +186,18 @@ Process error output:
                     $"ERROR: Oodle DLL not found. Please copy oo2core_9_win64.dll, oo2core_8_win64.dll or oo2core_6_win64.dll from the game directory to WitchyBND's directory.\n\nOriginal exception:\n\n{e}",
                     WitchyErrorType.NoOodle));
             }
+            catch (Exception e) when (OperatingSystem.IsMacOS() && !Configuration.IsTest && !Configuration.IsDebug &&
+                          (e.Message.Contains("oo2core") ||
+                           e.Message.Contains("oodle") || e is NoOodleFoundException))
+            {
+                error = true;
+                if (Configuration.IsTest)
+                    throw;
+
+                RegisterError(new WitchyError(
+                    $"ERROR: Oodle library not found. Please provide liboo2coremac64.2.9.dylib via the 'Set up Oodle' menu.\n\nOriginal exception:\n\n{e}",
+                    WitchyErrorType.NoOodle));
+            }
             catch (Exception e) when (!OperatingSystem.IsWindows() && !Configuration.IsTest && !Configuration.IsDebug &&
                                       (e.Message.Contains("oo2core") ||
                                        e.Message.Contains("oodle") || e is NoOodleFoundException))

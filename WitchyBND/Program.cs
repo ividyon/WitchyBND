@@ -17,10 +17,18 @@ using WitchyBND.CliModes;
 using WitchyBND.Services;
 using WitchyLib;
 using Oodle = SoulsOodleLib.Oodle;
+#if MACOS
+using AppKit;
+using Foundation;
+#endif
 
 namespace WitchyBND;
 
+#if MACOS
+[SupportedOSPlatform("macos14.0")]
+#else
 [SupportedOSPlatform("windows")]
+#endif
 internal static class Program
 {
     public static int ProcessedItems = 0;
@@ -33,27 +41,126 @@ internal static class Program
     static Program()
     {
     }
+#if MACOS
+    internal static NSRunningApplication terminal;
+    internal static bool modal = false;
+    internal static bool relaunch = false;
+    internal static int runningServices = 0;
+    internal static int totalServices = 0;
+    internal static int handledServices => totalServices - runningServices;
 
+    private class AppDelegate: NSApplicationDelegate
+    {
+        static readonly WitchyNSServiceProvider provider = new();
+
+        readonly string[] args;
+
+        public AppDelegate(string[] args) => this.args = args;
+
+        public override void DidFinishLaunching(NSNotification notification)
+        {
+            NSApplication.SharedApplication.ServicesProvider = provider;
+            terminal = NSWorkspace.SharedWorkspace.FrontmostApplication;
+            new Thread(() => {
+                try
+                {
+                    if (Environment.GetEnvironmentVariable("MACOS_RELAUNCH_CLI") == "1")
+                    {
+                        NSRunLoop.Current.RunUntil(NSDate.DistantFuture);
+                        if (notification.UserInfo.ContainsKey(NSApplication.LaunchIsDefaultLaunchKey) &&
+                            !((NSNumber)notification.UserInfo[NSApplication.LaunchIsDefaultLaunchKey]!).BoolValue)
+                            SpinWait.SpinUntil(() => totalServices > 0 && runningServices == 0, 300000);
+                        else
+                            Relaunch(args); // don't relaunch on service launches, let the service handle it
+                    }
+                    else
+                    {
+                        OutputService.InitializePromptPlus();
+                        Witchy(args);
+                    }
+                }
+                catch (Exception ex) { Console.Error.WriteLine(ex); }
+                finally
+                {
+                    NSApplication.SharedApplication.BeginInvokeOnMainThread(() => {
+                        NSApplication.SharedApplication.Stop(this);
+                        NSApplication.SharedApplication.PostEvent(
+                            NSEvent.OtherEvent(NSEventType.ApplicationDefined, CoreGraphics.CGPoint.Empty, 0, 0, 0, null, 0, 0, 0), true);
+                    });
+                }
+            }) { Name = "Witchy", IsBackground = true }.Start();
+        }
+
+        public override void DidBecomeActive(NSNotification notification)
+        {
+            if (!modal && runningServices == 0) terminal.Activate(NSApplicationActivationOptions.Default);
+        }
+    }
+
+    public static void Relaunch(string[] args)
+    {
+        if (args.Length > 0)
+        {
+            // use /usr/bin/open to run app in a visible terminal
+            // osascript could but requires automation permissions
+            var launcher = Path.Combine(Path.GetTempPath(), "WitchyBND");
+            var beforeLaunch = Process.GetProcessesByName("WitchyBND").Length;
+            using var sw = new StreamWriter(launcher, new FileStreamOptions()
+            {
+                Access = FileAccess.Write,
+                Mode = FileMode.Create,
+                Options = FileOptions.DeleteOnClose,
+                UnixCreateMode = UnixFileMode.UserExecute | UnixFileMode.UserRead
+            });
+            // open --args only works when opening .app bundles, which doesn't show a terminal
+            sw.WriteLine("#!/bin/sh");
+            sw.WriteLine($"{NSBundle.MainBundle.ExecutablePath!} '{string.Join("' '", args)}'");
+            sw.Flush();
+            Process.Start("/usr/bin/open", launcher).WaitForExit();
+            SpinWait.SpinUntil(() => beforeLaunch < Process.GetProcessesByName("WitchyBND").Length, 3000);
+        }
+        else
+            Process.Start("/usr/bin/open", $"\"{NSBundle.MainBundle.ExecutablePath!}\"");
+        Interlocked.Decrement(ref runningServices);
+    }
+#endif
     [STAThread]
     static int Main(string[] args)
     {
         Console.OutputEncoding = Encoding.UTF8;
         Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+        RuntimeHelpers.RunClassConstructor(typeof(WBUtil).TypeHandle);
+        RuntimeHelpers.RunClassConstructor(typeof(Configuration).TypeHandle);
+        
+        ServiceProvider.InitializeProvider();
+        _errorService = ServiceProvider.GetService<IErrorService>();
+        _updateService = ServiceProvider.GetService<IUpdateService>();
+        _output = ServiceProvider.GetService<IOutputService>();
+#if MACOS
+        NSApplication.Init();
+        NSApplication.SharedApplication.ActivationPolicy = Environment.GetEnvironmentVariable("MACOS_RELAUNCH_CLI") == "1"
+            ? NSApplicationActivationPolicy.Accessory : NSApplicationActivationPolicy.Regular;
+        NSApplication.SharedApplication.Delegate = new AppDelegate(args);
+        try { NSApplication.SharedApplication.Run(); }
+        catch { if (_errorService.HasErrors) return -1; }
+        if (relaunch)
+            Relaunch(args);
+#else
+        Witchy(args);
+#endif
+        return _errorService.HasErrors ? -1 : 0;
+    }
 
-        Assembly assembly = Assembly.GetExecutingAssembly();
+    public static void Witchy(string[] args)
+    {
         // AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
+        Assembly assembly = Assembly.GetExecutingAssembly();
 
         var parser = new Parser(with => {
             // with.AutoHelp = false;
             // with.AutoVersion = false;
         });
-
-        RuntimeHelpers.RunClassConstructor(typeof(Configuration).TypeHandle);
-        ServiceProvider.InitializeProvider();
-        _errorService = ServiceProvider.GetService<IErrorService>();
-        _updateService = ServiceProvider.GetService<IUpdateService>();
-        _output = ServiceProvider.GetService<IOutputService>();
-
+        
         var parserResult = parser.ParseArguments<CliOptions>(args);
         parserResult.WithParsed(opt => {
                 try
@@ -206,9 +313,9 @@ internal static class Program
                 }
             })
             .WithNotParsed(errors => { DisplayHelp(parserResult, errors); });
-        if (_errorService.HasErrors)
-            return -1;
-        return 0;
+#if MACOS
+        Interlocked.Decrement(ref runningServices);
+#endif
     }
 
     // private static Assembly? CurrentDomainOnAssemblyResolve(object? sender, ResolveEventArgs args)
@@ -299,7 +406,11 @@ internal static class Program
     public static void DisplayHelp<T>(ParserResult<T> result = null, IEnumerable<Error> errors = null)
     {
         var assembly = Assembly.GetExecutingAssembly();
-        var versionInfo = FileVersionInfo.GetVersionInfo(OSPath.Combine(AppContext.BaseDirectory, "WitchyBND.exe"));
+#if MACOS
+        var versionInfo = FileVersionInfo.GetVersionInfo(NSBundle.MainBundle.ExecutablePath!);
+#else
+        var versionInfo = FileVersionInfo.GetVersionInfo(OSPath.Combine(AppContext.BaseDirectory, "WitchyBND"+(OperatingSystem.IsWindows() ? ".exe" : "")));
+#endif
         var companyName = versionInfo.CompanyName;
 
         if (result == null)

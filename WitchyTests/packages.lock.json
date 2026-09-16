@@ -263,7 +263,7 @@
         "dependencies": {
           "BouncyCastle.Cryptography": "[2.4.0, )",
           "NativeFileDialogSharp": "[0.6.0-alpha, )",
-          "SoulsFormats": "[2.17.0, )"
+          "SoulsFormats": "[3.0.1, )"
         }
       },
       "witchybnd": {
@@ -275,18 +275,18 @@
           "Microsoft.Extensions.DependencyInjection": "[8.0.0, )",
           "Microsoft.Extensions.Hosting.Abstractions": "[8.0.0, )",
           "NativeFileDialogSharp": "[0.6.0-alpha, )",
-          "PromptPlus": "[5.0.1, )",
-          "SoulsFormats": "[2.17.0, )",
-          "SoulsOodleLib": "[2.17.0, )",
-          "WitchyFormats": "[2.17.0, )",
-          "WitchyLib": "[2.17.0, )",
+          "PromptPlus": "[5.0.8, )",
+          "SoulsFormats": "[3.0.1, )",
+          "SoulsOodleLib": "[3.0.1, )",
+          "WitchyFormats": "[3.0.1, )",
+          "WitchyLib": "[3.0.1, )",
           "securifybv.ShellLink": "[0.1.0, )"
         }
       },
       "witchyformats": {
         "type": "Project",
         "dependencies": {
-          "SoulsFormats": "[2.17.0, )"
+          "SoulsFormats": "[3.0.1, )"
         }
       },
       "witchylib": {
@@ -295,12 +295,26 @@
           "EastAsianWidthDotNet": "[1.0.1, )",
           "Microsoft.Extensions.FileSystemGlobbing": "[8.0.0-preview.2.23128.3, )",
           "Newtonsoft.Json": "[13.0.3, )",
-          "PromptPlus": "[5.0.1, )",
-          "WitchyFormats": "[2.17.0, )"
+          "PromptPlus": "[5.0.8, )",
+          "WitchyFormats": "[3.0.1, )"
         }
       }
     },
     "net10.0/linux-x64": {
+      "NativeFileDialogSharp": {
+        "type": "Transitive",
+        "resolved": "0.6.0-alpha",
+        "contentHash": "2JvfxgAMWEGA9rIuYw+/vcj8eisBJbb4fzviJU47urU72z7m6BW2SykaMRtQorr06Xh3ZxG+gykiqV3D4crfLA=="
+      }
+    },
+    "net10.0/osx-arm64": {
+      "NativeFileDialogSharp": {
+        "type": "Transitive",
+        "resolved": "0.6.0-alpha",
+        "contentHash": "2JvfxgAMWEGA9rIuYw+/vcj8eisBJbb4fzviJU47urU72z7m6BW2SykaMRtQorr06Xh3ZxG+gykiqV3D4crfLA=="
+      }
+    },
+    "net10.0/osx-x64": {
       "NativeFileDialogSharp": {
         "type": "Transitive",
         "resolved": "0.6.0-alpha",

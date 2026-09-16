@@ -43,6 +43,13 @@ public class OutputService : IOutputService
 {
     public OutputService()
     {
+        // needs deferred until relaunch, as default launch redirects stdin/stdout
+        if (!OperatingSystem.IsMacOS())
+            InitializePromptPlus();
+    }
+
+    public static void InitializePromptPlus()
+    {
         PromptPlus.Config.DefaultCulture = new CultureInfo("en-us");
         if (!OperatingSystem.IsWindows())
         {

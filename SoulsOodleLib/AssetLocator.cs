@@ -53,6 +53,15 @@ namespace SoulsOodleLib
                         }
                     }
                 }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                var defaultPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Steam");
+                string fullPath = Path.Combine([defaultPath, ..path]);
+                if (Directory.Exists(fullPath) || File.Exists(fullPath))
+                {
+                    return fullPath;
+                }
+            }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var homeDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);

@@ -76,6 +76,13 @@ public static class ConfigMode
         [Display(Name = "Configure Windows integration")]
         Windows,
 
+        [Display(Name = "Configure macOS integration")]
+        MacOS,
+
+        [Display(Name = "Set up Oodle",
+            Description = @"This usually happens automatically on Windows. Use this if you are on macOS.")]
+        Oodle,
+
         [Display(Name = "Reset skipped versions")]
         ResetSkip,
 
@@ -265,6 +272,32 @@ Press any key to continue to the configuration screen...");
                         output.WriteLine("This is not supported on your current platform.");
                         output.KeyPress(Constants.PressAnyKeyConfiguration).Run();
                     }
+                    break;
+                case ConfigMenuItem.MacOS:
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                        IntegrationMode.CliServiceIntegrationMode(opt);
+                    else
+                    {
+                        output.WriteLine("This is not supported on your current platform.");
+                        output.KeyPress(Constants.PressAnyKeyConfiguration).Run();
+                    }
+                    break;
+                case ConfigMenuItem.Oodle:
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    {
+                        if (OodleMode.OodleRebundleMode(opt)) return;
+                    }
+                    else
+                    {
+                        var _handle = SoulsOodleLib.Oodle.GrabOodle(_ => { }, false, false);
+                        if (_handle == IntPtr.Zero)
+                            output.WriteLine(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                                ? "Oodle DLL not found. Please copy oo2core_9_win64.dll, oo2core_8_win64.dll or oo2core_6_win64.dll from the game directory to WitchyBND's directory."
+                                : "Oodle library not found. Please provide liboo2corelinux64.so.9 to WitchyBND's directory.");
+                        else
+                            output.WriteLine("Oodle located, setup is complete.");
+                    }
+                    output.KeyPress(Constants.PressAnyKeyConfiguration).Run();
                     break;
                 case ConfigMenuItem.ResetSkip:
                     var conf = output.Confirm($"Reset any skipped versions? The updater will once again prompt you for an update, if there is one.").Run();

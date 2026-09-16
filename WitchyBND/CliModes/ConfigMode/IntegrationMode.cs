@@ -37,6 +37,16 @@ public static class IntegrationMode
             Description = "Reverts the above.")]
         RemoveFromPath,
     }
+    private enum ServiceIntegrationChoices
+    {
+        [Display(Name = "Configure WitchyBND service menu",
+            Description = "Manage WitchyBND context menu services for right-click menus in Finder.")]
+        ConfigureServices,
+
+        [Display(Name = "Configure macOS service menu",
+            Description = "Adjust how many items appear in the macOS service menu without a submenu.")]
+        ConfigureServiceMenu,
+    }
 
     public static void CliShellIntegrationMode(CliOptions opt)
     {
@@ -46,6 +56,7 @@ public static class IntegrationMode
             output.Clear();
             output.DoubleDash("WitchyBND Windows integration");
             var select = output.Select<IntegrationChoices>("Select an option")
+                .ChangeDescription(a => a.GetAttribute<DisplayAttribute>().Description)
                 .Run();
             if (select.IsAborted) return;
             switch (select.Content)
@@ -79,6 +90,92 @@ Your taskbar will briefly disappear for a few seconds. Witchy will try to restor
                 case IntegrationChoices.RemoveFromPath:
                     Shell.RemoveFromPathVariable();
                     output.WriteLine("Successfully removed WitchyBND from PATH variable.");
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            output.WriteLine(Constants.PressAnyKey);
+            output.ReadKey();
+        }
+    }
+
+    public static void CliServiceIntegrationMode(CliOptions opt)
+    {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return;
+        while (true)
+        {
+            output.Clear();
+            output.DoubleDash("WitchyBND macOS integration");
+#if !MACOS
+            output.WriteLine(@"macOS services are not available for this build of WitchyBND.
+Build or install the Microsoft.macOS configuration for right-click integration services.");
+            output.WriteLine(Constants.PressAnyKey);
+            output.ReadKey();
+            return;
+#endif
+            var readInfo = new System.Diagnostics.ProcessStartInfo("/usr/bin/defaults", ["read", "-g", "NSServicesMinimumItemCountForContextSubmenu"])
+                { RedirectStandardOutput = true, RedirectStandardError = true };
+            var readDefaults = System.Diagnostics.Process.Start(readInfo);
+            readDefaults.WaitForExit();
+            var count = readDefaults.ExitCode != 0 ? "default" : $"{Convert.ToInt32(readDefaults.StandardOutput.ReadLine().Trim())-1}";
+            var select = output.Select<ServiceIntegrationChoices>("Select an option")
+                .TextSelector(a => {
+                    var name = a.GetAttribute<DisplayAttribute>().Name;
+                    switch (a)
+                    {
+                        case ServiceIntegrationChoices.ConfigureServiceMenu:
+                            return $"{name} ({count})";
+                    }
+                    return name;
+                })
+                .ChangeDescription(a => a.GetAttribute<DisplayAttribute>().Description)
+                .Run();
+            if (select.IsAborted) return;
+            switch (select.Content)
+            {
+                case ServiceIntegrationChoices.ConfigureServices:
+                    output.WriteLine(
+                        @"WitchyBND services must be enabled in System Settings, at
+Keyboard > Keyboard Shortcuts > Services > Files and Folders");
+#if MACOS
+                    var handler = ObjCRuntime.Class.GetHandle("NSServicesMenuHandler");
+                    if (handler != ObjCRuntime.NativeHandle.Zero)
+                    {
+                        [DllImport("/usr/lib/libobjc.dylib", EntryPoint = "objc_msgSend")]
+                        static extern IntPtr IntPtr_objc_msgSend(IntPtr receiver, IntPtr selector);
+
+                        // see [NSClassFromString(@"NSServicesMenuHandler") fp_methodDescription]
+                        IntPtr_objc_msgSend(handler, ObjCRuntime.Selector.GetHandle("_configureServicesMenu:"));
+                    }
+                    else
+                    {
+                        AppKit.NSWorkspace.SharedWorkspace.OpenUrl(new Foundation.NSUrl(
+                            "x-apple.systempreferences:com.apple.Keyboard-Settings?Shortcuts"));
+                    }
+                    Foundation.NSRunLoop.Current.RunUntil(Foundation.NSDate.DistantFuture);
+#endif
+                    break;
+                case ServiceIntegrationChoices.ConfigureServiceMenu:
+                    output.WriteLine("Input number of items allowed in service menu.");
+                    var input = output.Input("Enter nothing to reset to the default.")
+                        .AcceptInput(char.IsNumber)
+                        .Run();
+                    if (!input.IsAborted)
+                    {
+                        if (input.Content != "") {
+                            var info = new System.Diagnostics.ProcessStartInfo("/usr/bin/defaults",
+                                ["write", "-g", "NSServicesMinimumItemCountForContextSubmenu", $"{Math.Clamp(Convert.ToInt32(input.Content)+1, 0, 999)}"]);
+                            System.Diagnostics.Process.Start(info).WaitForExit();
+                        }
+                        else if (count != "default")
+                        {
+                            var info = new System.Diagnostics.ProcessStartInfo("/usr/bin/defaults",
+                                ["delete", "-g", "NSServicesMinimumItemCountForContextSubmenu"]);
+                            System.Diagnostics.Process.Start(info).WaitForExit();
+                        }
+                    }
+                    output.WriteLine("Done. Restart Finder for the changes to take effect.");
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

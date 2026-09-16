@@ -11,6 +11,7 @@ public static class Oodle
     {
         if (_handle != IntPtr.Zero) return _handle;
 
+        var isMacOS = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
         var isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
         Dictionary<OodleVersion, string> localOodlePaths =
@@ -19,7 +20,15 @@ public static class Oodle
             { OodleVersion.Oodle8, Path.Combine(AppContext.BaseDirectory, $"oo2core_8_win64.dll") },
             { OodleVersion.Oodle6, Path.Combine(AppContext.BaseDirectory, $"oo2core_6_win64.dll") }
         };
-        if (isLinux)
+        if (isMacOS)
+        {
+            localOodlePaths = new() {
+                { OodleVersion.Oodle9, Path.Combine(AppContext.BaseDirectory, $"liboo2coremac64.2.9.dylib") },
+                { OodleVersion.Oodle8, Path.Combine(AppContext.BaseDirectory, $"liboo2coremac64.2.8.dylib") },
+                { OodleVersion.Oodle6, Path.Combine(AppContext.BaseDirectory, $"liboo2coremac64.2.6.dylib") },
+            };
+        }
+        else if (isLinux)
         {
             localOodlePaths = new() {
                 { OodleVersion.Oodle9, Path.Combine(AppContext.BaseDirectory, $"liboo2corelinux64.so.9") },
@@ -49,10 +58,12 @@ public static class Oodle
 
             if (gamePath == null)
             {
-                if (!isLinux)
-                    writeLineFunction("Could not find Oodle compression library (oo2core_*_win64.dll). Please copy it from your Game folder into the application folder.");
-                else
+                if (isMacOS)
+                    writeLineFunction("Could not find Oodle compression library (liboo2coremac64.2.9.dylib). Please provide it in the application folder.");
+                else if (isLinux)
                     writeLineFunction("Could not find Oodle compression library (liboo2corelinux64.so.9). Please provide it in the application folder.");
+                else
+                    writeLineFunction("Could not find Oodle compression library (oo2core_*_win64.dll). Please copy it from your Game folder into the application folder.");
                 return IntPtr.Zero;
             }
         }
@@ -63,7 +74,15 @@ public static class Oodle
                 { OodleVersion.Oodle8, Path.Combine(gamePath, $"oo2core_8_win64.dll") },
                 { OodleVersion.Oodle6, Path.Combine(gamePath, $"oo2core_6_win64.dll") }
             };
-        if (isLinux)
+        if (isMacOS)
+        {
+            gameOodlePaths = new() {
+                { OodleVersion.Oodle9, Path.Combine(gamePath, $"liboo2coremac64.2.9.dylib") },
+                { OodleVersion.Oodle8, Path.Combine(gamePath, $"liboo2coremac64.2.8.dylib") },
+                { OodleVersion.Oodle6, Path.Combine(gamePath, $"liboo2coremac64.2.6.dylib") },
+            };
+        }
+        else if (isLinux)
         {
             gameOodlePaths = new() {
                 { OodleVersion.Oodle9, Path.Combine(gamePath, $"liboo2corelinux64.so.9") },
@@ -82,10 +101,12 @@ public static class Oodle
             return _handle;
         }
 
-        if (!isLinux)
-            writeLineFunction("Could not find Oodle compression library (oo2core_*_win64.dll). Please copy it from your Game folder into the application folder.");
-        else
+        if (isMacOS)
+            writeLineFunction("Could not find Oodle compression library (liboo2coremac64.2.9.dylib). Please provide it in the application folder.");
+        else if (isLinux)
             writeLineFunction("Could not find Oodle compression library (liboo2corelinux64.so.9). Please provide it in the application folder.");
+        else
+            writeLineFunction("Could not find Oodle compression library (oo2core_*_win64.dll). Please copy it from your Game folder into the application folder.");
         return IntPtr.Zero;
     }
 
