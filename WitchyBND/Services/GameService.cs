@@ -135,7 +135,8 @@ public class GameService : IGameService
             {
                 XDocument xDoc = XDocument.Load(xmlPath);
 
-                if (game == null && xDoc.Root != null)
+                // Generic BND4 manifests have no game metadata; use the normal lookup below.
+                if (game == null && xDoc.Root?.Element("game") != null)
                 {
                     game = WFileParser.GetGameTypeFromXml(xDoc.Root);
                 }
